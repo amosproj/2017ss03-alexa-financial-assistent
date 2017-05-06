@@ -54,14 +54,17 @@ public class AmosAlexaSpeechlet implements Speechlet {
                 session.getSessionId());
 
         Intent intent = request.getIntent();
-        String intentName = (intent != null) ? intent.getName() : null;
+        String intentName = (intent != null) ? intent.getName() : "";
 
-        if ("HelloWorldIntent".equals(intentName)) {
-            return getHelloResponse();
-        } else if ("AMAZON.HelpIntent".equals(intentName)) {
-            return getHelpResponse();
-        } else {
-            throw new SpeechletException("Invalid Intent");
+        switch (intentName) {
+            case "HelloWorldIntent":
+                return getHelloResponse();
+            case "AMAZON.HelpIntent":
+                return getHelpResponse();
+            case "StandingOrdersIntent":
+                return getStandingOrdersResponse();
+            default:
+                throw new SpeechletException("Invalid Intent");
         }
     }
 
@@ -139,5 +142,65 @@ public class AmosAlexaSpeechlet implements Speechlet {
         reprompt.setOutputSpeech(speech);
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse getStandingOrdersResponse() {
+        /*
+          This class represents a standing order. It currently only serves testing purposes.
+          Later, it should be replaced by a structure corresponding to the API provided by the bank.
+         */
+        class StandingOrder {
+            String recipient;
+            double amount;
+
+            StandingOrder(String recipient, double amount) {
+                this.recipient = recipient;
+                this.amount = amount;
+            }
+        }
+
+        // This array contains some sample standing orders. Later, it should be filled through the API.
+        StandingOrder[] dummyStandingOrders = new StandingOrder[]{
+                new StandingOrder("Alice", 50),
+                new StandingOrder("Bob", 30),
+        };
+
+        StringBuilder speechTextBuilder = new StringBuilder();
+
+        speechTextBuilder.append("There are ")
+                .append(dummyStandingOrders.length)
+                .append(" standing orders.");
+
+        for (int i = 0; i < dummyStandingOrders.length; i++) {
+            speechTextBuilder.append(' ');
+
+            speechTextBuilder.append("Standing order number ")
+                    .append(i + 1)
+                    .append(": ");
+
+            speechTextBuilder.append("Transfer ")
+                    .append(dummyStandingOrders[i].amount)
+                    .append(" Euros to ")
+                    .append(dummyStandingOrders[i].recipient)
+                    .append(".");
+        }
+
+        String speechText = speechTextBuilder.toString();
+
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("StandingOrders");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        return SpeechletResponse.newTellResponse(speech, card);
     }
 }
