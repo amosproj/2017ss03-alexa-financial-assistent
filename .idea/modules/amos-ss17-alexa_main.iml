@@ -13,6 +13,7 @@
     <orderEntry type="library" name="Gradle: com.amazonaws:aws-lambda-java-core:1.0.0" level="project" />
     <orderEntry type="library" name="Gradle: com.amazonaws:aws-java-sdk-dynamodb:1.9.40" level="project" />
     <orderEntry type="library" name="Gradle: log4j:log4j:1.2.17" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.3.2" level="project" />
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-server:9.0.6.v20130930" level="project" />
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-servlet:9.0.6.v20130930" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:slf4j-api:1.7.10" level="project" />
