@@ -29,6 +29,7 @@ public final class AmosAlexaSpeechletRequestStreamHandler extends SpeechletReque
          * Alexa Skill and put the relevant Application Ids in this Set.
          */
         supportedApplicationIds.add("amzn1.ask.skill.464a154a-6a6a-48de-9036-841baaef8dd7"); // Gabriel
+        supportedApplicationIds.add("amzn1.ask.skill.38e33c69-1510-43cd-be1d-929f08a966b4"); // Julian
         supportedApplicationIds.add("amzn1.ask.skill.[TODO]"); // TODO: Add your Skill ID here
     }
 
