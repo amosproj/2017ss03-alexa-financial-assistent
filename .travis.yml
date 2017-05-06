@@ -3,6 +3,8 @@ jdk:
 - oraclejdk8
 script: "./gradlew buildZip"
 deploy:
+  on:
+    branch: master
   provider: lambda
   skip_cleanup: true
   zip: build/distributions/amos-ss17-alexa-fat-1.0.zip
