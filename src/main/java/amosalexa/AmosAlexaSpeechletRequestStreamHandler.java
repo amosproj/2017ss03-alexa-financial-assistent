@@ -28,7 +28,8 @@ public final class AmosAlexaSpeechletRequestStreamHandler extends SpeechletReque
          * This Id can be found on https://developer.amazon.com/edw/home.html#/ "Edit" the relevant
          * Alexa Skill and put the relevant Application Ids in this Set.
          */
-        supportedApplicationIds.add("amzn1.ask.skill.[TODO]");
+        supportedApplicationIds.add("amzn1.ask.skill.464a154a-6a6a-48de-9036-841baaef8dd7"); // Gabriel
+        supportedApplicationIds.add("amzn1.ask.skill.[TODO]"); // TODO: Add your Skill ID here
     }
 
     public AmosAlexaSpeechletRequestStreamHandler() {
