@@ -9,6 +9,7 @@
  */
 package amosalexa;
 
+import com.amazon.speech.slu.Slot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,8 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+
+import java.util.Map;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
@@ -62,7 +65,7 @@ public class AmosAlexaSpeechlet implements Speechlet {
             case "AMAZON.HelpIntent":
                 return getHelpResponse();
             case "StandingOrdersIntent":
-                return getStandingOrdersResponse();
+                return getStandingOrdersResponse(intent.getSlots());
             default:
                 throw new SpeechletException("Invalid Intent");
         }
@@ -149,7 +152,7 @@ public class AmosAlexaSpeechlet implements Speechlet {
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
-    private SpeechletResponse getStandingOrdersResponse() {
+    private SpeechletResponse getStandingOrdersResponse(Map<String,Slot> slots) {
         /*
           This class represents a standing order. It currently only serves testing purposes.
           Later, it should be replaced by a structure corresponding to the API provided by the bank.
@@ -170,36 +173,50 @@ public class AmosAlexaSpeechlet implements Speechlet {
                 new StandingOrder("Bob", 30),
         };
 
-        StringBuilder speechTextBuilder = new StringBuilder();
+        // Check if user requested to have their stranding orders sent to their email address
+        Slot channelSlot = slots.get("Channel");
+        boolean sendPerEmail = channelSlot != null &&
+                channelSlot.getValue() != null &&
+                channelSlot.getValue().equals("email");
 
-        speechTextBuilder.append("There are ")
-                .append(dummyStandingOrders.length)
-                .append(" standing orders.");
+        StringBuilder textBuilder = new StringBuilder();
 
-        for (int i = 0; i < dummyStandingOrders.length; i++) {
-            speechTextBuilder.append(' ');
+        if (sendPerEmail) {
+            // TODO: Send standing orders to user's email address
 
-            speechTextBuilder.append("Standing order number ")
-                    .append(i + 1)
-                    .append(": ");
+            textBuilder.append("I have sent ")
+                    .append(dummyStandingOrders.length)
+                    .append(" standing orders to your email address.");
+        } else {
+            textBuilder.append("There are ")
+                    .append(dummyStandingOrders.length)
+                    .append(" standing orders.");
 
-            speechTextBuilder.append("Transfer ")
-                    .append(dummyStandingOrders[i].amount)
-                    .append(" Euros to ")
-                    .append(dummyStandingOrders[i].recipient)
-                    .append(".");
+            for (int i = 0; i < dummyStandingOrders.length; i++) {
+                textBuilder.append(' ');
+
+                textBuilder.append("Standing order number ")
+                        .append(i + 1)
+                        .append(": ");
+
+                textBuilder.append("Transfer ")
+                        .append(dummyStandingOrders[i].amount)
+                        .append(" Euros to ")
+                        .append(dummyStandingOrders[i].recipient)
+                        .append(".");
+            }
         }
 
-        String speechText = speechTextBuilder.toString();
+        String text = textBuilder.toString();
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
         card.setTitle("StandingOrders");
-        card.setContent(speechText);
+        card.setContent(text);
 
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
+        speech.setText(text);
 
         return SpeechletResponse.newTellResponse(speech, card);
     }

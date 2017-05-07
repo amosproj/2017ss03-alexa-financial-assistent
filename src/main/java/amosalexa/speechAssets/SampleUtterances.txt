@@ -8,3 +8,6 @@ HelloWorldIntent how are you
 
 StandingOrdersIntent standing orders
 StandingOrdersIntent tell standing orders
+StandingOrdersIntent send standing orders via {email | Channel}
+StandingOrdersIntent send standing orders per {email | Channel}
+StandingOrdersIntent {email | Channel} standing orders

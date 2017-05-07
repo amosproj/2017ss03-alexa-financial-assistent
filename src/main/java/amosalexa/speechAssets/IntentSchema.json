@@ -7,7 +7,13 @@
       "intent": "AMAZON.HelpIntent"
     },
     {
-      "intent": "StandingOrdersIntent"
+      "intent": "StandingOrdersIntent",
+      "slots": [
+        {
+          "name": "Channel",
+          "type": "AMAZON.LITERAL"
+        }
+      ]
     }
   ]
 }
