@@ -60,6 +60,8 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return getHelloResponse();
         } else if ("AMAZON.HelpIntent".equals(intentName)) {
             return getHelpResponse();
+        } else if ("GetAccountBalance".equals(intentName)) {
+            return getAccountBalanceResponse();
         } else {
             throw new SpeechletException("Invalid Intent");
         }
@@ -128,6 +130,35 @@ public class AmosAlexaSpeechlet implements Speechlet {
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
         card.setTitle("HelloWorld");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    /**
+     * Creates and returns a {@code SpeechletResponse} with the current account balance.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse getAccountBalanceResponse() {
+
+        // This is just a dummy response. Will be replaced sooner or later.
+        // TODO: Implement the magic.
+
+        double accountBalance = 47.11;
+        String speechText = "Your account balance is " + Double.toString(accountBalance);
+
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("AccountBalance");
         card.setContent(speechText);
 
         // Create the plain text output.
