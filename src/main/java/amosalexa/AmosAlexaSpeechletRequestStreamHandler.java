@@ -9,10 +9,10 @@
  */
 package amosalexa;
 
+import com.amazon.speech.speechlet.lambda.SpeechletRequestStreamHandler;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import com.amazon.speech.speechlet.lambda.SpeechletRequestStreamHandler;
 
 /**
  * This class could be the handler for an AWS Lambda function powering an Alexa Skills Kit
@@ -30,7 +30,7 @@ public final class AmosAlexaSpeechletRequestStreamHandler extends SpeechletReque
          */
         supportedApplicationIds.add("amzn1.ask.skill.464a154a-6a6a-48de-9036-841baaef8dd7"); // Gabriel
         supportedApplicationIds.add("amzn1.ask.skill.38e33c69-1510-43cd-be1d-929f08a966b4"); // Julian
-        supportedApplicationIds.add("amzn1.ask.skill.[TODO]"); // TODO: Add your Skill ID here
+        supportedApplicationIds.add("amzn1.ask.skill.efedfade-b723-4831-a416-a8c3ca271565"); // Paul
     }
 
     public AmosAlexaSpeechletRequestStreamHandler() {
