@@ -9,6 +9,8 @@
  */
 package amosalexa;
 
+import com.amazon.speech.slu.Slot;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,10 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
@@ -54,16 +60,20 @@ public class AmosAlexaSpeechlet implements Speechlet {
                 session.getSessionId());
 
         Intent intent = request.getIntent();
-        String intentName = (intent != null) ? intent.getName() : null;
+        String intentName = (intent != null) ? intent.getName() : "";
 
+         
         if ("HelloWorldIntent".equals(intentName)) {
             return getHelloResponse();
         } else if ("AMAZON.HelpIntent".equals(intentName)) {
             return getHelpResponse();
         } else if ("GetAccountBalance".equals(intentName)) {
             return getAccountBalanceResponse();
-        } else {
+        } else if ("StandingOrdersIntent".equals(intentName)) {
+            return getStandingOrdersResponse(intent.getSlots());
+        }  else {
             throw new SpeechletException("Invalid Intent");
+                
         }
     }
 
@@ -170,5 +180,121 @@ public class AmosAlexaSpeechlet implements Speechlet {
         reprompt.setOutputSpeech(speech);
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse getStandingOrdersResponse(Map<String,Slot> slots) {
+        /*
+          This class represents a standing order. It currently only serves testing purposes.
+          Later, it should be replaced by a structure corresponding to the API provided by the bank.
+         */
+        class StandingOrder {
+            String recipient;
+            double amount;
+
+            StandingOrder(String recipient, double amount) {
+                this.recipient = recipient;
+                this.amount = amount;
+            }
+        }
+
+        // This array contains some sample standing orders. Later, it should be filled through the API.
+        StandingOrder[] dummyStandingOrders = new StandingOrder[]{
+                new StandingOrder("Alice", 50),
+                new StandingOrder("Bob", 30),
+        };
+
+        // Check if user requested to have their stranding orders sent to their email address
+        Slot channelSlot = slots.get("Channel");
+        boolean sendPerEmail = channelSlot != null &&
+                channelSlot.getValue() != null &&
+                channelSlot.getValue().equals("email");
+
+        StringBuilder textBuilder = new StringBuilder();
+
+        if (sendPerEmail) {
+            // TODO: Send standing orders to user's email address
+
+            textBuilder.append("I have sent ")
+                    .append(dummyStandingOrders.length)
+                    .append(" standing orders to your email address.");
+        } else {
+            // We want to directly return standing orders here
+
+            Slot recipientSlot = slots.get("Recipient");
+            String recipient = recipientSlot.getValue();
+
+            if (recipient != null) {
+                // User specified a recipient
+
+                List<StandingOrder> orders = new LinkedList<>();
+
+                // Find closest standing orders that could match the request.
+                for (int i = 0; i < dummyStandingOrders.length; i++) {
+                    if (StringUtils.getLevenshteinDistance(recipient, dummyStandingOrders[i].recipient) <=
+                            dummyStandingOrders[i].recipient.length() / 3) {
+                        orders.add(dummyStandingOrders[i]);
+                    }
+                }
+
+                textBuilder.append("I have found ")
+                        .append(orders.size())
+                        .append(" standing orders.");
+
+                int i = 1;
+                for (StandingOrder order : orders) {
+                    textBuilder.append(' ');
+
+                    textBuilder.append("Standing order number ")
+                            .append(i)
+                            .append(": ");
+
+                    textBuilder.append("Transfer ")
+                            .append(order.amount)
+                            .append(" Euros to ")
+                            .append(order.recipient)
+                            .append(".");
+
+                    i++;
+                }
+            } else {
+                // Just return all standing orders
+
+                textBuilder.append("There are ")
+                        .append(dummyStandingOrders.length)
+                        .append(" standing orders.");
+
+                for (int i = 0; i < dummyStandingOrders.length; i++) {
+                    textBuilder.append(' ');
+
+                    textBuilder.append("Standing order number ")
+                            .append(i + 1)
+                            .append(": ");
+
+                    textBuilder.append("Transfer ")
+                            .append(dummyStandingOrders[i].amount)
+                            .append(" Euros to ")
+                            .append(dummyStandingOrders[i].recipient)
+                            .append(".");
+                }
+            }
+        }
+
+        String text = textBuilder.toString();
+
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("StandingOrders");
+        card.setContent(text);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(text);
+
+        return SpeechletResponse.newTellResponse(speech, card);
     }
 }
