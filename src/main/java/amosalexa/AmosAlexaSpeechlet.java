@@ -10,6 +10,7 @@
 package amosalexa;
 
 import com.amazon.speech.slu.Slot;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,8 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -188,22 +191,64 @@ public class AmosAlexaSpeechlet implements Speechlet {
                     .append(dummyStandingOrders.length)
                     .append(" standing orders to your email address.");
         } else {
-            textBuilder.append("There are ")
-                    .append(dummyStandingOrders.length)
-                    .append(" standing orders.");
+            // We want to directly return standing orders here
 
-            for (int i = 0; i < dummyStandingOrders.length; i++) {
-                textBuilder.append(' ');
+            Slot recipientSlot = slots.get("Recipient");
+            String recipient = recipientSlot.getValue();
 
-                textBuilder.append("Standing order number ")
-                        .append(i + 1)
-                        .append(": ");
+            if (recipient != null) {
+                // User specified a recipient
 
-                textBuilder.append("Transfer ")
-                        .append(dummyStandingOrders[i].amount)
-                        .append(" Euros to ")
-                        .append(dummyStandingOrders[i].recipient)
-                        .append(".");
+                List<StandingOrder> orders = new LinkedList<>();
+
+                // Find closest standing orders that could match the request.
+                for (int i = 0; i < dummyStandingOrders.length; i++) {
+                    if (StringUtils.getLevenshteinDistance(recipient, dummyStandingOrders[i].recipient) <=
+                            dummyStandingOrders[i].recipient.length() / 3) {
+                        orders.add(dummyStandingOrders[i]);
+                    }
+                }
+
+                textBuilder.append("I have found ")
+                        .append(orders.size())
+                        .append(" standing orders.");
+
+                int i = 1;
+                for (StandingOrder order : orders) {
+                    textBuilder.append(' ');
+
+                    textBuilder.append("Standing order number ")
+                            .append(i)
+                            .append(": ");
+
+                    textBuilder.append("Transfer ")
+                            .append(order.amount)
+                            .append(" Euros to ")
+                            .append(order.recipient)
+                            .append(".");
+
+                    i++;
+                }
+            } else {
+                // Just return all standing orders
+
+                textBuilder.append("There are ")
+                        .append(dummyStandingOrders.length)
+                        .append(" standing orders.");
+
+                for (int i = 0; i < dummyStandingOrders.length; i++) {
+                    textBuilder.append(' ');
+
+                    textBuilder.append("Standing order number ")
+                            .append(i + 1)
+                            .append(": ");
+
+                    textBuilder.append("Transfer ")
+                            .append(dummyStandingOrders[i].amount)
+                            .append(" Euros to ")
+                            .append(dummyStandingOrders[i].recipient)
+                            .append(".");
+                }
             }
         }
 

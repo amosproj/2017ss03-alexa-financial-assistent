@@ -11,3 +11,4 @@ StandingOrdersIntent tell standing orders
 StandingOrdersIntent send standing orders via {email | Channel}
 StandingOrdersIntent send standing orders per {email | Channel}
 StandingOrdersIntent {email | Channel} standing orders
+StandingOrdersIntent standing orders to {Recipient}

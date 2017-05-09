@@ -12,6 +12,10 @@
         {
           "name": "Channel",
           "type": "AMAZON.LITERAL"
+        },
+        {
+          "name": "Recipient",
+          "type": "AMAZON.Person"
         }
       ]
     }
