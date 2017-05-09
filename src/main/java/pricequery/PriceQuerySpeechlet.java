@@ -23,12 +23,17 @@ import pricequery.aws.util.AWSUtil;
 
 import java.util.List;
 
-
 /**
  * This feature lets alexa request product information from amazon
  */
 public class PriceQuerySpeechlet implements Speechlet {
+
     private static final Logger log = LoggerFactory.getLogger(PriceQuerySpeechlet.class);
+
+    private String speechTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com.";
+
+    private String repromptTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com. Just " +
+            "what your are looking for. Like what costs an Iphone";
 
     @Override
     public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -50,9 +55,9 @@ public class PriceQuerySpeechlet implements Speechlet {
             throws SpeechletException {
         log.info("onIntent requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
 
-        // Get intent from the request object.
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : null;
+
         log.warn(getClass().toString() + " Intent started: " + intentName);
 
         if ("ProductRequestIntent".equals(intentName)) {
@@ -70,9 +75,7 @@ public class PriceQuerySpeechlet implements Speechlet {
 
         String speechTextStart = "";
         String speechText;
-        String repromptText;
 
-        // Check for favorite color and create output to user.
         if (keyword != null) {
 
             log.warn(getClass().toString() + " Keyword: " + keyword);
@@ -90,17 +93,12 @@ public class PriceQuerySpeechlet implements Speechlet {
             }
 
             speechText = speechTextStart + specheTextItems;
-
-            repromptText = "Reprompt";
-
         } else {
-            // Render an error since we don't know what the users favorite color is.
-            speechText = "No Keyword recognized";
-            repromptText = "Reprompt - No Keyword recognized";
+            speechText = speechTextWelcome;
         }
 
 
-        return getSpeechletResponse(speechText, repromptText);
+        return getSpeechletResponse(speechText, repromptTextWelcome);
     }
 
     @Override
@@ -116,12 +114,7 @@ public class PriceQuerySpeechlet implements Speechlet {
      * @return SpeechletResponse spoken and visual welcome message
      */
     private SpeechletResponse getWelcomeResponse() {
-
-        String speechText = "I Tell you how to use this skill";
-
-        String repromptText = "I will tell you again how to use this";
-
-        return getSpeechletResponse(speechText, repromptText);
+        return getSpeechletResponse(speechTextWelcome, repromptTextWelcome);
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText){
