@@ -1,10 +1,22 @@
 {
   "intents": [
     {
-      "intent": "HelloWorldIntent"
+      "slots": [
+        {
+          "name": "ProductKeyword",
+          "type": "LIST_OF_KEYWORDS"
+        }
+      ],
+      "intent": "ProductRequestIntent"
     },
     {
       "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
     }
   ]
 }
