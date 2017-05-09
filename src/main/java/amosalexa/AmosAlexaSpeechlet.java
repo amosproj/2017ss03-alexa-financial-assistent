@@ -150,8 +150,8 @@ public class AmosAlexaSpeechlet implements Speechlet {
      */
     private SpeechletResponse getAccountBalanceResponse() {
 
-        // This is just a dummy response. Will be replaced sooner or later.
-        // TODO: Implement the magic.
+        // This is just a dummy account balance. Will be replaced by an API.
+        // TODO: Implement GetAccountBalance with real data.
 
         double accountBalance = 47.11;
         String speechText = "Your account balance is " + Double.toString(accountBalance);
