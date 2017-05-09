@@ -1,0 +1,4 @@
+ProductRequestIntent what costs {ProductKeyword}
+ProductRequestIntent give me the price of {ProductKeyword}
+ProductRequestIntent find {ProductKeyword}
+ProductRequestIntent how much costs {ProductKeyword}
