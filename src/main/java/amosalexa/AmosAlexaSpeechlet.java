@@ -62,15 +62,18 @@ public class AmosAlexaSpeechlet implements Speechlet {
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
 
-        switch (intentName) {
-            case "HelloWorldIntent":
-                return getHelloResponse();
-            case "AMAZON.HelpIntent":
-                return getHelpResponse();
-            case "StandingOrdersIntent":
-                return getStandingOrdersResponse(intent.getSlots());
-            default:
-                throw new SpeechletException("Invalid Intent");
+         
+        if ("HelloWorldIntent".equals(intentName)) {
+            return getHelloResponse();
+        } else if ("AMAZON.HelpIntent".equals(intentName)) {
+            return getHelpResponse();
+        } else if ("GetAccountBalance".equals(intentName)) {
+            return getAccountBalanceResponse();
+        } else if ("StandingOrdersIntent".equals(intentName)) {
+            return getStandingOrdersResponse(intent.getSlots());
+        }  else {
+            throw new SpeechletException("Invalid Intent");
+                
         }
     }
 
@@ -137,6 +140,35 @@ public class AmosAlexaSpeechlet implements Speechlet {
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
         card.setTitle("HelloWorld");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    /**
+     * Creates and returns a {@code SpeechletResponse} with the current account balance.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse getAccountBalanceResponse() {
+
+        // This is just a dummy account balance. Will be replaced by an API.
+        // TODO: Implement GetAccountBalance with real data.
+
+        double accountBalance = 47.11;
+        String speechText = "Your account balance is " + Double.toString(accountBalance);
+
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("AccountBalance");
         card.setContent(speechText);
 
         // Create the plain text output.

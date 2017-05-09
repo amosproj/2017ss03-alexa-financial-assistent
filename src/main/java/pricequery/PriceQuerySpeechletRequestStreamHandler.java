@@ -7,8 +7,9 @@
 
  or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-package amosalexa;
+package pricequery;
 
+import amosalexa.AmosAlexaSpeechlet;
 import com.amazon.speech.speechlet.lambda.SpeechletRequestStreamHandler;
 
 import java.util.HashSet;
@@ -21,19 +22,18 @@ import java.util.Set;
  * this project using the {@code lambda-compile} Ant task and upload the resulting zip file to power
  * your function.
  */
-public final class AmosAlexaSpeechletRequestStreamHandler extends SpeechletRequestStreamHandler {
+public final class PriceQuerySpeechletRequestStreamHandler extends SpeechletRequestStreamHandler {
     private static final Set<String> supportedApplicationIds = new HashSet<String>();
     static {
         /*
          * This Id can be found on https://developer.amazon.com/edw/home.html#/ "Edit" the relevant
          * Alexa Skill and put the relevant Application Ids in this Set.
          */
-        supportedApplicationIds.add("amzn1.ask.skill.464a154a-6a6a-48de-9036-841baaef8dd7"); // Gabriel
-        supportedApplicationIds.add("amzn1.ask.skill.38e33c69-1510-43cd-be1d-929f08a966b4"); // Julian
-        supportedApplicationIds.add("amzn1.ask.skill.3eaf7014-b9fb-46b3-84dc-59c5b639451c"); // Paul
+        supportedApplicationIds.add("amzn1.ask.skill.[skill-id]");
+
     }
 
-    public AmosAlexaSpeechletRequestStreamHandler() {
-        super(new AmosAlexaSpeechlet(), supportedApplicationIds);
+    public PriceQuerySpeechletRequestStreamHandler() {
+        super(new PriceQuerySpeechlet(), supportedApplicationIds);
     }
 }
