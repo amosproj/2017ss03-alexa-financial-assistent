@@ -11,6 +11,7 @@
 import amosalexa.AmosAlexaSpeechlet;
 import com.amazon.speech.speechlet.Speechlet;
 import com.amazon.speech.speechlet.servlet.SpeechletServlet;
+import login.LoginSpeechlet;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -61,6 +62,7 @@ public final class Launcher {
 
         context.addServlet(new ServletHolder(createServlet(new AmosAlexaSpeechlet())), "/amosalexa");
         context.addServlet(new ServletHolder(createServlet(new PriceQuerySpeechlet())), "/price");
+        context.addServlet(new ServletHolder(createServlet(new LoginSpeechlet())), "/login");
 
         server.start();
         server.join();

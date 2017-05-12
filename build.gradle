@@ -33,6 +33,7 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-servlet:9.0.6.v20130930'
     compile 'org.slf4j:slf4j-api:1.7.10'
     compile 'org.slf4j:slf4j-simple:1.6.2'
+    compile 'org.facebook4j:facebook4j-core:2.4.9'
 }
 
 task fatJar(type: Jar) {

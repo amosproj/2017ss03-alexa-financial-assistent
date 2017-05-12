@@ -1,0 +1,30 @@
+{
+  "intents": [
+    {
+      "name": "AMAZON.CancelIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.HelpIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.StopIntent",
+      "samples": []
+    },
+    {
+      "name": "FriendsCountIntent",
+      "samples": [
+        "Wie viele Freunde habe ich"
+      ],
+      "slots": []
+    },
+    {
+      "name": "UsernameIntent",
+      "samples": [
+        "Wie ist mein Facebook-Name"
+      ],
+      "slots": []
+    }
+  ]
+}
