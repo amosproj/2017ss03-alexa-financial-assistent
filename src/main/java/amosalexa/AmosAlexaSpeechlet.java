@@ -61,7 +61,6 @@ public class AmosAlexaSpeechlet implements Speechlet {
 
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
-
          
         if ("HelloWorldIntent".equals(intentName)) {
             return getHelloResponse();
