@@ -31,6 +31,10 @@ public class SessionStorage {
             }
             return storage.get(key);
         }
+
+        public Object remove(String key) {
+            return storage.remove(key);
+        }
     }
 
     private Map<String,Storage> sessionStorage;
@@ -73,7 +77,7 @@ public class SessionStorage {
     }
 
     /**
-     * Retrieves an arbitrary objects that has been stored before.
+     * Retrieves an arbitrary object that has been stored before.
      * @param sessionId
      * @param key
      * @return
@@ -81,6 +85,15 @@ public class SessionStorage {
     public Object getObject(String sessionId, String key) {
         Storage storage = getStorage(sessionId);
         return storage.get(key);
+    }
+
+    /**
+     * Removes and returns a Storage objects that has been stored before.
+     * @param sessionId
+     * @return Storage object
+     */
+    public Object removeStorage(String sessionId) {
+        return sessionStorage.remove(sessionId);
     }
 
 }
