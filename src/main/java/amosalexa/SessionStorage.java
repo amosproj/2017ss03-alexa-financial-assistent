@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class helps to store arbitrary objects and link them to a session.
+ * This singleton class helps to store arbitrary objects and link them to a session.
  * TODO: Implement removal of sessions and objects
  */
 public class SessionStorage {
+
+    private static SessionStorage instance;
 
     /**
      * This class contains session related values.
@@ -33,8 +35,15 @@ public class SessionStorage {
 
     private Map<String,Storage> sessionStorage;
 
-    public SessionStorage() {
+    private SessionStorage() {
         sessionStorage = new HashMap<>();
+    }
+
+    public static SessionStorage getInstance() {
+        if(SessionStorage.instance == null) {
+            SessionStorage.instance = new SessionStorage();
+        }
+        return SessionStorage.instance;
     }
 
     /**

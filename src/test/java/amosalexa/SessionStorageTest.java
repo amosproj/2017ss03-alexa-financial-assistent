@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 public class SessionStorageTest {
     @Test
     public void getObject() throws Exception {
-        SessionStorage sessionStorage = new SessionStorage();
+        SessionStorage sessionStorage = SessionStorage.getInstance();
 
         sessionStorage.putObject("sessid123", "key1", "val1");
         sessionStorage.putObject("sessid123", "key2", "val2");
