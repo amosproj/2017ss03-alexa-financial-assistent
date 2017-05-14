@@ -63,10 +63,23 @@ public class PriceQuerySpeechlet implements Speechlet {
         if ("ProductRequestIntent".equals(intentName)) {
             log.warn(getClass().toString() + " Intent started: " + intentName);
             return getProductInformation(intent, session);
-        } else {
+        }
+
+        else if ("DepotRequestIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getDepotInformation(intent, session);
+        }
+
+        else {
             throw new SpeechletException("Invalid Intent");
         }
     }
+
+    private SpeechletResponse getDepotInformation(Intent intent, Session session) {
+
+            return getSpeechletResponse("Der Aktienkurs von Microsoft liegt bei " + FinanceApi.getStockPrice() + "Dollar.", repromptTextWelcome);
+    }
+
 
     private SpeechletResponse getProductInformation(Intent intent, Session session) {
         // get keyword for product search
@@ -89,7 +102,7 @@ public class PriceQuerySpeechlet implements Speechlet {
 
             for(int i = 0; i < 3; i++){
                 Offer offer = AWSLookup.offerLookup(items.get(i).getASIN());
-                specheTextItems = specheTextItems + "<break time=\"1.0s\" />  " + AWSUtil.shortTitle(items.get(i).getTitle()) + "für " + offer.getLowestNewPrice() / 100 + " Euro";
+                specheTextItems = specheTextItems + AWSUtil.shortTitle(items.get(i).getTitle()) + "fuer " + offer.getLowestNewPrice() / 100 + " Euro";
             }
 
             speechText = speechTextStart + specheTextItems;
