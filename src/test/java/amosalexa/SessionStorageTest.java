@@ -4,10 +4,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by Julian
- * Copyright (c) 14.05.2017 Bitspark GmbH
- */
 public class SessionStorageTest {
     @Test
     public void getObject() throws Exception {
