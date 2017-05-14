@@ -88,7 +88,7 @@ public class SessionStorage {
     }
 
     /**
-     * Removes and returns a Storage objects that has been stored before.
+     * Removes and returns a Storage object that has been stored before.
      * @param sessionId
      * @return Storage object
      */
