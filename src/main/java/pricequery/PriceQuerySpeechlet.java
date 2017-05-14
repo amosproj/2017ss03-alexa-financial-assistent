@@ -30,10 +30,10 @@ public class PriceQuerySpeechlet implements Speechlet {
 
     private static final Logger log = LoggerFactory.getLogger(PriceQuerySpeechlet.class);
 
-    private String speechTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com.";
+    private String speechTextWelcome = "Willkommen! Der Preisanfrage-Skill zeigt, was ein Produkt auf Amazon kostet.";
 
-    private String repromptTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com. Just " +
-            "what your are looking for. Like what costs an Iphone";
+    private String repromptTextWelcome = "Willkommen! Der Preisanfrage-Skill zeigt, was ein Produkt auf Amazon kostet. " +
+            "Sag einfach wonach Du suchen willst. Zum Beispiel: Was kostet ein iPhone?";
 
     @Override
     public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -83,13 +83,13 @@ public class PriceQuerySpeechlet implements Speechlet {
             List<Item> items = AWSLookup.itemSearch(keyword, 1, null);
 
             if(!items.isEmpty()){
-                speechTextStart = "Bingo, I found something!";
+                speechTextStart = "Bingo, Ich habe etwas gefunden!";
             }
             String specheTextItems = "";
 
             for(int i = 0; i < 3; i++){
                 Offer offer = AWSLookup.offerLookup(items.get(i).getASIN());
-                specheTextItems = specheTextItems + "<break time=\"1.0s\" />  " + AWSUtil.shortTitle(items.get(i).getTitle()) + "for " + offer.getLowestNewPrice() / 100 + " Euro";
+                specheTextItems = specheTextItems + "<break time=\"1.0s\" />  " + AWSUtil.shortTitle(items.get(i).getTitle()) + "für " + offer.getLowestNewPrice() / 100 + " Euro";
             }
 
             speechText = speechTextStart + specheTextItems;

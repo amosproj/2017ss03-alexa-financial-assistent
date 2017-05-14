@@ -9,7 +9,6 @@
  */
 package pricequery;
 
-import amosalexa.AmosAlexaSpeechlet;
 import com.amazon.speech.speechlet.lambda.SpeechletRequestStreamHandler;
 
 import java.util.HashSet;
@@ -29,7 +28,7 @@ public final class PriceQuerySpeechletRequestStreamHandler extends SpeechletRequ
          * This Id can be found on https://developer.amazon.com/edw/home.html#/ "Edit" the relevant
          * Alexa Skill and put the relevant Application Ids in this Set.
          */
-        supportedApplicationIds.add("amzn1.ask.skill.[skill-id]");
+        supportedApplicationIds.add("amzn1.ask.skill.c62469b0-2ce8-4b2f-a52f-f50ff0ab63da");
 
     }
 
