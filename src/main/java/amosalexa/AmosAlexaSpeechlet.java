@@ -9,6 +9,7 @@
  */
 package amosalexa;
 
+import amosalexa.dialogsystem.DialogResponseManager;
 import com.amazon.speech.slu.Slot;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -61,7 +62,9 @@ public class AmosAlexaSpeechlet implements Speechlet {
 
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
-         
+
+        SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
+
         if ("HelloWorldIntent".equals(intentName)) {
             return getHelloResponse();
         } else if ("AMAZON.HelpIntent".equals(intentName)) {
@@ -70,9 +73,15 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return getAccountBalanceResponse();
         } else if ("StandingOrdersIntent".equals(intentName)) {
             return getStandingOrdersResponse(intent.getSlots());
-        }  else {
+        } else if ("TestListIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
+            return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("AMAZON.YesIntent".equals(intentName)) {
+            return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("AMAZON.NoIntent".equals(intentName)) {
+            return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+        } else {
             throw new SpeechletException("Invalid Intent");
-                
         }
     }
 

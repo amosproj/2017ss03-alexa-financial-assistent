@@ -11,10 +11,12 @@ public class SessionStorage {
 
     private static SessionStorage instance;
 
+    public static String CURRENTDIALOG = "CURRENTDIALOG";
+
     /**
      * This class contains session related values.
      */
-    class Storage {
+    public class Storage {
         private Map<String,Object> storage;
 
         private Storage() {
