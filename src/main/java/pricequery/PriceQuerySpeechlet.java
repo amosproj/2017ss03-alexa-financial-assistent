@@ -65,9 +65,29 @@ public class PriceQuerySpeechlet implements Speechlet {
             return getProductInformation(intent, session);
         }
 
+        else if ("MicrosoftStockIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getMicrosoftStock(intent, session);
+        }
+
+        else if ("AppleStockIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getAppleStock(intent, session);
+        }
+
+        else if ("TeslaStockIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getTeslaStock(intent, session);
+        }
+
         else if ("DepotRequestIntent".equals(intentName)) {
             log.warn(getClass().toString() + " Intent started: " + intentName);
             return getDepotInformation(intent, session);
+        }
+
+        else if ("DepotCompositionIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getDepotComposition(intent, session);
         }
 
         else {
@@ -75,10 +95,59 @@ public class PriceQuerySpeechlet implements Speechlet {
         }
     }
 
+    private SpeechletResponse getDepotComposition(Intent intent, Session session) {
+
+        String[] stock1 = new String[] {"Apple", "5", "AAPL"};
+        String[] stock2 = new String[] {"Tesla", "10", "TSLA"};
+        String[] stock3 = new String[] {"Microsoft", "5", "MSFT"};
+
+
+        return getSpeechletResponse("Du hast folgende Aktien im Depot: "
+                + stock1[1] + " Aktien von " + stock1[0] + ", "
+                + stock2[1] + " Aktien von " + stock2[0] + " und "
+                + stock3[1] + " Aktien von " + stock3[0]
+                , repromptTextWelcome);
+    }
+
+
+
     private SpeechletResponse getDepotInformation(Intent intent, Session session) {
 
-            return getSpeechletResponse("Der Aktienkurs von Microsoft liegt bei " + FinanceApi.getStockPrice() + "Dollar.", repromptTextWelcome);
+        String StockTesla = FinanceApi.getStockPrice("TSLA");
+        String StockApple = FinanceApi.getStockPrice("AAPL");
+        String StockMicrosoft = FinanceApi.getStockPrice("MSFT");
+
+        double numStocksApple = 5;
+        double numStocksTesla = 10;
+        double numStocksMicrosoft = 10;
+
+
+        double DoubleDepotWert = Double.parseDouble(StockTesla) * numStocksTesla
+                + Double.parseDouble(StockApple) * numStocksApple
+                + Double.parseDouble(StockMicrosoft) * numStocksMicrosoft;
+
+
+        String wertDepot = String.valueOf(DoubleDepotWert);
+
+        return getSpeechletResponse("Der Gesamtwert deines Depots liegt aktuell bei"
+                    + wertDepot + "Dollar.", repromptTextWelcome);
     }
+
+    private SpeechletResponse getMicrosoftStock(Intent intent, Session session) {
+        return getSpeechletResponse("Der Aktienkurs von Microsoft liegt aktuell bei "
+                + FinanceApi.getStockPrice("MSFT") + " Dollor.", repromptTextWelcome);
+    }
+
+    private SpeechletResponse getAppleStock(Intent intent, Session session) {
+        return getSpeechletResponse("Der Aktienkurs von Apple liegt aktuell bei "
+                + FinanceApi.getStockPrice("AAPL") + " Dollar.", repromptTextWelcome);
+    }
+
+    private SpeechletResponse getTeslaStock(Intent intent, Session session) {
+        return getSpeechletResponse("Der Aktienkurs von Tesla liegt aktuell bei "
+                + FinanceApi.getStockPrice("TSLA") + " Dollar.", repromptTextWelcome);
+    }
+
 
 
     private SpeechletResponse getProductInformation(Intent intent, Session session) {

@@ -23,25 +23,11 @@ public class FinanceApi {
         }
     }
 
-//    public static void main(String[] args) throws IOException, JSONException {
-//        FinanceApi example = new FinanceApi();
-//        String response = example.run("http://finance.google.com/finance/info?client=ig&q=NASDAQ:MSFT");
-//
-//        response = response.substring(5, response.length()-2);
-//
-//        //create a JSON-Object of the String
-//        final JSONObject obj = new JSONObject(response);
-//
-//        // read out the current stock price
-//        JsonObject jsonObject = new JsonParser().parse("{\"pcls_fix\": \"68.38\"}").getAsJsonObject();
-//        String stockPrice = jsonObject.get("pcls_fix").getAsString();
-//    }
-
-    public static String getStockPrice() {
+    public static String getStockPrice(String stock) {
 
         try {
-            FinanceApi example = new FinanceApi();
-            String response = example.run("http://finance.google.com/finance/info?client=ig&q=NASDAQ:MSFT");
+            FinanceApi finance = new FinanceApi();
+            String response = finance.run("http://finance.google.com/finance/info?client=ig&q=NASDAQ:" + stock);
 
             response = response.substring(5, response.length() - 2);
 
@@ -49,7 +35,12 @@ public class FinanceApi {
             final JSONObject obj = new JSONObject(response);
 
             // read out the current stock price
-            JsonObject jsonObject = new JsonParser().parse("{\"pcls_fix\": \"68.38\"}").getAsJsonObject();
+            //Gson gson = new Gson();
+
+
+            JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
+
+            // JsonObject jsonObject = new JsonParser().parse("{\"pcls_fix\": \"68.38\"}").getAsJsonObject();
             String stockPrice = jsonObject.get("pcls_fix").getAsString();
 
             return stockPrice;
