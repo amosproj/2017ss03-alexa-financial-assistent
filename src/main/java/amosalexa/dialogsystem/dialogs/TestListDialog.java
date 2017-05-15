@@ -79,8 +79,6 @@ public class TestListDialog implements DialogHandler {
 	}
 
 	private SpeechletResponse exitIntent(SessionStorage.Storage storage) {
-		storage.put(SessionStorage.CURRENTDIALOG, "MainMenu"); // Reset the current dialog
-
 		String speechText = "Okay, tschüss.";
 
 		// Create the plain text output
