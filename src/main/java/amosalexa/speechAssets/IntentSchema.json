@@ -29,7 +29,13 @@
       ]
     },
     {
-      "intent": "AccountInformation"
+      "intent": "AccountInformation",
+      "slots": [
+        {
+          "name": "BankInformation",
+          "type": "LIST_OF_BANK_INFORMATION"
+        }
+      ]
     }
   ]
 }
