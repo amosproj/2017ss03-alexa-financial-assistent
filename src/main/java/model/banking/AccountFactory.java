@@ -6,7 +6,7 @@ import com.amazonaws.util.json.JSONObject;
 import model.banking.account.Account;
 
 /**
- * Factory to create new accounts at the endpoint
+ * Factory to get or create new accounts at the endpoint
  */
 public class AccountFactory {
 
