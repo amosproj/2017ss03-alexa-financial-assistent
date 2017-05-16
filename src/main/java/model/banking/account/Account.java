@@ -1,43 +1,43 @@
 package model.banking.account;
 
-import model.banking.Links;
+import model.banking.common.Links;
 
 public class Account
 {
-    private String creditcardLimit;
+    private double creditcardLimit;
 
-    private String balance;
+    private double balance;
 
     private String openingDate;
 
-    private String creditLimit;
+    private double creditLimit;
 
     private Links _links;
 
     private String number;
 
-    private String interestRate;
+    private double interestRate;
 
-    private String withdrawalFee;
+    private double withdrawalFee;
 
     private String iban;
 
-    public String getCreditcardLimit ()
+    public double getCreditcardLimit ()
     {
         return creditcardLimit;
     }
 
-    public void setCreditcardLimit (String creditcardLimit)
+    public void setCreditcardLimit (double creditcardLimit)
     {
         this.creditcardLimit = creditcardLimit;
     }
 
-    public String getBalance ()
+    public double getBalance ()
     {
         return balance;
     }
 
-    public void setBalance (String balance)
+    public void setBalance (double balance)
     {
         this.balance = balance;
     }
@@ -52,12 +52,12 @@ public class Account
         this.openingDate = openingDate;
     }
 
-    public String getCreditLimit ()
+    public double getCreditLimit ()
     {
         return creditLimit;
     }
 
-    public void setCreditLimit (String creditLimit)
+    public void setCreditLimit (double creditLimit)
     {
         this.creditLimit = creditLimit;
     }
@@ -82,22 +82,22 @@ public class Account
         this.number = number;
     }
 
-    public String getInterestRate ()
+    public double getInterestRate ()
     {
         return interestRate;
     }
 
-    public void setInterestRate (String interestRate)
+    public void setInterestRate (double interestRate)
     {
         this.interestRate = interestRate;
     }
 
-    public String getWithdrawalFee ()
+    public double getWithdrawalFee ()
     {
         return withdrawalFee;
     }
 
-    public void setWithdrawalFee (String withdrawalFee)
+    public void setWithdrawalFee (double withdrawalFee)
     {
         this.withdrawalFee = withdrawalFee;
     }

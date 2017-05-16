@@ -1,4 +1,4 @@
-package model.banking;
+package model.banking.common;
 
 public class Self
 {
