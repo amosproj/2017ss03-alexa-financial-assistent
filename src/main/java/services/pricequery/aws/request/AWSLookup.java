@@ -1,13 +1,12 @@
-package pricequery.aws.request;
+package services.pricequery.aws.request;
 
 import org.apache.log4j.Logger;
-import pricequery.aws.creator.ItemCreator;
-import pricequery.aws.creator.OfferCreator;
-import pricequery.aws.model.Item;
-import pricequery.aws.model.Offer;
-import pricequery.aws.util.AWSUtil;
+import services.pricequery.aws.creator.ItemCreator;
+import services.pricequery.aws.creator.OfferCreator;
+import services.pricequery.aws.model.Item;
+import services.pricequery.aws.model.Offer;
+import services.pricequery.aws.util.AWSUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

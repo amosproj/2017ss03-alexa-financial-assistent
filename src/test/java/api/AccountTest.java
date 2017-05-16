@@ -4,6 +4,8 @@ import com.amazonaws.util.json.JSONException;
 import model.banking.AccountFactory;
 import model.banking.account.Account;
 import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,14 @@ public class AccountTest {
 
     private static final Logger log = LoggerFactory.getLogger(AccountTest.class);
 
+    private AccountFactory accountFactory = AccountFactory.getInstance();
+
+    private DummyAccount dummyAccount;
+
+    @Before
+    public  void setUp(){
+        dummyAccount = new DummyAccount();
+    }
 
     /**
      * Account Information
@@ -26,28 +36,22 @@ public class AccountTest {
 
     @Test
     public void testAccountObjectModel(){
-        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
-        Account account = (Account) bankingRESTClient.getBankingModelObject("/api/v1_0/accounts/9999999999", Account.class);
-        log.error("Request Account: " + account.toString());
+        Account account = accountFactory.getAccount(dummyAccount.getNumber());
+        assertEquals(account.getOpeningDate(), dummyAccount.getOpeningDate());
     }
 
     @Test
     public void testCreateAccount() throws JSONException {
 
-        // init
-        String number = "0000000000";
-        double balance = 1.0;
-        String openingDate = new DateTime(2017, 5, 1, 12, 0).toLocalDate().toString();
-
-        AccountFactory accountFactory = AccountFactory.getInstance();
+        DummyAccount acc = new DummyAccount();
 
         // create account
-        Account account =  accountFactory.createAccount(number, balance, openingDate);
+        Account account =  accountFactory.createAccount(acc.getNumber(), acc.getBalance(), acc.getOpeningDate());
 
         // check value
-        assertEquals(account.getBalance(), balance, 0.0);
-        assertEquals(account.getNumber(), number);
-        assertEquals(account.getOpeningDate(), openingDate);
+        assertEquals(account.getBalance(), acc.getBalance(), 0.0);
+        assertEquals(account.getNumber(), acc.getNumber());
+        assertEquals(account.getOpeningDate(), acc.getOpeningDate());
     }
 
 }

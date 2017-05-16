@@ -27,7 +27,8 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import pricequery.PriceQueryService;
+import services.accountinformation.BankAccountService;
+import services.pricequery.PriceQueryService;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -76,6 +77,8 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return PriceQueryService.getInstance().onIntent(request, session);
         } else if ("StandingOrdersIntent".equals(intentName)) {
             return getStandingOrdersResponse(intent.getSlots());
+        } else if ("AccountInformation".equals(intentName)) {
+            return BankAccountService.getInstance().onIntent(request, session);
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent

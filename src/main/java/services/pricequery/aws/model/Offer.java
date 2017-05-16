@@ -1,4 +1,4 @@
-package pricequery.aws.model;
+package services.pricequery.aws.model;
 
 import java.sql.Timestamp;
 

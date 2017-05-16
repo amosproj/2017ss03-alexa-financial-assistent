@@ -14,3 +14,12 @@ StandingOrdersIntent {email | Channel} standing orders
 StandingOrdersIntent standing orders to {Recipient}
 
 TestListIntent test liste
+
+ProductRequestIntent what costs {ProductKeyword}
+ProductRequestIntent give me the price of {ProductKeyword}
+ProductRequestIntent find {ProductKeyword}
+ProductRequestIntent how much costs {ProductKeyword}
+
+AccountInformation what is my {BankInformation}
+AccountInformation give me my current {BankInformation}
+
