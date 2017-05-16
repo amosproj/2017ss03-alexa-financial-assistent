@@ -26,31 +26,21 @@ import java.util.List;
 /**
  * This feature lets alexa request product information from amazon
  */
-public class PriceQuerySpeechlet implements Speechlet {
+public class PriceQueryService  {
 
-    private static final Logger log = LoggerFactory.getLogger(PriceQuerySpeechlet.class);
+    private static final Logger log = LoggerFactory.getLogger(PriceQueryService.class);
 
     private String speechTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com.";
 
     private String repromptTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com. Just " +
             "what your are looking for. Like what costs an Iphone";
 
-    @Override
-    public void onSessionStarted(final SessionStartedRequest request, final Session session)
-            throws SpeechletException {
-        log.info("onSessionStarted requestId={}, sessionId={}", request.getRequestId(),  session.getSessionId());
-        // any initialization logic goes here
+    private static PriceQueryService priceQueryService = new PriceQueryService();
+
+    public static PriceQueryService getInstance(){
+        return priceQueryService;
     }
 
-    @Override
-    public SpeechletResponse onLaunch(final LaunchRequest request, final Session session)
-            throws SpeechletException {
-        log.info("onLaunch requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
-
-        return getWelcomeResponse();
-    }
-
-    @Override
     public SpeechletResponse onIntent(final IntentRequest request, final Session session)
             throws SpeechletException {
         log.info("onIntent requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
@@ -99,22 +89,6 @@ public class PriceQuerySpeechlet implements Speechlet {
 
 
         return getSpeechletResponse(speechText, repromptTextWelcome);
-    }
-
-    @Override
-    public void onSessionEnded(final SessionEndedRequest request, final Session session)
-            throws SpeechletException {
-        log.info("onSessionEnded requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
-        // any cleanup logic goes here
-    }
-
-    /**
-     * Creates and returns a {@code SpeechletResponse} with a welcome message.
-     *
-     * @return SpeechletResponse spoken and visual welcome message
-     */
-    private SpeechletResponse getWelcomeResponse() {
-        return getSpeechletResponse(speechTextWelcome, repromptTextWelcome);
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText){

@@ -26,6 +26,7 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+import pricequery.PriceQueryService;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -69,9 +70,9 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return getHelpResponse();
         } else if ("GetAccountBalance".equals(intentName)) {
             return getAccountBalanceResponse();
-        } else if ("StandingOrdersIntent".equals(intentName)) {
-            return getStandingOrdersResponse(intent.getSlots());
-        }  else {
+        } else if ("ProductRequestIntent".equals(intentName)) {
+            return PriceQueryService.getInstance().onIntent(request, session);
+        } else {
             throw new SpeechletException("Invalid Intent");
                 
         }
