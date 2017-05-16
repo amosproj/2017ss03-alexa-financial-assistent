@@ -21,6 +21,8 @@ repositories {
     mavenCentral()
 }
 
+
+
 dependencies {
     compile 'com.amazon.alexa:alexa-skills-kit:1.1.2'
     compile 'com.amazonaws:aws-lambda-java-core:1.0.0'
@@ -33,6 +35,15 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-servlet:9.0.6.v20130930'
     compile 'org.slf4j:slf4j-api:1.7.10'
     compile 'org.slf4j:slf4j-simple:1.6.2'
+
+    compile 'com.squareup.okhttp3:okhttp:3.5.0'
+    compile 'org.json.name.json:20090211'
+    compile 'com.fasterxml.jackson.core.jackson-databind:2.0.1'
+    compile 'com.google.code.gson.gson:2.8.0'
+    compile 'joda-time.joda-time:2.9.4'
+    testCompile 'junit:junit:4.10'
+
+
 }
 
 task fatJar(type: Jar) {
