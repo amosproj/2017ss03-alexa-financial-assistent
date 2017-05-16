@@ -7,7 +7,7 @@
 
  or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-package pricequery;
+package services.pricequery;
 
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -16,38 +16,30 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SimpleCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pricequery.aws.model.Item;
-import pricequery.aws.model.Offer;
-import pricequery.aws.request.AWSLookup;
-import pricequery.aws.util.AWSUtil;
+import services.SpeechService;
+import services.pricequery.aws.model.Item;
+import services.pricequery.aws.model.Offer;
+import services.pricequery.aws.request.AWSLookup;
+import services.pricequery.aws.util.AWSUtil;
 
 import java.util.List;
 
 /**
  * This feature lets alexa request product information from amazon
  */
-public class PriceQuerySpeechlet implements Speechlet {
+public class PriceQueryService implements SpeechService {
 
-    private static final Logger log = LoggerFactory.getLogger(PriceQuerySpeechlet.class);
+    private static final Logger log = LoggerFactory.getLogger(PriceQueryService.class);
 
     private String speechTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com.";
 
     private String repromptTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com. Just " +
             "what your are looking for. Like what costs an Iphone";
 
-    @Override
-    public void onSessionStarted(final SessionStartedRequest request, final Session session)
-            throws SpeechletException {
-        log.info("onSessionStarted requestId={}, sessionId={}", request.getRequestId(),  session.getSessionId());
-        // any initialization logic goes here
-    }
+    private static PriceQueryService priceQueryService = new PriceQueryService();
 
-    @Override
-    public SpeechletResponse onLaunch(final LaunchRequest request, final Session session)
-            throws SpeechletException {
-        log.info("onLaunch requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
-
-        return getWelcomeResponse();
+    public static PriceQueryService getInstance(){
+        return priceQueryService;
     }
 
     @Override
@@ -99,22 +91,6 @@ public class PriceQuerySpeechlet implements Speechlet {
 
 
         return getSpeechletResponse(speechText, repromptTextWelcome);
-    }
-
-    @Override
-    public void onSessionEnded(final SessionEndedRequest request, final Session session)
-            throws SpeechletException {
-        log.info("onSessionEnded requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
-        // any cleanup logic goes here
-    }
-
-    /**
-     * Creates and returns a {@code SpeechletResponse} with a welcome message.
-     *
-     * @return SpeechletResponse spoken and visual welcome message
-     */
-    private SpeechletResponse getWelcomeResponse() {
-        return getSpeechletResponse(speechTextWelcome, repromptTextWelcome);
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText){

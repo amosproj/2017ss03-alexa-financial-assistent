@@ -1,8 +1,7 @@
-package pricequery.aws.creator;
+package services.pricequery.aws.creator;
 
-import pricequery.aws.model.Item;
-import pricequery.aws.model.Offer;
-import pricequery.aws.util.XMLParser;
+import services.pricequery.aws.model.Item;
+import services.pricequery.aws.util.XMLParser;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 

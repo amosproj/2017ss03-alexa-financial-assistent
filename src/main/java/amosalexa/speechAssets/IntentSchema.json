@@ -18,6 +18,33 @@
           "type": "AMAZON.Person"
         }
       ]
+    },
+    {
+      "intent": "ProductRequestIntent",
+      "slots": [
+        {
+          "name": "ProductKeyword",
+          "type": "LIST_OF_KEYWORDS"
+        }
+      ]
+    },
+    {
+      "intent": "AMAZON.YesIntent"
+    },
+    {
+      "intent": "AMAZON.NoIntent"
+    },
+    {
+      "intent": "TestListIntent"
+    },
+    {
+      "intent": "AccountInformation",
+      "slots": [
+        {
+          "name": "BankInformation",
+          "type": "LIST_OF_BANK_INFORMATION"
+        }
+      ]
     }
   ]
 }
