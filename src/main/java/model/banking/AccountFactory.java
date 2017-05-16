@@ -6,7 +6,7 @@ import com.amazonaws.util.json.JSONObject;
 import model.banking.account.Account;
 
 /**
- * Factory to create new accounts at the endpoint
+ * Factory to get or create new accounts at the endpoint
  */
 public class AccountFactory {
 
@@ -30,5 +30,10 @@ public class AccountFactory {
 
         BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
         return (Account) bankingRESTClient.postBankingModelObject("/api/v1_0/accounts/generate", jsonObject.toString(), Account.class);
+    }
+
+    public Account getAccount(String number){
+        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
+        return (Account) bankingRESTClient.getBankingModelObject("/api/v1_0/accounts/" + number, Account.class);
     }
 }
