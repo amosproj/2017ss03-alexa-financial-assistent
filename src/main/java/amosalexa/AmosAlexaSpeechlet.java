@@ -24,6 +24,7 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+import pricequery.PriceQueryService;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
@@ -62,6 +63,8 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return getHelpResponse();
         } else if ("GetAccountBalance".equals(intentName)) {
             return getAccountBalanceResponse();
+        } else if ("ProductRequestIntent".equals(intentName)) {
+            return PriceQueryService.getInstance().onIntent(request, session);
         } else {
             throw new SpeechletException("Invalid Intent");
         }

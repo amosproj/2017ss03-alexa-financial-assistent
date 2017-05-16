@@ -60,7 +60,7 @@ public final class Launcher {
         server.setHandler(context);
 
         context.addServlet(new ServletHolder(createServlet(new AmosAlexaSpeechlet())), "/amosalexa");
-        context.addServlet(new ServletHolder(createServlet(new PriceQuerySpeechlet())), "/price");
+
 
         server.start();
         server.join();
