@@ -1,10 +1,9 @@
-package pricequery.aws.request;
+package services.pricequery.aws.request;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import pricequery.aws.util.XMLParser;
+import services.pricequery.aws.util.XMLParser;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

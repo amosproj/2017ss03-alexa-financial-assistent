@@ -7,7 +7,7 @@
 
  or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-package pricequery;
+package services.pricequery;
 
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -16,17 +16,18 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SimpleCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pricequery.aws.model.Item;
-import pricequery.aws.model.Offer;
-import pricequery.aws.request.AWSLookup;
-import pricequery.aws.util.AWSUtil;
+import services.SpeechService;
+import services.pricequery.aws.model.Item;
+import services.pricequery.aws.model.Offer;
+import services.pricequery.aws.request.AWSLookup;
+import services.pricequery.aws.util.AWSUtil;
 
 import java.util.List;
 
 /**
  * This feature lets alexa request product information from amazon
  */
-public class PriceQueryService  {
+public class PriceQueryService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(PriceQueryService.class);
 
@@ -41,6 +42,7 @@ public class PriceQueryService  {
         return priceQueryService;
     }
 
+    @Override
     public SpeechletResponse onIntent(final IntentRequest request, final Session session)
             throws SpeechletException {
         log.info("onIntent requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());

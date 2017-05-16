@@ -19,7 +19,7 @@
  *
  */
 
-package pricequery.aws.request;
+package services.pricequery.aws.request;
 
 import org.apache.commons.codec.binary.Base64;
 

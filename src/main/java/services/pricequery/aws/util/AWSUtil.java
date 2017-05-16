@@ -1,4 +1,4 @@
-package pricequery.aws.util;
+package services.pricequery.aws.util;
 
 
 import java.io.UnsupportedEncodingException;
