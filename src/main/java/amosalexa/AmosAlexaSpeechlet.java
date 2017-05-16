@@ -73,6 +73,8 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return getHelpResponse();
         } else if ("GetAccountBalance".equals(intentName)) {
             return getAccountBalanceResponse();
+        } else if ("checkCreditLimit".equals(intentName)) {
+            return getCreditLimitResponse();
         } else if ("ProductRequestIntent".equals(intentName)) {
             return PriceQueryService.getInstance().onIntent(request, session);
         } else if ("StandingOrdersIntent".equals(intentName)) {
@@ -183,6 +185,32 @@ public class AmosAlexaSpeechlet implements Speechlet {
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
         card.setTitle("AccountBalance");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    /**
+     * Creates and returns a {@code SpeechletResponse} with the current account balance.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse getCreditLimitResponse() {
+        double creditLimit = 2000.91;
+
+        String speechText = "Your credit limit is " + Double.toString(creditLimit);
+
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("CreditLimit");
         card.setContent(speechText);
 
         // Create the plain text output.
