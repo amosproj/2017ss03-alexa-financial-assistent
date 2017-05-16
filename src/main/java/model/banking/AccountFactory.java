@@ -31,4 +31,9 @@ public class AccountFactory {
         BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
         return (Account) bankingRESTClient.postBankingModelObject("/api/v1_0/accounts/generate", jsonObject.toString(), Account.class);
     }
+
+    public Account getAccount(String number){
+        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
+        return (Account) bankingRESTClient.getBankingModelObject("/api/v1_0/accounts/" + number, Account.class);
+    }
 }
