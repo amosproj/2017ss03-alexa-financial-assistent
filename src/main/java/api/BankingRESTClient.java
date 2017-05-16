@@ -3,7 +3,6 @@ package api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
 import org.slf4j.LoggerFactory;
-import pricequery.PriceQuerySpeechlet;
 
 import java.io.IOException;
 
@@ -28,7 +27,7 @@ public class BankingRESTClient {
     /**
      *
      */
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(PriceQuerySpeechlet.class);
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(BankingRESTClient.class);
 
     /**
      * Http Client
