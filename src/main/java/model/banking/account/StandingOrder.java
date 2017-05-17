@@ -118,4 +118,15 @@ public class StandingOrder {
     public void set_links(model.banking.account._links _links) {
         this._links = _links;
     }
+
+    public String getExecutionRateString() {
+        if (this.executionRate.equals(ExecutionRate.MONTHLY))
+            return "monatlich ";
+        if (this.executionRate.equals(ExecutionRate.QUARTERLY))
+            return "vierteljährlich ";
+        if (this.executionRate.equals(ExecutionRate.HALF_YEARLY))
+            return "halbjährlich ";
+        if (this.executionRate.equals(ExecutionRate.YEARLY))
+            return "jährlich ";
+    }
 }

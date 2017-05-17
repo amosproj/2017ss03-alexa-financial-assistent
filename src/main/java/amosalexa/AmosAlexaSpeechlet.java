@@ -310,8 +310,7 @@ public class AmosAlexaSpeechlet implements Speechlet {
                             .append(i)
                             .append(": ");
 
-                    textBuilder.append("Überweise ")
-                            //TODO execution Rate
+                    textBuilder.append("Überweise ").append(order.getExecutionRateString())
                             .append(order.getAmount())
                             .append(" Euro an ")
                             .append(order.getPayee())
@@ -333,7 +332,7 @@ public class AmosAlexaSpeechlet implements Speechlet {
                             .append(i + 1)
                             .append(": ");
 
-                    textBuilder.append("Überweise ")
+                    textBuilder.append("Überweise ").append(standingOrders[i].getExecutionRateString())
                             .append(standingOrders[i].getAmount())
                             .append(" Euro an ")
                             .append(standingOrders[i].getPayee())
