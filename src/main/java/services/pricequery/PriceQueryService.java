@@ -31,10 +31,10 @@ public class PriceQueryService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(PriceQueryService.class);
 
-    private String speechTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com.";
+    private String speechTextWelcome = "Willkommen! Der Preisanfrage-Skill zeigt, was ein Produkt auf Amazon kostet.";
 
-    private String repromptTextWelcome = "Welcome, the price query skill tells you what a product costs on amazon.com. Just " +
-            "what your are looking for. Like what costs an Iphone";
+    private String repromptTextWelcome = "Willkommen! Der Preisanfrage-Skill zeigt, was ein Produkt auf Amazon kostet. " +
+            "Sag einfach wonach Du suchen willst. Zum Beispiel: Was kostet ein iPhone?";
 
     private static PriceQueryService priceQueryService = new PriceQueryService();
 
@@ -55,10 +55,92 @@ public class PriceQueryService implements SpeechService {
         if ("ProductRequestIntent".equals(intentName)) {
             log.warn(getClass().toString() + " Intent started: " + intentName);
             return getProductInformation(intent, session);
-        } else {
+        }
+
+        else if ("MicrosoftStockIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getMicrosoftStock(intent, session);
+        }
+
+        else if ("AppleStockIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getAppleStock(intent, session);
+        }
+
+        else if ("TeslaStockIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getTeslaStock(intent, session);
+        }
+
+        else if ("DepotRequestIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getDepotInformation(intent, session);
+        }
+
+        else if ("DepotCompositionIntent".equals(intentName)) {
+            log.warn(getClass().toString() + " Intent started: " + intentName);
+            return getDepotComposition(intent, session);
+        }
+
+        else {
             throw new SpeechletException("Invalid Intent");
         }
     }
+
+    private SpeechletResponse getDepotComposition(Intent intent, Session session) {
+
+        String[] stock1 = new String[] {"Apple", "5", "AAPL"};
+        String[] stock2 = new String[] {"Tesla", "10", "TSLA"};
+        String[] stock3 = new String[] {"Microsoft", "5", "MSFT"};
+
+
+        return getSpeechletResponse("Du hast folgende Aktien im Depot: "
+                + stock1[1] + " Aktien von " + stock1[0] + ", "
+                + stock2[1] + " Aktien von " + stock2[0] + " und "
+                + stock3[1] + " Aktien von " + stock3[0]
+                , repromptTextWelcome);
+    }
+
+
+
+    private SpeechletResponse getDepotInformation(Intent intent, Session session) {
+
+        String StockTesla = FinanceApi.getStockPrice("TSLA");
+        String StockApple = FinanceApi.getStockPrice("AAPL");
+        String StockMicrosoft = FinanceApi.getStockPrice("MSFT");
+
+        double numStocksApple = 5;
+        double numStocksTesla = 10;
+        double numStocksMicrosoft = 10;
+
+
+        double DoubleDepotWert = Double.parseDouble(StockTesla) * numStocksTesla
+                + Double.parseDouble(StockApple) * numStocksApple
+                + Double.parseDouble(StockMicrosoft) * numStocksMicrosoft;
+
+
+        String wertDepot = String.valueOf(DoubleDepotWert);
+
+        return getSpeechletResponse("Der Gesamtwert deines Depots liegt aktuell bei"
+                    + wertDepot + "Dollar.", repromptTextWelcome);
+    }
+
+    private SpeechletResponse getMicrosoftStock(Intent intent, Session session) {
+        return getSpeechletResponse("Der Aktienkurs von Microsoft liegt aktuell bei "
+                + FinanceApi.getStockPrice("MSFT") + " Dollor.", repromptTextWelcome);
+    }
+
+    private SpeechletResponse getAppleStock(Intent intent, Session session) {
+        return getSpeechletResponse("Der Aktienkurs von Apple liegt aktuell bei "
+                + FinanceApi.getStockPrice("AAPL") + " Dollar.", repromptTextWelcome);
+    }
+
+    private SpeechletResponse getTeslaStock(Intent intent, Session session) {
+        return getSpeechletResponse("Der Aktienkurs von Tesla liegt aktuell bei "
+                + FinanceApi.getStockPrice("TSLA") + " Dollar.", repromptTextWelcome);
+    }
+
+
 
     private SpeechletResponse getProductInformation(Intent intent, Session session) {
         // get keyword for product search
@@ -75,13 +157,13 @@ public class PriceQueryService implements SpeechService {
             List<Item> items = AWSLookup.itemSearch(keyword, 1, null);
 
             if(!items.isEmpty()){
-                speechTextStart = "Bingo, I found something!";
+                speechTextStart = "Bingo, Ich habe etwas gefunden!";
             }
             String specheTextItems = "";
 
             for(int i = 0; i < 3; i++){
                 Offer offer = AWSLookup.offerLookup(items.get(i).getASIN());
-                specheTextItems = specheTextItems + "<break time=\"1.0s\" />  " + AWSUtil.shortTitle(items.get(i).getTitle()) + "for " + offer.getLowestNewPrice() / 100 + " Euro";
+                specheTextItems = specheTextItems + AWSUtil.shortTitle(items.get(i).getTitle()) + "fuer " + offer.getLowestNewPrice() / 100 + " Euro";
             }
 
             speechText = speechTextStart + specheTextItems;
