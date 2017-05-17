@@ -128,5 +128,6 @@ public class StandingOrder {
             return "halbjährlich ";
         if (this.executionRate.equals(ExecutionRate.YEARLY))
             return "jährlich ";
+        else return "";
     }
 }
