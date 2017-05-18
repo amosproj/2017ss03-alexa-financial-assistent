@@ -13,7 +13,7 @@ public class DummyDepot {
     static String repromptTextWelcome = "Willkommen bei der Amos Banking App. Du kannst Überweisungen tätigen," +
             "dein Depot abfragen und erhältst Tipps zur Geldanlage.";
 
-    private SpeechletResponse getDepotComposition(Intent intent, Session session) {
+    public static SpeechletResponse getDepotComposition(Intent intent, Session session) {
 
         String[] stock1 = new String[] {"Apple", "5", "AAPL"};
         String[] stock2 = new String[] {"Tesla", "10", "TSLA"};
@@ -27,9 +27,7 @@ public class DummyDepot {
                 , repromptTextWelcome);
     }
 
-
-
-    private SpeechletResponse getDepotInformation(Intent intent, Session session) {
+    public static SpeechletResponse getDepotInformation(Intent intent, Session session) {
 
         String StockTesla = FinanceApi.getStockPrice("TSLA");
         String StockApple = FinanceApi.getStockPrice("AAPL");
@@ -51,23 +49,23 @@ public class DummyDepot {
                 + wertDepot + "Dollar.", repromptTextWelcome);
     }
 
-    private SpeechletResponse getMicrosoftStock(Intent intent, Session session) {
+    public static SpeechletResponse getMicrosoftStock(Intent intent, Session session) {
         return getSpeechletResponse("Der Aktienkurs von Microsoft liegt aktuell bei "
                 + FinanceApi.getStockPrice("MSFT") + " Dollor.", repromptTextWelcome);
     }
 
-    private SpeechletResponse getAppleStock(Intent intent, Session session) {
+    public static SpeechletResponse getAppleStock(Intent intent, Session session) {
         return getSpeechletResponse("Der Aktienkurs von Apple liegt aktuell bei "
                 + FinanceApi.getStockPrice("AAPL") + " Dollar.", repromptTextWelcome);
     }
 
-    private SpeechletResponse getTeslaStock(Intent intent, Session session) {
+    public static  SpeechletResponse getTeslaStock(Intent intent, Session session) {
         return getSpeechletResponse("Der Aktienkurs von Tesla liegt aktuell bei "
                 + FinanceApi.getStockPrice("TSLA") + " Dollar.", repromptTextWelcome);
     }
 
 
-    private SpeechletResponse getSpeechletResponse(String speechText, String repromptText){
+    private static SpeechletResponse getSpeechletResponse(String speechText, String repromptText){
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
         card.setTitle("Bank Information");

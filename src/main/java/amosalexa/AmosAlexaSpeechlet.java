@@ -9,6 +9,7 @@
  */
 package amosalexa;
 
+import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -86,6 +87,16 @@ public class AmosAlexaSpeechlet implements Speechlet {
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("MicrosoftStockIntent".equals(intentName)) {
+            return DummyDepot.getMicrosoftStock(intent, session);
+        } else if ("AppleStockIntent".equals(intentName)) {
+            return DummyDepot.getAppleStock(intent, session);
+        } else if ("TeslaStockIntent".equals(intentName)) {
+            return DummyDepot.getTeslaStock(intent, session);
+        } else if ("DepotRequestIntent".equals(intentName)) {
+            return DummyDepot.getDepotInformation(intent, session);
+        } else if ("DepotCompositionIntent".equals(intentName)) {
+            return DummyDepot.getDepotComposition(intent, session);
         } else if ("AMAZON.YesIntent".equals(intentName)) {
             return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("AMAZON.NoIntent".equals(intentName)) {
