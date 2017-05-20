@@ -9,6 +9,7 @@
  */
 package services.pricequery;
 
+import amosalexa.depot.FinanceApi;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.*;
@@ -16,7 +17,6 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SimpleCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pricequery.FinanceApi;
 import services.SpeechService;
 import services.pricequery.aws.model.Item;
 import services.pricequery.aws.model.Offer;

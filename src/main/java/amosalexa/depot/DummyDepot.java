@@ -5,7 +5,6 @@ import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SimpleCard;
-import pricequery.FinanceApi;
 
 public class DummyDepot {
 
@@ -15,9 +14,9 @@ public class DummyDepot {
 
     public static SpeechletResponse getDepotComposition(Intent intent, Session session) {
 
-        String[] stock1 = new String[] {"Apple", "5", "AAPL"};
-        String[] stock2 = new String[] {"Tesla", "10", "TSLA"};
-        String[] stock3 = new String[] {"Microsoft", "5", "MSFT"};
+        String[] stock1 = new String[]{"Apple", "5", "AAPL"};
+        String[] stock2 = new String[]{"Tesla", "10", "TSLA"};
+        String[] stock3 = new String[]{"Microsoft", "5", "MSFT"};
 
 
         return getSpeechletResponse("Du hast folgende Aktien im Depot: "
@@ -59,13 +58,13 @@ public class DummyDepot {
                 + FinanceApi.getStockPrice("AAPL") + " Dollar.", repromptTextWelcome);
     }
 
-    public static  SpeechletResponse getTeslaStock(Intent intent, Session session) {
+    public static SpeechletResponse getTeslaStock(Intent intent, Session session) {
         return getSpeechletResponse("Der Aktienkurs von Tesla liegt aktuell bei "
                 + FinanceApi.getStockPrice("TSLA") + " Dollar.", repromptTextWelcome);
     }
 
 
-    private static SpeechletResponse getSpeechletResponse(String speechText, String repromptText){
+    private static SpeechletResponse getSpeechletResponse(String speechText, String repromptText) {
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
         card.setTitle("Bank Information");
