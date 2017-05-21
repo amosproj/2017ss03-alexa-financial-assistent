@@ -4,15 +4,8 @@
       "intent": "HelloWorldIntent"
     },
     {
-      "intent": "AMAZON.HelpIntent"
-    },
-    {
       "intent": "StandingOrdersIntent",
       "slots": [
-        {
-          "name": "Channel",
-          "type": "AMAZON.LITERAL"
-        },
         {
           "name": "Recipient",
           "type": "AMAZON.Person"
@@ -28,12 +21,7 @@
         }
       ]
     },
-    {
-      "intent": "AMAZON.YesIntent"
-    },
-    {
-      "intent": "AMAZON.NoIntent"
-    },
+
     {
       "intent": "TestListIntent"
     },
@@ -41,10 +29,28 @@
       "intent": "AccountInformation",
       "slots": [
         {
-          "name": "BankInformation",
-          "type": "LIST_OF_BANK_INFORMATION"
+          "name": "AccountInformationSlots",
+          "type": "LIST_OF_ACCOUNT_INFORMATION"
         }
       ]
+    },
+    {
+      "intent": "BankContactInformation",
+      "slots": [
+        {
+          "name": "BankNameSlots",
+          "type": "LIST_OF_BANKS"
+        }
+      ]
+    },
+    {
+      "intent": "AMAZON.YesIntent"
+    },
+    {
+      "intent": "AMAZON.NoIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
     }
   ]
 }

@@ -33,7 +33,7 @@ public class BankAccountService implements SpeechService {
     /**
      * Name for custom slot types
      */
-    private static final String SLOT_NAME = "BankInformation";
+    private static final String SLOT_NAME = "AccountInformationSlots";
 
     public BankAccountService(SpeechletSubject speechletSubject){
       subscribe(speechletSubject);

@@ -48,6 +48,7 @@ dependencies {
     testCompile 'junit:junit:4.10'
 
     compile 'se.walkercrou:google-places-api-java:2.1.2'
+    compile 'com.google.maps:google-maps-services:0.1.20'
 
 
 }

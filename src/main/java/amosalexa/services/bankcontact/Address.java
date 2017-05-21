@@ -21,17 +21,16 @@ package amosalexa.services.bankcontact;
  */
 public class Address {
 
-    private String stateOrRegion;
-    private String city;
-    private String countryCode;
-    private String postalCode;
-    private String addressLine1;
+    private String stateOrRegion = "Germany";
+    private String city = "Nürnberg";
+    private String countryCode = null;
+    private String postalCode = "90459";
+    private String addressLine1 = "Wölknerstraße 11";
     private String addressLine2;
     private String addressLine3;
     private String districtOrCounty;
 
-    private Address() {
-
+    public Address() {
     }
 
     public String getStateOrRegion() {

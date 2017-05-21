@@ -3,16 +3,16 @@ package amosalexa.services.bankcontact;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
-import amosalexa.services.bankcontact.exceptions.DeviceAddressClientException;
-import amosalexa.services.bankcontact.exceptions.UnauthorizedException;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.speechlet.interfaces.system.SystemInterface;
 import com.amazon.speech.speechlet.interfaces.system.SystemState;
 import com.amazon.speech.ui.*;
+import com.google.maps.model.LatLng;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.walkercrou.places.Place;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +24,12 @@ public class BankContactService implements SpeechService{
     /**
      * This is the default title that this skill will be using for cards.
      */
-    private static final String ADDRESS_CARD_TITLE = "Sample Device Address Skill";
+    private static final String BANK_CONTACT_CARD = "Bank Kontakt Informationen";
+
+    /**
+     * Slots with different bank names
+     */
+    private static final String SLOT_NAME_BANK = "BankNameSlots";
 
     /**
      * The permissions that this skill relies on for retrieving addresses. If the consent token isn't
@@ -61,13 +66,17 @@ public class BankContactService implements SpeechService{
 
         log.info("Intent received: {}", intentName);
 
-        // We want to handle each intent differently here, so that we can give each a unique response.
-        // Refer to the Interaction Model for more information:
-        // https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interaction-model-reference
         switch(intentName) {
-            // This is the custom intent that delivers the main functionality of the sample skill.
-            // Refer to speechAssets/SampleUtterances for examples that would trigger this.
+
             case "BankContactInformation":
+
+                /**
+                 * device address can only be requested from a real device
+                 * - assuming we received the device address - creating dummy address
+                 */
+
+
+                /*
                 String consentToken = session.getUser().getPermissions().getConsentToken();
 
                 if (consentToken == null) {
@@ -86,8 +95,9 @@ public class BankContactService implements SpeechService{
 
                     Address addressObject = alexaDeviceAddressClient.getFullAddress();
 
+
                     if (addressObject == null) {
-                        return getAskResponse(ADDRESS_CARD_TITLE, ERROR_TEXT);
+                        return getAskResponse(BANK_CONTACT_CARD, ERROR_TEXT);
                     }
 
                     return getAddressResponse(
@@ -98,16 +108,53 @@ public class BankContactService implements SpeechService{
                     return getPermissionsResponse();
                 } catch (DeviceAddressClientException e) {
                     log.error("Device Address Client failed to successfully return the address.", e);
-                    return getAskResponse(ADDRESS_CARD_TITLE, ERROR_TEXT);
+                    return getAskResponse(BANK_CONTACT_CARD, ERROR_TEXT);
                 }
                 // This is one of the many Amazon built in intents.
                 // Refer to the following for a list of all available built in intents:
                 // https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/built-in-intent-ref/standard-intents
+
+                */
+
+                String slotValue = requestEnvelope.getRequest().getIntent().getSlot(SLOT_NAME_BANK).getValue();
+
+                if(slotValue.isEmpty()){
+                    slotValue = "Deutsche Bank";
+                }
+                log.warn(getClass().getCanonicalName() + "Slot Value: " + slotValue);
+
+                Address dummyAddress = new Address();
+                LatLng deviceLocation = GeoCoder.getLatLng(dummyAddress);
+
+                log.warn(getClass().getCanonicalName() + "Device Location : " + deviceLocation);
+                Place bank = PlaceFinder.findNearbyPlace(deviceLocation, slotValue);
+
+                log.warn(getClass().getCanonicalName() + " Place : " + bank.getName());
+
+                if(bank.getName().isEmpty()){
+                   // getAskResponse(BANK_CONTACT_CARD, HELP_TEXT);
+                } else {
+                   return getBankContactResponse(bank);
+                }
             case "AMAZON.HelpIntent":
-                return getAskResponse(ADDRESS_CARD_TITLE, HELP_TEXT);
+                return getAskResponse(BANK_CONTACT_CARD, HELP_TEXT);
             default:
-                return getAskResponse(ADDRESS_CARD_TITLE, UNHANDLED_TEXT);
+                return getAskResponse(BANK_CONTACT_CARD, UNHANDLED_TEXT);
         }
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the GetAddress intent.
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse getBankContactResponse(Place deutscheBank) {
+        String speechText = deutscheBank.getName() + " hat die Telefonnummer: " + deutscheBank.getPhoneNumber();
+
+        SimpleCard card = getSimpleCard(BANK_CONTACT_CARD, speechText);
+
+        PlainTextOutputSpeech speech = getPlainTextOutputSpeech(speechText);
+
+        return SpeechletResponse.newTellResponse(speech, card);
     }
 
     /**
@@ -117,7 +164,7 @@ public class BankContactService implements SpeechService{
     private SpeechletResponse getAddressResponse(String streetName, String state, String zipCode) {
         String speechText = "Your address is " + streetName + " " + state + ", " + zipCode;
 
-        SimpleCard card = getSimpleCard(ADDRESS_CARD_TITLE, speechText);
+        SimpleCard card = getSimpleCard(BANK_CONTACT_CARD, speechText);
 
         PlainTextOutputSpeech speech = getPlainTextOutputSpeech(speechText);
 
@@ -161,7 +208,7 @@ public class BankContactService implements SpeechService{
         // The differences between a permissions card and a simple card is that the
         // permissions card includes additional indicators for a user to enable permissions if needed.
         AskForPermissionsConsentCard card = new AskForPermissionsConsentCard();
-        card.setTitle(ADDRESS_CARD_TITLE);
+        card.setTitle(BANK_CONTACT_CARD);
 
         Set<String> permissions = new HashSet<>();
         permissions.add(ALL_ADDRESS_PERMISSION);
