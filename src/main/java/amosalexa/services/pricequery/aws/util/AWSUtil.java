@@ -1,4 +1,4 @@
-package services.pricequery.aws.util;
+package amosalexa.services.pricequery.aws.util;
 
 
 import java.io.UnsupportedEncodingException;

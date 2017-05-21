@@ -7,7 +7,7 @@
 
  or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-package services.pricequery;
+package amosalexa.services.pricequery;
 
 import amosalexa.depot.FinanceApi;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -18,11 +18,11 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SimpleCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import services.SpeechService;
-import services.pricequery.aws.model.Item;
-import services.pricequery.aws.model.Offer;
-import services.pricequery.aws.request.AWSLookup;
-import services.pricequery.aws.util.AWSUtil;
+import amosalexa.services.SpeechService;
+import amosalexa.services.pricequery.aws.model.Item;
+import amosalexa.services.pricequery.aws.model.Offer;
+import amosalexa.services.pricequery.aws.request.AWSLookup;
+import amosalexa.services.pricequery.aws.util.AWSUtil;
 
 import java.util.List;
 

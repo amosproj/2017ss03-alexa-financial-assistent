@@ -1,4 +1,4 @@
-package services.pricequery.aws.model;
+package amosalexa.services.pricequery.aws.model;
 
 import java.sql.Timestamp;
 

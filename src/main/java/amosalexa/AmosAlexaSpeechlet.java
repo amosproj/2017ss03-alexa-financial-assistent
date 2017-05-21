@@ -25,8 +25,8 @@ import model.banking.account.StandingOrderResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import services.accountinformation.BankAccountService;
-import services.pricequery.PriceQueryService;
+import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.pricequery.PriceQueryService;
 
 import java.io.IOException;
 import java.util.LinkedList;

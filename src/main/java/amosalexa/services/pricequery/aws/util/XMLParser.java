@@ -1,4 +1,4 @@
-package services.pricequery.aws.util;
+package amosalexa.services.pricequery.aws.util;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;

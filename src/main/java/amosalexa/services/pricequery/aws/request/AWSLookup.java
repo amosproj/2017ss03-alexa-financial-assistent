@@ -1,11 +1,11 @@
-package services.pricequery.aws.request;
+package amosalexa.services.pricequery.aws.request;
 
 import org.apache.log4j.Logger;
-import services.pricequery.aws.creator.ItemCreator;
-import services.pricequery.aws.creator.OfferCreator;
-import services.pricequery.aws.model.Item;
-import services.pricequery.aws.model.Offer;
-import services.pricequery.aws.util.AWSUtil;
+import amosalexa.services.pricequery.aws.creator.ItemCreator;
+import amosalexa.services.pricequery.aws.creator.OfferCreator;
+import amosalexa.services.pricequery.aws.model.Item;
+import amosalexa.services.pricequery.aws.model.Offer;
+import amosalexa.services.pricequery.aws.util.AWSUtil;
 
 import java.util.HashMap;
 import java.util.List;

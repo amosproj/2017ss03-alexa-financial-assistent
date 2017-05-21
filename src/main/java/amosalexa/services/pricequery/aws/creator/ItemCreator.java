@@ -1,7 +1,7 @@
-package services.pricequery.aws.creator;
+package amosalexa.services.pricequery.aws.creator;
 
-import services.pricequery.aws.model.Item;
-import services.pricequery.aws.util.XMLParser;
+import amosalexa.services.pricequery.aws.model.Item;
+import amosalexa.services.pricequery.aws.util.XMLParser;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
