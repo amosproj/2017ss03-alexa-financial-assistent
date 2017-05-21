@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import services.accountinformation.BankAccountService;
 import services.pricequery.PriceQueryService;
+import services.savings.SavingsPlanService;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -84,6 +85,8 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return getStandingOrdersModifyResponse(intent.getSlots());
         } else if ("AccountInformation".equals(intentName)) {
             return BankAccountService.getInstance().onIntent(request, session);
+        } else if ("ErstelleSparplanIntent".equals(intentName)) {
+            return SavingsPlanService.getInstance().onIntent(request, session);
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
