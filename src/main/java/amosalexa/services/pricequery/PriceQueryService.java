@@ -9,6 +9,7 @@
  */
 package amosalexa.services.pricequery;
 
+import amosalexa.SpeechletSubject;
 import amosalexa.depot.FinanceApi;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -33,16 +34,25 @@ public class PriceQueryService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(PriceQueryService.class);
 
+    private static final String PRICE_QUERY_INTENT = "ProductRequestIntent";
+
     private String speechTextWelcome = "Willkommen! Der Preisanfrage-Skill zeigt, was ein Produkt auf Amazon kostet.";
 
     private String repromptTextWelcome = "Willkommen! Der Preisanfrage-Skill zeigt, was ein Produkt auf Amazon kostet. " +
             "Sag einfach wonach Du suchen willst. Zum Beispiel: Was kostet ein iPhone?";
 
-    private static PriceQueryService priceQueryService = new PriceQueryService();
 
-    public static PriceQueryService getInstance(){
-        return priceQueryService;
+
+    public PriceQueryService(SpeechletSubject speechletSubject){
+        subscribe(speechletSubject);
     }
+
+
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        speechletSubject.attachSpeechletObserver(this, PRICE_QUERY_INTENT);
+    }
+
 
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
@@ -89,6 +99,9 @@ public class PriceQueryService implements SpeechService {
 
         return null;
     }
+
+
+
 
     private SpeechletResponse getDepotComposition(Intent intent, Session session) {
 
