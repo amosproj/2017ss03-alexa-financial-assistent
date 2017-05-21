@@ -18,6 +18,12 @@ public class SavingsPlanService implements SpeechService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanService.class);
 
+    private static final String GRUNDBETRAG_KEY = "Grundbetrag";
+
+    private static final String ANZAHL_JAHRE_KEY = "AnzahlJahre";
+
+    private static final String EINZAHLUNG_MONAT_KEY = "EinzahlungMonat";
+
     /**
      * Singleton
      */
@@ -30,9 +36,9 @@ public class SavingsPlanService implements SpeechService {
     public SpeechletResponse onIntent(IntentRequest request, Session session) throws SpeechletException {
 
         Map<String, Slot> slots = request.getIntent().getSlots();
-        Slot grundbetragSlot = slots.get("Grundbetrag");
-        Slot anzahlJahreSlot = slots.get("AnzahlJahre");
-        Slot monatlicheEinzahlungSlot = slots.get("EinzahlungMonat");
+        Slot grundbetragSlot = slots.get(GRUNDBETRAG_KEY);
+        Slot anzahlJahreSlot = slots.get(ANZAHL_JAHRE_KEY);
+        Slot monatlicheEinzahlungSlot = slots.get(EINZAHLUNG_MONAT_KEY);
 
         String speechText, repromptText;
 
@@ -42,41 +48,33 @@ public class SavingsPlanService implements SpeechService {
 
         LOGGER.info("Session: " + session.getAttributes());
 
-        LOGGER.info("onIntent...");
-
-        if (!session.getAttributes().isEmpty())
-            LOGGER.info("test: " + session.getAttribute("GRUNDBETRAG_KEY").equals("?"));
-
-        if (grundbetragSlot.getValue() == null && !session.getAttributes().containsKey("GRUNDBETRAG_KEY")) {
-            LOGGER.info("if...");
-            speechText = "Wie ist denn ueberhaupt der Grundbetrag?";
-            repromptText = "Wie ist der Grundbetrag?";
-
+        if (grundbetragSlot.getValue() == null && !session.getAttributes().containsKey(GRUNDBETRAG_KEY)) {
+            speechText = "Was moechtest du als Grundbetrag anlegen?";
+            repromptText = speechText;
             return getSpeechletResponse(speechText, repromptText, true);
         } else {
-            session.setAttribute("GRUNDBETRAG_KEY", grundbetragSlot.getValue());
+            session.setAttribute(GRUNDBETRAG_KEY, grundbetragSlot.getValue());
         }
 
         if (anzahlJahreSlot.getValue() == null) {
-            LOGGER.info("if anzahlJahre == null ...");
             speechText = "Wie viele Jahre moechtest du das Geld anlegen?";
+            //TODO better use duration?
             repromptText = speechText;
-
             return getSpeechletResponse(speechText, repromptText, true);
+        } else {
+            session.setAttribute(ANZAHL_JAHRE_KEY, anzahlJahreSlot.getValue());
         }
 
-        speechText = "TEST";
-        repromptText = "TEST";
+        if (monatlicheEinzahlungSlot.getValue() == null) {
+            speechText = "Wie viel Geld moechtest du monatlich investieren?";
+            repromptText = speechText;
+            return getSpeechletResponse(speechText, repromptText, true);
+        } else {
+            session.setAttribute(EINZAHLUNG_MONAT_KEY, monatlicheEinzahlungSlot.getValue());
+        }
 
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("CreditLimit");
-        card.setContent("TEST");
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("HALLO");
+        speechText = "ENDE";
+        repromptText = "ENDE";
 
         return getSpeechletResponse(speechText, repromptText, true);
         // return SpeechletResponse.newTellResponse(speech, card);
