@@ -1,0 +1,294 @@
+{
+  "intents": [
+    {
+      "name": "AMAZON.CancelIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.HelpIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.StopIntent",
+      "samples": []
+    },
+    {
+      "name": "ErstelleSparplanIntent",
+      "samples": [
+        "Berechne mir einen Sparplan",
+        "ich möchte monatlich Geld sparen",
+        "Erstelle einen Sparplan",
+        "Erstelle ein Sparkonto",
+        "Ich möchte monatlich {EinzahlungMonat} anlegen.",
+        "Ich möchte über {AnzahlJahre} Jahre monatlich {EinzahlungMonat} anlegen.",
+        "Ich möchte einen Grundbetrag von {Grundbetrag} Euro anlegen."
+      ],
+      "slots": [
+        {
+          "name": "Grundbetrag",
+          "type": "AMAZON.NUMBER",
+          "samples": [
+            "{Grundbetrag} ",
+            "Ich möchte einmalig {Grundbetrag} einzahlen."
+          ]
+        },
+        {
+          "name": "EinzahlungMonat",
+          "type": "AMAZON.NUMBER",
+          "samples": [
+            "{EinzahlungMonat} ",
+            "Ich möchte monatlich {EinzahlungMonat} einzahlen."
+          ]
+        },
+        {
+          "name": "AnzahlJahre",
+          "type": "AMAZON.NUMBER",
+          "samples": [
+            "{AnzahlJahre} Jahre.",
+            "Ich möchte {AnzahlJahre} Jahre einzahlen."
+          ]
+        },
+        {
+          "name": "Zinssatz",
+          "type": "AMAZON.NUMBER",
+          "samples": []
+        }
+      ]
+    },
+    {
+      "name": "getNummerPaulIntent",
+      "samples": [
+        "Was ist die Nummer von {Mitarbeiter}",
+        "Wie lautet die Nummer von {Mitarbeiter}"
+      ],
+      "slots": [
+        {
+          "name": "Mitarbeiter",
+          "type": "LIST_OF_EMPLOYEES",
+          "samples": []
+        }
+      ]
+    },
+    {
+      "name": "MyColorIsIntent",
+      "samples": [
+        " Was ist die Nummer von {Mitarbeiter}",
+        "Wie lautet die Nummer von {Mitarbeiter} ",
+        "Wie ist die Handynummer von {Mitarbeiter}"
+      ],
+      "slots": [
+        {
+          "name": "Mitarbeiter",
+          "type": "LIST_OF_EMPLOYEES",
+          "samples": []
+        }
+      ]
+    },
+    {
+      "name": "WhatsMyColorIntent",
+      "samples": [
+        "whats my color",
+        "what is my color",
+        "say my color",
+        "tell me my color",
+        "whats my favorite color",
+        "what is my favorite color",
+        "say my favorite color",
+        "tell me my favorite color",
+        "tell me what my favorite color is"
+      ],
+      "slots": []
+    }
+  ],
+  "types": [
+    {
+      "name": "LIST_OF_COLORS",
+      "values": [
+        {
+          "name": {
+            "value": "grün"
+          }
+        },
+        {
+          "name": {
+            "value": "blau"
+          }
+        },
+        {
+          "name": {
+            "value": "lila"
+          }
+        },
+        {
+          "name": {
+            "value": "rot"
+          }
+        },
+        {
+          "name": {
+            "value": "orange"
+          }
+        },
+        {
+          "name": {
+            "value": "gelb"
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST_OF_EMPLOYEES",
+      "values": [
+        {
+          "name": {
+            "value": "Thorsten"
+          }
+        },
+        {
+          "name": {
+            "value": "Anne"
+          }
+        },
+        {
+          "name": {
+            "value": "Marie"
+          }
+        },
+        {
+          "name": {
+            "value": "Voldemort"
+          }
+        },
+        {
+          "name": {
+            "value": "Paul"
+          }
+        },
+        {
+          "name": {
+            "value": "Kerstin"
+          }
+        }
+      ]
+    }
+  ],
+  "prompts": [
+    {
+      "id": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-Grundbetrag",
+      "promptVersion": "1.0",
+      "definitionVersion": "1.0",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "Was ist dein Startbetrag?"
+        },
+        {
+          "type": "PlainText",
+          "value": "Welchen Grundbetrag möchtest du investieren?"
+        }
+      ]
+    },
+    {
+      "id": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-EinzahlungMonat",
+      "promptVersion": "1.0",
+      "definitionVersion": "1.0",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "Wieviel Geld möchtest du monatlich anlegen?"
+        }
+      ]
+    },
+    {
+      "id": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-AnzahlJahre",
+      "promptVersion": "1.0",
+      "definitionVersion": "1.0",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "Über wie viele Jahre möchtest du einzahlen?"
+        }
+      ]
+    }
+  ],
+  "dialog": {
+    "version": "1.0",
+    "intents": [
+      {
+        "name": "ErstelleSparplanIntent",
+        "confirmationRequired": false,
+        "prompts": {},
+        "slots": [
+          {
+            "name": "Grundbetrag",
+            "type": "AMAZON.NUMBER",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicit": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-Grundbetrag"
+            }
+          },
+          {
+            "name": "EinzahlungMonat",
+            "type": "AMAZON.NUMBER",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicit": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-EinzahlungMonat"
+            }
+          },
+          {
+            "name": "AnzahlJahre",
+            "type": "AMAZON.NUMBER",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicit": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-AnzahlJahre"
+            }
+          },
+          {
+            "name": "Zinssatz",
+            "type": "AMAZON.NUMBER",
+            "elicitationRequired": false,
+            "confirmationRequired": false,
+            "prompts": {}
+          }
+        ]
+      },
+      {
+        "name": "getNummerPaulIntent",
+        "confirmationRequired": false,
+        "prompts": {},
+        "slots": [
+          {
+            "name": "Mitarbeiter",
+            "type": "LIST_OF_EMPLOYEES",
+            "elicitationRequired": false,
+            "confirmationRequired": false,
+            "prompts": {}
+          }
+        ]
+      },
+      {
+        "name": "MyColorIsIntent",
+        "confirmationRequired": false,
+        "prompts": {},
+        "slots": [
+          {
+            "name": "Mitarbeiter",
+            "type": "LIST_OF_EMPLOYEES",
+            "elicitationRequired": false,
+            "confirmationRequired": false,
+            "prompts": {}
+          }
+        ]
+      },
+      {
+        "name": "WhatsMyColorIntent",
+        "confirmationRequired": false,
+        "prompts": {},
+        "slots": []
+      }
+    ]
+  }
+}
