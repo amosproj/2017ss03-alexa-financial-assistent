@@ -33,29 +33,5 @@ public class SavingsPlanService implements SpeechService {
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
-    private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
-                                                   boolean isAskResponse) {
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Session");
-        card.setContent(speechText);
 
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        if (isAskResponse) {
-            // Create reprompt
-            PlainTextOutputSpeech repromptSpeech = new PlainTextOutputSpeech();
-            repromptSpeech.setText(repromptText);
-            Reprompt reprompt = new Reprompt();
-            reprompt.setOutputSpeech(repromptSpeech);
-
-            return SpeechletResponse.newAskResponse(speech, reprompt, card);
-
-        } else {
-            return SpeechletResponse.newTellResponse(speech, card);
-        }
-    }
-    Including
 }
