@@ -31,19 +31,43 @@ public class SavingsPlanService implements SpeechService {
 
         Map<String, Slot> slots = request.getIntent().getSlots();
         Slot grundbetragSlot = slots.get("Grundbetrag");
+        Slot anzahlJahreSlot = slots.get("AnzahlJahre");
+        Slot monatlicheEinzahlungSlot = slots.get("EinzahlungMonat");
+
         String speechText, repromptText;
+
+        LOGGER.info("Grundbetrag: " + grundbetragSlot.getValue());
+        LOGGER.info("Jahre: " + anzahlJahreSlot.getValue());
+        LOGGER.info("monatliche Einzahlung: " + monatlicheEinzahlungSlot.getValue());
+
+        LOGGER.info("Session: " + session.getAttributes());
 
         LOGGER.info("onIntent...");
 
-        if (grundbetragSlot.getValue() == null) {
+        if (!session.getAttributes().isEmpty())
+            LOGGER.info("test: " + session.getAttribute("GRUNDBETRAG_KEY").equals("?"));
+
+        if (grundbetragSlot.getValue() == null && !session.getAttributes().containsKey("GRUNDBETRAG_KEY")) {
             LOGGER.info("if...");
             speechText = "Wie ist denn ueberhaupt der Grundbetrag?";
             repromptText = "Wie ist der Grundbetrag?";
 
             return getSpeechletResponse(speechText, repromptText, true);
         } else {
-            LOGGER.info("GrundbetragSlot: " + grundbetragSlot.getValue());
+            session.setAttribute("GRUNDBETRAG_KEY", grundbetragSlot.getValue());
         }
+
+        if (anzahlJahreSlot.getValue() == null) {
+            LOGGER.info("if anzahlJahre == null ...");
+            speechText = "Wie viele Jahre moechtest du das Geld anlegen?";
+            repromptText = speechText;
+
+            return getSpeechletResponse(speechText, repromptText, true);
+        }
+
+        speechText = "TEST";
+        repromptText = "TEST";
+
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -54,7 +78,8 @@ public class SavingsPlanService implements SpeechService {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText("HALLO");
 
-        return SpeechletResponse.newTellResponse(speech, card);
+        return getSpeechletResponse(speechText, repromptText, true);
+        // return SpeechletResponse.newTellResponse(speech, card);
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
