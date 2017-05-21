@@ -1,5 +1,8 @@
 package amosalexa.services.bankaccount;
 
+import amosalexa.server.Launcher;
+import amosalexa.SpeechletSubject;
+import amosalexa.services.SpeechService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -11,7 +14,7 @@ import model.banking.AccountFactory;
 import model.banking.account.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import amosalexa.services.SpeechService;
+
 
 import java.util.Map;
 
@@ -20,8 +23,10 @@ public class BankAccountService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
 
+    private static final String BANK_ACCOUNT_INTENT = "AccountInformation";
+
     /**
-     * Todo: dummy account number -- Log in is missing
+     *
      */
     private static final String number = "0000000001";
 
@@ -30,15 +35,19 @@ public class BankAccountService implements SpeechService {
      */
     private static final String SLOT_NAME = "BankInformation";
 
-    /**
-     * Singleton
-     */
-    private static BankAccountService bankAccountService = new BankAccountService();
-
-
-    public static BankAccountService getInstance(){
-        return bankAccountService;
+    public BankAccountService(SpeechletSubject speechletSubject){
+      subscribe(speechletSubject);
     }
+
+    /**
+     * ties the Speechlet Subject (Amos Alexa Speechlet) with an Speechlet Observer
+     * @param speechletSubject service
+     */
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        speechletSubject.attachSpeechletObserver(this, BANK_ACCOUNT_INTENT);
+    }
+
 
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
@@ -101,6 +110,8 @@ public class BankAccountService implements SpeechService {
             speechText = "Your "  + slot + " is " + account.getCreditcardLimit();
         }
 
+        log.warn("I'm here from Observer pattern");
+
         return getSpeechletResponse(speechText, repromptText);
     }
 
@@ -117,4 +128,6 @@ public class BankAccountService implements SpeechService {
 
         return SpeechletResponse.newTellResponse(speech, card);
     }
+
+
 }

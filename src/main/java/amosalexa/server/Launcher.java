@@ -1,4 +1,4 @@
-/**
+package amosalexa.server; /**
     Copyright 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
@@ -9,7 +9,9 @@
  */
 
 import amosalexa.AmosAlexaSpeechlet;
-import com.amazon.speech.speechlet.Speechlet;
+import amosalexa.SpeechletObserver;
+import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.pricequery.PriceQueryService;
 import com.amazon.speech.speechlet.SpeechletV2;
 import com.amazon.speech.speechlet.servlet.SpeechletServlet;
 import org.apache.log4j.PropertyConfigurator;
@@ -43,6 +45,7 @@ public final class Launcher {
     private Launcher() {
     }
 
+
     /**
      * Main entry point. Starts a Jetty server.
      *
@@ -59,8 +62,17 @@ public final class Launcher {
 
         server.setHandler(context);
 
-        context.addServlet(new ServletHolder(createServlet(new AmosAlexaSpeechlet())), "/amosalexa");
+        AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
 
+        /**
+         * Observer pattern
+         * speechlet observer. every observer needs an subject to listen to (here: speechlet subject)
+         */
+        new BankAccountService(amosAlexaSpeechlet);
+        new PriceQueryService(amosAlexaSpeechlet);
+        //TODO: Add services
+
+        context.addServlet(new ServletHolder(createServlet(amosAlexaSpeechlet)), "/amosalexa");
 
         server.start();
         server.join();
@@ -68,9 +80,12 @@ public final class Launcher {
 
     private static SpeechletServlet createServlet(final SpeechletV2 speechlet) {
         SpeechletServlet servlet = new SpeechletServlet();
+
         servlet.setSpeechlet(speechlet);
         return servlet;
     }
+
+
 
     private static Server newServer() {
         return new Server(PORT);

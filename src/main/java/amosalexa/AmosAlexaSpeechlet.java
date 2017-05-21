@@ -25,26 +25,45 @@ import model.banking.account.StandingOrderResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import amosalexa.services.bankaccount.BankAccountService;
-import amosalexa.services.pricequery.PriceQueryService;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
  */
-public class AmosAlexaSpeechlet implements SpeechletV2 {
+public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     private static final Logger logger = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
+
+    private Map<String, SpeechletObserver> speechServiceObservers = new HashMap<>();
+
+    /**
+     * attach a speechlet observer - observer will be notified if the intent name matches the key
+     * @param speechletObserver
+     * @param intentName
+     */
+    @Override
+    public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName){
+        speechServiceObservers.put(intentName, speechletObserver);
+    }
+
+    /**
+     * notifies the speechlet observer by the requested intent name - invokes method of observer
+     * @param requestEnvelope request from amazon
+     * @return SpeechletResponse
+     */
+    @Override
+    public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope){
+        SpeechletObserver speechService = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
+        return speechService.onIntent(requestEnvelope);
+    }
+
 
     @Override
     public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
         logger.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
-        // any initialization logic goes here
     }
 
     @Override
@@ -58,6 +77,7 @@ public class AmosAlexaSpeechlet implements SpeechletV2 {
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
+
 
         logger.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
@@ -75,16 +95,12 @@ public class AmosAlexaSpeechlet implements SpeechletV2 {
             return getAccountBalanceResponse();
         } else if ("checkCreditLimit".equals(intentName)) {
             return getCreditLimitResponse();
-        } else if ("ProductRequestIntent".equals(intentName)) {
-            return PriceQueryService.getInstance().onIntent(requestEnvelope);
         } else if ("StandingOrdersInfoIntent".equals(intentName)) {
             return getStandingOrdersInfoResponse(intent.getSlots());
         } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
             return getStandingOrdersDeleteResponse(intent.getSlots());
         } else if ("StandingOrdersModifyIntent".equals(intentName)) {
             return getStandingOrdersModifyResponse(intent.getSlots());
-        } else if ("AccountInformation".equals(intentName)) {
-            return BankAccountService.getInstance().onIntent(requestEnvelope);
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             try {
@@ -116,7 +132,8 @@ public class AmosAlexaSpeechlet implements SpeechletV2 {
             }
         }
 
-        return getHelloResponse();
+        return notifyOnIntent(requestEnvelope);
+
     }
 
     @Override
