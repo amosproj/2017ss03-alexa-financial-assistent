@@ -11,6 +11,8 @@ package amosalexa;
 
 import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
+import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.pricequery.PriceQueryService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -37,6 +39,16 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     private static final Logger logger = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
 
     private Map<String, SpeechletObserver> speechServiceObservers = new HashMap<>();
+
+    private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
+
+    public static AmosAlexaSpeechlet getInstance(){
+
+        new BankAccountService(amosAlexaSpeechlet);
+        new PriceQueryService(amosAlexaSpeechlet);
+
+        return amosAlexaSpeechlet;
+    }
 
     /**
      * attach a speechlet observer - observer will be notified if the intent name matches the key

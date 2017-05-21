@@ -62,17 +62,17 @@ public final class Launcher {
 
         server.setHandler(context);
 
-        AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
-
         /**
          * Observer pattern
          * speechlet observer. every observer needs an subject to listen to (here: speechlet subject)
          */
+        /*
         new BankAccountService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
-        //TODO: Add services
 
-        context.addServlet(new ServletHolder(createServlet(amosAlexaSpeechlet)), "/amosalexa");
+        */
+
+        context.addServlet(new ServletHolder(createServlet(AmosAlexaSpeechlet.getInstance())), "/amosalexa");
 
         server.start();
         server.join();

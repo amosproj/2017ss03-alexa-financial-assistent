@@ -36,6 +36,6 @@ public final class AmosAlexaSpeechletRequestStreamHandler extends SpeechletReque
     }
 
     public AmosAlexaSpeechletRequestStreamHandler() {
-        super(new AmosAlexaSpeechlet(), supportedApplicationIds);
+        super(AmosAlexaSpeechlet.getInstance(), supportedApplicationIds);
     }
 }
