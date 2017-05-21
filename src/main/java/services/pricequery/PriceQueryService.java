@@ -10,6 +10,7 @@
 package services.pricequery;
 
 import amosalexa.depot.FinanceApi;
+import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.*;
@@ -44,7 +45,11 @@ public class PriceQueryService implements SpeechService {
     }
 
     @Override
-    public SpeechletResponse onIntent(final IntentRequest request, final Session session) {
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+
+        IntentRequest request = requestEnvelope.getRequest();
+        Session session = requestEnvelope.getSession();
+
         log.info("onIntent requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
 
         Intent intent = request.getIntent();

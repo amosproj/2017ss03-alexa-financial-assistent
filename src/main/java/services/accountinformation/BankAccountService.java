@@ -1,5 +1,6 @@
 package services.accountinformation;
 
+import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
@@ -41,7 +42,10 @@ public class BankAccountService implements SpeechService {
     }
 
     @Override
-    public SpeechletResponse onIntent(IntentRequest request, Session session) {
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+
+        IntentRequest request = requestEnvelope.getRequest();
+        Session session = requestEnvelope.getSession();
 
         Account account = AccountFactory.getInstance().getAccount(number);
 

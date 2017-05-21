@@ -76,7 +76,7 @@ public class AmosAlexaSpeechlet implements SpeechletV2 {
         } else if ("checkCreditLimit".equals(intentName)) {
             return getCreditLimitResponse();
         } else if ("ProductRequestIntent".equals(intentName)) {
-            return PriceQueryService.getInstance().onIntent(request, session);
+            return PriceQueryService.getInstance().onIntent(requestEnvelope);
         } else if ("StandingOrdersInfoIntent".equals(intentName)) {
             return getStandingOrdersInfoResponse(intent.getSlots());
         } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
@@ -84,7 +84,7 @@ public class AmosAlexaSpeechlet implements SpeechletV2 {
         } else if ("StandingOrdersModifyIntent".equals(intentName)) {
             return getStandingOrdersModifyResponse(intent.getSlots());
         } else if ("AccountInformation".equals(intentName)) {
-            return BankAccountService.getInstance().onIntent(request, session);
+            return BankAccountService.getInstance().onIntent(requestEnvelope);
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             try {
