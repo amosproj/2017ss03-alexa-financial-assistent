@@ -10,6 +10,7 @@
 
 import amosalexa.AmosAlexaSpeechlet;
 import com.amazon.speech.speechlet.Speechlet;
+import com.amazon.speech.speechlet.SpeechletV2;
 import com.amazon.speech.speechlet.servlet.SpeechletServlet;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.*;
@@ -65,7 +66,7 @@ public final class Launcher {
         server.join();
     }
 
-    private static SpeechletServlet createServlet(final Speechlet speechlet) {
+    private static SpeechletServlet createServlet(final SpeechletV2 speechlet) {
         SpeechletServlet servlet = new SpeechletServlet();
         servlet.setSpeechlet(speechlet);
         return servlet;

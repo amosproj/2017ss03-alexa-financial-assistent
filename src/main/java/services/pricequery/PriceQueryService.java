@@ -44,8 +44,7 @@ public class PriceQueryService implements SpeechService {
     }
 
     @Override
-    public SpeechletResponse onIntent(final IntentRequest request, final Session session)
-            throws SpeechletException {
+    public SpeechletResponse onIntent(final IntentRequest request, final Session session) {
         log.info("onIntent requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
 
         Intent intent = request.getIntent();
@@ -83,9 +82,7 @@ public class PriceQueryService implements SpeechService {
             return getDepotComposition(intent, session);
         }
 
-        else {
-            throw new SpeechletException("Invalid Intent");
-        }
+        return null;
     }
 
     private SpeechletResponse getDepotComposition(Intent intent, Session session) {

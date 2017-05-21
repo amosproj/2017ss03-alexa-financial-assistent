@@ -41,7 +41,7 @@ public class BankAccountService implements SpeechService {
     }
 
     @Override
-    public SpeechletResponse onIntent(IntentRequest request, Session session) throws SpeechletException {
+    public SpeechletResponse onIntent(IntentRequest request, Session session) {
 
         Account account = AccountFactory.getInstance().getAccount(number);
 
