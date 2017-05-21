@@ -46,35 +46,46 @@ public class SavingsPlanService implements SpeechService {
         LOGGER.info("Jahre: " + anzahlJahreSlot.getValue());
         LOGGER.info("monatliche Einzahlung: " + monatlicheEinzahlungSlot.getValue());
 
-        LOGGER.info("Session: " + session.getAttributes());
+        LOGGER.info("Session Before: " + session.getAttributes());
+
+        if (grundbetragSlot.getValue() != null) {
+            session.setAttribute(GRUNDBETRAG_KEY, grundbetragSlot.getValue());
+        }
+        if (anzahlJahreSlot.getValue() != null) {
+            session.setAttribute(ANZAHL_JAHRE_KEY, anzahlJahreSlot.getValue());
+        }
+        if (monatlicheEinzahlungSlot.getValue() != null) {
+            session.setAttribute(EINZAHLUNG_MONAT_KEY, monatlicheEinzahlungSlot.getValue());
+        }
 
         if (grundbetragSlot.getValue() == null && !session.getAttributes().containsKey(GRUNDBETRAG_KEY)) {
             speechText = "Was moechtest du als Grundbetrag anlegen?";
             repromptText = speechText;
             return getSpeechletResponse(speechText, repromptText, true);
-        } else {
-            session.setAttribute(GRUNDBETRAG_KEY, grundbetragSlot.getValue());
         }
 
-        if (anzahlJahreSlot.getValue() == null) {
+        if (anzahlJahreSlot.getValue() == null && !session.getAttributes().containsKey(ANZAHL_JAHRE_KEY)) {
             speechText = "Wie viele Jahre moechtest du das Geld anlegen?";
             //TODO better use duration?
             repromptText = speechText;
             return getSpeechletResponse(speechText, repromptText, true);
-        } else {
-            session.setAttribute(ANZAHL_JAHRE_KEY, anzahlJahreSlot.getValue());
         }
 
-        if (monatlicheEinzahlungSlot.getValue() == null) {
+        if (monatlicheEinzahlungSlot.getValue() == null && !session.getAttributes().containsKey(EINZAHLUNG_MONAT_KEY)) {
+            if (grundbetragSlot.getValue() == null) {
+                speechText = "Du musst zuerst einen Grundbetrag angeben.";
+                repromptText = speechText;
+                return getSpeechletResponse(speechText, repromptText, true);
+            }
             speechText = "Wie viel Geld moechtest du monatlich investieren?";
             repromptText = speechText;
             return getSpeechletResponse(speechText, repromptText, true);
-        } else {
-            session.setAttribute(EINZAHLUNG_MONAT_KEY, monatlicheEinzahlungSlot.getValue());
         }
 
         speechText = "ENDE";
         repromptText = "ENDE";
+
+        LOGGER.info("Session Afterwards: " + session.getAttributes());
 
         return getSpeechletResponse(speechText, repromptText, true);
         // return SpeechletResponse.newTellResponse(speech, card);
