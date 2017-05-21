@@ -12,6 +12,7 @@ package amosalexa;
 import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.pricequery.PriceQueryService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -46,6 +47,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         new BankAccountService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
+        new BankContactService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
