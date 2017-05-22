@@ -51,6 +51,15 @@
     },
     {
       "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "BlockCardIntent",
+      "slots": [
+        {
+          "name": "BankCardNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
     }
   ]
 }

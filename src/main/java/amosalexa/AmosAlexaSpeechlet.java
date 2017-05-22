@@ -13,6 +13,7 @@ import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankcontact.BankContactService;
+import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.pricequery.PriceQueryService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -48,6 +49,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new BankAccountService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
+        new BlockCardService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
@@ -122,6 +124,8 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             } catch (SpeechletException e) {
                 e.printStackTrace();
             }
+        } else if ("BlockBankCardIntent".equals(intentName)) {
+
         } else if ("MicrosoftStockIntent".equals(intentName)) {
             return DummyDepot.getMicrosoftStock(intent, session);
         } else if ("AppleStockIntent".equals(intentName)) {

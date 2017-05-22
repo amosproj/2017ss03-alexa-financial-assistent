@@ -8,9 +8,6 @@ HelloWorldIntent how are you
 
 StandingOrdersIntent standing orders
 StandingOrdersIntent tell standing orders
-StandingOrdersIntent send standing orders via {email | Channel}
-StandingOrdersIntent send standing orders per {email | Channel}
-StandingOrdersIntent {email | Channel} standing orders
 StandingOrdersIntent standing orders to {Recipient}
 
 TestListIntent test liste
@@ -24,3 +21,6 @@ AccountInformation what is my {AccountInformationSlots}
 AccountInformation give me my current {AccountInformationSlots}
 
 BankContactInformation Wie ist die Telefonnummer der {BankNameSlots}
+
+BlockCardIntent Sperre Karte {BankCardNumber}
+BlockCardIntent Sperre Karte Nummer {BankCardNumber}
