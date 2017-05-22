@@ -3,14 +3,24 @@ package api;
 import com.amazonaws.util.json.JSONException;
 import model.banking.AccountFactory;
 import model.banking.account.Account;
+import model.banking.account.CardResponse;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.client.Traverson;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
 
 import static org.junit.Assert.*;
+import static org.springframework.hateoas.client.Hop.rel;
 
 
 public class AccountTest {
@@ -42,7 +52,6 @@ public class AccountTest {
 
     @Test
     public void testCreateAccount() throws JSONException {
-
         DummyAccount acc = new DummyAccount();
 
         // create account
@@ -54,4 +63,9 @@ public class AccountTest {
         assertEquals(account.getOpeningDate(), acc.getOpeningDate());
     }
 
+    @Test
+    public void testCard() throws URISyntaxException {
+        Collection<CardResponse> cards = accountFactory.getCardsForAccount("0000000000");
+        assertEquals(cards.size(), 0);
+    }
 }

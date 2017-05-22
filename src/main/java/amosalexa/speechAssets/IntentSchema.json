@@ -21,7 +21,6 @@
         }
       ]
     },
-
     {
       "intent": "TestListIntent"
     },
@@ -51,6 +50,27 @@
     },
     {
       "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "FourDigitNumberIntent",
+      "slots":[
+        {
+          "name": "FourDigits",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "ReplacementCardIntent"
+    },
+    {
+      "intent": "ReplacementCardReasonIntent",
+      "slots": [
+        {
+          "name": "ReplacementReason",
+          "type": "LIST_OF_REPLACEMENT_REASONS"
+        }
+      ]
     }
   ]
 }

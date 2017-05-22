@@ -17,7 +17,12 @@ public class BankingRESTClient {
     /**
      * Banking API Endpoint
      */
-    private static final String BANKING_API_ENDPOINT = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com";
+    public static final String BANKING_API_ENDPOINT = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com";
+
+    /**
+     * Banking API base URL v1.0
+     */
+    public static final String BANKING_API_BASEURL_V1 = "/api/v1_0";
 
     /**
      *
