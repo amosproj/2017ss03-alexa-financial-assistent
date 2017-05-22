@@ -17,11 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class BlockCardService  implements SpeechService {
+public class BlockCardService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(BlockCardService.class);
-
-    private static final String BLOCK_CARD_INTENT = "BlockCardIntent";
 
     /**
      *
@@ -33,17 +31,20 @@ public class BlockCardService  implements SpeechService {
      */
     private static final String BANK_CARD_NUMBER_SLOT = "BankCardNumber";
 
-    public BlockCardService(SpeechletSubject speechletSubject){
+    public BlockCardService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
 
     /**
      * ties the Speechlet Subject (Amos Alexa Speechlet) with an Speechlet Observer
+     *
      * @param speechletSubject service
      */
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, BLOCK_CARD_INTENT);
+        speechletSubject.attachSpeechletObserver(this, "BlockCardIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
     }
 
     @Override
@@ -57,22 +58,31 @@ public class BlockCardService  implements SpeechService {
         String bankCardNumber = request.getIntent().getSlot(BANK_CARD_NUMBER_SLOT).getValue();
 
         if (request.getIntent().equals("AMAZON.YesIntent")) {
-            // TODO: Block card
+            Object cardNumberObj = session.getAttribute("BlockCardService.CardNumber");
+
+            if (cardNumberObj != null) {
+                long cardNumber = (long)cardNumberObj;
+
+                // TODO: Lock card with number cardNumber
+
+                return getSpeechletResponse("Karte wurde gesperrt.", "", false);
+            }
+
             return null;
         } else if (request.getIntent().equals("AMAZON.NoIntent")) {
-            // TODO: Cancel
-            return null;
+            session.setAttribute("BlockCardService.CardNumber", null);
+            return getSpeechletResponse("Okay, tschüss.", "", false);
         } else {
             if (bankCardNumber == null) {
                 String speechText = "Wie lautet die Nummber der Karte?";
-                String repromptText = "Sagen Sie auch die Nummber der Karte. Zum Beispiel: Sperre Karte 12345.";
+                String repromptText = "Sagen Sie auch die Nummer der Karte. Zum Beispiel: Sperre Karte 12345.";
 
                 return getSpeechletResponse(speechText, repromptText, false);
             } else {
                 session.setAttribute("BlockCardService.CardNumber", Long.parseLong(bankCardNumber));
 
-                String speechText = "Anfrage zur Sperrung entgegengenommen.";
-                String repromptText = String.format("Möchten Sie die Karte %d wirklich sperren?", bankCardNumber);
+                String speechText = "Möchten Sie die Karte " + bankCardNumber + " wirklich sperren?";
+                String repromptText = "Bitte bestätigen Sie, indem Sie 'ja' sagen.";
 
                 return getSpeechletResponse(speechText, repromptText, true);
             }

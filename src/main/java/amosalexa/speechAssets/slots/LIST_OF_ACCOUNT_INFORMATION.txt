@@ -1,8 +1,8 @@
-number
-iban
-balance
-opening date
-withdrawal fee
-interest rate
-credit limit
-credit card limit
+Kontonummer
+IBAN
+Kontostand
+Eröffnungsdatum
+Abhebegebühr
+Zinssatz
+Kreditlimit
+Kreditkartenlimit
