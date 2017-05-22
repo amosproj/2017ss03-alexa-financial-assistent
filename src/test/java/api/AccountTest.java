@@ -63,9 +63,4 @@ public class AccountTest {
         assertEquals(account.getOpeningDate(), acc.getOpeningDate());
     }
 
-    @Test
-    public void testCard() throws URISyntaxException {
-        Collection<CardResponse> cards = accountFactory.getCardsForAccount("0000000000");
-        assertEquals(cards.size(), 0);
-    }
 }
