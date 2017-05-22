@@ -1,9 +1,6 @@
 {
   "intents": [
     {
-      "intent": "HelloWorldIntent"
-    },
-    {
       "intent": "StandingOrdersIntent",
       "slots": [
         {

@@ -1,24 +1,15 @@
-HelloWorldIntent say hello
-HelloWorldIntent say hello world
-HelloWorldIntent hello
-HelloWorldIntent say hi
-HelloWorldIntent say hi world
-HelloWorldIntent hi
-HelloWorldIntent how are you
-
-StandingOrdersIntent standing orders
-StandingOrdersIntent tell standing orders
-StandingOrdersIntent standing orders to {Recipient}
+StandingOrdersIntent Daueraufträge
+StandingOrdersIntent Daueraufträge an {Recipient}
 
 TestListIntent test liste
 
-ProductRequestIntent what costs {ProductKeyword}
-ProductRequestIntent give me the price of {ProductKeyword}
-ProductRequestIntent find {ProductKeyword}
-ProductRequestIntent how much costs {ProductKeyword}
+ProductRequestIntent Was kostet {ProductKeyword}
+ProductRequestIntent Finde {ProductKeyword}
 
-AccountInformation what is my {AccountInformationSlots}
-AccountInformation give me my current {AccountInformationSlots}
+AccountInformation Was ist mein {AccountInformationSlots}
+AccountInformation Was ist meine {AccountInformationSlots}
+AccountInformation Wie hoch ist mein {AccountInformationSlots}
+AccountInformation Wie hoch ist meine {AccountInformationSlots}
 
 BankContactInformation Wie ist die Telefonnummer der {BankNameSlots}
 
