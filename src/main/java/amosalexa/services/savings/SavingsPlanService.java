@@ -1,16 +1,17 @@
-package services.savings;
+package amosalexa.services.savings;
 
+import amosalexa.SpeechletSubject;
+import amosalexa.services.SpeechService;
+import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
-import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import services.SpeechService;
 
 import java.util.Map;
 
@@ -18,22 +19,26 @@ public class SavingsPlanService implements SpeechService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanService.class);
 
+    private static final String SAVINGS_PLAN_INTENT = "SavingsPlanIntent";
+
     private static final String GRUNDBETRAG_KEY = "Grundbetrag";
 
     private static final String ANZAHL_JAHRE_KEY = "AnzahlJahre";
 
     private static final String EINZAHLUNG_MONAT_KEY = "EinzahlungMonat";
 
-    /**
-     * Singleton
-     */
-    private static SavingsPlanService savingsPlanService = new SavingsPlanService();
-
-    public static SavingsPlanService getInstance() {
-        return savingsPlanService;
+    public SavingsPlanService(SpeechletSubject speechletSubject) {
+        subscribe(speechletSubject);
     }
 
-    public SpeechletResponse onIntent(IntentRequest request, Session session) throws SpeechletException {
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        speechletSubject.attachSpeechletObserver(this, SAVINGS_PLAN_INTENT);
+    }
+
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+        IntentRequest request = requestEnvelope.getRequest();
+        Session session = requestEnvelope.getSession();
 
         Map<String, Slot> slots = request.getIntent().getSlots();
         Slot grundbetragSlot = slots.get(GRUNDBETRAG_KEY);
@@ -135,5 +140,4 @@ public class SavingsPlanService implements SpeechService {
 
         return strResult;
     }
-
 }

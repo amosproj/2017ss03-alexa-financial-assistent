@@ -14,6 +14,7 @@ import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.pricequery.PriceQueryService;
+import amosalexa.services.savings.SavingsPlanService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -43,32 +44,35 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
 
-    public static AmosAlexaSpeechlet getInstance(){
+    public static AmosAlexaSpeechlet getInstance() {
 
         new BankAccountService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
+        new SavingsPlanService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
 
     /**
      * attach a speechlet observer - observer will be notified if the intent name matches the key
+     *
      * @param speechletObserver
      * @param intentName
      */
     @Override
-    public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName){
+    public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName) {
         speechServiceObservers.put(intentName, speechletObserver);
     }
 
     /**
      * notifies the speechlet observer by the requested intent name - invokes method of observer
+     *
      * @param requestEnvelope request from amazon
      * @return SpeechletResponse
      */
     @Override
-    public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope){
+    public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
         SpeechletObserver speechService = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
         return speechService.onIntent(requestEnvelope);
     }
