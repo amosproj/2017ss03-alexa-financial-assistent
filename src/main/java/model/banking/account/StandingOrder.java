@@ -123,11 +123,11 @@ public class StandingOrder {
         if (this.executionRate.equals(ExecutionRate.MONTHLY))
             return "monatlich ";
         if (this.executionRate.equals(ExecutionRate.QUARTERLY))
-            return "vierteljährlich ";
+            return "vierteljaehrlich ";
         if (this.executionRate.equals(ExecutionRate.HALF_YEARLY))
-            return "halbjährlich ";
+            return "halbjaehrlich ";
         if (this.executionRate.equals(ExecutionRate.YEARLY))
-            return "jährlich ";
+            return "jaehrlich ";
         else return "";
     }
 }
