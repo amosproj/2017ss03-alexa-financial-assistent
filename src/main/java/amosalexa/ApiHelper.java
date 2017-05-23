@@ -3,6 +3,7 @@ package amosalexa;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -108,6 +109,33 @@ public class ApiHelper {
 
         //print result
         System.out.println(response.toString());
+    }
+
+    public static String sendPost(String requestUrl, String urlParams) {
+        StringBuffer jsonString;
+        try {
+            URL url = new URL(requestUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/hal+json");
+            OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
+            writer.write(urlParams);
+            writer.close();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            jsonString = new StringBuffer();
+            String line;
+            while ((line = br.readLine()) != null) {
+                jsonString.append(line);
+            }
+            br.close();
+            connection.disconnect();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return jsonString.toString();
     }
 
 }
