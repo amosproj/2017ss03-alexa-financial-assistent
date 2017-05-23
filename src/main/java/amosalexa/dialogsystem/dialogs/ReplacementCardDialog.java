@@ -42,7 +42,7 @@ public class ReplacementCardDialog implements DialogHandler {
 		String intentName = intent.getName();
 
 		if("ReplacementCardIntent".equals(intentName)) {
-			return askForCardNumber(intent, storage, false);
+			return askForCardNumber(storage, false);
 		} else if("FourDigitNumberIntent".equals(intentName)) {
 			return askIfBlockedOrDamaged(intent, storage);
 		} else if("ReplacementCardReasonIntent".equals(intentName)) {
@@ -56,7 +56,7 @@ public class ReplacementCardDialog implements DialogHandler {
 		}
 	}
 
-	private SpeechletResponse askForCardNumber(Intent intent, SessionStorage.Storage storage, boolean errored) {
+	private SpeechletResponse askForCardNumber(SessionStorage.Storage storage, boolean errored) {
 		Collection<CardResponse> cards = AccountFactory.getInstance().getCardsForAccount("0000000000"); // TODO: Load account from session
 
 		if(cards.size() == 0) {
@@ -124,7 +124,7 @@ public class ReplacementCardDialog implements DialogHandler {
 
 		// If these are invalid digits, ask again
 		if(!validDigits) {
-			return askForCardNumber(intent, storage, true);
+			return askForCardNumber(storage, true);
 		}
 
 		PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
@@ -139,7 +139,7 @@ public class ReplacementCardDialog implements DialogHandler {
 
 	private SpeechletResponse askForConfirmation(Intent intent, SessionStorage.Storage storage) {
 		if(!storage.containsKey(STORAGE_SELECTED_CARD)) {
-			return askForCardNumber(intent, storage, true);
+			return askForCardNumber(storage, true);
 		}
 
 		String replacementReason = intent.getSlot("ReplacementReason").getValue();
@@ -172,7 +172,7 @@ public class ReplacementCardDialog implements DialogHandler {
 
 	private SpeechletResponse orderReplacement(Intent intent, SessionStorage.Storage storage) {
 		if(!storage.containsKey(STORAGE_SELECTED_CARD)) {
-			return askForCardNumber(intent, storage, true);
+			return askForCardNumber(storage, true);
 		}
 		if(!storage.containsKey(STORAGE_REASON)) {
 			return askIfBlockedOrDamaged(intent, storage);

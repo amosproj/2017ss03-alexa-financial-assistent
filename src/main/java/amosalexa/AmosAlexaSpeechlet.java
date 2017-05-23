@@ -123,30 +123,14 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return getStandingOrdersModifyResponse(intent.getSlots());
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
-            try {
-                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-            } catch (SpeechletException e) {
-                e.printStackTrace();
-            }
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("ReplacementCardIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "ReplacementCard"); // Set CURRENTDIALOG to start the ReplacementCard dialog
-            try {
-                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-            } catch (SpeechletException e) {
-                e.printStackTrace();
-            }
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("ReplacementCardReasonIntent".equals(intentName)) {
-            try {
-                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-            } catch (SpeechletException e) {
-                e.printStackTrace();
-            }
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("FourDigitNumberIntent".equals(intentName)) {
-            try {
-                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-            } catch (SpeechletException e) {
-                e.printStackTrace();
-            }
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("MicrosoftStockIntent".equals(intentName)) {
             return DummyDepot.getMicrosoftStock(intent, session);
         } else if ("AppleStockIntent".equals(intentName)) {
@@ -158,17 +142,9 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         } else if ("DepotCompositionIntent".equals(intentName)) {
             return DummyDepot.getDepotComposition(intent, session);
         } else if ("AMAZON.YesIntent".equals(intentName)) {
-            try {
-                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-            } catch (SpeechletException e) {
-                e.printStackTrace();
-            }
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("AMAZON.NoIntent".equals(intentName)) {
-            try {
-                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-            } catch (SpeechletException e) {
-                e.printStackTrace();
-            }
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         }
 
         return notifyOnIntent(requestEnvelope);
