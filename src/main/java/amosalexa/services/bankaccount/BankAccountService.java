@@ -70,44 +70,44 @@ public class BankAccountService implements SpeechService {
 
         String slotValue = request.getIntent().getSlot(SLOT_NAME).getValue();
 
-        String slot = "Kontostand";
+        String slot = "balance";
         if(slot.equals(slotValue)){
-            speechText = "Ihr "  + slot + " ist " + account.getBalance();
+            speechText = "Your "  + slot + " is " + account.getBalance();
         }
 
-        slot = "Kontonummer";
+        slot = "number";
         if(slot.equals(slotValue)){
-            speechText = "Ihre "  + slot + " ist " + account.getNumber();
+            speechText = "Your "  + slot + " is " + account.getNumber();
         }
 
-        slot = "IBAN";
+        slot = "iban";
         if(slot.equals(slotValue)){
-            speechText = "Ihre "  + slot + " ist " + account.getIban();
+            speechText = "Your "  + slot + " is " + account.getIban();
         }
 
-        slot = "Eröffnungsdatum";
+        slot = "opening date";
         if(slot.equals(slotValue)){
-            speechText = "Ihr "  + slot + " ist " + account.getOpeningDate();
+            speechText = "Your "  + slot + " is " + account.getOpeningDate();
         }
 
-        slot = "Abhebegebühr";
+        slot = "withdrawal fee";
         if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " ist " + account.getWithdrawalFee();
+            speechText = "Your "  + slot + " is " + account.getWithdrawalFee();
         }
 
-        slot = "Zinssatz";
+        slot = "interest rate";
         if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " ist " + account.getInterestRate();
+            speechText = "Your "  + slot + " is " + account.getInterestRate();
         }
 
-        slot = "Kreditlimit";
+        slot = "credit limit";
         if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " ist " + account.getCreditLimit();
+            speechText = "Your "  + slot + " is " + account.getCreditLimit();
         }
 
-        slot = "Kreditkartenlimit";
+        slot = "credit card limit";
         if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " ist " + account.getCreditcardLimit();
+            speechText = "Your "  + slot + " is " + account.getCreditcardLimit();
         }
 
         log.warn("I'm here from Observer pattern");

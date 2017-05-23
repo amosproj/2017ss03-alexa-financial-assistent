@@ -26,11 +26,6 @@ public class BlockCardService implements SpeechService {
      */
     private static final String number = "0000000001";
 
-    /**
-     * Name for custom slot types
-     */
-    private static final String BANK_CARD_NUMBER_SLOT = "BankCardNumber";
-
     public BlockCardService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
@@ -55,7 +50,7 @@ public class BlockCardService implements SpeechService {
         // TODO: Use account later to actually block a card
         Account account = AccountFactory.getInstance().getAccount(number);
 
-        String bankCardNumber = request.getIntent().getSlot(BANK_CARD_NUMBER_SLOT).getValue();
+        String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
 
         if (request.getIntent().equals("AMAZON.YesIntent")) {
             Object cardNumberObj = session.getAttribute("BlockCardService.CardNumber");

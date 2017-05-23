@@ -1,15 +1,27 @@
-StandingOrdersIntent Daueraufträge
-StandingOrdersIntent Daueraufträge an {Recipient}
+HelloWorldIntent say hello
+HelloWorldIntent say hello world
+HelloWorldIntent hello
+HelloWorldIntent say hi
+HelloWorldIntent say hi world
+HelloWorldIntent hi
+HelloWorldIntent how are you
+
+StandingOrdersIntent standing orders
+StandingOrdersIntent tell standing orders
+StandingOrdersIntent send standing orders via {email | Channel}
+StandingOrdersIntent send standing orders per {email | Channel}
+StandingOrdersIntent {email | Channel} standing orders
+StandingOrdersIntent standing orders to {Recipient}
 
 TestListIntent test liste
 
-ProductRequestIntent Was kostet {ProductKeyword}
-ProductRequestIntent Finde {ProductKeyword}
+ProductRequestIntent what costs {ProductKeyword}
+ProductRequestIntent give me the price of {ProductKeyword}
+ProductRequestIntent find {ProductKeyword}
+ProductRequestIntent how much costs {ProductKeyword}
 
-AccountInformation Was ist mein {AccountInformationSlots}
-AccountInformation Was ist meine {AccountInformationSlots}
-AccountInformation Wie hoch ist mein {AccountInformationSlots}
-AccountInformation Wie hoch ist meine {AccountInformationSlots}
+AccountInformation what is my {AccountInformationSlots}
+AccountInformation give me my current {AccountInformationSlots}
 
 BankContactInformation Wie ist die Telefonnummer der {BankNameSlots}
 
