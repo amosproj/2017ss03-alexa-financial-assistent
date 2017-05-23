@@ -1,0 +1,139 @@
+{
+  "intents": [
+    {
+      "name": "AMAZON.CancelIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.HelpIntent",
+      "samples": []
+    },
+    {
+      "name": "AMAZON.StopIntent",
+      "samples": []
+    },
+    {
+      "name": "ErstelleSparplanIntent",
+      "samples": [
+        "Berechne mir einen Sparplan",
+        "ich moechte monatlich Geld sparen",
+        "Erstelle einen Sparplan",
+        "Erstelle ein Sparkonto",
+        "Ich moechte monatlich {EinzahlungMonat} Euro anlegen.",
+        "Ich moechte einen Grundbetrag von {Grundbetrag} Euro anlegen.",
+        "{Grundbetrag} Euro",
+        "{AnzahlJahre} Jahre",
+        "monatlich {EinzahlungMonat} Euro",
+        "Ich moechte einmalig {Grundbetrag}  Euro anlegen",
+        "Ich moechte einen Sparplan erstellen und einmalig {Grundbetrag} Euro anlegen.",
+        "Ich moechte als Einmalzahlung {Grundbetrag} Euro anlegen",
+        "Ich moechte {AnzahlJahre} Jahre monatlich {EinzahlungMonat} Euro anlegen.",
+        "Ich moechte {AnzahlJahre} Jahre lang Geld anlegen."
+      ],
+      "slots": [
+        {
+          "name": "Grundbetrag",
+          "type": "AMAZON.NUMBER",
+          "samples": [
+            "{Grundbetrag} ",
+            "Ich moechte einmalig {Grundbetrag} einzahlen."
+          ]
+        },
+        {
+          "name": "EinzahlungMonat",
+          "type": "AMAZON.NUMBER",
+          "samples": [
+            "{EinzahlungMonat} ",
+            "Ich moechte monatlich {EinzahlungMonat} einzahlen."
+          ]
+        },
+        {
+          "name": "AnzahlJahre",
+          "type": "AMAZON.NUMBER",
+          "samples": [
+            "{AnzahlJahre} Jahre.",
+            "Ich moechte {AnzahlJahre} Jahre einzahlen."
+          ]
+        }
+      ]
+    }
+  ],
+  "prompts": [
+    {
+      "id": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-Grundbetrag",
+      "promptVersion": "1.0",
+      "definitionVersion": "1.0",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "Was ist dein Startbetrag?"
+        },
+        {
+          "type": "PlainText",
+          "value": "Welchen Grundbetrag moechtest du investieren?"
+        }
+      ]
+    },
+    {
+      "id": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-EinzahlungMonat",
+      "promptVersion": "1.0",
+      "definitionVersion": "1.0",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "Wieviel Geld moechtest du monatlich anlegen?"
+        }
+      ]
+    },
+    {
+      "id": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-AnzahlJahre",
+      "promptVersion": "1.0",
+      "definitionVersion": "1.0",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "ueber wie viele Jahre moechtest du einzahlen?"
+        }
+      ]
+    }
+  ],
+  "dialog": {
+    "version": "1.0",
+    "intents": [
+      {
+        "name": "ErstelleSparplanIntent",
+        "confirmationRequired": false,
+        "prompts": {},
+        "slots": [
+          {
+            "name": "Grundbetrag",
+            "type": "AMAZON.NUMBER",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicit": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-Grundbetrag"
+            }
+          },
+          {
+            "name": "EinzahlungMonat",
+            "type": "AMAZON.NUMBER",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicit": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-EinzahlungMonat"
+            }
+          },
+          {
+            "name": "AnzahlJahre",
+            "type": "AMAZON.NUMBER",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicit": "Elicit.Intent-ErstelleSparplanIntent.IntentSlot-AnzahlJahre"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
