@@ -2,6 +2,7 @@ package amosalexa.dialogsystem.dialogs;
 
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
+import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
@@ -18,15 +19,17 @@ public class TestListDialog implements DialogHandler {
 	}
 
 	@Override
-	public SpeechletResponse handle(String intent, SessionStorage.Storage storage) throws SpeechletException {
-		if("TestListIntent".equals(intent)) {
+	public SpeechletResponse handle(Intent intent, SessionStorage.Storage storage) throws SpeechletException {
+		String intentName = intent.getName();
+
+		if("TestListIntent".equals(intentName)) {
 			return initialList(storage);
-		} else if("AMAZON.YesIntent".equals(intent)) {
+		} else if("AMAZON.YesIntent".equals(intentName)) {
 			return nextListItem(storage);
-		} else if("AMAZON.NoIntent".equals(intent)) {
+		} else if("AMAZON.NoIntent".equals(intentName)) {
 			return exitIntent(storage);
 		} else {
-			throw new SpeechletException("Unhandled intent: " + intent);
+			throw new SpeechletException("Unhandled intent: " + intentName);
 		}
 	}
 

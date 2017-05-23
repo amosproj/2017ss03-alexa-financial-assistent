@@ -11,6 +11,11 @@ package amosalexa;
 
 import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
+import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.bankcontact.BankContactService;
+import amosalexa.services.pricequery.PriceQueryService;
+import amosalexa.services.savings.SavingsPlanService;
+import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.*;
@@ -24,41 +29,75 @@ import model.banking.account.StandingOrderResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import services.accountinformation.BankAccountService;
-import services.pricequery.PriceQueryService;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
  */
-public class AmosAlexaSpeechlet implements Speechlet {
+public class AmosAlexaSpeechlet implements SpeechletSubject {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
+
+    private Map<String, SpeechletObserver> speechServiceObservers = new HashMap<>();
+
+    private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
+
+    public static AmosAlexaSpeechlet getInstance() {
+
+        new BankAccountService(amosAlexaSpeechlet);
+        new PriceQueryService(amosAlexaSpeechlet);
+        new BankContactService(amosAlexaSpeechlet);
+        new SavingsPlanService(amosAlexaSpeechlet);
+
+        return amosAlexaSpeechlet;
+    }
+
+    /**
+     * attach a speechlet observer - observer will be notified if the intent name matches the key
+     *
+     * @param speechletObserver
+     * @param intentName
+     */
+    @Override
+    public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName) {
+        speechServiceObservers.put(intentName, speechletObserver);
+    }
+
+    /**
+     * notifies the speechlet observer by the requested intent name - invokes method of observer
+     *
+     * @param requestEnvelope request from amazon
+     * @return SpeechletResponse
+     */
+    @Override
+    public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+        SpeechletObserver speechService = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
+        return speechService.onIntent(requestEnvelope);
+    }
+
 
     @Override
-    public void onSessionStarted(final SessionStartedRequest request, final Session session)
-            throws SpeechletException {
-        LOGGER.info("onSessionStarted requestId={}, sessionId={}", request.getRequestId(),
-                session.getSessionId());
-        // any initialization logic goes here
+    public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
+        logger.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+                requestEnvelope.getSession().getSessionId());
     }
 
     @Override
-    public SpeechletResponse onLaunch(final LaunchRequest request, final Session session)
-            throws SpeechletException {
-        LOGGER.info("onLaunch requestId={}, sessionId={}", request.getRequestId(),
-                session.getSessionId());
+    public SpeechletResponse onLaunch(SpeechletRequestEnvelope<LaunchRequest> requestEnvelope) {
+        logger.info("onLaunch requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+                requestEnvelope.getSession().getSessionId());
         return getWelcomeResponse();
     }
 
     @Override
-    public SpeechletResponse onIntent(final IntentRequest request, final Session session)
-            throws SpeechletException {
-        LOGGER.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+        IntentRequest request = requestEnvelope.getRequest();
+        Session session = requestEnvelope.getSession();
+
+
+        logger.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
 
         Intent intent = request.getIntent();
@@ -76,19 +115,22 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return getCreditLimitResponse();
         } else if ("bankTransfer".equals(intentName)) {
             return bankTransfer(intent.getSlots());
-        } else if ("ProductRequestIntent".equals(intentName)) {
-            return PriceQueryService.getInstance().onIntent(request, session);
         } else if ("StandingOrdersInfoIntent".equals(intentName)) {
             return getStandingOrdersInfoResponse(intent.getSlots());
         } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
             return getStandingOrdersDeleteResponse(intent.getSlots());
         } else if ("StandingOrdersModifyIntent".equals(intentName)) {
             return getStandingOrdersModifyResponse(intent.getSlots());
-        } else if ("AccountInformation".equals(intentName)) {
-            return BankAccountService.getInstance().onIntent(request, session);
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
-            return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("ReplacementCardIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "ReplacementCard"); // Set CURRENTDIALOG to start the ReplacementCard dialog
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("ReplacementCardReasonIntent".equals(intentName)) {
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("FourDigitNumberIntent".equals(intentName)) {
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("MicrosoftStockIntent".equals(intentName)) {
             return DummyDepot.getMicrosoftStock(intent, session);
         } else if ("AppleStockIntent".equals(intentName)) {
@@ -100,19 +142,19 @@ public class AmosAlexaSpeechlet implements Speechlet {
         } else if ("DepotCompositionIntent".equals(intentName)) {
             return DummyDepot.getDepotComposition(intent, session);
         } else if ("AMAZON.YesIntent".equals(intentName)) {
-            return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("AMAZON.NoIntent".equals(intentName)) {
-            return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
-        } else {
-            throw new SpeechletException("Invalid Intent");
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         }
+
+        return notifyOnIntent(requestEnvelope);
+
     }
 
     @Override
-    public void onSessionEnded(final SessionEndedRequest request, final Session session)
-            throws SpeechletException {
-        LOGGER.info("onSessionEnded requestId={}, sessionId={}", request.getRequestId(),
-                session.getSessionId());
+    public void onSessionEnded(SpeechletRequestEnvelope<SessionEndedRequest> requestEnvelope) {
+        logger.info("onSessionEnded requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+                requestEnvelope.getSession().getSessionId());
         // any cleanup logic goes here
     }
 
@@ -185,10 +227,56 @@ public class AmosAlexaSpeechlet implements Speechlet {
     }
 
     /**
-     * Creates and returns a {@code SpeechletResponse} with the current account balance.
+     * Transfers money and returns response with
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
+    private SpeechletResponse bankTransfer(Map<String, Slot> slots) {
+        Slot amountSlot = slots.get("amount");
+        Slot nameSlot = slots.get("name");
+
+        String amount = amountSlot.getValue();
+        String name = nameSlot.getValue();
+
+        //getting response regarding account balance
+        this.getAccountBalanceResponse();
+
+        //transfering money
+        String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
+        String urlParams = "{\n" +
+                "  \"amount\" : " + amount + ",\n" +
+                "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
+                "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
+                "  \"valueDate\" : \"2017-05-16\",\n" +
+                "  \"description\" : \"Beschreibung\"\n" +
+                "}";
+        ApiHelper.sendPost(url, urlParams);
+
+        //reply message
+        String speechText = "Die "+ amount + " wurden zu " + name + " überwiesen";
+
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("CreditLimit");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+
+    /**
+		 * Creates and returns a {@code SpeechletResponse} with the current account balance.
+		 *
+		 * @return SpeechletResponse spoken and visual response for the given intent
+		 */
     private SpeechletResponse getAccountBalanceResponse() {
 
         // This is just a dummy account balance. Will be replaced by an API.
@@ -240,57 +328,12 @@ public class AmosAlexaSpeechlet implements Speechlet {
     }
 
     /**
-     * Transfers money and returns response with
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse bankTransfer(Map<String, Slot> slots) {
-        Slot amountSlot = slots.get("amount");
-        Slot nameSlot = slots.get("name");
-
-        String amount = amountSlot.getValue();
-        String name = nameSlot.getValue();
-
-        //getting response regarding account balance
-        this.getAccountBalanceResponse();
-
-        //transfering money
-        String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
-        String urlParams = "{\n" +
-                "  \"amount\" : " + amount + ",\n" +
-                "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
-                "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
-                "  \"valueDate\" : \"2017-05-16\",\n" +
-                "  \"description\" : \"Beschreibung\"\n" +
-                "}";
-        ApiHelper.sendPost(url, urlParams);
-
-        //reply message
-        String speechText = "Die "+ amount + " wurden zu " + name + " überwiesen";
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("CreditLimit");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
      * Creates a {@code SpeechletResponse} for the standing orders intent.
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse getStandingOrdersInfoResponse(Map<String, Slot> slots) {
-        LOGGER.info("StandingOrdersResponse called.");
+        logger.info("StandingOrdersResponse called.");
 
         ObjectMapper mapper = new ObjectMapper();
         ApiHelper helper = new ApiHelper();
@@ -305,7 +348,7 @@ public class AmosAlexaSpeechlet implements Speechlet {
         try {
             standingOrderResponse = mapper.readValue(test, StandingOrderResponse.class);
         } catch (IOException e) {
-            LOGGER.error(e.getMessage());
+            logger.error(e.getMessage());
         }
 
         // Create the Simple card content.
@@ -408,10 +451,10 @@ public class AmosAlexaSpeechlet implements Speechlet {
     }
 
     private SpeechletResponse getStandingOrdersDeleteResponse(Map<String, Slot> slots) {
-        LOGGER.info("StandingOrdersDeleteResponse called.");
+        logger.info("StandingOrdersDeleteResponse called.");
 
         Slot numberSlot = slots.get("Number");
-        LOGGER.info("NumberSlot: " + numberSlot.getValue());
+        logger.info("NumberSlot: " + numberSlot.getValue());
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -424,7 +467,7 @@ public class AmosAlexaSpeechlet implements Speechlet {
         try {
             helper.sendDelete("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" + numberSlot.getValue());
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            logger.error(e.getMessage());
             card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
             speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
             return SpeechletResponse.newTellResponse(speech, card);
@@ -436,19 +479,19 @@ public class AmosAlexaSpeechlet implements Speechlet {
     }
 
     private SpeechletResponse getStandingOrdersModifyResponse(Map<String, Slot> slots) {
-        LOGGER.info("StandingOrdersModifyResponse called.");
+        logger.info("StandingOrdersModifyResponse called.");
 
         Slot numberSlot = slots.get("Number");
-        LOGGER.info("NumberSlot: " + numberSlot.getValue());
+        logger.info("NumberSlot: " + numberSlot.getValue());
 
         Slot amountSlot = slots.get("Amount");
-        LOGGER.info("AmountSlot: " + amountSlot.getValue());
+        logger.info("AmountSlot: " + amountSlot.getValue());
 
         Slot executionRateSlot = slots.get("ExecutionRate");
-        LOGGER.info("ExecutionRateSlot: " + executionRateSlot.getValue());
+        logger.info("ExecutionRateSlot: " + executionRateSlot.getValue());
 
         Slot firstExecutionSlot = slots.get("FirstExecution");
-        LOGGER.info("FirstExecutionSlot: " + firstExecutionSlot.getValue());
+        logger.info("FirstExecutionSlot: " + firstExecutionSlot.getValue());
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -471,7 +514,7 @@ public class AmosAlexaSpeechlet implements Speechlet {
             helper.sendPut("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" +
                     numberSlot.getValue(), urlParameters);
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            logger.error(e.getMessage());
             card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
             speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
             return SpeechletResponse.newTellResponse(speech, card);
@@ -481,5 +524,6 @@ public class AmosAlexaSpeechlet implements Speechlet {
         speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geaendert.");
         return SpeechletResponse.newTellResponse(speech, card);
     }
+
 
 }

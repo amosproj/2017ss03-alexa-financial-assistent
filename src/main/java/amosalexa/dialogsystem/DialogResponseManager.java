@@ -1,9 +1,15 @@
 package amosalexa.dialogsystem;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
+import amosalexa.dialogsystem.dialogs.ReplacementCardDialog;
 import amosalexa.dialogsystem.dialogs.TestListDialog;
+import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import com.amazon.speech.ui.PlainTextOutputSpeech;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
@@ -13,11 +19,15 @@ import java.util.HashMap;
  */
 public class DialogResponseManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
+
+
 	private static DialogResponseManager instance;
 
 	private DialogResponseManager() {
 		// TODO: Registering new DialogHandlers should happen automatically, not in this class
 		registerDialogHandler(new TestListDialog());
+		registerDialogHandler(new ReplacementCardDialog());
 	}
 
 	public static DialogResponseManager getInstance() {
@@ -33,19 +43,28 @@ public class DialogResponseManager {
 		dialogHandlers.put(dialogHandler.getDialogName(), dialogHandler);
 	}
 
-	public SpeechletResponse handle(String intent, SessionStorage.Storage storage) throws SpeechletException {
-		String dialog = (String)storage.get(SessionStorage.CURRENTDIALOG);
+	public SpeechletResponse handle(Intent intent, SessionStorage.Storage storage) {
+		try {
+			String dialog = (String) storage.get(SessionStorage.CURRENTDIALOG);
 
-		if(dialog == null) {
-			throw new SpeechletException("CURRENTDIALOG not set in Session.");
+			if (dialog == null) {
+				throw new SpeechletException("CURRENTDIALOG not set in Session.");
+			}
+
+			DialogHandler handler = dialogHandlers.get(dialog);
+
+			if (handler == null) {
+				throw new SpeechletException("No handler for dialogsystem " + dialog + " registered in DialogResponseManager.");
+			}
+
+			return handler.handle(intent, storage);
+		} catch(SpeechletException e) {
+			logger.error(e.getMessage());
+
+			PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+			speech.setText("Ein Fehler ist aufgetreten.");
+
+			return SpeechletResponse.newTellResponse(speech);
 		}
-
-		DialogHandler handler = dialogHandlers.get(dialog);
-
-		if(handler == null) {
-			throw new SpeechletException("No handler for dialogsystem " + dialog + " registered in DialogResponseManager.");
-		}
-
-		return handler.handle(intent, storage);
 	}
 }
