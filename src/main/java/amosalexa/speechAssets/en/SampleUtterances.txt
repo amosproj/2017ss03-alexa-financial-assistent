@@ -1,0 +1,17 @@
+StandingOrdersIntent standing orders
+StandingOrdersIntent tell standing orders
+StandingOrdersIntent standing orders to {Recipient}
+
+TestListIntent test list
+
+ProductRequestIntent what costs {ProductKeyword}
+ProductRequestIntent give me the price of {ProductKeyword}
+ProductRequestIntent find {ProductKeyword}
+ProductRequestIntent how much costs {ProductKeyword}
+
+AccountInformation what is my {AccountInformationSlots}
+AccountInformation give me my current {AccountInformationSlots}
+
+BankContactInformation What is the phone number of {BankNameSlots}
+
+BlockCardIntent Block card {BankCardNumber}

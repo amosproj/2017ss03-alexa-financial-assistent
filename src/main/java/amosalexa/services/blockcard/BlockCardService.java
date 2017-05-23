@@ -50,31 +50,31 @@ public class BlockCardService implements SpeechService {
         // TODO: Use account later to actually block a card
         Account account = AccountFactory.getInstance().getAccount(number);
 
-        String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
-
-        if (request.getIntent().equals("AMAZON.YesIntent")) {
-            Object cardNumberObj = session.getAttribute("BlockCardService.CardNumber");
+        if (request.getIntent().getName().equals("AMAZON.YesIntent")) {
+            String cardNumberObj = (String) session.getAttribute("BlockCardService.CardNumber");
 
             if (cardNumberObj != null) {
-                long cardNumber = (long)cardNumberObj;
+                long cardNumber = Long.parseLong(cardNumberObj);
 
                 // TODO: Lock card with number cardNumber
 
-                return getSpeechletResponse("Karte wurde gesperrt.", "", false);
+                return getSpeechletResponse("Karte " + cardNumberObj + " wurde gesperrt.", "", false);
             }
 
             return null;
-        } else if (request.getIntent().equals("AMAZON.NoIntent")) {
+        } else if (request.getIntent().getName().equals("AMAZON.NoIntent")) {
             session.setAttribute("BlockCardService.CardNumber", null);
             return getSpeechletResponse("Okay, tschüss.", "", false);
         } else {
+            String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
+
             if (bankCardNumber == null) {
                 String speechText = "Wie lautet die Nummber der Karte?";
                 String repromptText = "Sagen Sie auch die Nummer der Karte. Zum Beispiel: Sperre Karte 12345.";
 
                 return getSpeechletResponse(speechText, repromptText, false);
             } else {
-                session.setAttribute("BlockCardService.CardNumber", Long.parseLong(bankCardNumber));
+                session.setAttribute("BlockCardService.CardNumber", bankCardNumber);
 
                 String speechText = "Möchten Sie die Karte " + bankCardNumber + " wirklich sperren?";
                 String repromptText = "Bitte bestätigen Sie, indem Sie 'ja' sagen.";

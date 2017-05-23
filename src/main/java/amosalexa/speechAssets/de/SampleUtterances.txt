@@ -1,0 +1,22 @@
+StandingOrdersIntent Daueraufträge
+StandingOrdersIntent Was sind meine Daueraufträge
+StandingOrdersIntent Daueraufträge an {Recipient}
+StandingOrdersIntent Was sind meine Daueraufträge an {Recipient}
+
+TestListIntent Teste Liste
+
+ProductRequestIntent Was kostet {ProductKeyword}
+ProductRequestIntent Sag mir den Preis von {ProductKeyword}
+ProductRequestIntent Finde {ProductKeyword}
+ProductRequestIntent Wie viel kostet {ProductKeyword}
+
+AccountInformation Wie ist mein {AccountInformationSlots}
+AccountInformation Wie ist meine {AccountInformationSlots}
+AccountInformation Was ist mein {AccountInformationSlots}
+AccountInformation Was ist meine {AccountInformationSlots}
+AccountInformation Wie hoch ist mein {AccountInformationSlots}
+AccountInformation Wie hoch ist meine {AccountInformationSlots}
+
+BankContactInformation Wie ist die Telefonnummer der {BankNameSlots}
+
+BlockCardIntent Sperre Karte {BankCardNumber}

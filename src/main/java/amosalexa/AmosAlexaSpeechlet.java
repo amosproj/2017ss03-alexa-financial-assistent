@@ -40,7 +40,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     private static final Logger logger = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
 
-    private Map<String, SpeechletObserver> speechServiceObservers = new HashMap<>();
+    private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
 
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
 
@@ -61,7 +61,14 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     @Override
     public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName){
-        speechServiceObservers.put(intentName, speechletObserver);
+        List<SpeechletObserver> list = speechServiceObservers.get(intentName);
+
+        if (list == null) {
+            list = new LinkedList<>();
+            speechServiceObservers.put(intentName, list);
+        }
+
+        list.add(speechletObserver);
     }
 
     /**
@@ -71,8 +78,21 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     @Override
     public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope){
-        SpeechletObserver speechService = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
-        return speechService.onIntent(requestEnvelope);
+        List<SpeechletObserver> list = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
+
+        if (list == null) {
+            return null;
+        }
+
+        for (SpeechletObserver speechService : list) {
+            SpeechletResponse response = speechService.onIntent(requestEnvelope);
+
+            if (response != null) {
+                return response;
+            }
+        }
+
+        return null;
     }
 
 
@@ -149,7 +169,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         }
 
         return notifyOnIntent(requestEnvelope);
-
     }
 
     @Override
