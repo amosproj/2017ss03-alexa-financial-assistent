@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+//TODO not needed. Use BankingRESTClient instead
 public class ApiHelper {
 
     //TODO User-Agent
@@ -43,7 +44,7 @@ public class ApiHelper {
         return response.toString();
     }
 
-    // HTTP POST request
+    // HTTP PUT request
     public void sendPut(String baseUrl, String urlParameters) throws Exception {
 
         URL url = new URL(baseUrl);

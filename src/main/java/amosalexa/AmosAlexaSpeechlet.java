@@ -15,7 +15,6 @@ import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.pricequery.PriceQueryService;
-import amosalexa.services.savings.SavingsPlanService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -46,7 +45,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new StandingOrderService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
-        new SavingsPlanService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
@@ -120,6 +118,9 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("ReplacementCardReasonIntent".equals(intentName)) {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("SavingsPlanIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "SavingsPlan"); // Set CURRENTDIALOG to start the SavingsPlan dialog
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage);
         } else if ("FourDigitNumberIntent".equals(intentName)) {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("MicrosoftStockIntent".equals(intentName)) {
