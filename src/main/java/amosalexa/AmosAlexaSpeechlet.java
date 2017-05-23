@@ -14,6 +14,7 @@ import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
+import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.pricequery.PriceQueryService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -26,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,7 +38,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     private static final Logger logger = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
 
-    private Map<String, SpeechletObserver> speechServiceObservers = new HashMap<>();
+    private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
 
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
 
@@ -45,6 +48,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new StandingOrderService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
+        new BlockCardService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
@@ -57,7 +61,14 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     @Override
     public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName) {
-        speechServiceObservers.put(intentName, speechletObserver);
+        List<SpeechletObserver> list = speechServiceObservers.get(intentName);
+
+        if (list == null) {
+            list = new LinkedList<>();
+            speechServiceObservers.put(intentName, list);
+        }
+
+        list.add(speechletObserver);
     }
 
     /**
@@ -68,8 +79,21 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     @Override
     public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
-        SpeechletObserver speechService = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
-        return speechService.onIntent(requestEnvelope);
+        List<SpeechletObserver> list = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
+
+        if (list == null) {
+            return null;
+        }
+
+        for (SpeechletObserver speechService : list) {
+            SpeechletResponse response = speechService.onIntent(requestEnvelope);
+
+            if (response != null) {
+                return response;
+            }
+        }
+
+        return null;
     }
 
 
@@ -100,9 +124,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-        if ("HelloWorldIntent".equals(intentName)) {
-            return getHelloResponse();
-        } else if ("AMAZON.HelpIntent".equals(intentName)) {
+        if ("AMAZON.HelpIntent".equals(intentName)) {
             return getHelpResponse();
         } else if ("GetAccountBalance".equals(intentName)) {
             return getAccountBalanceResponse();
@@ -134,13 +156,27 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         } else if ("DepotCompositionIntent".equals(intentName)) {
             return DummyDepot.getDepotComposition(intent, session);
         } else if ("AMAZON.YesIntent".equals(intentName)) {
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+            SpeechletResponse response = DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+            if (response != null) {
+                return response;
+            }
         } else if ("AMAZON.NoIntent".equals(intentName)) {
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+            SpeechletResponse response = DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+            if (response != null) {
+                return response;
+            }
         }
 
-        return notifyOnIntent(requestEnvelope);
+        SpeechletResponse response =  notifyOnIntent(requestEnvelope);
 
+        if (response == null) {
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText("Ein Fehler ist aufgetreten.");
+
+            return SpeechletResponse.newTellResponse(speech);
+        }
+
+        return response;
     }
 
     @Override
@@ -172,26 +208,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         reprompt.setOutputSpeech(speech);
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
-     * Creates a {@code SpeechletResponse} for the hello intent.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getHelloResponse() {
-        String speechText = "Hello world";
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("HelloWorld");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        return SpeechletResponse.newTellResponse(speech, card);
     }
 
     /**

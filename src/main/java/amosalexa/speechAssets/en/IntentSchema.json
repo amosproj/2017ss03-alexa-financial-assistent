@@ -1,9 +1,6 @@
 {
   "intents": [
     {
-      "intent": "HelloWorldIntent"
-    },
-    {
       "intent": "StandingOrdersIntent",
       "slots": [
         {
@@ -53,7 +50,7 @@
     },
     {
       "intent": "FourDigitNumberIntent",
-      "slots":[
+      "slots": [
         {
           "name": "FourDigits",
           "type": "AMAZON.NUMBER"
@@ -69,6 +66,15 @@
         {
           "name": "ReplacementReason",
           "type": "LIST_OF_REPLACEMENT_REASONS"
+        }
+      ]
+    },
+    {
+      "intent": "BlockCardIntent",
+      "slots": [
+        {
+          "name": "BankCardNumber",
+          "type": "AMAZON.NUMBER"
         }
       ]
     }
