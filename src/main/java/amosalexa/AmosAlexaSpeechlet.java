@@ -74,6 +74,8 @@ public class AmosAlexaSpeechlet implements Speechlet {
             return getAccountBalanceResponse();
         } else if ("checkCreditLimit".equals(intentName)) {
             return getCreditLimitResponse();
+        } else if ("bankTransfer".equals(intentName)) {
+            return bankTransfer(intent.getSlots());
         } else if ("ProductRequestIntent".equals(intentName)) {
             return PriceQueryService.getInstance().onIntent(request, session);
         } else if ("StandingOrdersInfoIntent".equals(intentName)) {
@@ -220,6 +222,51 @@ public class AmosAlexaSpeechlet implements Speechlet {
         double creditLimit = 2000.91;
 
         String speechText = "Your credit limit is " + Double.toString(creditLimit);
+
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("CreditLimit");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    /**
+     * Transfers money and returns response with
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse bankTransfer(Map<String, Slot> slots) {
+        Slot amountSlot = slots.get("amount");
+        Slot nameSlot = slots.get("name");
+
+        String amount = amountSlot.getValue();
+        String name = nameSlot.getValue();
+
+        //getting response regarding account balance
+        this.getAccountBalanceResponse();
+
+        //transfering money
+        String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
+        String urlParams = "{\n" +
+                "  \"amount\" : " + amount + ",\n" +
+                "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
+                "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
+                "  \"valueDate\" : \"2017-05-16\",\n" +
+                "  \"description\" : \"Beschreibung\"\n" +
+                "}";
+        ApiHelper.sendPost(url, urlParams);
+
+        //reply message
+        String speechText = "Die "+ amount + " wurden zu " + name + " überwiesen";
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
