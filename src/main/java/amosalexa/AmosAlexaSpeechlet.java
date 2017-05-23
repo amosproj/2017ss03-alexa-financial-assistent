@@ -12,6 +12,7 @@ package amosalexa;
 import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.savings.SavingsPlanService;
@@ -22,16 +23,11 @@ import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import model.banking.account.StandingOrder;
-import model.banking.account.StandingOrderResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
@@ -47,6 +43,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     public static AmosAlexaSpeechlet getInstance() {
 
         new BankAccountService(amosAlexaSpeechlet);
+        new StandingOrderService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
@@ -115,12 +112,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return getCreditLimitResponse();
         } else if ("bankTransfer".equals(intentName)) {
             return bankTransfer(intent.getSlots());
-        } else if ("StandingOrdersInfoIntent".equals(intentName)) {
-            return getStandingOrdersInfoResponse(intent.getSlots());
-        } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
-            return getStandingOrdersDeleteResponse(intent.getSlots());
-        } else if ("StandingOrdersModifyIntent".equals(intentName)) {
-            return getStandingOrdersModifyResponse(intent.getSlots());
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
@@ -253,7 +244,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         ApiHelper.sendPost(url, urlParams);
 
         //reply message
-        String speechText = "Die "+ amount + " wurden zu " + name + " überwiesen";
+        String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -273,10 +264,10 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
 
     /**
-		 * Creates and returns a {@code SpeechletResponse} with the current account balance.
-		 *
-		 * @return SpeechletResponse spoken and visual response for the given intent
-		 */
+     * Creates and returns a {@code SpeechletResponse} with the current account balance.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
     private SpeechletResponse getAccountBalanceResponse() {
 
         // This is just a dummy account balance. Will be replaced by an API.
@@ -326,204 +317,5 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
-
-    /**
-     * Creates a {@code SpeechletResponse} for the standing orders intent.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getStandingOrdersInfoResponse(Map<String, Slot> slots) {
-        logger.info("StandingOrdersResponse called.");
-
-        ObjectMapper mapper = new ObjectMapper();
-        ApiHelper helper = new ApiHelper();
-        String test = null;
-        try {
-            test = helper.sendGet("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders");
-        } catch (Exception e) {
-            //TODO
-        }
-
-        StandingOrderResponse standingOrderResponse = null;
-        try {
-            standingOrderResponse = mapper.readValue(test, StandingOrderResponse.class);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Daueraufträge");
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-
-        if (standingOrderResponse == null || standingOrderResponse.get_embedded() == null) {
-            card.setContent("Keine Daueraufträge vorhanden.");
-            speech.setText("Keine Dauerauftraege vorhanden.");
-            return SpeechletResponse.newTellResponse(speech, card);
-        }
-
-        StandingOrder[] standingOrders = standingOrderResponse.get_embedded().getStandingOrders();
-
-        // Check if user requested to have their stranding orders sent to their email address
-        Slot channelSlot = slots.get("Channel");
-        boolean sendPerEmail = channelSlot != null &&
-                channelSlot.getValue() != null &&
-                channelSlot.getValue().equals("email");
-
-        StringBuilder textBuilder = new StringBuilder();
-
-        if (sendPerEmail) {
-            // TODO: Send standing orders to user's email address
-
-            textBuilder.append("Ich habe")
-                    .append(standingOrders.length)
-                    .append(" an deine E-Mail-Adresse gesendet.");
-        } else {
-            // We want to directly return standing orders here
-
-            Slot payeeSlot = slots.get("Payee");
-            String payee = payeeSlot.getValue();
-
-            if (payee != null) {
-                // User specified a recipient
-
-                List<StandingOrder> orders = new LinkedList<>();
-
-                // Find closest standing orders that could match the request.
-                for (int i = 0; i < standingOrders.length; i++) {
-                    if (StringUtils.getLevenshteinDistance(payee, standingOrders[i].getPayee()) <=
-                            standingOrders[i].getPayee().length() / 3) {
-                        orders.add(standingOrders[i]);
-                    }
-                }
-
-                textBuilder.append("Es wurden ")
-                        .append(orders.size())
-                        .append(" Daueraufträge gefunden.");
-
-                int i = 1;
-                for (StandingOrder order : orders) {
-                    textBuilder.append(' ');
-
-                    textBuilder.append("Dauerauftrag Nummer ")
-                            .append(i)
-                            .append(": ");
-
-                    textBuilder.append("Überweise ").append(order.getExecutionRateString())
-                            .append(order.getAmount())
-                            .append(" Euro an ")
-                            .append(order.getPayee())
-                            .append(".");
-
-                    i++;
-                }
-            } else {
-                // Just return all standing orders
-
-                textBuilder.append("Sie haben momentan ")
-                        .append(standingOrders.length)
-                        .append(" Daueraufträge.");
-
-                for (int i = 0; i < standingOrders.length; i++) {
-                    textBuilder.append(' ');
-
-                    textBuilder.append("Dauerauftrag Nummer ")
-                            .append(i + 1)
-                            .append(": ");
-
-                    textBuilder.append("Überweise ").append(standingOrders[i].getExecutionRateString())
-                            .append(standingOrders[i].getAmount())
-                            .append(" Euro an ")
-                            .append(standingOrders[i].getPayee())
-                            .append(".");
-                }
-            }
-        }
-
-        String text = textBuilder.toString();
-
-        card.setContent(text);
-        speech.setText(text);
-
-        return SpeechletResponse.newTellResponse(speech, card);
-    }
-
-    private SpeechletResponse getStandingOrdersDeleteResponse(Map<String, Slot> slots) {
-        logger.info("StandingOrdersDeleteResponse called.");
-
-        Slot numberSlot = slots.get("Number");
-        logger.info("NumberSlot: " + numberSlot.getValue());
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Lösche Dauerauftrag");
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-
-        ApiHelper helper = new ApiHelper();
-        try {
-            helper.sendDelete("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" + numberSlot.getValue());
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
-            speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
-            return SpeechletResponse.newTellResponse(speech, card);
-        }
-
-        card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde gelöscht.");
-        speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geloescht.");
-        return SpeechletResponse.newTellResponse(speech, card);
-    }
-
-    private SpeechletResponse getStandingOrdersModifyResponse(Map<String, Slot> slots) {
-        logger.info("StandingOrdersModifyResponse called.");
-
-        Slot numberSlot = slots.get("Number");
-        logger.info("NumberSlot: " + numberSlot.getValue());
-
-        Slot amountSlot = slots.get("Amount");
-        logger.info("AmountSlot: " + amountSlot.getValue());
-
-        Slot executionRateSlot = slots.get("ExecutionRate");
-        logger.info("ExecutionRateSlot: " + executionRateSlot.getValue());
-
-        Slot firstExecutionSlot = slots.get("FirstExecution");
-        logger.info("FirstExecutionSlot: " + firstExecutionSlot.getValue());
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Ändere Dauerauftrag");
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-
-        ApiHelper helper = new ApiHelper();
-        try {
-            String response = helper.sendGet("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" +
-                    numberSlot.getValue());
-            mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
-            StandingOrder standingOrder = mapper.readValue(response, StandingOrder.class);
-            String urlParameters = "payee=" + standingOrder.getPayee() + "&amount=" + Double.valueOf(amountSlot.getValue()) +
-                    "&destinationAccount=" + standingOrder.getDestinationAccount() + "&firstExecution=2017-05-16"
-                    + "&executionRate=" + standingOrder.getExecutionRate() + "&description=" + standingOrder.getDescription() + "&status=" + standingOrder.getStatus();
-            helper.sendPut("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" +
-                    numberSlot.getValue(), urlParameters);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
-            speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
-            return SpeechletResponse.newTellResponse(speech, card);
-        }
-
-        card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geändert.");
-        speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geaendert.");
-        return SpeechletResponse.newTellResponse(speech, card);
-    }
-
 
 }
