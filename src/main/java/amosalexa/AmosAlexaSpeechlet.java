@@ -124,7 +124,26 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             try {
-                return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+            } catch (SpeechletException e) {
+                e.printStackTrace();
+            }
+        } else if ("ReplacementCardIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "ReplacementCard"); // Set CURRENTDIALOG to start the ReplacementCard dialog
+            try {
+                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+            } catch (SpeechletException e) {
+                e.printStackTrace();
+            }
+        } else if ("ReplacementCardReasonIntent".equals(intentName)) {
+            try {
+                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+            } catch (SpeechletException e) {
+                e.printStackTrace();
+            }
+        } else if ("FourDigitNumberIntent".equals(intentName)) {
+            try {
+                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
             } catch (SpeechletException e) {
                 e.printStackTrace();
             }
@@ -140,13 +159,13 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return DummyDepot.getDepotComposition(intent, session);
         } else if ("AMAZON.YesIntent".equals(intentName)) {
             try {
-                return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
             } catch (SpeechletException e) {
                 e.printStackTrace();
             }
         } else if ("AMAZON.NoIntent".equals(intentName)) {
             try {
-                return DialogResponseManager.getInstance().handle(intentName, sessionStorage); // Let the DialogHandler handle this intent
+                return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
             } catch (SpeechletException e) {
                 e.printStackTrace();
             }

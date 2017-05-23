@@ -1,7 +1,9 @@
 package amosalexa.dialogsystem;
 
 import amosalexa.SessionStorage;
+import amosalexa.dialogsystem.dialogs.ReplacementCardDialog;
 import amosalexa.dialogsystem.dialogs.TestListDialog;
+import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 
@@ -18,6 +20,7 @@ public class DialogResponseManager {
 	private DialogResponseManager() {
 		// TODO: Registering new DialogHandlers should happen automatically, not in this class
 		registerDialogHandler(new TestListDialog());
+		registerDialogHandler(new ReplacementCardDialog());
 	}
 
 	public static DialogResponseManager getInstance() {
@@ -33,7 +36,7 @@ public class DialogResponseManager {
 		dialogHandlers.put(dialogHandler.getDialogName(), dialogHandler);
 	}
 
-	public SpeechletResponse handle(String intent, SessionStorage.Storage storage) throws SpeechletException {
+	public SpeechletResponse handle(Intent intent, SessionStorage.Storage storage) throws SpeechletException {
 		String dialog = (String)storage.get(SessionStorage.CURRENTDIALOG);
 
 		if(dialog == null) {
