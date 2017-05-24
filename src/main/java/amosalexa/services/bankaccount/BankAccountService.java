@@ -70,6 +70,8 @@ public class BankAccountService implements SpeechService {
 
         String slotValue = request.getIntent().getSlot(SLOT_NAME).getValue();
 
+        // TODO: Translate into German, see de/slots/LIST_OF_ACCOUNT_INFORMATION.txt
+
         String slot = "balance";
         if(slot.equals(slotValue)){
             speechText = "Your "  + slot + " is " + account.getBalance();

@@ -64,10 +64,15 @@ public class DialogResponseManager {
         } catch (SpeechletException e) {
             logger.error(e.getMessage());
 
-            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            /*PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
             speech.setText("Ein Fehler ist aufgetreten.");
 
-            return SpeechletResponse.newTellResponse(speech);
+            return SpeechletResponse.newTellResponse(speech);*/
+
+            // I had to modify this because now more than one Speechlet can subscribe to the YesIntent
+            // So we must not abort here.
+
+            return null;
         }
     }
 }
