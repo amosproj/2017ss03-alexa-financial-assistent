@@ -14,6 +14,7 @@ import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
 import model.banking.account.StandingOrder;
+import model.banking.account.Transactions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ public class SavingsPlanDialog implements DialogHandler {
         if ("SavingsPlanIntent".equals(intentName)) {
             return askForSavingsParameter(intent, storage);
         } else if ("AMAZON.YesIntent".equals(intentName)) {
-            return createSavingsPlanStandingOrder(intent, storage);
+            return createSavingsPlan(intent, storage);
         } else if ("AMAZON.NoIntent".equals(intentName)) {
             return cancelAction();
         } else {
@@ -124,12 +125,33 @@ public class SavingsPlanDialog implements DialogHandler {
         return SpeechletResponse.newAskResponse(speech, reprompt);
     }
 
-    private SpeechletResponse createSavingsPlanStandingOrder(Intent intent, SessionStorage.Storage storage) {
+    private SpeechletResponse createSavingsPlan(Intent intent, SessionStorage.Storage storage) {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        createSavingsPlanStandingOrder((String) storage.get(EINZAHLUNG_MONAT_KEY));
+        String grundbetrag = (String) storage.get(GRUNDBETRAG_KEY);
+        String monatlicheZahlung = (String) storage.get(EINZAHLUNG_MONAT_KEY);
+        createSavingsPlanOneOffPayment(grundbetrag);
+        createSavingsPlanStandingOrder(monatlicheZahlung);
         //TODO replace date
-        speech.setText("Okay! Ich habe den Sparplan angelegt. Die erste Zahlung auf dein Sparkonto erfolgt am 01.06.2017");
+        speech.setText("Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von " + grundbetrag + " Euro wird deinem Sparkonto " +
+                "gutgeschrieben. Die erste regelmaeßige Einzahlung von " + monatlicheZahlung + " Euro erfolgt am 01.06.2017.");
         return SpeechletResponse.newTellResponse(speech);
+    }
+
+    private void createSavingsPlanOneOffPayment(String betrag) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("amount", betrag);
+            //TODO Hard coded savings account?
+            jsonObject.put("sourceAccount", "DE42100000009999999999");
+            jsonObject.put("destinationAccount", "DE39100000007777777777");
+            jsonObject.put("valueDate", "2017-05-24");
+            jsonObject.put("description", "Savings Plan");
+        } catch (JSONException e) {
+            LOGGER.error(e.getMessage());
+        }
+        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
+        //TODO Post mapped to Object.class
+        bankingRESTClient.postBankingModelObject("/api/v1_0/transactions", jsonObject.toString(), Object.class);
     }
 
     private void createSavingsPlanStandingOrder(String monatlicheZahlung) {

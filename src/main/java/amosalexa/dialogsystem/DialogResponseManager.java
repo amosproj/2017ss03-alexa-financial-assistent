@@ -3,13 +3,12 @@ package amosalexa.dialogsystem;
 import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.dialogs.ReplacementCardDialog;
+import amosalexa.dialogsystem.dialogs.StandingOrderDialog;
 import amosalexa.dialogsystem.dialogs.TestListDialog;
 import amosalexa.dialogsystem.dialogs.savings.SavingsPlanDialog;
-import amosalexa.dialogsystem.dialogs.StandingOrderDialog;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
