@@ -12,7 +12,6 @@ package amosalexa;
 import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BankAccountService;
-import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.pricequery.PriceQueryService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -42,7 +41,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     public static AmosAlexaSpeechlet getInstance() {
 
         new BankAccountService(amosAlexaSpeechlet);
-        new StandingOrderService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
 
@@ -133,6 +131,15 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return DummyDepot.getDepotInformation(intent, session);
         } else if ("DepotCompositionIntent".equals(intentName)) {
             return DummyDepot.getDepotComposition(intent, session);
+        } else if ("StandingOrdersInfoIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "StandingOrders");
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "StandingOrders");
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
+        } else if ("StandingOrdersModifyIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "StandingOrders");
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("AMAZON.YesIntent".equals(intentName)) {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("AMAZON.NoIntent".equals(intentName)) {

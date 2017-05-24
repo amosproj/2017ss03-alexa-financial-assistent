@@ -1,18 +1,19 @@
-package amosalexa.services.bankaccount;
+package amosalexa.dialogsystem.dialogs;
 
 import amosalexa.ApiHelper;
-import amosalexa.SpeechletSubject;
-import amosalexa.services.SpeechService;
-import com.amazon.speech.json.SpeechletRequestEnvelope;
+import amosalexa.SessionStorage;
+import amosalexa.dialogsystem.DialogHandler;
+import api.BankingRESTClient;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
-import com.amazon.speech.speechlet.IntentRequest;
-import com.amazon.speech.speechlet.Session;
+import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
+import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+import com.amazonaws.util.json.JSONException;
+import com.amazonaws.util.json.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import model.banking.account.StandingOrder;
 import model.banking.account.StandingOrderResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -24,44 +25,45 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class StandingOrderService implements SpeechService {
+public class StandingOrderDialog implements DialogHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StandingOrderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandingOrderDialog.class);
 
-    private static final String STANDING_ORDERS_INFO_INTENT = "StandingOrdersInfoIntent";
+    private static final String CONTEXT = "CURRENT_CONTEXT";
 
-    public StandingOrderService(SpeechletSubject speechletSubject) {
-        subscribe(speechletSubject);
+    private static final String STANDING_ORDER_DIALOG = "StandingOrders";
+
+    StandingOrder[] standingOrders;
+
+    @Override
+    public String getDialogName() {
+        return STANDING_ORDER_DIALOG;
     }
 
     @Override
-    public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, STANDING_ORDERS_INFO_INTENT);
-    }
-
-    @Override
-    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
-        IntentRequest request = requestEnvelope.getRequest();
-        Session session = requestEnvelope.getSession();
-
-        LOGGER.info("onIntent requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
-
-        Intent intent = request.getIntent();
-        String intentName = (intent != null) ? intent.getName() : null;
-
-        LOGGER.info(getClass().toString() + " Intent started: " + intentName);
+    public SpeechletResponse handle(Intent intent, SessionStorage.Storage storage) throws SpeechletException {
+        String intentName = intent.getName();
+        LOGGER.info("Intent Name: " + intentName);
 
         if ("StandingOrdersInfoIntent".equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            return getStandingOrdersInfoResponse(intent);
+            storage.put(CONTEXT, "StandingOrderInfo");
+            return getStandingOrdersInfoResponse(intent, storage);
         } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            return getStandingOrdersDeleteResponse(intent);
+            storage.put(CONTEXT, "StandingOrderDeletion");
+            return askForDDeletionConfirmation(intent, storage);
         } else if ("StandingOrdersModifyIntent".equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
+            storage.put(CONTEXT, "StandingOrderModification");
             return getStandingOrdersModifyResponse(intent);
+        } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderInfo")) {
+            return getNextStandingOrderInfo(storage);
+        } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderDeletion")) {
+            return getStandingOrdersDeleteResponse(intent, storage);
+        } else {
+            throw new SpeechletException("Unhandled intent: " + intentName);
         }
-        return null;
     }
 
     /**
@@ -69,7 +71,7 @@ public class StandingOrderService implements SpeechService {
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
-    private SpeechletResponse getStandingOrdersInfoResponse(Intent intent) {
+    private SpeechletResponse getStandingOrdersInfoResponse(Intent intent, SessionStorage.Storage storage) {
         LOGGER.info("StandingOrdersResponse called.");
 
         Map<String, Slot> slots = intent.getSlots();
@@ -103,7 +105,7 @@ public class StandingOrderService implements SpeechService {
             return SpeechletResponse.newTellResponse(speech, card);
         }
 
-        StandingOrder[] standingOrders = standingOrderResponse.get_embedded().getStandingOrders();
+        standingOrders = standingOrderResponse.get_embedded().getStandingOrders();
 
         // Check if user requested to have their stranding orders sent to their email address
         Slot channelSlot = slots.get("Channel");
@@ -146,8 +148,8 @@ public class StandingOrderService implements SpeechService {
                 for (StandingOrder order : orders) {
                     textBuilder.append(' ');
 
-                    textBuilder.append("Dauerauftrag Nummer ")
-                            .append(i)
+                    textBuilder.append("Dauerauftrag ")
+                            .append(order.getStandingOrderId())
                             .append(": ");
 
                     textBuilder.append("Ueberweise ").append(order.getExecutionRateString())
@@ -163,11 +165,11 @@ public class StandingOrderService implements SpeechService {
 
                 textBuilder.append("Du hast momentan ")
                         .append(standingOrders.length == 1 ? "einen Dauerauftrag. " : standingOrders.length + " Dauerauftraege. ");
-                for (int i = 0; i < standingOrders.length; i++) {
+                for (int i = 0; i <= 1; i++) {
                     textBuilder.append(' ');
 
-                    textBuilder.append("Dauerauftrag Nummer ")
-                            .append(i + 1)
+                    textBuilder.append("Dauerauftrag ")
+                            .append(standingOrders[i].getStandingOrderId())
                             .append(": ");
 
                     textBuilder.append("Ueberweise ").append(standingOrders[i].getExecutionRateString())
@@ -175,6 +177,24 @@ public class StandingOrderService implements SpeechService {
                             .append(" Euro an ")
                             .append(standingOrders[i].getPayee())
                             .append(".");
+                }
+
+                if (standingOrders.length > 2) {
+                    textBuilder.append(" Moechtest du einen weiteren Eintrag hoeren?");
+
+                    String text = textBuilder.toString();
+
+                    card.setContent(text);
+                    speech.setText(text);
+
+                    // Create reprompt
+                    Reprompt reprompt = new Reprompt();
+                    reprompt.setOutputSpeech(speech);
+
+                    // Save current list offset in this session
+                    storage.put("NextStandingOrder", 2);
+
+                    return SpeechletResponse.newAskResponse(speech, reprompt);
                 }
             }
         }
@@ -187,13 +207,71 @@ public class StandingOrderService implements SpeechService {
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
-    private SpeechletResponse getStandingOrdersDeleteResponse(Intent intent) {
-        LOGGER.info("StandingOrdersDeleteResponse called.");
+    private SpeechletResponse getNextStandingOrderInfo(SessionStorage.Storage storage) {
+        int nextEntry = (int) storage.get("NextStandingOrder");
+        StandingOrder nextSO;
+        StringBuilder textBuilder = new StringBuilder();
 
+        if (nextEntry < standingOrders.length) {
+            nextSO = standingOrders[nextEntry];
+            textBuilder.append("Dauerauftrag Nummer ")
+                    .append(nextSO.getStandingOrderId())
+                    .append(": ");
+
+            textBuilder.append("Ueberweise ").append(nextSO.getExecutionRateString())
+                    .append(nextSO.getAmount())
+                    .append(" Euro an ")
+                    .append(nextSO.getPayee())
+                    .append(".");
+
+
+            // Save current list offset in this session
+            storage.put("NextStandingOrder", nextEntry + 1);
+
+            String text = textBuilder.toString();
+
+            // Create the plain text output
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText(text);
+
+            // Create reprompt
+            Reprompt reprompt = new Reprompt();
+            reprompt.setOutputSpeech(speech);
+
+            return SpeechletResponse.newAskResponse(speech, reprompt);
+        } else {
+            // Create the plain text output
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText("Das waren alle vorhandenen Dauerauftraege.");
+
+            return SpeechletResponse.newTellResponse(speech);
+        }
+    }
+
+    private SpeechletResponse askForDDeletionConfirmation(Intent intent, SessionStorage.Storage storage) {
         Map<String, Slot> slots = intent.getSlots();
 
         Slot numberSlot = slots.get("Number");
         LOGGER.info("NumberSlot: " + numberSlot.getValue());
+
+        storage.put("StandingOrderToDelete", numberSlot.getValue());
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Moechtest du den Dauerauftrag mit der Nummer " + numberSlot.getValue()
+                + " wirklich loeschen?");
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    private SpeechletResponse getStandingOrdersDeleteResponse(Intent intent, SessionStorage.Storage storage) {
+        LOGGER.info("StandingOrdersDeleteResponse called.");
+
+        String standingOrderToDelete = (String) storage.get("StandingOrderToDelete");
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -204,16 +282,16 @@ public class StandingOrderService implements SpeechService {
 
         ApiHelper helper = new ApiHelper();
         try {
-            helper.sendDelete("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" + numberSlot.getValue());
+            helper.sendDelete("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" + standingOrderToDelete);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
-            speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
+            card.setContent("Dauerauftrag Nummer " + standingOrderToDelete + " wurde nicht gefunden.");
+            speech.setText("Dauerauftrag Nummer " + standingOrderToDelete + " wurde nicht gefunden.");
             return SpeechletResponse.newTellResponse(speech, card);
         }
 
-        card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde gelöscht.");
-        speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geloescht.");
+        card.setContent("Dauerauftrag Nummer " + standingOrderToDelete + " wurde gelöscht.");
+        speech.setText("Dauerauftrag Nummer " + standingOrderToDelete + " wurde geloescht.");
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
@@ -243,27 +321,23 @@ public class StandingOrderService implements SpeechService {
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
 
-        ApiHelper helper = new ApiHelper();
+        JSONObject jsonObject = new JSONObject();
         try {
-            String response = helper.sendGet("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" +
-                    numberSlot.getValue());
-            mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
-            StandingOrder standingOrder = mapper.readValue(response, StandingOrder.class);
-            String urlParameters = "payee=" + standingOrder.getPayee() + "&amount=" + Double.valueOf(amountSlot.getValue()) +
-                    "&destinationAccount=" + standingOrder.getDestinationAccount() + "&firstExecution=2017-05-16"
-                    + "&executionRate=" + standingOrder.getExecutionRate() + "&description=" + standingOrder.getDescription() + "&status=" + standingOrder.getStatus();
-            helper.sendPut("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" +
-                    numberSlot.getValue(), urlParameters);
-        } catch (Exception e) {
+            //TODO
+            jsonObject.put("payee", "Max Mustermann");
+            jsonObject.put("amount", amountSlot.getValue());
+            jsonObject.put("destinationAccount", "DE39100000007777777777");
+            jsonObject.put("firstExecution", "2017-06-01");
+            jsonObject.put("executionRate", "MONTHLY");
+            jsonObject.put("description", "Updated standing Order");
+        } catch (JSONException e) {
             LOGGER.error(e.getMessage());
-            card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
-            speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde nicht gefunden.");
-            return SpeechletResponse.newTellResponse(speech, card);
         }
+        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
+        bankingRESTClient.putBankingModelObject("/api/v1_0/accounts/9999999999/standingorders/" + numberSlot.getValue(), jsonObject.toString(), StandingOrder.class);
 
         card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geändert.");
         speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geaendert.");
         return SpeechletResponse.newTellResponse(speech, card);
     }
-
 }

@@ -53,42 +53,47 @@ public class SavingsPlanDialog implements DialogHandler {
 
     private SpeechletResponse askForSavingsParameter(Intent intent, SessionStorage.Storage storage) {
         Map<String, Slot> slots = intent.getSlots();
-        Slot grundbetragSlot = slots.get(GRUNDBETRAG_KEY);
-        Slot anzahlJahreSlot = slots.get(ANZAHL_JAHRE_KEY);
-        Slot monatlicheEinzahlungSlot = slots.get(EINZAHLUNG_MONAT_KEY);
+        String grundbetrag = slots.get(GRUNDBETRAG_KEY).getValue();
+        String anzahlJahre = slots.get(ANZAHL_JAHRE_KEY).getValue();
+        String monatlicheEinzahlung = slots.get(EINZAHLUNG_MONAT_KEY).getValue();
 
         String speechText, repromptText;
 
-        LOGGER.info("Grundbetrag: " + grundbetragSlot.getValue());
-        LOGGER.info("Jahre: " + anzahlJahreSlot.getValue());
-        LOGGER.info("monatliche Einzahlung: " + monatlicheEinzahlungSlot.getValue());
-        //LOGGER.info("Session Before: " + storage.getAttributes());
+        LOGGER.info("Grundbetrag: " + grundbetrag);
+        LOGGER.info("Jahre: " + anzahlJahre);
+        LOGGER.info("monatliche Einzahlung: " + monatlicheEinzahlung);
+        LOGGER.info("Storage Before: " + storage);
 
-        if (grundbetragSlot.getValue() != null) {
-            storage.put(GRUNDBETRAG_KEY, grundbetragSlot.getValue());
-        }
-        if (anzahlJahreSlot.getValue() != null) {
-            storage.put(ANZAHL_JAHRE_KEY, anzahlJahreSlot.getValue());
-        }
-        if (monatlicheEinzahlungSlot.getValue() != null) {
-            storage.put(EINZAHLUNG_MONAT_KEY, monatlicheEinzahlungSlot.getValue());
+        if (grundbetrag != null && storage.containsKey(GRUNDBETRAG_KEY)) {
+            monatlicheEinzahlung = grundbetrag;
+            grundbetrag = null;
         }
 
-        if (grundbetragSlot.getValue() == null && !storage.containsKey(GRUNDBETRAG_KEY)) {
+        if (grundbetrag != null) {
+            storage.put(GRUNDBETRAG_KEY, grundbetrag);
+        }
+        if (anzahlJahre != null) {
+            storage.put(ANZAHL_JAHRE_KEY, anzahlJahre);
+        }
+        if (monatlicheEinzahlung != null) {
+            storage.put(EINZAHLUNG_MONAT_KEY, monatlicheEinzahlung);
+        }
+
+        if (grundbetrag == null && !storage.containsKey(GRUNDBETRAG_KEY)) {
             speechText = "Was moechtest du als Grundbetrag anlegen?";
             repromptText = speechText;
             return getSpeechletResponse(speechText, repromptText, true);
         }
 
-        if (anzahlJahreSlot.getValue() == null && !storage.containsKey(ANZAHL_JAHRE_KEY)) {
+        if (anzahlJahre == null && !storage.containsKey(ANZAHL_JAHRE_KEY)) {
             speechText = "Wie viele Jahre moechtest du das Geld anlegen?";
             //TODO better use duration?
             repromptText = speechText;
             return getSpeechletResponse(speechText, repromptText, true);
         }
 
-        if (monatlicheEinzahlungSlot.getValue() == null && !storage.containsKey(EINZAHLUNG_MONAT_KEY)) {
-            if (grundbetragSlot.getValue() == null && !storage.containsKey(GRUNDBETRAG_KEY)) {
+        if (monatlicheEinzahlung == null && !storage.containsKey(EINZAHLUNG_MONAT_KEY)) {
+            if (grundbetrag == null && !storage.containsKey(GRUNDBETRAG_KEY)) {
                 speechText = "Du musst zuerst einen Grundbetrag angeben.";
                 repromptText = speechText;
                 return getSpeechletResponse(speechText, repromptText, true);
@@ -106,7 +111,7 @@ public class SavingsPlanDialog implements DialogHandler {
 
         SsmlOutputSpeech speech = new SsmlOutputSpeech();
         speech.setSsml("<speak>Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende " +
-                "des Zeitraums insgesamt <say-as interpret-as=\"number\">" + calculateSavings(grundbetragString, einzahlungMonatString, anzahlJahreString)
+                "des Zeitraums insgesamt <say-as interpret-as=\"number\">" + calculationString
                 + "</say-as> Euro. Soll ich diesen Sparplan fuer dich anlegen?</speak>");
 
         // Create reprompt
@@ -177,16 +182,30 @@ public class SavingsPlanDialog implements DialogHandler {
 
     private String calculateSavings(String grundbetrag, String monatlicheEinzahlung, String jahre) {
         DecimalFormat df = new DecimalFormat("#.##");
-        double gb = Double.valueOf(grundbetrag);
-        //TODO m never used?
-        double m = Double.valueOf(monatlicheEinzahlung);
-        double j = Double.valueOf(jahre);
-        double zins = 2;
-        double result;
-        double klammer;
-        klammer = 1 + zins / 100;
-        result = gb * Math.pow(klammer, j);
-        String strResult = String.valueOf(df.format(result));
-        return strResult;
+
+        //The principal investment amount
+        double p = Double.valueOf(grundbetrag);
+
+        //The annual interest rate TODO hardcoded 2 percent?
+        double r = 0.02;
+
+        //The number of times that interest is compounded per year (monthly = 12)
+        double n = 12;
+
+        //The number of years the money is invested
+        int t = Integer.valueOf(jahre);
+
+        //Compound interest for principal
+        double amount1 = p * Math.pow(1 + (r / n), (n * t));
+
+        //The monthly payment
+        double pmt = Double.valueOf(monatlicheEinzahlung);
+
+        //Future value of a series
+        double amount2 = pmt * (((Math.pow((1 + r / n), n * t)) - 1) / (r / n)); //* (1+ (r/n));
+        //Note that last multiplication is optional! (Two ways of calculating)
+
+        double totalAmount = amount1 + amount2;
+        return df.format(totalAmount);
     }
 }
