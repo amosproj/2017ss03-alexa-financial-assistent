@@ -14,7 +14,6 @@ import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
 import model.banking.account.StandingOrder;
-import model.banking.account.Transactions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,7 +197,7 @@ public class SavingsPlanDialog implements DialogHandler {
 
     private SpeechletResponse cancelAction() {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("OK tschüss!");
+        speech.setText("OK tschuess!");
         return SpeechletResponse.newTellResponse(speech);
     }
 

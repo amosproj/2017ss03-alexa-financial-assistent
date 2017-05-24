@@ -56,11 +56,13 @@ public class StandingOrderDialog implements DialogHandler {
         } else if ("StandingOrdersModifyIntent".equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             storage.put(CONTEXT, "StandingOrderModification");
-            return getStandingOrdersModifyResponse(intent);
+            return askForModificationConfirmation(intent, storage);
         } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderInfo")) {
             return getNextStandingOrderInfo(storage);
         } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderDeletion")) {
             return getStandingOrdersDeleteResponse(intent, storage);
+        } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderModification")) {
+            return getStandingOrdersModifyResponse(intent, storage);
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
@@ -250,7 +252,6 @@ public class StandingOrderDialog implements DialogHandler {
 
     private SpeechletResponse askForDDeletionConfirmation(Intent intent, SessionStorage.Storage storage) {
         Map<String, Slot> slots = intent.getSlots();
-
         Slot numberSlot = slots.get("Number");
         LOGGER.info("NumberSlot: " + numberSlot.getValue());
 
@@ -260,6 +261,30 @@ public class StandingOrderDialog implements DialogHandler {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText("Moechtest du den Dauerauftrag mit der Nummer " + numberSlot.getValue()
                 + " wirklich loeschen?");
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    private SpeechletResponse askForModificationConfirmation(Intent intent, SessionStorage.Storage storage) {
+        Map<String, Slot> slots = intent.getSlots();
+        Slot numberSlot = slots.get("Number");
+        Slot amountSlot = slots.get("Amount");
+        Slot executionRateSlot = slots.get("ExecutionRate");
+        Slot firstExecutionSlot = slots.get("FirstExecution");
+
+        storage.put("StandingOrderToModify", numberSlot.getValue());
+        storage.put("NewAmount", amountSlot.getValue());
+        storage.put("NewExecutionRate", executionRateSlot.getValue());
+        storage.put("NewFirstExecution", firstExecutionSlot.getValue());
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Moechtest du den Dauerauftrag mit der Nummer " + numberSlot.getValue()
+                + " wirklich aendern?");
 
         // Create reprompt
         Reprompt reprompt = new Reprompt();
@@ -295,22 +320,11 @@ public class StandingOrderDialog implements DialogHandler {
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
-    private SpeechletResponse getStandingOrdersModifyResponse(Intent intent) {
-        Map<String, Slot> slots = intent.getSlots();
-
-        LOGGER.info("StandingOrdersModifyResponse called.");
-
-        Slot numberSlot = slots.get("Number");
-        LOGGER.info("NumberSlot: " + numberSlot.getValue());
-
-        Slot amountSlot = slots.get("Amount");
-        LOGGER.info("AmountSlot: " + amountSlot.getValue());
-
-        Slot executionRateSlot = slots.get("ExecutionRate");
-        LOGGER.info("ExecutionRateSlot: " + executionRateSlot.getValue());
-
-        Slot firstExecutionSlot = slots.get("FirstExecution");
-        LOGGER.info("FirstExecutionSlot: " + firstExecutionSlot.getValue());
+    private SpeechletResponse getStandingOrdersModifyResponse(Intent intent, SessionStorage.Storage storage) {
+        String standingOrderToModify = (String) storage.get("StandingOrderToModify");
+        String newAmount = (String) storage.get("NewAmount");
+        String newExecutionRate = (String) storage.get("NewExecutionRate");
+        String newFirstExecution = (String) storage.get("NewFirstExecution");
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -325,7 +339,7 @@ public class StandingOrderDialog implements DialogHandler {
         try {
             //TODO
             jsonObject.put("payee", "Max Mustermann");
-            jsonObject.put("amount", amountSlot.getValue());
+            jsonObject.put("amount", newAmount);
             jsonObject.put("destinationAccount", "DE39100000007777777777");
             jsonObject.put("firstExecution", "2017-06-01");
             jsonObject.put("executionRate", "MONTHLY");
@@ -334,10 +348,10 @@ public class StandingOrderDialog implements DialogHandler {
             LOGGER.error(e.getMessage());
         }
         BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
-        bankingRESTClient.putBankingModelObject("/api/v1_0/accounts/9999999999/standingorders/" + numberSlot.getValue(), jsonObject.toString(), StandingOrder.class);
+        bankingRESTClient.putBankingModelObject("/api/v1_0/accounts/9999999999/standingorders/" + standingOrderToModify, jsonObject.toString(), StandingOrder.class);
 
-        card.setContent("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geändert.");
-        speech.setText("Dauerauftrag Nummer " + numberSlot.getValue() + " wurde geaendert.");
+        card.setContent("Dauerauftrag Nummer " + standingOrderToModify + " wurde geändert.");
+        speech.setText("Dauerauftrag Nummer " + standingOrderToModify + " wurde geaendert.");
         return SpeechletResponse.newTellResponse(speech, card);
     }
 }
