@@ -1,12 +1,10 @@
 package amosalexa.services.bankaccount;
 
-import amosalexa.server.Launcher;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
-import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SimpleCard;
@@ -25,6 +23,7 @@ public class BankAccountService implements SpeechService {
 
     private static final String BANK_ACCOUNT_INTENT = "AccountInformation";
 
+    private static final String CARD_NAME = "Konto Information";
     /**
      *
      */
@@ -53,80 +52,73 @@ public class BankAccountService implements SpeechService {
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
 
         IntentRequest request = requestEnvelope.getRequest();
-        Session session = requestEnvelope.getSession();
-
         Account account = AccountFactory.getInstance().getAccount(number);
 
-        String speechText = "What Information do you need about your bank account?";
+        String speechText = "Was möchtest du über dein Konto erfahren?";
 
-        String repromptText = "Say what you want do know about your bank account. For Example: What is my interest rate.";
+        String repromptText = "Was möchtest du über dein Konto erfahren? Frage mich etwas!";
 
-        Map<String, Slot> slots = request.getIntent().getSlots();
-
-        for (Map.Entry entry : slots.entrySet()) {
-            Slot slot = (Slot) entry.getValue();
-            log.info(entry.getKey() + ", " + slot.getValue());
-        }
 
         String slotValue = request.getIntent().getSlot(SLOT_NAME).getValue();
 
+        if(slotValue != null){
+            String slot = "Kontostand";
+            if(slot.equals(slotValue)){
+                speechText = "Dein "  + slot + " beträgt " + account.getBalance();
+            }
 
-        String slot = "Kontostand";
-        if(slot.equals(slotValue)){
-            speechText = "Dein "  + slot + " beträgt " + account.getBalance();
+            slot = "Kontonummer";
+            if(slot.equals(slotValue)){
+                speechText = "Deine "  + slot + " lautet " + account.getNumber();
+            }
+
+            slot = "IBAN";
+            if(slot.equals(slotValue)){
+                speechText = "Deine "  + slot + " lautet " + account.getIban();
+            }
+
+            slot = "Eröffnungsdatum";
+            if(slot.equals(slotValue)){
+                speechText = "Dein "  + slot + " war " + account.getOpeningDate();
+            }
+
+            slot = "Abhebegebühr";
+            if(slot.equals(slotValue)){
+                speechText = "Deine "  + slot + " beträgt " + account.getWithdrawalFee();
+            }
+
+            slot = "Zinssatz";
+            if(slot.equals(slotValue)){
+                speechText = "Dein "  + slot + " ist aktuell " + account.getInterestRate();
+            }
+
+            slot = "Kreditlimit";
+            if(slot.equals(slotValue)){
+                speechText = "Dein "  + slot + " ist " + account.getCreditLimit();
+            }
+
+            slot = "Kreditkartenlimit";
+            if(slot.equals(slotValue)){
+                speechText = "Dein "  + slot + " beträgt " + account.getCreditcardLimit();
+            }
+
+            return getSpeechletResponse(speechText);
+
+        } else {
+            return getSpeechletResponse(repromptText);
         }
-
-        slot = "Kontonummer";
-        if(slot.equals(slotValue)){
-            speechText = "Deine "  + slot + " lautet " + account.getNumber();
-        }
-
-        slot = "IBAN";
-        if(slot.equals(slotValue)){
-            speechText = "Deine "  + slot + " lautet " + account.getIban();
-        }
-
-        slot = "Eröffnungsdatum";
-        if(slot.equals(slotValue)){
-            speechText = "Dein "  + slot + " war " + account.getOpeningDate();
-        }
-
-        slot = "Abhebegebühr";
-        if(slot.equals(slotValue)){
-            speechText = "Deine "  + slot + " beträgt " + account.getWithdrawalFee();
-        }
-
-        slot = "Zinssatz";
-        if(slot.equals(slotValue)){
-            speechText = "Dein "  + slot + " ist aktuell " + account.getInterestRate();
-        }
-
-        slot = "Kreditlimit";
-        if(slot.equals(slotValue)){
-            speechText = "Dein "  + slot + " ist " + account.getCreditLimit();
-        }
-
-        slot = "Kreditkartenlimit";
-        if(slot.equals(slotValue)){
-            speechText = "Dein "  + slot + " beträgt " + account.getCreditcardLimit();
-        }
-
-        return getSpeechletResponse(speechText, repromptText);
     }
 
 
-    private SpeechletResponse getSpeechletResponse(String speechText, String repromptText){
-        // Create the Simple card content.
+    private SpeechletResponse getSpeechletResponse(String speechText){
+
         SimpleCard card = new SimpleCard();
-        card.setTitle("Bank Information");
+        card.setTitle(CARD_NAME);
         card.setContent(speechText);
 
-        // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText(speechText);
 
         return SpeechletResponse.newTellResponse(speech, card);
     }
-
-
 }
