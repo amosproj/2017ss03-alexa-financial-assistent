@@ -10,44 +10,35 @@ import com.google.maps.errors.ApiException;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import org.junit.Test;
-import se.walkercrou.places.GooglePlaces;
-import se.walkercrou.places.Param;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import se.walkercrou.places.Hours;
 import se.walkercrou.places.Place;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 public class LocationTest {
 
+
+    private static final Logger log = LoggerFactory.getLogger(LocationTest.class);
+
     @Test
-    public void placesTest(){
-        // TODO: Investigate this test
-        // It has been failing since the start (since having checked out the latest DEVELOP state, which should
-        // always be a working state)
-        // It is not the responsibility of the one checking out foreign code to repair that code
-
-        /*Address dummyAddress = new Address();
+    public void placesTest() throws InterruptedException {
+        Address dummyAddress = new Address();
+        String slotValue = "Sparkasse";
         LatLng deviceLocation = GeoCoder.getLatLng(dummyAddress);
-        Place deutscheBank = PlaceFinder.findNearbyPlace(deviceLocation, "Deutsche Bank", "Deutsche Bank Filiale");
+        List<Place> places = PlaceFinder.findNearbyPlace(deviceLocation, slotValue);
 
-        if (deutscheBank != null) {
-            Place deutscheBankDetails = deutscheBank.getDetails(); // sends a GET request for more details
-            // Just an example of the amount of information at your disposal:
-            System.out.println("ID: " + deutscheBankDetails.getPlaceId());
-            System.out.println("Name: " + deutscheBankDetails.getName());
-            System.out.println("Phone: " + deutscheBankDetails.getPhoneNumber());
-            System.out.println("International Phone: " + deutscheBankDetails.getInternationalPhoneNumber());
-            System.out.println("Website: " + deutscheBankDetails.getWebsite());
-            System.out.println("Always Opened: " + deutscheBankDetails.isAlwaysOpened());
-            System.out.println("Status: " + deutscheBankDetails.getStatus());
-            System.out.println("Google Place URL: " + deutscheBankDetails.getGoogleUrl());
-            System.out.println("Price: " + deutscheBankDetails.getPrice());
-            System.out.println("Address: " + deutscheBankDetails.getAddress());
-            System.out.println("Vicinity: " + deutscheBankDetails.getVicinity());
-            System.out.println("Reviews: " + deutscheBankDetails.getReviews().size());
-            System.out.println("Hours:\n " + deutscheBankDetails.getHours());
-        }*/
+        Place place = PlaceFinder.findOpeningHoursPlace(places, slotValue);
+
+        log.warn("Addresse: " + place.getAddress());
+
+        for(Hours.Period period : place.getHours().getPeriods()){
+            log.info("Place: " + period.getOpeningDay());
+            log.info("Place: " + period.getOpeningTime());
+            log.info("Place: " + period.getClosingTime());
+        }
     }
 
     @Test
