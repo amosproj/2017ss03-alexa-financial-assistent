@@ -85,8 +85,8 @@ public class BankContactService implements SpeechService {
         Intent intent = intentRequest.getIntent();
         String intentName = getIntentName(intent);
 
-        slotDateValue = requestEnvelope.getRequest().getIntent().getSlot(SLOT_NAME_OPENING_HOURS_DATE).getValue();
-        slotNameBankValue = requestEnvelope.getRequest().getIntent().getSlot(SLOT_NAME_BANK).getValue();
+        slotNameBankValue = intent.getSlot(SLOT_NAME_BANK) != null ? intent.getSlot(SLOT_NAME_BANK).getValue() : null;
+        slotDateValue = intent.getSlot(SLOT_NAME_OPENING_HOURS_DATE) != null ? intent.getSlot(SLOT_NAME_BANK).getValue() : null;
 
         switch (intentName) {
 
