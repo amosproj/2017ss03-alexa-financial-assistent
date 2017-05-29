@@ -5,7 +5,9 @@ import com.amazon.speech.speechlet.Context;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
+import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.Test;
 
@@ -35,6 +37,21 @@ public class AmosAlexaSpeechletTest {
                 "Karte 123 wurde gesperrt.");
     }
 
+    @Test
+    public void SavingsPlanTest() throws Exception {
+        newSession();
+        testIntent(
+                "SavingsPlanIntent", "AnzahlJahre:2", "EinzahlungMonat:150", "Grundbetrag:1500",
+                "<speak>Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende des Zeitraums insgesamt <say-as interpret-as=\"number\">5231,01</say-as> Euro. Soll ich diesen Sparplan fuer dich anlegen?</speak>");
+
+        Calendar calendar = Calendar.getInstance();
+        String nextPayin = String.format("01.%02d.%d", calendar.get(Calendar.MONTH) + 2, calendar.get(Calendar.YEAR));
+
+        testIntent(
+                "AMAZON.YesIntent",
+                "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am "+nextPayin+".");
+    }
+
     private void testIntent(String intent, String... params) throws IOException, NoSuchFieldException, IllegalAccessException {
         String[] slots = new String[params.length - 1];
         String expectedOutput = null;
@@ -51,7 +68,20 @@ public class AmosAlexaSpeechletTest {
 
         AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
         SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
-        assertEquals(((PlainTextOutputSpeech) response.getOutputSpeech()).getText(), expectedOutput);
+        assertEquals(expectedOutput, getOutputSpeechText(response.getOutputSpeech()));
+    }
+
+    private String getOutputSpeechText(OutputSpeech outputSpeech) {
+        if (outputSpeech instanceof SsmlOutputSpeech) {
+            SsmlOutputSpeech ssmlOutputSpeech = (SsmlOutputSpeech)outputSpeech;
+            return ssmlOutputSpeech.getSsml();
+        }
+        if (outputSpeech instanceof PlainTextOutputSpeech) {
+            PlainTextOutputSpeech plainTextOutputSpeech = (PlainTextOutputSpeech)outputSpeech;
+            return plainTextOutputSpeech.getText();
+        }
+
+        return null;
     }
 
     private void newSession() {
@@ -83,7 +113,14 @@ public class AmosAlexaSpeechletTest {
 
         StringBuilder slotsJson = new StringBuilder();
 
+        boolean first = true;
         for (String slot : slots) {
+            if (first) {
+                first = false;
+            } else {
+                slotsJson.append(',');
+            }
+
             String[] slotParts = slot.split(":");
             slotsJson.append("\"").append(slotParts[0]).append("\":");
             slotsJson.append("{");
