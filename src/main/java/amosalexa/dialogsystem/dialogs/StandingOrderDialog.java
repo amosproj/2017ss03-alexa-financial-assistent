@@ -1,9 +1,9 @@
 package amosalexa.dialogsystem.dialogs;
 
-import amosalexa.ApiHelper;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
-import api.BankingRESTClient;
+import api.banking.AccountAPI;
+import api.banking.BankingRESTClient;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.SpeechletException;
@@ -14,18 +14,22 @@ import com.amazon.speech.ui.SimpleCard;
 import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.banking.account.StandingOrder;
-import model.banking.account.StandingOrderResponse;
+import model.banking.Account;
+import model.banking.StandingOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class StandingOrderDialog implements DialogHandler {
+
+    // FIXME: Get the current account number from the session
+    private static final String ACCOUNT_NUMBER = "9999999999";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandingOrderDialog.class);
 
@@ -78,21 +82,7 @@ public class StandingOrderDialog implements DialogHandler {
 
         Map<String, Slot> slots = intent.getSlots();
 
-        ObjectMapper mapper = new ObjectMapper();
-        ApiHelper helper = new ApiHelper();
-        String test = null;
-        try {
-            test = helper.sendGet("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders");
-        } catch (Exception e) {
-            //TODO
-        }
-
-        StandingOrderResponse standingOrderResponse = null;
-        try {
-            standingOrderResponse = mapper.readValue(test, StandingOrderResponse.class);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-        }
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -101,13 +91,13 @@ public class StandingOrderDialog implements DialogHandler {
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
 
-        if (standingOrderResponse == null || standingOrderResponse.get_embedded() == null) {
+        if (standingOrdersCollection == null || standingOrdersCollection.size() == 0) {
             card.setContent("Keine Daueraufträge vorhanden.");
             speech.setText("Keine Dauerauftraege vorhanden.");
             return SpeechletResponse.newTellResponse(speech, card);
         }
 
-        standingOrders = standingOrderResponse.get_embedded().getStandingOrders();
+        standingOrders = (StandingOrder[]) standingOrdersCollection.toArray();
 
         // Check if user requested to have their stranding orders sent to their email address
         Slot channelSlot = slots.get("Channel");
@@ -305,11 +295,9 @@ public class StandingOrderDialog implements DialogHandler {
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
 
-        ApiHelper helper = new ApiHelper();
-        try {
-            helper.sendDelete("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" + standingOrderToDelete);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+        Number standingOrderNum = Integer.parseInt(standingOrderToDelete);
+
+        if(!AccountAPI.deleteStandingOrder(ACCOUNT_NUMBER, standingOrderNum)) {
             card.setContent("Dauerauftrag Nummer " + standingOrderToDelete + " wurde nicht gefunden.");
             speech.setText("Dauerauftrag Nummer " + standingOrderToDelete + " wurde nicht gefunden.");
             return SpeechletResponse.newTellResponse(speech, card);
@@ -335,20 +323,13 @@ public class StandingOrderDialog implements DialogHandler {
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
 
-        JSONObject jsonObject = new JSONObject();
-        try {
-            //TODO
-            jsonObject.put("payee", "Max Mustermann");
-            jsonObject.put("amount", newAmount);
-            jsonObject.put("destinationAccount", "DE39100000007777777777");
-            jsonObject.put("firstExecution", "2017-06-01");
-            jsonObject.put("executionRate", "MONTHLY");
-            jsonObject.put("description", "Updated standing Order");
-        } catch (JSONException e) {
-            LOGGER.error(e.getMessage());
-        }
-        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
-        bankingRESTClient.putBankingModelObject("/api/v1_0/accounts/9999999999/standingorders/" + standingOrderToModify, jsonObject.toString(), StandingOrder.class);
+        Number standingOrderNum = Integer.parseInt(standingOrderToModify);
+        StandingOrder standingOrder = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderNum);
+
+        // TODO: Actually update the StandingOrder
+        standingOrder.setAmount(Integer.parseInt(newAmount));
+
+        AccountAPI.updateStandingOrder(ACCOUNT_NUMBER, standingOrder);
 
         card.setContent("Dauerauftrag Nummer " + standingOrderToModify + " wurde geändert.");
         speech.setText("Dauerauftrag Nummer " + standingOrderToModify + " wurde geaendert.");

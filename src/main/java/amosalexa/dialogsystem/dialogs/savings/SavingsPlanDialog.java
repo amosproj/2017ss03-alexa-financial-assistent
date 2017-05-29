@@ -2,7 +2,7 @@ package amosalexa.dialogsystem.dialogs.savings;
 
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
-import api.BankingRESTClient;
+import api.banking.BankingRESTClient;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.SpeechletException;
@@ -13,7 +13,7 @@ import com.amazon.speech.ui.SimpleCard;
 import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
-import model.banking.account.StandingOrder;
+import model.banking.StandingOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

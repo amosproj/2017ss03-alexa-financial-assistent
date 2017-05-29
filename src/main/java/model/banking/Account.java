@@ -1,25 +1,15 @@
-package model.banking.account;
+package model.banking;
 
-import model.banking.common.Links;
 
-public class Account
-{
+public class Account {
+
     private double creditcardLimit;
-
     private double balance;
-
     private String openingDate;
-
     private double creditLimit;
-
-    private Links _links;
-
     private String number;
-
     private double interestRate;
-
     private double withdrawalFee;
-
     private String iban;
 
     public double getCreditcardLimit ()
@@ -60,16 +50,6 @@ public class Account
     public void setCreditLimit (double creditLimit)
     {
         this.creditLimit = creditLimit;
-    }
-
-    public Links get_links ()
-    {
-        return _links;
-    }
-
-    public void set_links (Links _links)
-    {
-        this._links = _links;
     }
 
     public String getNumber ()
@@ -115,6 +95,6 @@ public class Account
     @Override
     public String toString()
     {
-        return "ClassPojo [creditcardLimit = "+creditcardLimit+", balance = "+balance+", openingDate = "+openingDate+", creditLimit = "+creditLimit+", Links = "+_links+", number = "+number+", interestRate = "+interestRate+", withdrawalFee = "+withdrawalFee+", iban = "+iban+"]";
+        return "ClassPojo [creditcardLimit = "+creditcardLimit+", balance = "+balance+", openingDate = "+openingDate+", creditLimit = "+creditLimit+", number = "+number+", interestRate = "+interestRate+", withdrawalFee = "+withdrawalFee+", iban = "+iban+"]";
     }
 }

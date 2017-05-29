@@ -1,39 +1,37 @@
 package api;
 
+import api.banking.AccountAPI;
 import com.amazonaws.util.json.JSONException;
-import model.banking.AccountFactory;
-import model.banking.account.Account;
-import model.banking.account.CardResponse;
+import model.banking.Account;
+import model.banking.Card;
 import org.joda.time.DateTime;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.client.Traverson;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Objects;
 
 import static org.junit.Assert.*;
-import static org.springframework.hateoas.client.Hop.rel;
 
 
 public class AccountTest {
 
     private static final Logger log = LoggerFactory.getLogger(AccountTest.class);
 
-    private AccountFactory accountFactory = AccountFactory.getInstance();
-
-    private DummyAccount dummyAccount;
+    private Account dummyAccount;
+    private static final String ACCOUNT_NUMBER = "0000000000";
+    private static final String CARD_NUMBER = "0000000001";
 
     @Before
-    public  void setUp(){
-        dummyAccount = new DummyAccount();
+    public  void setUp() {
+        dummyAccount = new Account();
+        dummyAccount.setNumber(ACCOUNT_NUMBER);
+        dummyAccount.setBalance(1234);
+        dummyAccount.setOpeningDate(new DateTime(2017, 5, 1, 12, 0).toLocalDate().toString());
+
+        AccountAPI.createAccount(dummyAccount);
     }
 
     /**
@@ -45,22 +43,45 @@ public class AccountTest {
      */
 
     @Test
-    public void testAccountObjectModel(){
-        Account account = accountFactory.getAccount(dummyAccount.getNumber());
+    public void testGetAccount() {
+        Account account = AccountAPI.getAccount(ACCOUNT_NUMBER);
+
+        // check value
+        assertEquals(account.getBalance(), dummyAccount.getBalance(), 0.0);
+        assertEquals(account.getNumber(), dummyAccount.getNumber());
         assertEquals(account.getOpeningDate(), dummyAccount.getOpeningDate());
     }
 
     @Test
-    public void testCreateAccount() throws JSONException {
-        DummyAccount acc = new DummyAccount();
+    public void testCreateAndGetCard() {
+        Card card = new Card();
+        card.setCardType(Card.CardType.DEBIT);
+        card.setCardNumber(CARD_NUMBER);
+        card.setStatus(Card.Status.ACTIVE);
+        card.setExpirationDate(new DateTime(2018, 5, 1, 12, 0).toLocalDate().toString());
+        card.setAccountNumber(ACCOUNT_NUMBER);
 
-        // create account
-        Account account =  accountFactory.createAccount(acc.getNumber(), acc.getBalance(), acc.getOpeningDate());
+        Card newCard = AccountAPI.createCardForAccount(ACCOUNT_NUMBER, card);
 
-        // check value
-        assertEquals(account.getBalance(), acc.getBalance(), 0.0);
-        assertEquals(account.getNumber(), acc.getNumber());
-        assertEquals(account.getOpeningDate(), acc.getOpeningDate());
+        assertEquals(card.getCardType(), newCard.getCardType());
+        assertEquals(card.getCardNumber(), newCard.getCardNumber());
+        assertEquals(card.getStatus(), newCard.getStatus());
+        assertEquals(card.getExpirationDate(), newCard.getExpirationDate());
+
+        // Get cards
+        Collection<Card> cards = AccountAPI.getCardsForAccount(ACCOUNT_NUMBER);
+
+        boolean foundCard = false;
+
+        for(Card card1 : cards ) {
+            if(card1.getCardNumber().equals(newCard.getCardNumber())) {
+                foundCard = true;
+                return;
+            }
+        }
+
+        assertTrue(foundCard);
     }
+
 
 }

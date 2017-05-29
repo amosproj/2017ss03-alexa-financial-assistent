@@ -265,7 +265,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
                 "  \"valueDate\" : \"2017-05-16\",\n" +
                 "  \"description\" : \"Beschreibung\"\n" +
                 "}";
-        ApiHelper.sendPost(url, urlParams);
+        //ApiHelper.sendPost(url, urlParams);
 
         //reply message
         String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";

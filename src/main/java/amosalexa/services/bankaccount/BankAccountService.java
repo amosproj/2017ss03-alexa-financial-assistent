@@ -1,8 +1,8 @@
 package amosalexa.services.bankaccount;
 
-import amosalexa.server.Launcher;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
+import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -10,8 +10,7 @@ import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SimpleCard;
-import model.banking.AccountFactory;
-import model.banking.account.Account;
+import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +54,7 @@ public class BankAccountService implements SpeechService {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
-        Account account = AccountFactory.getInstance().getAccount(number);
+        Account account = AccountAPI.getAccount(number);
 
         String speechText = "What Information do you need about your bank account?";
 
