@@ -59,45 +59,46 @@ public class BankAccountService implements SpeechService {
         String repromptText = "Was möchtest du über dein Konto erfahren? Frage mich etwas!";
 
 
-        String slotValue = request.getIntent().getSlot(SLOT_NAME).getValue();
+        String slotValue = request.getIntent().getSlot(SLOT_NAME).getValue().toLowerCase();
+        log.info("SlotValue: " + slotValue);
 
         if(slotValue != null){
-            String slot = "Kontostand";
+            String slot = "kontostand";
             if(slot.equals(slotValue)){
                 speechText = "Dein "  + slot + " beträgt " + account.getBalance();
             }
 
-            slot = "Kontonummer";
+            slot = "kontonummer";
             if(slot.equals(slotValue)){
                 speechText = "Deine "  + slot + " lautet " + account.getNumber();
             }
 
-            slot = "IBAN";
+            slot = "iban";
             if(slot.equals(slotValue)){
                 speechText = "Deine "  + slot + " lautet " + account.getIban();
             }
 
-            slot = "Eröffnungsdatum";
+            slot = "eröffnungsdatum";
             if(slot.equals(slotValue)){
                 speechText = "Dein "  + slot + " war " + account.getOpeningDate();
             }
 
-            slot = "Abhebegebühr";
+            slot = "abhebegebühr";
             if(slot.equals(slotValue)){
                 speechText = "Deine "  + slot + " beträgt " + account.getWithdrawalFee();
             }
 
-            slot = "Zinssatz";
+            slot = "zinssatz";
             if(slot.equals(slotValue)){
                 speechText = "Dein "  + slot + " ist aktuell " + account.getInterestRate();
             }
 
-            slot = "Kreditlimit";
+            slot = "kreditlimit";
             if(slot.equals(slotValue)){
                 speechText = "Dein "  + slot + " ist " + account.getCreditLimit();
             }
 
-            slot = "Kreditkartenlimit";
+            slot = "kreditkartenlimit";
             if(slot.equals(slotValue)){
                 speechText = "Dein "  + slot + " beträgt " + account.getCreditcardLimit();
             }
