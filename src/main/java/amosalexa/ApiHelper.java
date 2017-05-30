@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 //TODO not needed. Use BankingRESTClient instead
+@Deprecated
 public class ApiHelper {
 
     //TODO User-Agent

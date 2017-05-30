@@ -3,12 +3,12 @@ package amosalexa.dialogsystem;
 import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.dialogs.ReplacementCardDialog;
+import amosalexa.dialogsystem.dialogs.StandingOrderDialog;
 import amosalexa.dialogsystem.dialogs.TestListDialog;
 import amosalexa.dialogsystem.dialogs.savings.SavingsPlanDialog;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +29,7 @@ public class DialogResponseManager {
         registerDialogHandler(new TestListDialog());
         registerDialogHandler(new ReplacementCardDialog());
         registerDialogHandler(new SavingsPlanDialog());
+        registerDialogHandler(new StandingOrderDialog());
     }
 
     public static DialogResponseManager getInstance() {

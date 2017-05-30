@@ -17,8 +17,6 @@ AccountInformation Was ist meine {AccountInformationSlots}
 AccountInformation Wie hoch ist mein {AccountInformationSlots}
 AccountInformation Wie hoch ist meine {AccountInformationSlots}
 
-BankContactInformation Wie ist die Telefonnummer der {BankNameSlots}
-
 ReplacementCardReasonIntent Die Karte wurde {ReplacementReason}
 ReplacementCardReasonIntent Die Karte ist {ReplacementReason}
 ReplacementCardReasonIntent Die alte Karte wurde {ReplacementReason}
@@ -35,3 +33,46 @@ ReplacementCardIntent Bestelle eine Ersatzkarte
 ReplacementCardIntent Ich brauche eine Ersatzkarte
 
 BlockCardIntent Sperre Karte {BankCardNumber}
+
+AuthenticationPIN {AuthenticationPINSlots}
+
+BankAddress Bankadresse
+BankAddress Wo finde ich meine Bank
+BankAddress Wo ist meine Bank
+BankAddress Wie ist die Adresse von {BankNameSlots}
+BankAddress Wo ist die {BankNameSlots}
+
+BankOpeningHours Öffnungszeiten
+BankOpeningHours Wann hat die {BankNameSlots} am {OpeningHoursDate} geöffnet
+BankOpeningHours Wann hat die {BankNameSlots} geöffnet
+BankOpeningHours Öffnungszeiten meiner Bank
+BankOpeningHours Wann hat die {BankNameSlots} geöffnet
+
+SavingsPlanIntent Berechne mir einen Sparplan
+SavingsPlanIntent Ich moechte monatlich Geld sparen
+SavingsPlanIntent Erstelle einen Sparplan
+SavingsPlanIntent Ich moechte monatlich {EinzahlungMonat} Euro anlegen.
+SavingsPlanIntent Ich moechte einen Grundbetrag von {Grundbetrag} Euro anlegen.
+SavingsPlanIntent {Grundbetrag} Euro
+SavingsPlanIntent {AnzahlJahre} Jahre
+SavingsPlanIntent Monatlich {EinzahlungMonat} Euro
+SavingsPlanIntent Ich moechte einmalig {Grundbetrag} Euro anlegen
+SavingsPlanIntent Ich moechte einen Sparplan erstellen und einmalig {Grundbetrag} Euro anlegen.
+SavingsPlanIntent Ich moechte als Einmalzahlung {Grundbetrag} Euro anlegen
+SavingsPlanIntent Ich moechte {AnzahlJahre} Jahre monatlich {EinzahlungMonat} Euro anlegen.
+SavingsPlanIntent Ich moechte {AnzahlJahre} Jahre lang Geld anlegen.
+SavingsPlanIntent {AnzahlJahre} Jahr
+SavingsPlanIntent {EinzahlungMonat} Euro
+
+StandingOrdersDeleteIntent Lösche Dauerauftrag Nummer {Number}
+
+StandingOrdersInfoIntent Daueraufträge
+StandingOrdersInfoIntent Wie lauten meine Daueraufträge
+StandingOrdersInfoIntent Wie sind meine Daueraufträge
+StandingOrdersInfoIntent Was sind meine Daueraufträge
+StandingOrdersInfoIntent Nenne mir meine Daueraufträge
+StandingOrdersInfoIntent Sende Daueraufträge per {Channel}
+StandingOrdersInfoIntent Daueraufträge an {Payee}
+
+StandingOrdersModifyIntent Ändere den Betrag von Dauerauftrag Nummer {Number} auf {Amount} Euro
+StandingOrdersModifyIntent Ändere den Ausführungsrhythmus von Dauerauftrag Nummer {Number} auf {ExecutionRate} beginnend am {FirstExecution}

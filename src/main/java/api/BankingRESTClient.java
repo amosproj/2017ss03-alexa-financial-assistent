@@ -8,7 +8,7 @@ import java.io.IOException;
 
 /**
  * Banking Rest Client
- *
+ * <p>
  * more information visit the api guide: https://s3.eu-central-1.amazonaws.com/amos-bank/api-guide.html
  */
 
@@ -45,18 +45,20 @@ public class BankingRESTClient {
     private static BankingRESTClient bankingRESTClient = new BankingRESTClient();
 
     /**
-     *
      * @return BankingRESTClient
      */
-    public static BankingRESTClient getInstance(){ return bankingRESTClient;}
+    public static BankingRESTClient getInstance() {
+        return bankingRESTClient;
+    }
 
 
     /**
      * makes a http request to the api endpoint
+     *
      * @param url api request url
      * @return String
      */
-    private String doGetBankingModelObject(String url){
+    private String doGetBankingModelObject(String url) {
 
         log.error("Banking API Request - URL: " + url);
 
@@ -77,11 +79,12 @@ public class BankingRESTClient {
 
     /**
      * maps response of http request to the object model
+     *
      * @param objectPath object path of the API interface
-     * @param cl mapping class
+     * @param cl         mapping class
      * @return banking object
      */
-    public Object getBankingModelObject(String objectPath, Class cl){
+    public Object getBankingModelObject(String objectPath, Class cl) {
         log.info("GET from API: " + objectPath + " Mapping to: " + cl);
         String response = doGetBankingModelObject(BANKING_API_ENDPOINT + objectPath);
         try {
@@ -95,11 +98,12 @@ public class BankingRESTClient {
 
     /**
      * actually post request for postBankingModelObject()
-     * @param url uri
+     *
+     * @param url  uri
      * @param json body
      * @return JSON response
      */
-    private String doPostBankingModelObject(String url, String json){
+    private String doPostBankingModelObject(String url, String json) {
 
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
@@ -117,15 +121,60 @@ public class BankingRESTClient {
     }
 
     /**
-     * POST http request to the banking endpoint
-     * @param objectPath endpoint object
+     * actually put request for postBankingModelObject()
+     *
+     * @param url  uri
      * @param json body
-     * @param cl mapping class
+     * @return JSON response
+     */
+    private String doPutBankingModelObject(String url, String json) {
+
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .put(body)
+                .build();
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            return response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * POST http request to the banking endpoint
+     *
+     * @param objectPath endpoint object
+     * @param json       body
+     * @param cl         mapping class
      * @return banking object
      */
-    public Object postBankingModelObject(String objectPath, String json, Class cl){
+    public Object postBankingModelObject(String objectPath, String json, Class cl) {
         log.info("POST from API: " + objectPath + " Body: " + json);
         String response = doPostBankingModelObject(BANKING_API_ENDPOINT + objectPath, json);
+        try {
+            return new ObjectMapper().readValue(response, cl);
+        } catch (IOException e) {
+            log.error("IOException Exception - Can not read value.");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * PUT http request to the banking endpoint
+     *
+     * @param objectPath endpoint object
+     * @param json       body
+     * @param cl         mapping class
+     * @return banking object
+     */
+    public Object putBankingModelObject(String objectPath, String json, Class cl) {
+        log.info("PUT from API: " + objectPath + " Body: " + json);
+        String response = doPutBankingModelObject(BANKING_API_ENDPOINT + objectPath, json);
         try {
             return new ObjectMapper().readValue(response, cl);
         } catch (IOException e) {
