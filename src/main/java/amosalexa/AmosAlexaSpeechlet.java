@@ -11,6 +11,7 @@ package amosalexa;
 
 import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
+import amosalexa.security.AuthenticationManager;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
@@ -47,6 +48,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
+        new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
@@ -113,6 +115,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
+        logger.info("Authenticated: " + AuthenticationManager.isAuthenticated());
 
         logger.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());

@@ -198,6 +198,15 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "slots": [
+        {
+          "name": "AuthenticationPINSlots",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "AuthenticationPIN"
     }
   ]
 }
