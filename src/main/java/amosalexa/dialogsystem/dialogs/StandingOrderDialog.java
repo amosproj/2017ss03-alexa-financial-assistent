@@ -97,8 +97,12 @@ public class StandingOrderDialog implements DialogHandler {
             return SpeechletResponse.newTellResponse(speech, card);
         }
 
-        standingOrders = (StandingOrder[]) standingOrdersCollection.toArray();
-
+        standingOrders = new StandingOrder[standingOrdersCollection.size()];
+        int index = 0;
+        for(StandingOrder standingOrder : standingOrdersCollection) {
+            standingOrders[index++] = standingOrder;
+        }
+        
         // Check if user requested to have their stranding orders sent to their email address
         Slot channelSlot = slots.get("Channel");
         boolean sendPerEmail = channelSlot != null &&
@@ -117,7 +121,7 @@ public class StandingOrderDialog implements DialogHandler {
             // We want to directly return standing orders here
 
             Slot payeeSlot = slots.get("Payee");
-            String payee = payeeSlot.getValue();
+            String payee = (payeeSlot == null ? null : payeeSlot.getValue());
 
             if (payee != null) {
                 // User specified a recipient
