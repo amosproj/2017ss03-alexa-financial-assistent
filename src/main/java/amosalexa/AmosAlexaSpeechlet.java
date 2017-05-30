@@ -248,25 +248,53 @@ public class AmosAlexaSpeechlet implements Speechlet {
         Slot amountSlot = slots.get("amount");
         Slot nameSlot = slots.get("name");
 
+        LOGGER.info("Confirmation slot: " + slots.get("confirmation").getValue());
+
+
+        if (slots.get("confirmation").getValue() == "Ja" || slots.get("confirmation").getValue() != null) {
+
+            String amount = amountSlot.getValue();
+            String name = nameSlot.getValue();
+
+            //getting response regarding account balance
+            this.getAccountBalanceResponse();
+
+            //transfering money
+            String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
+            String urlParams = "{\n" +
+                    "  \"amount\" : " + amount + ",\n" +
+                    "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
+                    "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
+                    "  \"valueDate\" : \"2017-05-16\",\n" +
+                    "  \"description\" : \"Beschreibung\"\n" +
+                    "}";
+            ApiHelper.sendPost(url, urlParams);
+
+            // confirmation question
+            String speechText = "Die "+ amount + " Euro wurden zu " + name + " überwiesen";
+
+            // Create the Simple card content.
+            SimpleCard card = new SimpleCard();
+            card.setTitle("CreditLimit");
+            card.setContent(speechText);
+
+            // Create the plain text output.
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText(speechText);
+
+            // Create reprompt
+            Reprompt reprompt = new Reprompt();
+            reprompt.setOutputSpeech(speech);
+
+            return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        }
+
         String amount = amountSlot.getValue();
         String name = nameSlot.getValue();
 
-        //getting response regarding account balance
-        this.getAccountBalanceResponse();
+        // confirmation question
+        String speechText = "Bist du sicher, dass du " + amount + " Euro an " + name + " überweisen willst?";
 
-        //transfering money
-        String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
-        String urlParams = "{\n" +
-                "  \"amount\" : " + amount + ",\n" +
-                "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
-                "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
-                "  \"valueDate\" : \"2017-05-16\",\n" +
-                "  \"description\" : \"Beschreibung\"\n" +
-                "}";
-        ApiHelper.sendPost(url, urlParams);
-
-        //reply message
-        String speechText = "Die "+ amount + " wurden zu " + name + " überwiesen";
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
