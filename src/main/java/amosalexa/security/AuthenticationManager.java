@@ -89,6 +89,10 @@ public class AuthenticationManager extends AbstractSpeechService implements Spee
         return authenticated == null ? false : authenticated;
     }
 
+    public static void revokeAuthentication(){
+        SessionStorage.getInstance().putObject(AUTHENTICATION_SESSION, AUTHENTICATION_ATTRIBUTE, Boolean.FALSE);
+    }
+
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
         speechletSubject.attachSpeechletObserver(this, AUTHENTICATION_PIN_INTENT);

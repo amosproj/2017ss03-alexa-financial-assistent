@@ -115,7 +115,11 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
         if (!AuthenticationManager.isAuthenticated()) {
             return AuthenticationManager.authenticate();
         }
+
+        AuthenticationManager.revokeAuthentication();
         */
+
+
 
         // try to get device address - needs user permission and real device
         DeviceAddressUtil.getDeviceAddress(requestEnvelope);
@@ -137,6 +141,8 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
             default:
                 return getAskResponse(BANK_CONTACT_CARD, UNHANDLED_TEXT);
         }
+
+
     }
 
     /**
