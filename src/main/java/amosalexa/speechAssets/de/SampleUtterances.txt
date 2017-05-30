@@ -38,6 +38,7 @@ AuthenticationPIN {AuthenticationPINSlots}
 
 BankAddress Bankadresse
 BankAddress Wo finde ich meine Bank
+BankAddress Wo ist meine Bank
 BankAddress Wie ist die Adresse von {BankNameSlots}
 BankAddress Wo ist die {BankNameSlots}
 

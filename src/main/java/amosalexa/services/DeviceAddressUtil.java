@@ -38,10 +38,9 @@ public class DeviceAddressUtil {
             }
 
         } catch (DeviceAddressClientException e) {
-            log.error("Device Address Client failed to successfully return the address.", e);
+            log.error("Device Address Client failed to successfully return the address.");
         } catch (NullPointerException e){
             log.warn("No Permission!");
-            e.printStackTrace();
         }
     }
 
