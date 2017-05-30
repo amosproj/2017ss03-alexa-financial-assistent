@@ -3,6 +3,8 @@ package amosalexa.services.bankcontact;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
+import amosalexa.services.bankcontact.exceptions.DeviceAddressClientException;
+import amosalexa.services.bankcontact.exceptions.UnauthorizedException;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
@@ -30,13 +32,17 @@ public class BankContactService implements SpeechService {
     /**
      * Slots with different bank names
      */
-    private static final String SLOT_NAME_BANK = "BankNameSlots";
+    private static final String SLOT_BANK_NAME = "BankNameSlots";
 
     /**
      * Slot for dates
      */
     private static final String SLOT_NAME_OPENING_HOURS_DATE = "OpeningHoursDate";
 
+    /**
+     * Address of device - for simulation only dummy values possible
+     */
+    private static Address deviceAddress = new Address();
 
     /**
      * bank slot fall back
@@ -61,6 +67,7 @@ public class BankContactService implements SpeechService {
     private static final String HELP_TEXT = "Ich kann dich nicht verstehen. Was möchtest du über deine Bank erfahren?";
     private static final String UNHANDLED_TEXT = "Das weiß ich nicht. Bitte, frage etwas anderes.";
     private static final String ERROR_TEXT = "Es ist ein Fehler aufgetreten. Bitte, versuche es noch einmal.";
+    private static final String NO_OPENING_HOURS = "Es konnten keine Öffnungszeiten gefunden werden!";
 
 
     /**
@@ -70,7 +77,7 @@ public class BankContactService implements SpeechService {
     private static final String BANK_ADDRESS_INTENT = "BankAddress";
 
 
-    private String slotNameBankValue;
+    private String slotBankNameValue;
     private String slotDateValue;
 
     public BankContactService(SpeechletSubject speechletSubject) {
@@ -85,15 +92,26 @@ public class BankContactService implements SpeechService {
         Intent intent = intentRequest.getIntent();
         String intentName = getIntentName(intent);
 
-        slotNameBankValue = intent.getSlot(SLOT_NAME_BANK) != null ? intent.getSlot(SLOT_NAME_BANK).getValue() : null;
-        slotDateValue = intent.getSlot(SLOT_NAME_OPENING_HOURS_DATE) != null ? intent.getSlot(SLOT_NAME_BANK).getValue() : null;
+        slotBankNameValue = intent.getSlot(SLOT_BANK_NAME) != null ? intent.getSlot(SLOT_BANK_NAME).getValue() : null;
+        slotDateValue = intent.getSlot(SLOT_NAME_OPENING_HOURS_DATE) != null ? intent.getSlot(SLOT_NAME_OPENING_HOURS_DATE).getValue() : null;
+
+        if (slotBankNameValue == null) {
+            slotBankNameValue = SLOT_NAME_BANK_FALLBACK;
+        }
+
+        // slot values
+        log.info(getClass().getCanonicalName() + "Slot Value : " + slotBankNameValue + " ( " + SLOT_BANK_NAME + " ) ");
+        log.info(getClass().getCanonicalName() + "Slot Value : " + slotDateValue + " ( " + SLOT_NAME_OPENING_HOURS_DATE + " ) ");
+
+
+        // try to get device address - needs user permission and real device
+        getDeviceAddress(requestEnvelope);
 
         switch (intentName) {
-
             case BANK_ADDRESS_INTENT:
-                return bankAddressResponse(requestEnvelope);
+                return bankAddressResponse();
             case BANK_OPENING_HOURS_INTENT:
-                return bankOpeningHoursResponse(requestEnvelope);
+                return bankOpeningHoursResponse();
             case "AMAZON.HelpIntent":
                 return getAskResponse(BANK_CONTACT_CARD, HELP_TEXT);
             default:
@@ -103,14 +121,14 @@ public class BankContactService implements SpeechService {
 
     /**
      * gets the address of a bank
-     * @param requestEnvelope request
      * @return SpeechletResponse spoken and visual response for the given intent
      */
-    private SpeechletResponse bankAddressResponse(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
-        Place place = getPlace(slotNameBankValue);
+    private SpeechletResponse bankAddressResponse() {
+        Place place = getPlace();
 
         if (place == null) {
-            return getAskResponse(BANK_CONTACT_CARD, HELP_TEXT);
+            log.error("No place was found! Your address: " + deviceAddress.toString());
+            return getAskResponse(BANK_CONTACT_CARD, ERROR_TEXT);
         }
 
         return doBankAddressResponse(place);
@@ -132,73 +150,59 @@ public class BankContactService implements SpeechService {
     }
 
 
-    private Place getPlace(String slotBankName) {
-
-        if (slotBankName == null) {
-            slotBankName = SLOT_NAME_BANK_FALLBACK;
-        }
-
-        // slot values
-        log.warn(getClass().getCanonicalName() + "Slot Value : " + slotBankName + " ( " + SLOT_NAME_BANK + " ) ");
+    /**
+     * search for a place with opening hours
+     * @return Place
+     */
+    private Place getPlace() {
 
         // finds nearby place according the slot value
-        List<Place> places = PlaceFinder.findNearbyPlace(GeoCoder.getLatLng(new Address()), slotBankName);
-
+        List<Place> places = PlaceFinder.findNearbyPlace(GeoCoder.getLatLng(deviceAddress), slotBankNameValue);
 
         // check the list of places for one with opening hours
-        return PlaceFinder.findOpeningHoursPlace(places, slotBankName);
+        return PlaceFinder.findOpeningHoursPlace(places, slotBankNameValue);
     }
 
 
-    private SpeechletResponse bankOpeningHoursResponse(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+    private void getDeviceAddress(SpeechletRequestEnvelope<IntentRequest> requestEnvelope){
 
-        /*
-        String consentToken = requestEnvelope.getSession().getUser().getPermissions().getConsentToken();
+        Permissions permissions = requestEnvelope.getSession().getUser().getPermissions();
 
-        if (consentToken == null) {
-            log.info("The user hasn't authorized the skill. Sending a permissions card.");
-            return getPermissionsResponse();
+        // for simulation
+        if(permissions == null){
+            return;
         }
+
+        String consentToken = requestEnvelope.getSession().getUser().getPermissions().getConsentToken();
 
         try {
 
             SystemState systemState = getSystemState(requestEnvelope.getContext());
-
             String deviceId = systemState.getDevice().getDeviceId();
             String apiEndpoint = systemState.getApiEndpoint();
 
-            AlexaDeviceAddressClient alexaDeviceAddressClient = new AlexaDeviceAddressClient(
-                    deviceId, consentToken, apiEndpoint);
+            AlexaDeviceAddressClient alexaDeviceAddressClient = new AlexaDeviceAddressClient(deviceId, consentToken, apiEndpoint);
 
-            Address addressObject = alexaDeviceAddressClient.getFullAddress();
+            deviceAddress = alexaDeviceAddressClient.getFullAddress();
 
-            if (addressObject == null) {
-                return getAskResponse(BANK_CONTACT_CARD, ERROR_TEXT);
+            if (deviceAddress == null) {
+                log.error("requested device address is null");
             }
-
-            // convert device address to latitude and longitude for place request
-            LatLng deviceLocation = GeoCoder.getLatLng(addressObject);
-
-            log.warn(getClass().getCanonicalName() + "Device Location : " + deviceLocation);
-            */
-
-        Place place = getPlace(slotNameBankValue);
-
-        if (place == null) {
-            return getAskResponse(BANK_CONTACT_CARD, HELP_TEXT);
-        }
-
-        return doBankOpeningHoursResponse(place, slotDateValue);
-/*
-        } catch (UnauthorizedException e) {
-            return getPermissionsResponse();
 
         } catch (DeviceAddressClientException e) {
             log.error("Device Address Client failed to successfully return the address.", e);
+        }
+    }
 
+    private SpeechletResponse bankOpeningHoursResponse() {
+
+        Place place = getPlace();
+        if (place == null) {
+            log.error("No place was found! Your address: " + deviceAddress.getAddressLine1());
             return getAskResponse(BANK_CONTACT_CARD, ERROR_TEXT);
         }
-        */
+
+        return doBankOpeningHoursResponse(place, slotDateValue);
     }
 
     /**
@@ -208,16 +212,44 @@ public class BankContactService implements SpeechService {
      */
     private SpeechletResponse doBankOpeningHoursResponse(Place place, String slotDate) {
 
+        if(slotDate == null){
+            return doCompleteBankOpeningHoursResponse(place);
+        }
         String opening = PlaceFinder.getHours(place, true, slotDate);
         String closing = PlaceFinder.getHours(place, false, slotDate);
         String weekday = PlaceFinder.getWeekday(slotDate, Locale.GERMAN);
 
-        String speechText = place.getName() + " Geöffnet am " + weekday + " von " + opening + " bis " + closing + " Uhr";
+        if(closing == null || opening == null){
+            log.error("No opening hours for " + place.getName());
+            return getAskResponse(BANK_CONTACT_CARD, NO_OPENING_HOURS);
+        }
+
+        String speechText = place.getName() + " Geöffnet am " + weekday + " von " + opening + " bis " + closing;
 
         SimpleCard card = getSimpleCard(BANK_CONTACT_CARD, speechText);
         PlainTextOutputSpeech speech = getPlainTextOutputSpeech(speechText);
 
         return SpeechletResponse.newTellResponse(speech, card);
+    }
+
+    private SpeechletResponse doCompleteBankOpeningHoursResponse(Place place){
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append(place.getName()).append(" hat am ");
+
+        List<String> openingWeekdayHours = PlaceFinder.getCompleteWeekdayHours(place);
+
+        for(String hours : openingWeekdayHours) {
+            stringBuilder.append(hours);
+        }
+        SimpleCard card = getSimpleCard(BANK_CONTACT_CARD, stringBuilder.toString());
+        SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
+        outputSpeech.setSsml("<speak>" + stringBuilder.toString() + "</speak>");
+
+        log.info("Speech: " + stringBuilder.toString());
+
+        return SpeechletResponse.newTellResponse(outputSpeech, card);
     }
 
     /**
@@ -254,8 +286,8 @@ public class BankContactService implements SpeechService {
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse getPermissionsResponse() {
-        String speechText = "You have not given this skill permissions to access your address. " +
-                "Please give this skill permissions to access your address.";
+        String speechText = "Dieser Skill hat keine Berechtigung auf deine Adresse " +
+                "Gib bitte diesem Skill die Berechtigung auf deine Adresses zuzugreifen";
 
         // Create the permission card content.
         // The differences between a permissions card and a simple card is that the

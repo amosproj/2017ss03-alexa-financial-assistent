@@ -3,10 +3,16 @@ package amosalexa.services.bankcontact;
 
 import com.google.maps.model.LatLng;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.walkercrou.places.*;
 
+import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -94,15 +100,53 @@ public class PlaceFinder {
     public static String getHours(Place place, boolean isOpening, String wd){
 
         String weekday = getWeekday(wd, Locale.ENGLISH);
+
         for(Hours.Period period : place.getHours().getPeriods()){
-            Day day = period.getClosingDay();
+            String time = period.getClosingTime();
             if(isOpening){
-                day = period.getOpeningDay();
+                time = period.getOpeningTime();
             }
-            if(day.name().toLowerCase().equals(weekday.toLowerCase())){
-                return period.getOpeningTime();
+            if(period.getOpeningDay().name().toLowerCase().equals(weekday.toLowerCase())){
+                return convertTime(time);
             }
         }
         return null;
+    }
+
+    /**
+     * returns a list of strings with opening hours for each weekday
+     * @param place place with opening hours
+     * @return list of opening hours
+     */
+    public static List<String> getCompleteWeekdayHours(Place place){
+
+        List<String> openingWeekdayHours = new ArrayList<>();
+
+        LocalDate date = new LocalDate();
+
+        for(Hours.Period period : place.getHours().getPeriods()){
+            String dayOfWeek = period.getOpeningDay().name();
+            date = date.withDayOfWeek(DayOfWeek.valueOf(dayOfWeek).getValue());
+            String weekdayHours =
+                    date.dayOfWeek().getAsText(Locale.GERMAN) +
+                    " geöffnet von " +
+                    "<say-as interpret-as=\"time\">" + convertTime(period.getOpeningTime()) + "</say-as> " +
+                    " bis <say-as interpret-as=\"time\">" + convertTime(period.getClosingTime()) + "</say-as>. ";
+            openingWeekdayHours.add(weekdayHours);
+         }
+        return openingWeekdayHours;
+    }
+
+
+    /**
+     * converts time e.g. 1200 to 12:00
+     * @param time input time
+     * @return formatted output time
+     */
+    public static String convertTime(String time){
+        DateTimeFormatter inputFormatter = DateTimeFormat.forPattern("HHmm");
+        DateTime dateTime = inputFormatter.parseDateTime(time);
+        DateTimeFormatter outputFormatter = DateTimeFormat.forPattern("HH:mm");
+        return outputFormatter.print(dateTime);
     }
 }
