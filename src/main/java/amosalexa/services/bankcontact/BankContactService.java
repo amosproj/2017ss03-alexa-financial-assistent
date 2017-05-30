@@ -2,14 +2,13 @@ package amosalexa.services.bankcontact;
 
 
 import amosalexa.SpeechletSubject;
+import amosalexa.security.AuthenticationManager;
+import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.DeviceAddressUtil;
 import amosalexa.services.SpeechService;
-import amosalexa.services.bankcontact.exceptions.DeviceAddressClientException;
-import amosalexa.services.bankcontact.exceptions.UnauthorizedException;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
-import com.amazon.speech.speechlet.interfaces.system.SystemInterface;
-import com.amazon.speech.speechlet.interfaces.system.SystemState;
 import com.amazon.speech.ui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class BankContactService implements SpeechService {
+public class BankContactService extends AbstractSpeechService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(BankContactService.class);
 
@@ -42,7 +41,7 @@ public class BankContactService implements SpeechService {
     /**
      * Address of device - for simulation only dummy values possible
      */
-    private static Address deviceAddress = new Address();
+    public static Address deviceAddress = new Address();
 
     /**
      * bank slot fall back
@@ -76,14 +75,20 @@ public class BankContactService implements SpeechService {
     private static final String BANK_OPENING_HOURS_INTENT = "BankOpeningHours";
     private static final String BANK_ADDRESS_INTENT = "BankAddress";
 
-
+    /**
+     * Slots
+     */
     private String slotBankNameValue;
     private String slotDateValue;
+
+    /**
+     * Permissions
+     */
+    public static String consentToken = null;
 
     public BankContactService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
-
 
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
@@ -92,6 +97,7 @@ public class BankContactService implements SpeechService {
         Intent intent = intentRequest.getIntent();
         String intentName = getIntentName(intent);
 
+        // slot values
         slotBankNameValue = intent.getSlot(SLOT_BANK_NAME) != null ? intent.getSlot(SLOT_BANK_NAME).getValue() : null;
         slotDateValue = intent.getSlot(SLOT_NAME_OPENING_HOURS_DATE) != null ? intent.getSlot(SLOT_NAME_OPENING_HOURS_DATE).getValue() : null;
 
@@ -99,13 +105,27 @@ public class BankContactService implements SpeechService {
             slotBankNameValue = SLOT_NAME_BANK_FALLBACK;
         }
 
-        // slot values
+
         log.info(getClass().getCanonicalName() + "Slot Value : " + slotBankNameValue + " ( " + SLOT_BANK_NAME + " ) ");
         log.info(getClass().getCanonicalName() + "Slot Value : " + slotDateValue + " ( " + SLOT_NAME_OPENING_HOURS_DATE + " ) ");
 
 
+        /*
+        // Authenticate
+        if (!AuthenticationManager.isAuthenticated()) {
+            return AuthenticationManager.authenticate();
+        }
+        */
+
         // try to get device address - needs user permission and real device
-        getDeviceAddress(requestEnvelope);
+        DeviceAddressUtil.getDeviceAddress(requestEnvelope);
+
+        // check permission for device address
+        if (consentToken == null) {
+            log.info("Consent token is null. Ask for permission!");
+            // simulation environment does not support permission requests
+            // return getPermissionsResponse();
+        }
 
         switch (intentName) {
             case BANK_ADDRESS_INTENT:
@@ -121,9 +141,11 @@ public class BankContactService implements SpeechService {
 
     /**
      * gets the address of a bank
+     *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse bankAddressResponse() {
+
         Place place = getPlace();
 
         if (place == null) {
@@ -149,9 +171,9 @@ public class BankContactService implements SpeechService {
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
-
     /**
      * search for a place with opening hours
+     *
      * @return Place
      */
     private Place getPlace() {
@@ -163,36 +185,6 @@ public class BankContactService implements SpeechService {
         return PlaceFinder.findOpeningHoursPlace(places, slotBankNameValue);
     }
 
-
-    private void getDeviceAddress(SpeechletRequestEnvelope<IntentRequest> requestEnvelope){
-
-        Permissions permissions = requestEnvelope.getSession().getUser().getPermissions();
-
-        // for simulation
-        if(permissions == null){
-            return;
-        }
-
-        String consentToken = requestEnvelope.getSession().getUser().getPermissions().getConsentToken();
-
-        try {
-
-            SystemState systemState = getSystemState(requestEnvelope.getContext());
-            String deviceId = systemState.getDevice().getDeviceId();
-            String apiEndpoint = systemState.getApiEndpoint();
-
-            AlexaDeviceAddressClient alexaDeviceAddressClient = new AlexaDeviceAddressClient(deviceId, consentToken, apiEndpoint);
-
-            deviceAddress = alexaDeviceAddressClient.getFullAddress();
-
-            if (deviceAddress == null) {
-                log.error("requested device address is null");
-            }
-
-        } catch (DeviceAddressClientException e) {
-            log.error("Device Address Client failed to successfully return the address.", e);
-        }
-    }
 
     private SpeechletResponse bankOpeningHoursResponse() {
 
@@ -212,14 +204,14 @@ public class BankContactService implements SpeechService {
      */
     private SpeechletResponse doBankOpeningHoursResponse(Place place, String slotDate) {
 
-        if(slotDate == null){
+        if (slotDate == null) {
             return doCompleteBankOpeningHoursResponse(place);
         }
         String opening = PlaceFinder.getHours(place, true, slotDate);
         String closing = PlaceFinder.getHours(place, false, slotDate);
         String weekday = PlaceFinder.getWeekday(slotDate, Locale.GERMAN);
 
-        if(closing == null || opening == null){
+        if (closing == null || opening == null) {
             log.error("No opening hours for " + place.getName());
             return getAskResponse(BANK_CONTACT_CARD, NO_OPENING_HOURS);
         }
@@ -232,7 +224,13 @@ public class BankContactService implements SpeechService {
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
-    private SpeechletResponse doCompleteBankOpeningHoursResponse(Place place){
+    /**
+     * response the opening hours for the whole week
+     *
+     * @param place Bank
+     * @return SpeechletResponse
+     */
+    private SpeechletResponse doCompleteBankOpeningHoursResponse(Place place) {
 
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -240,7 +238,7 @@ public class BankContactService implements SpeechService {
 
         List<String> openingWeekdayHours = PlaceFinder.getCompleteWeekdayHours(place);
 
-        for(String hours : openingWeekdayHours) {
+        for (String hours : openingWeekdayHours) {
             stringBuilder.append(hours);
         }
         SimpleCard card = getSimpleCard(BANK_CONTACT_CARD, stringBuilder.toString());
@@ -250,27 +248,6 @@ public class BankContactService implements SpeechService {
         log.info("Speech: " + stringBuilder.toString());
 
         return SpeechletResponse.newTellResponse(outputSpeech, card);
-    }
-
-    /**
-     * Helper method that will get the intent name from a provided Intent object. If a name does not
-     * exist then this method will return null.
-     *
-     * @param intent intent object provided from a skill request.
-     * @return intent name or null.
-     */
-    private String getIntentName(Intent intent) {
-        return (intent != null) ? intent.getName() : null;
-    }
-
-    /**
-     * Helper method that retrieves the system state from the request context.
-     *
-     * @param context request context.
-     * @return SystemState the systemState
-     */
-    private SystemState getSystemState(Context context) {
-        return context.getState(SystemInterface.class, SystemState.class);
     }
 
 
@@ -286,12 +263,10 @@ public class BankContactService implements SpeechService {
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse getPermissionsResponse() {
+
         String speechText = "Dieser Skill hat keine Berechtigung auf deine Adresse " +
                 "Gib bitte diesem Skill die Berechtigung auf deine Adresses zuzugreifen";
 
-        // Create the permission card content.
-        // The differences between a permissions card and a simple card is that the
-        // permissions card includes additional indicators for a user to enable permissions if needed.
         AskForPermissionsConsentCard card = new AskForPermissionsConsentCard();
         card.setTitle(BANK_CONTACT_CARD);
 
@@ -300,65 +275,9 @@ public class BankContactService implements SpeechService {
         card.setPermissions(permissions);
 
         PlainTextOutputSpeech speech = getPlainTextOutputSpeech(speechText);
-
         return SpeechletResponse.newTellResponse(speech, card);
+
     }
 
-    /**
-     * Helper method for retrieving an Ask response with a simple card and reprompt included.
-     *
-     * @param cardTitle  Title of the card that you want displayed.
-     * @param speechText speech text that will be spoken to the user.
-     * @return the resulting card and speech text.
-     */
-    private SpeechletResponse getAskResponse(String cardTitle, String speechText) {
-        SimpleCard card = getSimpleCard(cardTitle, speechText);
-        PlainTextOutputSpeech speech = getPlainTextOutputSpeech(speechText);
-        Reprompt reprompt = getReprompt(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
-     * Helper method that returns a reprompt object. This is used in Ask responses where you want
-     * the user to be able to respond to your speech.
-     *
-     * @param outputSpeech The OutputSpeech object that will be said once and repeated if necessary.
-     * @return Reprompt instance.
-     */
-    private Reprompt getReprompt(OutputSpeech outputSpeech) {
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(outputSpeech);
-
-        return reprompt;
-    }
-
-    /**
-     * Helper method for retrieving an OutputSpeech object when given a string of TTS.
-     *
-     * @param speechText the text that should be spoken out to the user.
-     * @return an instance of SpeechOutput.
-     */
-    private PlainTextOutputSpeech getPlainTextOutputSpeech(String speechText) {
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        return speech;
-    }
-
-    /**
-     * Helper method that creates a card object.
-     *
-     * @param title   title of the card
-     * @param content body of the card
-     * @return SimpleCard the display card to be sent along with the voice response.
-     */
-    private SimpleCard getSimpleCard(String title, String content) {
-        SimpleCard card = new SimpleCard();
-        card.setTitle(title);
-        card.setContent(content);
-
-        return card;
-    }
 
 }
