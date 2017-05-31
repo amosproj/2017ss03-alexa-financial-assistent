@@ -62,7 +62,6 @@ public class SecuritiesAccountInformationService implements SpeechService {
         if ("AMAZON.YesIntent".equals(intentName)) {
             return getNextSecuritiesAccountInformation(request.getIntent(), session);
         } else if ("AMAZON.NoIntent".equals(intentName)) {
-            session.setAttribute("BlockCardService.CardNumber", null);
             return getSpeechletResponse("Okay, tschuess!", "", false);
         } else if ("AMAZON.StopIntent".equals(intentName)) {
             return null;

@@ -1,5 +1,9 @@
 package model.banking.account;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class StandingOrderResponse {
 
     private _embedded _embedded;
@@ -20,5 +24,9 @@ public class StandingOrderResponse {
 
     public void set_links(model.banking.account._links _links) {
         this._links = _links;
+    }
+
+    public List<StandingOrder> getStandingOrders() {
+        return _embedded != null ? new ArrayList<StandingOrder>(Arrays.asList(_embedded.getStandingOrders())) : null;
     }
 }

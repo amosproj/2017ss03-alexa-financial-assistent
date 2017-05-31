@@ -1,11 +1,14 @@
-package amosalexa.dialogsystem.dialogs;
+package amosalexa.services.bankaccount;
 
 import amosalexa.ApiHelper;
-import amosalexa.SessionStorage;
-import amosalexa.dialogsystem.DialogHandler;
+import amosalexa.SpeechletSubject;
+import amosalexa.services.SpeechService;
 import api.BankingRESTClient;
+import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
+import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
@@ -25,47 +28,66 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class StandingOrderDialog implements DialogHandler {
+//TODO write test
+public class StandingOrderService implements SpeechService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StandingOrderDialog.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandingOrderService.class);
 
-    private static final String CONTEXT = "CURRENT_CONTEXT";
+    private static final String CONTEXT = "DIALOG_CONTEXT";
 
-    private static final String STANDING_ORDER_DIALOG = "StandingOrders";
+    private List<StandingOrder> standingOrders;
 
-    StandingOrder[] standingOrders;
+    public StandingOrderService(SpeechletSubject speechletSubject) {
+        subscribe(speechletSubject);
+    }
 
+    /**
+     * Ties the Speechlet Subject (Amos Alexa Speechlet) with an Speechlet Observer
+     *
+     * @param speechletSubject service
+     */
     @Override
-    public String getDialogName() {
-        return STANDING_ORDER_DIALOG;
+    public void subscribe(SpeechletSubject speechletSubject) {
+        speechletSubject.attachSpeechletObserver(this, "StandingOrdersInfoIntent");
+        speechletSubject.attachSpeechletObserver(this, "StandingOrdersDeleteIntent");
+        speechletSubject.attachSpeechletObserver(this, "StandingOrdersModifyIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.StopIntent");
     }
 
     @Override
-    public SpeechletResponse handle(Intent intent, SessionStorage.Storage storage) throws SpeechletException {
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
+        Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
+        Session session = requestEnvelope.getSession();
+        String dialogContext = (String) session.getAttribute(CONTEXT);
+
         LOGGER.info("Intent Name: " + intentName);
+        LOGGER.info("Context: " + dialogContext);
 
         if ("StandingOrdersInfoIntent".equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            storage.put(CONTEXT, "StandingOrderInfo");
-            return getStandingOrdersInfoResponse(intent, storage);
+            session.setAttribute(CONTEXT, "StandingOrderInfo");
+            return getStandingOrdersInfoResponse(intent, session);
         } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            storage.put(CONTEXT, "StandingOrderDeletion");
-            return askForDDeletionConfirmation(intent, storage);
+            session.setAttribute(CONTEXT, "StandingOrderDeletion");
+            return askForDDeletionConfirmation(intent, session);
         } else if ("StandingOrdersModifyIntent".equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            storage.put(CONTEXT, "StandingOrderModification");
-            return askForModificationConfirmation(intent, storage);
-        } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderInfo")) {
-            return getNextStandingOrderInfo(storage);
-        } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderDeletion")) {
-            return getStandingOrdersDeleteResponse(intent, storage);
-        } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderModification")) {
-            return getStandingOrdersModifyResponse(intent, storage);
+            session.setAttribute(CONTEXT, "StandingOrderModification");
+            return askForModificationConfirmation(intent, session);
+        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderInfo")) {
+            return getNextStandingOrderInfo(session);
+        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
+            return getStandingOrdersDeleteResponse(intent, session);
+        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
+            return getStandingOrdersModifyResponse(intent, session);
         } else if ("AMAZON.NoIntent".equals(intentName)) {
             return getSpeechletResponse("Okay, tschuess!", "", false);
         } else if ("AMAZON.StopIntent".equals(intentName)) {
+            //TODO StopIntent not working? Test
             return null;
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
@@ -77,12 +99,13 @@ public class StandingOrderDialog implements DialogHandler {
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
-    private SpeechletResponse getStandingOrdersInfoResponse(Intent intent, SessionStorage.Storage storage) {
+    private SpeechletResponse getStandingOrdersInfoResponse(Intent intent, Session session) {
         LOGGER.info("StandingOrdersResponse called.");
 
         Map<String, Slot> slots = intent.getSlots();
 
         ObjectMapper mapper = new ObjectMapper();
+        //TODO do not use ApiHelper
         ApiHelper helper = new ApiHelper();
         String test = null;
         try {
@@ -111,7 +134,7 @@ public class StandingOrderDialog implements DialogHandler {
             return SpeechletResponse.newTellResponse(speech, card);
         }
 
-        standingOrders = standingOrderResponse.get_embedded().getStandingOrders();
+        standingOrders = standingOrderResponse.getStandingOrders();
 
         // Check if user requested to have their stranding orders sent to their email address
         Slot channelSlot = slots.get("Channel");
@@ -123,9 +146,8 @@ public class StandingOrderDialog implements DialogHandler {
 
         if (sendPerEmail) {
             // TODO: Send standing orders to user's email address
-
             textBuilder.append("Ich habe")
-                    .append(standingOrders.length)
+                    .append(standingOrders.size())
                     .append(" an deine E-Mail-Adresse gesendet.");
         } else {
             // We want to directly return standing orders here
@@ -139,10 +161,10 @@ public class StandingOrderDialog implements DialogHandler {
                 List<StandingOrder> orders = new LinkedList<>();
 
                 // Find closest standing orders that could match the request.
-                for (int i = 0; i < standingOrders.length; i++) {
-                    if (StringUtils.getLevenshteinDistance(payee, standingOrders[i].getPayee()) <=
-                            standingOrders[i].getPayee().length() / 3) {
-                        orders.add(standingOrders[i]);
+                for (int i = 0; i < standingOrders.size(); i++) {
+                    if (StringUtils.getLevenshteinDistance(payee, standingOrders.get(i).getPayee()) <=
+                            standingOrders.get(i).getPayee().length() / 3) {
+                        orders.add(standingOrders.get(i));
                     }
                 }
 
@@ -170,25 +192,25 @@ public class StandingOrderDialog implements DialogHandler {
                 // Just return all standing orders
 
                 textBuilder.append("Du hast momentan ")
-                        .append(standingOrders.length == 1 ? "einen Dauerauftrag. " : standingOrders.length + " Dauerauftraege. ");
+                        .append(standingOrders.size() == 1 ? "einen Dauerauftrag. " : standingOrders.size() + " Dauerauftraege. ");
                 for (int i = 0; i <= 1; i++) {
                     textBuilder.append(' ');
 
                     textBuilder.append("Dauerauftrag ")
-                            .append(standingOrders[i].getStandingOrderId())
+                            .append(standingOrders.get(i).getStandingOrderId())
                             .append(": ");
 
                     //FIXME hardcoded savings account iban?
-                    boolean isSavingsPlanStandingOrder = standingOrders[i].getDestinationAccount().equals("DE39100000007777777777");
+                    boolean isSavingsPlanStandingOrder = standingOrders.get(i).getDestinationAccount().equals("DE39100000007777777777");
 
-                    textBuilder.append("Ueberweise ").append(standingOrders[i].getExecutionRateString())
-                            .append(standingOrders[i].getAmount())
+                    textBuilder.append("Ueberweise ").append(standingOrders.get(i).getExecutionRateString())
+                            .append(standingOrders.get(i).getAmount())
                             .append(" Euro ")
-                            .append(isSavingsPlanStandingOrder ? "auf dein Sparkonto " : "an " + standingOrders[i].getPayee())
+                            .append(isSavingsPlanStandingOrder ? "auf dein Sparkonto " : "an " + standingOrders.get(i).getPayee())
                             .append(".");
                 }
 
-                if (standingOrders.length > 2) {
+                if (standingOrders.size() > 2) {
                     textBuilder.append(" Moechtest du einen weiteren Eintrag hoeren?");
 
                     String text = textBuilder.toString();
@@ -201,7 +223,7 @@ public class StandingOrderDialog implements DialogHandler {
                     reprompt.setOutputSpeech(speech);
 
                     // Save current list offset in this session
-                    storage.put("NextStandingOrder", 2);
+                    session.setAttribute("NextStandingOrder", 2);
 
                     return SpeechletResponse.newAskResponse(speech, reprompt);
                 }
@@ -216,19 +238,19 @@ public class StandingOrderDialog implements DialogHandler {
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
-    private SpeechletResponse getNextStandingOrderInfo(SessionStorage.Storage storage) {
-        int nextEntry = (int) storage.get("NextStandingOrder");
+    private SpeechletResponse getNextStandingOrderInfo(Session session) {
+        int nextEntry = (int) session.getAttribute("NextStandingOrder");
         StandingOrder nextSO;
         StringBuilder textBuilder = new StringBuilder();
 
-        if (nextEntry < standingOrders.length) {
-            nextSO = standingOrders[nextEntry];
+        if (nextEntry < standingOrders.size()) {
+            nextSO = standingOrders.get(nextEntry);
             textBuilder.append("Dauerauftrag Nummer ")
                     .append(nextSO.getStandingOrderId())
                     .append(": ");
 
             //FIXME hardcoded savings account iban?
-            boolean isSavingsPlanStandingOrder = standingOrders[nextEntry].getDestinationAccount().equals("DE39100000007777777777");
+            boolean isSavingsPlanStandingOrder = standingOrders.get(nextEntry).getDestinationAccount().equals("DE39100000007777777777");
 
             textBuilder.append("Ueberweise ").append(nextSO.getExecutionRateString())
                     .append(nextSO.getAmount())
@@ -236,7 +258,7 @@ public class StandingOrderDialog implements DialogHandler {
                     .append(isSavingsPlanStandingOrder ? "auf dein Sparkonto " : "an " + nextSO.getPayee())
                     .append(".");
 
-            if (nextEntry == (standingOrders.length - 1)) {
+            if (nextEntry == (standingOrders.size() - 1)) {
                 textBuilder.append(" Das waren alle vorhandenen Dauerauftraege.");
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
                 speech.setText(textBuilder.toString());
@@ -246,7 +268,7 @@ public class StandingOrderDialog implements DialogHandler {
             }
 
             // Save current list offset in this session
-            storage.put("NextStandingOrder", nextEntry + 1);
+            session.setAttribute("NextStandingOrder", nextEntry + 1);
 
             String text = textBuilder.toString();
 
@@ -268,12 +290,12 @@ public class StandingOrderDialog implements DialogHandler {
         }
     }
 
-    private SpeechletResponse askForDDeletionConfirmation(Intent intent, SessionStorage.Storage storage) {
+    private SpeechletResponse askForDDeletionConfirmation(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
         Slot numberSlot = slots.get("Number");
         LOGGER.info("NumberSlot: " + numberSlot.getValue());
 
-        storage.put("StandingOrderToDelete", numberSlot.getValue());
+        session.setAttribute("StandingOrderToDelete", numberSlot.getValue());
 
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
@@ -287,7 +309,7 @@ public class StandingOrderDialog implements DialogHandler {
         return SpeechletResponse.newAskResponse(speech, reprompt);
     }
 
-    private SpeechletResponse askForModificationConfirmation(Intent intent, SessionStorage.Storage storage) {
+    private SpeechletResponse askForModificationConfirmation(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
         Slot numberSlot = slots.get("Number");
         Slot amountSlot = slots.get("Amount");
@@ -299,10 +321,10 @@ public class StandingOrderDialog implements DialogHandler {
             return getSpeechletResponse(text, text, true);
         }
 
-        storage.put("StandingOrderToModify", numberSlot.getValue());
-        storage.put("NewAmount", amountSlot.getValue());
-        storage.put("NewExecutionRate", executionRateSlot.getValue());
-        storage.put("NewFirstExecution", firstExecutionSlot.getValue());
+        session.setAttribute("StandingOrderToModify", numberSlot.getValue());
+        session.setAttribute("NewAmount", amountSlot.getValue());
+        session.setAttribute("NewExecutionRate", executionRateSlot.getValue());
+        session.setAttribute("NewFirstExecution", firstExecutionSlot.getValue());
 
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
@@ -315,10 +337,10 @@ public class StandingOrderDialog implements DialogHandler {
         return SpeechletResponse.newAskResponse(speech, reprompt);
     }
 
-    private SpeechletResponse getStandingOrdersDeleteResponse(Intent intent, SessionStorage.Storage storage) {
+    private SpeechletResponse getStandingOrdersDeleteResponse(Intent intent, Session session) {
         LOGGER.info("StandingOrdersDeleteResponse called.");
 
-        String standingOrderToDelete = (String) storage.get("StandingOrderToDelete");
+        String standingOrderToDelete = (String) session.getAttribute("StandingOrderToDelete");
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -327,6 +349,7 @@ public class StandingOrderDialog implements DialogHandler {
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
 
+        //TODO do not use ApiHelper anymore
         ApiHelper helper = new ApiHelper();
         try {
             helper.sendDelete("http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/accounts/9999999999/standingorders/" + standingOrderToDelete);
@@ -342,11 +365,12 @@ public class StandingOrderDialog implements DialogHandler {
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
-    private SpeechletResponse getStandingOrdersModifyResponse(Intent intent, SessionStorage.Storage storage) {
-        String standingOrderToModify = (String) storage.get("StandingOrderToModify");
-        String newAmount = (String) storage.get("NewAmount");
-        String newExecutionRate = (String) storage.get("NewExecutionRate");
-        String newFirstExecution = (String) storage.get("NewFirstExecution");
+    private SpeechletResponse getStandingOrdersModifyResponse(Intent intent, Session session) {
+        String standingOrderToModify = (String) session.getAttribute("StandingOrderToModify");
+        String newAmount = (String) session.getAttribute("NewAmount");
+        //TODO never used
+        String newExecutionRate = (String) session.getAttribute("NewExecutionRate");
+        String newFirstExecution = (String) session.getAttribute("NewFirstExecution");
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -359,7 +383,7 @@ public class StandingOrderDialog implements DialogHandler {
 
         JSONObject jsonObject = new JSONObject();
         try {
-            //TODO
+            //TODO finish
             jsonObject.put("payee", "Max Mustermann");
             jsonObject.put("amount", newAmount);
             jsonObject.put("destinationAccount", "DE39100000007777777777");

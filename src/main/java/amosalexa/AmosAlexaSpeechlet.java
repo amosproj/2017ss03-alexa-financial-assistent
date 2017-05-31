@@ -12,6 +12,7 @@ package amosalexa;
 import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.security.AuthenticationManager;
 import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
@@ -45,6 +46,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     public static AmosAlexaSpeechlet getInstance() {
 
         new BankAccountService(amosAlexaSpeechlet);
+        new StandingOrderService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
@@ -102,7 +104,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         return null;
     }
 
-
     @Override
     public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
         LOGGER.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
@@ -151,15 +152,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "SavingsPlan"); // Set CURRENTDIALOG to start the SavingsPlan dialog
             return DialogResponseManager.getInstance().handle(intent, sessionStorage);
         } else if ("FourDigitNumberIntent".equals(intentName)) {
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-        } else if ("StandingOrdersInfoIntent".equals(intentName)) {
-            sessionStorage.put(SessionStorage.CURRENTDIALOG, "StandingOrders");
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-        } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
-            sessionStorage.put(SessionStorage.CURRENTDIALOG, "StandingOrders");
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-        } else if ("StandingOrdersModifyIntent".equals(intentName)) {
-            sessionStorage.put(SessionStorage.CURRENTDIALOG, "StandingOrders");
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("AMAZON.YesIntent".equals(intentName)) {
             SpeechletResponse response = DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
