@@ -63,6 +63,10 @@ public class StandingOrderDialog implements DialogHandler {
             return getStandingOrdersDeleteResponse(intent, storage);
         } else if ("AMAZON.YesIntent".equals(intentName) && storage.get(CONTEXT).equals("StandingOrderModification")) {
             return getStandingOrdersModifyResponse(intent, storage);
+        } else if ("AMAZON.NoIntent".equals(intentName)) {
+            return getSpeechletResponse("Okay, tschuess!", "", false);
+        } else if ("AMAZON.StopIntent".equals(intentName)) {
+            return null;
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
@@ -226,6 +230,14 @@ public class StandingOrderDialog implements DialogHandler {
                     .append(nextSO.getPayee())
                     .append(".");
 
+            if (nextEntry == (standingOrders.length - 1)) {
+                textBuilder.append(" Das waren alle vorhandenen Dauerauftraege.");
+                PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+                speech.setText(textBuilder.toString());
+                return SpeechletResponse.newTellResponse(speech);
+            } else {
+                textBuilder.append(" Moechtest du einen weiteren Eintrag hoeren?");
+            }
 
             // Save current list offset in this session
             storage.put("NextStandingOrder", nextEntry + 1);
@@ -276,6 +288,11 @@ public class StandingOrderDialog implements DialogHandler {
         Slot executionRateSlot = slots.get("ExecutionRate");
         Slot firstExecutionSlot = slots.get("FirstExecution");
 
+        if (numberSlot.getValue() == null || (amountSlot.getValue() == null && executionRateSlot.getValue() == null && firstExecutionSlot.getValue() == null)) {
+            String text = "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.";
+            return getSpeechletResponse(text, text, true);
+        }
+
         storage.put("StandingOrderToModify", numberSlot.getValue());
         storage.put("NewAmount", amountSlot.getValue());
         storage.put("NewExecutionRate", executionRateSlot.getValue());
@@ -283,9 +300,8 @@ public class StandingOrderDialog implements DialogHandler {
 
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Moechtest du den Dauerauftrag mit der Nummer " + numberSlot.getValue()
-                + " wirklich aendern?");
-
+        speech.setText("Soll ich den Betrag von Dauerauftrag Nummer " + numberSlot.getValue() + " wirklich auf " +
+                amountSlot.getValue() + " Euro aendern?");
         // Create reprompt
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
@@ -353,5 +369,29 @@ public class StandingOrderDialog implements DialogHandler {
         card.setContent("Dauerauftrag Nummer " + standingOrderToModify + " wurde geändert.");
         speech.setText("Dauerauftrag Nummer " + standingOrderToModify + " wurde geaendert.");
         return SpeechletResponse.newTellResponse(speech, card);
+    }
+
+    private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
+                                                   boolean isAskResponse) {
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Block Bank Card");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        if (isAskResponse) {
+            // Create reprompt
+            PlainTextOutputSpeech repromptSpeech = new PlainTextOutputSpeech();
+            repromptSpeech.setText(repromptText);
+            Reprompt reprompt = new Reprompt();
+            reprompt.setOutputSpeech(repromptSpeech);
+
+            return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        } else {
+            return SpeechletResponse.newTellResponse(speech, card);
+        }
     }
 }
