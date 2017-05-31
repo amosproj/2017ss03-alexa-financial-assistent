@@ -13,6 +13,9 @@
       "intent": "TestListIntent"
     },
     {
+      "intent": "SecuritiesAccountInformationIntent"
+    },
+    {
       "intent": "AccountInformation",
       "slots": [
         {

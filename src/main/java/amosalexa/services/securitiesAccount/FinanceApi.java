@@ -1,4 +1,4 @@
-package amosalexa.depot;
+package amosalexa.services.securitiesAccount;
 
 
 import api.BankingRESTClient;

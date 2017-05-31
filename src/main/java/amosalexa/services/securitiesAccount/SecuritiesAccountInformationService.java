@@ -1,7 +1,6 @@
 package amosalexa.services.securitiesAccount;
 
 import amosalexa.SpeechletSubject;
-import amosalexa.depot.FinanceApi;
 import amosalexa.services.SpeechService;
 import api.BankingRESTClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;

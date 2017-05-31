@@ -10,7 +10,6 @@
 package amosalexa.services.pricequery;
 
 import amosalexa.SpeechletSubject;
-import amosalexa.depot.FinanceApi;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;

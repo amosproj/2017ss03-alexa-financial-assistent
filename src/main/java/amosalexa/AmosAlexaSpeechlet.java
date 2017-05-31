@@ -9,7 +9,6 @@
  */
 package amosalexa;
 
-import amosalexa.depot.DummyDepot;
 import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.security.AuthenticationManager;
 import amosalexa.services.bankaccount.BankAccountService;
@@ -153,10 +152,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage);
         } else if ("FourDigitNumberIntent".equals(intentName)) {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-        } else if ("DepotRequestIntent".equals(intentName)) {
-            return DummyDepot.getDepotInformation(intent, session);
-        } else if ("DepotCompositionIntent".equals(intentName)) {
-            return DummyDepot.getDepotComposition(intent, session);
         } else if ("StandingOrdersInfoIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "StandingOrders");
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
