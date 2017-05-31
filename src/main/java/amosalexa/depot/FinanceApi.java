@@ -1,19 +1,26 @@
 package amosalexa.depot;
 
 
+import api.BankingRESTClient;
+import com.amazonaws.util.json.JSONArray;
 import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import model.banking.account.Security;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 public class FinanceApi {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FinanceApi.class);
+
     OkHttpClient client = new OkHttpClient();
 
-    String run(String url) throws IOException {
+    private String run(String url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -23,36 +30,53 @@ public class FinanceApi {
         }
     }
 
-    public static String getStockPrice(String stock) {
+    private static String getTickerSymbolForIsin(Security security) {
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("idType", "ID_ISIN");
+            jsonObject.put("idValue", security.getIsin());
+        } catch (JSONException e) {
+            LOGGER.error(e.getMessage());
+        }
+        jsonArray.put(jsonObject);
+
+        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
+        String requestResponse = bankingRESTClient.postAnyObject("https://api.openfigi.com/v1/mapping", jsonArray.toString());
+        requestResponse = requestResponse.substring(10, requestResponse.length() - 1);
+        //LOGGER.info("Request Response: " + requestResponse);
+        try {
+            final JSONObject obj = new JSONObject(requestResponse);
+            String tickerSymbol = obj.getString("ticker");
+            return tickerSymbol;
+        } catch (JSONException e) {
+            LOGGER.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public static String getStockPrice(Security security) {
+        String tickerSymbol = getTickerSymbolForIsin(security);
 
         try {
             FinanceApi finance = new FinanceApi();
-            String response = finance.run("http://finance.google.com/finance/info?client=ig&q=NASDAQ:" + stock);
+            String response = finance.run("https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%20in%20(%22" + tickerSymbol + "%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=l");
 
-            response = response.substring(5, response.length() - 2);
+            //FIXME magic number...
+            response = response.substring(93, response.length() - 2);
 
-            //create a JSON-Object of the String
-            final JSONObject obj = new JSONObject(response);
+            final JSONObject jsonObject = new JSONObject(response);
+            //LOGGER.info("Stock Price Object: " + jsonObject);
 
-            // read out the current stock price
-            //Gson gson = new Gson();
-
-
-            JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
-
-            // JsonObject jsonObject = new JsonParser().parse("{\"pcls_fix\": \"68.38\"}").getAsJsonObject();
-            String stockPrice = jsonObject.get("pcls_fix").getAsString();
-
+            String stockPrice = jsonObject.getString("LastTradePriceOnly");
+            LOGGER.info("Stock price for " + tickerSymbol + ": " + stockPrice);
             return stockPrice;
-        }
-        catch (IOException io) {
-            System.out.println("Error: " + io);
-        }
-        catch (JSONException json) {
-            System.out.println("Error: " + json);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        } catch (JSONException e) {
+            LOGGER.error(e.getMessage());
         }
 
         return null;
-
     }
 }

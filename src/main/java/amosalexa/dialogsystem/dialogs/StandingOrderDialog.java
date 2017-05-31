@@ -178,10 +178,13 @@ public class StandingOrderDialog implements DialogHandler {
                             .append(standingOrders[i].getStandingOrderId())
                             .append(": ");
 
+                    //FIXME hardcoded savings account iban?
+                    boolean isSavingsPlanStandingOrder = standingOrders[i].getDestinationAccount().equals("DE39100000007777777777");
+
                     textBuilder.append("Ueberweise ").append(standingOrders[i].getExecutionRateString())
                             .append(standingOrders[i].getAmount())
-                            .append(" Euro an ")
-                            .append(standingOrders[i].getPayee())
+                            .append(" Euro ")
+                            .append(isSavingsPlanStandingOrder ? "auf dein Sparkonto " : "an " + standingOrders[i].getPayee())
                             .append(".");
                 }
 
@@ -224,10 +227,13 @@ public class StandingOrderDialog implements DialogHandler {
                     .append(nextSO.getStandingOrderId())
                     .append(": ");
 
+            //FIXME hardcoded savings account iban?
+            boolean isSavingsPlanStandingOrder = standingOrders[nextEntry].getDestinationAccount().equals("DE39100000007777777777");
+
             textBuilder.append("Ueberweise ").append(nextSO.getExecutionRateString())
                     .append(nextSO.getAmount())
-                    .append(" Euro an ")
-                    .append(nextSO.getPayee())
+                    .append(" Euro ")
+                    .append(isSavingsPlanStandingOrder ? "auf dein Sparkonto " : "an " + nextSO.getPayee())
                     .append(".");
 
             if (nextEntry == (standingOrders.length - 1)) {

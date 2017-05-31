@@ -15,6 +15,7 @@ import amosalexa.security.AuthenticationManager;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
+import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.pricequery.PriceQueryService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -36,7 +37,7 @@ import java.util.Map;
  */
 public class AmosAlexaSpeechlet implements SpeechletSubject {
 
-    private static final Logger logger = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
 
     private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
 
@@ -48,6 +49,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
+        new SecuritiesAccountInformationService(amosAlexaSpeechlet);
         new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
@@ -86,7 +88,12 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         }
 
         for (SpeechletObserver speechService : list) {
-            SpeechletResponse response = speechService.onIntent(requestEnvelope);
+            SpeechletResponse response = null;
+            try {
+                response = speechService.onIntent(requestEnvelope);
+            } catch (SpeechletException e) {
+                LOGGER.error(e.getMessage());
+            }
 
             if (response != null) {
                 return response;
@@ -99,13 +106,13 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     @Override
     public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
-        logger.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+        LOGGER.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
     }
 
     @Override
     public SpeechletResponse onLaunch(SpeechletRequestEnvelope<LaunchRequest> requestEnvelope) {
-        logger.info("onLaunch requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+        LOGGER.info("onLaunch requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
         return getWelcomeResponse();
     }
@@ -115,9 +122,9 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
-        logger.info("Authenticated: " + AuthenticationManager.isAuthenticated());
+        LOGGER.info("Authenticated: " + AuthenticationManager.isAuthenticated());
 
-        logger.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
+        LOGGER.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
 
         Intent intent = request.getIntent();
@@ -146,12 +153,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage);
         } else if ("FourDigitNumberIntent".equals(intentName)) {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-        } else if ("MicrosoftStockIntent".equals(intentName)) {
-            return DummyDepot.getMicrosoftStock(intent, session);
-        } else if ("AppleStockIntent".equals(intentName)) {
-            return DummyDepot.getAppleStock(intent, session);
-        } else if ("TeslaStockIntent".equals(intentName)) {
-            return DummyDepot.getTeslaStock(intent, session);
         } else if ("DepotRequestIntent".equals(intentName)) {
             return DummyDepot.getDepotInformation(intent, session);
         } else if ("DepotCompositionIntent".equals(intentName)) {
@@ -177,7 +178,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             }
         }
 
-        SpeechletResponse response =  notifyOnIntent(requestEnvelope);
+        SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
         if (response == null) {
             PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
@@ -191,7 +192,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     @Override
     public void onSessionEnded(SpeechletRequestEnvelope<SessionEndedRequest> requestEnvelope) {
-        logger.info("onSessionEnded requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+        LOGGER.info("onSessionEnded requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
         // any cleanup logic goes here
     }

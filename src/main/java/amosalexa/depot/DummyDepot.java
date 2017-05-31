@@ -10,7 +10,7 @@ public class DummyDepot {
 
 
     static String repromptTextWelcome = "Willkommen bei der Amos Banking App. Du kannst Überweisungen tätigen," +
-            "dein Depot abfragen und erhältst Tipps zur Geldanlage.";
+            "dein SecuritiesAccount abfragen und erhältst Tipps zur Geldanlage.";
 
     public static SpeechletResponse getDepotComposition(Intent intent, Session session) {
 
@@ -19,7 +19,7 @@ public class DummyDepot {
         String[] stock3 = new String[]{"Microsoft", "5", "MSFT"};
 
 
-        return getSpeechletResponse("Du hast folgende Aktien im Depot: "
+        return getSpeechletResponse("Du hast folgende Aktien im SecuritiesAccount: "
                         + stock1[1] + " Aktien von " + stock1[0] + ", "
                         + stock2[1] + " Aktien von " + stock2[0] + " und "
                         + stock3[1] + " Aktien von " + stock3[0]
@@ -28,9 +28,9 @@ public class DummyDepot {
 
     public static SpeechletResponse getDepotInformation(Intent intent, Session session) {
 
-        String StockTesla = FinanceApi.getStockPrice("TSLA");
-        String StockApple = FinanceApi.getStockPrice("AAPL");
-        String StockMicrosoft = FinanceApi.getStockPrice("MSFT");
+        String StockTesla = null;//FinanceApi.getStockPrice("TSLA");
+        String StockApple = null;//FinanceApi.getStockPrice("AAPL");
+        String StockMicrosoft = null;//FinanceApi.getStockPrice("MSFT");
 
         double numStocksApple = 5;
         double numStocksTesla = 10;
@@ -47,22 +47,6 @@ public class DummyDepot {
         return getSpeechletResponse("Der Gesamtwert deines Depots liegt aktuell bei"
                 + wertDepot + "Dollar.", repromptTextWelcome);
     }
-
-    public static SpeechletResponse getMicrosoftStock(Intent intent, Session session) {
-        return getSpeechletResponse("Der Aktienkurs von Microsoft liegt aktuell bei "
-                + FinanceApi.getStockPrice("MSFT") + " Dollor.", repromptTextWelcome);
-    }
-
-    public static SpeechletResponse getAppleStock(Intent intent, Session session) {
-        return getSpeechletResponse("Der Aktienkurs von Apple liegt aktuell bei "
-                + FinanceApi.getStockPrice("AAPL") + " Dollar.", repromptTextWelcome);
-    }
-
-    public static SpeechletResponse getTeslaStock(Intent intent, Session session) {
-        return getSpeechletResponse("Der Aktienkurs von Tesla liegt aktuell bei "
-                + FinanceApi.getStockPrice("TSLA") + " Dollar.", repromptTextWelcome);
-    }
-
 
     private static SpeechletResponse getSpeechletResponse(String speechText, String repromptText) {
         // Create the Simple card content.
