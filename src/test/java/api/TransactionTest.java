@@ -46,8 +46,7 @@ public class TransactionTest {
 		assertEquals(ACCOUNT_IBAN2, newTransaction.getDestinationAccount());
 		assertEquals(VALUE_DATE, newTransaction.getValueDate());
 		assertEquals("TestDescription", newTransaction.getDescription());
-
-		// Currently broken
+		
 		Collection<Transaction> transactions = AccountAPI.getTransactionsForAccount(ACCOUNT_NUMBER1);
 
 		boolean foundTransaction = false;
