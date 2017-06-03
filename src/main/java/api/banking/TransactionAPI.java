@@ -13,11 +13,21 @@ public class TransactionAPI {
 
 	private static BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
 
-	public static Transaction createTransaction(Number amount, String sourceAccount, String destinationAccount, String valueDate, String description) {
+	/**
+	 * Create transaction
+	 *
+	 * @param amount          the amount
+	 * @param sourceIban      the source IBAN (NOT ACCOUNT NUMBER)
+	 * @param destinationIban the destination IBAN (NOT ACCOUNT NUMBER)
+	 * @param valueDate       the value date
+	 * @param description     the description
+	 * @return the transaction
+	 */
+	public static Transaction createTransaction(Number amount, String sourceIban, String destinationIban, String valueDate, String description) {
 		Transaction newTransaction = new Transaction();
 		newTransaction.setAmount(amount);
-		newTransaction.setSourceAccount(sourceAccount);
-		newTransaction.setDestinationAccount(destinationAccount);
+		newTransaction.setSourceAccount(sourceIban);
+		newTransaction.setDestinationAccount(destinationIban);
 		newTransaction.setValueDate(valueDate);
 		newTransaction.setDescription(description);
 

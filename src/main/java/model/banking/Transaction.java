@@ -7,6 +7,7 @@ public class Transaction extends ResourceSupport {
 
 	private Number transactionId;
 	private Number amount;
+	private Number value;
 	private String destinationAccount;
 	private String sourceAccount;
 	private String valueDate;
@@ -26,6 +27,14 @@ public class Transaction extends ResourceSupport {
 
 	public void setAmount(Number amount) {
 		this.amount = amount;
+	}
+
+	public Number getValue() {
+		return value;
+	}
+
+	public void setValue(Number value) {
+		this.value = value;
 	}
 
 	public String getDestinationAccount() {

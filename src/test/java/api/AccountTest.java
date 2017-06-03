@@ -100,7 +100,7 @@ public class AccountTest {
         assertEquals(standingOrder.getExecutionRate(), StandingOrder.ExecutionRate.MONTHLY);
         assertEquals(standingOrder.getDescription(), "Description");
 
-        // Get cards
+        // Get standing orders
         Collection<StandingOrder> standingOrders = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
 
         boolean foundStandingOrder = false;
