@@ -34,6 +34,14 @@ public class SessionStorage {
             return storage.get(key);
         }
 
+        public boolean containsKey(String key) {
+            return storage.containsKey(key);
+        }
+
+        public int size(){
+            return storage.size();
+        }
+
         public Object remove(String key) {
             return storage.remove(key);
         }

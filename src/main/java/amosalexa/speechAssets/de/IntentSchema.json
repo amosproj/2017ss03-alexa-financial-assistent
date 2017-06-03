@@ -1,0 +1,162 @@
+{
+  "intents": [
+    {
+      "intent": "ProductRequestIntent",
+      "slots": [
+        {
+          "name": "ProductKeyword",
+          "type": "LIST_OF_KEYWORDS"
+        }
+      ]
+    },
+    {
+      "intent": "TestListIntent"
+    },
+    {
+      "intent": "SecuritiesAccountInformationIntent"
+    },
+    {
+      "intent": "AccountInformation",
+      "slots": [
+        {
+          "name": "AccountInformationSlots",
+          "type": "LIST_OF_ACCOUNT_INFORMATION"
+        }
+      ]
+    },
+    {
+      "intent": "BankOpeningHours",
+      "slots": [
+        {
+          "name": "OpeningHoursDate",
+          "type": "AMAZON.DATE"
+        },
+        {
+          "name": "BankNameSlots",
+          "type": "LIST_OF_BANKS"
+        }
+      ]
+    },
+    {
+      "intent": "BankAddress",
+      "slots": [
+        {
+          "name": "BankNameSlots",
+          "type": "LIST_OF_BANKS"
+        }
+      ]
+    },
+    {
+      "intent": "AMAZON.YesIntent"
+    },
+    {
+      "intent": "AMAZON.NoIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "SavingsPlanIntent",
+      "slots": [
+        {
+          "name": "Grundbetrag",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "EinzahlungMonat",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "AnzahlJahre",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "StandingOrdersDeleteIntent",
+      "slots": [
+        {
+          "name": "Payee",
+          "type": "AMAZON.DE_FIRST_NAME"
+        },
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "StandingOrdersInfoIntent",
+      "slots": [
+        {
+          "name": "Channel",
+          "type": "LIST_OF_CHANNEL"
+        },
+        {
+          "name": "Payee",
+          "type": "AMAZON.DE_FIRST_NAME"
+        }
+      ]
+    },
+    {
+      "intent": "StandingOrdersModifyIntent",
+      "slots": [
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Amount",
+          "type": "AMAZON.FOUR_DIGIT_NUMBER"
+        },
+        {
+          "name": "ExecutionRate",
+          "type": "LIST_OF_EXECUTION_RATES"
+        },
+        {
+          "name": "FirstExecution",
+          "type": "AMAZON.DATE"
+        }
+      ]
+    },
+    {
+      "intent": "FourDigitNumberIntent",
+      "slots": [
+        {
+          "name": "FourDigits",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "ReplacementCardIntent"
+    },
+    {
+      "intent": "ReplacementCardReasonIntent",
+      "slots": [
+        {
+          "name": "ReplacementReason",
+          "type": "LIST_OF_REPLACEMENT_REASONS"
+        }
+      ]
+    },
+    {
+      "intent": "BlockCardIntent",
+      "slots": [
+        {
+          "name": "BankCardNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "slots": [
+        {
+          "name": "AuthenticationPINSlots",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "AuthenticationPIN"
+    }
+  ]
+}

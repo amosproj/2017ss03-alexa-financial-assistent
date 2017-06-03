@@ -1,0 +1,82 @@
+{
+  "intents": [
+    {
+      "intent": "StandingOrdersIntent",
+      "slots": [
+        {
+          "name": "Recipient",
+          "type": "AMAZON.Person"
+        }
+      ]
+    },
+    {
+      "intent": "ProductRequestIntent",
+      "slots": [
+        {
+          "name": "ProductKeyword",
+          "type": "LIST_OF_KEYWORDS"
+        }
+      ]
+    },
+    {
+      "intent": "TestListIntent"
+    },
+    {
+      "intent": "AccountInformation",
+      "slots": [
+        {
+          "name": "AccountInformationSlots",
+          "type": "LIST_OF_ACCOUNT_INFORMATION"
+        }
+      ]
+    },
+    {
+      "intent": "BankContactInformation",
+      "slots": [
+        {
+          "name": "BankNameSlots",
+          "type": "LIST_OF_BANKS"
+        }
+      ]
+    },
+    {
+      "intent": "AMAZON.YesIntent"
+    },
+    {
+      "intent": "AMAZON.NoIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "FourDigitNumberIntent",
+      "slots": [
+        {
+          "name": "FourDigits",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "ReplacementCardIntent"
+    },
+    {
+      "intent": "ReplacementCardReasonIntent",
+      "slots": [
+        {
+          "name": "ReplacementReason",
+          "type": "LIST_OF_REPLACEMENT_REASONS"
+        }
+      ]
+    },
+    {
+      "intent": "BlockCardIntent",
+      "slots": [
+        {
+          "name": "BankCardNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    }
+  ]
+}
