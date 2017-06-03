@@ -3,16 +3,16 @@ package model.banking;
 
 public class Account {
 
-    private double creditcardLimit;
-    private double balance;
+    private Number creditcardLimit;
+    private Number balance;
     private String openingDate;
-    private double creditLimit;
+    private Number creditLimit;
     private String number;
-    private double interestRate;
-    private double withdrawalFee;
+    private Number interestRate;
+    private Number withdrawalFee;
     private String iban;
 
-    public double getCreditcardLimit ()
+    public Number getCreditcardLimit ()
     {
         return creditcardLimit;
     }
@@ -22,7 +22,7 @@ public class Account {
         this.creditcardLimit = creditcardLimit;
     }
 
-    public double getBalance ()
+    public Number getBalance ()
     {
         return balance;
     }
@@ -42,7 +42,7 @@ public class Account {
         this.openingDate = openingDate;
     }
 
-    public double getCreditLimit ()
+    public Number getCreditLimit ()
     {
         return creditLimit;
     }
@@ -62,7 +62,7 @@ public class Account {
         this.number = number;
     }
 
-    public double getInterestRate ()
+    public Number getInterestRate ()
     {
         return interestRate;
     }
@@ -72,7 +72,7 @@ public class Account {
         this.interestRate = interestRate;
     }
 
-    public double getWithdrawalFee ()
+    public Number getWithdrawalFee ()
     {
         return withdrawalFee;
     }

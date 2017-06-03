@@ -14,7 +14,7 @@ public class StandingOrder extends ResourceSupport {
     private Number amount;
     private String sourceAccount;
     private String destinationAccount;
-    private Date firstExecution;
+    private String firstExecution;
     private ExecutionRate executionRate;
     private String description;
     private StandingOrderStatus status;
@@ -59,11 +59,11 @@ public class StandingOrder extends ResourceSupport {
         this.destinationAccount = destinationAccount;
     }
 
-    public Date getFirstExecution() {
+    public String getFirstExecution() {
         return firstExecution;
     }
 
-    public void setFirstExecution(Date firstExecution) {
+    public void setFirstExecution(String firstExecution) {
         this.firstExecution = firstExecution;
     }
 

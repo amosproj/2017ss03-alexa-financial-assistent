@@ -7,7 +7,7 @@ public class SecuritiesAccount {
 
 	private Number securitiesAccountId;
 	private String clearingAccount;
-	private Date openingDate;
+	private String openingDate;
 
 	public Number getSecuritiesAccountId() {
 		return securitiesAccountId;
@@ -25,11 +25,11 @@ public class SecuritiesAccount {
 		this.clearingAccount = clearingAccount;
 	}
 
-	public Date getOpeningDate() {
+	public String getOpeningDate() {
 		return openingDate;
 	}
 
-	public void setOpeningDate(Date openingDate) {
+	public void setOpeningDate(String openingDate) {
 		this.openingDate = openingDate;
 	}
 

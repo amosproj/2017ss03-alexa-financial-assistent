@@ -162,7 +162,7 @@ public class AccountAPI {
 	}
 
 	public static StandingOrder createStandingOrderForAccount(String accountNumber, String payee, Number amount, String destinationAccount,
-															  Date firstExecution, StandingOrder.ExecutionRate executionRate, String description) {
+															  String firstExecution, StandingOrder.ExecutionRate executionRate, String description) {
 		StandingOrder newStandingOrder = new StandingOrder();
 		newStandingOrder.setPayee(payee);
 		newStandingOrder.setAmount(amount);
