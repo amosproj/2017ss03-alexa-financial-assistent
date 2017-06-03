@@ -2,7 +2,9 @@ package amosalexa.dialogsystem.dialogs.savings;
 
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
-import api.BankingRESTClient;
+import api.banking.AccountAPI;
+import api.banking.BankingRESTClient;
+import api.banking.TransactionAPI;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.SpeechletException;
@@ -13,7 +15,7 @@ import com.amazon.speech.ui.SimpleCard;
 import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
-import model.banking.account.StandingOrder;
+import model.banking.StandingOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,17 @@ import java.util.Map;
 
 //TODO Refactor to amosalexa.services.SpeechService
 public class SavingsPlanDialog implements DialogHandler {
+
+    // FIXME: Hardcoded Strings
+    private static final String SOURCE_ACCOUNT = "DE42100000009999999999";
+    private static final String DESTINATION_ACCOUNT = "DE39100000007777777777";
+    private static final String VALUE_DATE = "2017-05-24";
+    private static final String DESCRIPTION = "Savings Plan";
+    private static final String STANDING_ORDER_ACCOUNT = "9999999999";
+    private static final String PAYEE = "Max Mustermann";
+    private static final String FIRST_EXECUTION = "2017-06-01";
+    private static final StandingOrder.ExecutionRate EXECUTION_RATE = StandingOrder.ExecutionRate.MONTHLY;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanDialog.class);
 
@@ -138,37 +151,13 @@ public class SavingsPlanDialog implements DialogHandler {
     }
 
     private void createSavingsPlanOneOffPayment(String betrag) {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("amount", betrag);
-            //TODO Hard coded savings account?
-            jsonObject.put("sourceAccount", "DE42100000009999999999");
-            jsonObject.put("destinationAccount", "DE39100000007777777777");
-            jsonObject.put("valueDate", "2017-05-24");
-            jsonObject.put("description", "Savings Plan");
-        } catch (JSONException e) {
-            LOGGER.error(e.getMessage());
-        }
-        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
-        //TODO Post mapped to Object.class
-        bankingRESTClient.postBankingModelObject("/api/v1_0/transactions", jsonObject.toString(), Object.class);
+        Number amount = Integer.parseInt(betrag);
+        TransactionAPI.createTransaction(amount, SOURCE_ACCOUNT, DESTINATION_ACCOUNT, VALUE_DATE, DESCRIPTION);
     }
 
     private void createSavingsPlanStandingOrder(String monatlicheZahlung) {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("payee", "Max Mustermann");
-            jsonObject.put("amount", monatlicheZahlung);
-            //TODO Hard coded savings account?
-            jsonObject.put("destinationAccount", "DE39100000007777777777");
-            jsonObject.put("firstExecution", "2017-06-01");
-            jsonObject.put("executionRate", "MONTHLY");
-            jsonObject.put("description", "Savings Plan");
-        } catch (JSONException e) {
-            LOGGER.error(e.getMessage());
-        }
-        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
-        bankingRESTClient.postBankingModelObject("/api/v1_0/accounts/9999999999/standingorders", jsonObject.toString(), StandingOrder.class);
+        Number amount = Integer.parseInt(monatlicheZahlung);
+        AccountAPI.createStandingOrderForAccount(STANDING_ORDER_ACCOUNT, PAYEE, amount, DESTINATION_ACCOUNT, FIRST_EXECUTION, EXECUTION_RATE, DESCRIPTION);
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,

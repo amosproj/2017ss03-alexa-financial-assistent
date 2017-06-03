@@ -3,6 +3,7 @@ package amosalexa.services.securitiesAccount;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
 import api.BankingRESTClient;
+import api.banking.SecuritiesAccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -13,16 +14,22 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import model.banking.account.SecuritiesAccount;
-import model.banking.account.Security;
+import model.banking.SecuritiesAccount;
+import model.banking.Security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class SecuritiesAccountInformationService implements SpeechService {
+
+    // FIXME: Hardcoded SecuritiesAccount Id
+    private static final Number SEC_ACCOUNT_ID = 1;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuritiesAccountInformationService.class);
 
@@ -73,7 +80,7 @@ public class SecuritiesAccountInformationService implements SpeechService {
         LOGGER.info("SecuritiesAccountInformation called.");
 
         Map<String, Slot> slots = intent.getSlots();
-        SecuritiesAccount securitiesAccount = getSecuritiesAccountForAccount("1");
+        SecuritiesAccount securitiesAccount = SecuritiesAccountAPI.getSecuritiesAccount(SEC_ACCOUNT_ID);
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -82,13 +89,15 @@ public class SecuritiesAccountInformationService implements SpeechService {
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
 
-        if (securitiesAccount == null || securitiesAccount.getSecurities() == null) {
+        Collection<Security> securitiesCollection = SecuritiesAccountAPI.getSecuritiesForAccount(SEC_ACCOUNT_ID);
+
+        if (securitiesAccount == null || securitiesCollection == null || securitiesCollection.size() == 0) {
             card.setContent("Keine Info vorhanden.");
             speech.setText("Keine Info vorhanden.");
             return SpeechletResponse.newTellResponse(speech, card);
         }
 
-        securities = securitiesAccount.getSecurities();
+        securities = new LinkedList<>(securitiesCollection);
 
         // Check if user requested to have their stranding orders sent to their email address
         Slot channelSlot = slots.get("Channel");
@@ -229,12 +238,6 @@ public class SecuritiesAccountInformationService implements SpeechService {
             speech.setText("Das waren alle Wertpapiere in deinem Depot.");
             return SpeechletResponse.newTellResponse(speech);
         }
-    }
-
-    private SecuritiesAccount getSecuritiesAccountForAccount(String number) throws HttpClientErrorException {
-        BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
-        SecuritiesAccount secAccount = (SecuritiesAccount) bankingRESTClient.getBankingModelObject("/api/v1_0/securitiesAccounts/" + number, SecuritiesAccount.class);
-        return secAccount;
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,

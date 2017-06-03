@@ -1,28 +1,18 @@
-package model.banking.account;
+package model.banking;
 
-import model.banking.common.Links;
 
-public class Account
-{
-    private double creditcardLimit;
+public class Account {
 
-    private double balance;
-
+    private Number creditcardLimit;
+    private Number balance;
     private String openingDate;
-
-    private double creditLimit;
-
-    private Links _links;
-
+    private Number creditLimit;
     private String number;
-
-    private double interestRate;
-
-    private double withdrawalFee;
-
+    private Number interestRate;
+    private Number withdrawalFee;
     private String iban;
 
-    public double getCreditcardLimit ()
+    public Number getCreditcardLimit ()
     {
         return creditcardLimit;
     }
@@ -32,7 +22,7 @@ public class Account
         this.creditcardLimit = creditcardLimit;
     }
 
-    public double getBalance ()
+    public Number getBalance ()
     {
         return balance;
     }
@@ -52,7 +42,7 @@ public class Account
         this.openingDate = openingDate;
     }
 
-    public double getCreditLimit ()
+    public Number getCreditLimit ()
     {
         return creditLimit;
     }
@@ -60,16 +50,6 @@ public class Account
     public void setCreditLimit (double creditLimit)
     {
         this.creditLimit = creditLimit;
-    }
-
-    public Links get_links ()
-    {
-        return _links;
-    }
-
-    public void set_links (Links _links)
-    {
-        this._links = _links;
     }
 
     public String getNumber ()
@@ -82,7 +62,7 @@ public class Account
         this.number = number;
     }
 
-    public double getInterestRate ()
+    public Number getInterestRate ()
     {
         return interestRate;
     }
@@ -92,7 +72,7 @@ public class Account
         this.interestRate = interestRate;
     }
 
-    public double getWithdrawalFee ()
+    public Number getWithdrawalFee ()
     {
         return withdrawalFee;
     }
@@ -115,6 +95,6 @@ public class Account
     @Override
     public String toString()
     {
-        return "ClassPojo [creditcardLimit = "+creditcardLimit+", balance = "+balance+", openingDate = "+openingDate+", creditLimit = "+creditLimit+", Links = "+_links+", number = "+number+", interestRate = "+interestRate+", withdrawalFee = "+withdrawalFee+", iban = "+iban+"]";
+        return "ClassPojo [creditcardLimit = "+creditcardLimit+", balance = "+balance+", openingDate = "+openingDate+", creditLimit = "+creditLimit+", number = "+number+", interestRate = "+interestRate+", withdrawalFee = "+withdrawalFee+", iban = "+iban+"]";
     }
 }

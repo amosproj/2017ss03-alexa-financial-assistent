@@ -1,49 +1,29 @@
-package model.banking.account;
+package model.banking;
+
+import org.springframework.hateoas.ResourceSupport;
 
 import java.util.Date;
 
 /*
   This class represents a standing order.
  */
-public class StandingOrder {
+public class StandingOrder extends ResourceSupport {
 
-    public enum ExecutionRate {
-        MONTHLY,
-        QUARTERLY,
-        HALF_YEARLY,
-        YEARLY
-    }
-
-    public enum StandingOrderStatus {
-        ACTIVE,
-        INACTIVE
-    }
-
-    private Long standingOrderId;
-
+    private Number standingOrderId;
     private String payee;
-
-    private double amount;
-
+    private Number amount;
     private String sourceAccount;
-
     private String destinationAccount;
-
-    private Date firstExecution;
-
+    private String firstExecution;
     private ExecutionRate executionRate;
-
     private String description;
-
     private StandingOrderStatus status;
 
-    private _links _links;
-
-    public Long getStandingOrderId() {
+    public Number getStandingOrderId() {
         return standingOrderId;
     }
 
-    public void setStandingOrderId(Long standingOrderId) {
+    public void setStandingOrderId(Number standingOrderId) {
         this.standingOrderId = standingOrderId;
     }
 
@@ -55,11 +35,11 @@ public class StandingOrder {
         this.payee = payee;
     }
 
-    public double getAmount() {
+    public Number getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(Number amount) {
         this.amount = amount;
     }
 
@@ -79,11 +59,11 @@ public class StandingOrder {
         this.destinationAccount = destinationAccount;
     }
 
-    public Date getFirstExecution() {
+    public String getFirstExecution() {
         return firstExecution;
     }
 
-    public void setFirstExecution(Date firstExecution) {
+    public void setFirstExecution(String firstExecution) {
         this.firstExecution = firstExecution;
     }
 
@@ -111,14 +91,6 @@ public class StandingOrder {
         this.status = status;
     }
 
-    public model.banking.account._links get_links() {
-        return _links;
-    }
-
-    public void set_links(model.banking.account._links _links) {
-        this._links = _links;
-    }
-
     public String getExecutionRateString() {
         if (this.executionRate.equals(ExecutionRate.MONTHLY))
             return "monatlich ";
@@ -129,5 +101,17 @@ public class StandingOrder {
         if (this.executionRate.equals(ExecutionRate.YEARLY))
             return "jaehrlich ";
         else return "";
+    }
+
+    public enum ExecutionRate {
+        MONTHLY,
+        QUARTERLY,
+        HALF_YEARLY,
+        YEARLY
+    }
+
+    public enum StandingOrderStatus {
+        ACTIVE,
+        INACTIVE
     }
 }
