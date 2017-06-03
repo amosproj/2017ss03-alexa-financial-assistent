@@ -21,7 +21,7 @@ public class TransactionAPI {
 		newTransaction.setValueDate(valueDate);
 		newTransaction.setDescription(description);
 
-		return (Transaction) bankingRESTClient.postBankingModelObject("/transactions", newTransaction, Transaction.class);
+		return createTransaction(newTransaction);
 	}
 
 	public static Transaction createTransaction(Transaction newTransaction) {

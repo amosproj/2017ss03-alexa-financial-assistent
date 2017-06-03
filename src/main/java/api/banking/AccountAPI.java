@@ -3,6 +3,7 @@ package api.banking;
 import model.banking.Account;
 import model.banking.Card;
 import model.banking.StandingOrder;
+import model.banking.Transaction;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.MediaTypes;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestClientException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Date;
 
 import static org.springframework.hateoas.client.Hop.rel;
 
@@ -32,7 +34,7 @@ public class AccountAPI {
 		newAccount.setBalance(balance);
 		newAccount.setOpeningDate(openingDate);
 
-		return (Account) bankingRESTClient.postBankingModelObject("/accounts/generate", newAccount, Account.class);
+		return createAccount(newAccount);
 	}
 
 	public static Account createAccount(Account newAccount) {
@@ -43,8 +45,22 @@ public class AccountAPI {
 		return (Account) bankingRESTClient.getBankingModelObject("/accounts/" + accountNumber, Account.class);
 	}
 
+	public static Card createCardForAccount(String accountNumber, Card.CardType cardType, String cardNumber, Card.Status status, String expirationDate) {
+		Card newCard = new Card();
+		newCard.setCardType(cardType);
+		newCard.setCardNumber(cardNumber);
+		newCard.setStatus(status);
+		newCard.setExpirationDate(expirationDate);
+
+		return createCardForAccount(accountNumber, newCard);
+	}
+
 	public static Card createCardForAccount(String accountNumber, Card newCard) {
 		return (Card) bankingRESTClient.postBankingModelObject("/accounts/" + accountNumber + "/cards", newCard, Card.class);
+	}
+
+	public static Card getCardForAccount(String accountNumber, Number cardId){
+		return (Card) bankingRESTClient.getBankingModelObject("/accounts/" + accountNumber + "/cards/" + cardId, Card.class);
 	}
 
 	/**
@@ -65,9 +81,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<Card>> typeRefDevices = new ParameterizedTypeReference<Resources<Card>>() {};
-
 		Resources<Card> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
-
 		return resResponses.getContent();
 	}
 
@@ -88,6 +102,44 @@ public class AccountAPI {
 	}
 
 	/**
+	 * Delete a card
+	 * @param accountNumber Account number
+	 * @param cardId Card id
+	 * @return True on success, False otherwise
+	 */
+	public static boolean deleteCard(String accountNumber, Number cardId) {
+		try {
+			bankingRESTClient.deleteBankingModelObject("/accounts/" + accountNumber + "/cards/" + cardId);
+			return true;
+		} catch (RestClientException e) {
+			log.error("deleteCard failed", e);
+			return false;
+		}
+	}
+
+	/**
+	 * Get all transactions for the given account
+	 * @param accountNumber Account number
+	 * @return Collection of Cards
+	 * @throws HttpClientErrorException
+	 */
+	public static Collection<Transaction> getTransactionsForAccount(String accountNumber) throws HttpClientErrorException {
+		// TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
+		Traverson traverson = null;
+		try {
+			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/transactions"),
+					MediaTypes.HAL_JSON);
+		} catch (URISyntaxException e) {
+			log.error("getTransactionsForAccount failed", e);
+			return null;
+		}
+
+		ParameterizedTypeReference<Resources<Transaction>> typeRefDevices = new ParameterizedTypeReference<Resources<Transaction>>() {};
+		Resources<Transaction> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		return resResponses.getContent();
+	}
+
+	/**
 	 * Get all standing orders for the given account
 	 * @param accountNumber Account number
 	 * @return Collection of StandingOrders
@@ -105,10 +157,25 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<StandingOrder>> typeRefDevices = new ParameterizedTypeReference<Resources<StandingOrder>>() {};
-
 		Resources<StandingOrder> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
-
 		return resResponses.getContent();
+	}
+
+	public static StandingOrder createStandingOrderForAccount(String accountNumber, String payee, Number amount, String destinationAccount,
+															  Date firstExecution, StandingOrder.ExecutionRate executionRate, String description) {
+		StandingOrder newStandingOrder = new StandingOrder();
+		newStandingOrder.setPayee(payee);
+		newStandingOrder.setAmount(amount);
+		newStandingOrder.setDestinationAccount(destinationAccount);
+		newStandingOrder.setFirstExecution(firstExecution);
+		newStandingOrder.setExecutionRate(executionRate);
+		newStandingOrder.setDescription(description);
+
+		return createStandingOrderForAccount(accountNumber, newStandingOrder);
+	}
+
+	public static StandingOrder createStandingOrderForAccount(String accountNumber, StandingOrder newStandingOrder) {
+		return (StandingOrder) bankingRESTClient.postBankingModelObject("/accounts/" + accountNumber + "/standingorders", newStandingOrder, StandingOrder.class);
 	}
 
 	/**
@@ -152,6 +219,5 @@ public class AccountAPI {
 			return false;
 		}
 	}
-
 
 }
