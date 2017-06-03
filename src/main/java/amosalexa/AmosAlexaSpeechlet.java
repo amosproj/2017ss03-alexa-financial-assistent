@@ -15,6 +15,7 @@ import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.pricequery.PriceQueryService;
+import amosalexa.services.transfertemplates.TransferTemplateService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -47,6 +48,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
+        new TransferTemplateService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
