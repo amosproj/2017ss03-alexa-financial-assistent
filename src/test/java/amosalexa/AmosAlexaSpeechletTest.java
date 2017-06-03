@@ -1,5 +1,6 @@
 package amosalexa;
 
+import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.Context;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -9,6 +10,7 @@ import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,6 +33,17 @@ public class AmosAlexaSpeechletTest {
     /*************************************
      *          Testing section          *
      *************************************/
+
+    // Needed to ensure that the account balance is sufficient
+    @BeforeClass
+    public static void setUpAccount() {
+        Calendar cal = Calendar.getInstance();
+        Date time = cal.getTime();
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String openingDate = formatter.format(time);
+
+        AccountAPI.createAccount("9999999999", 1250000, openingDate);
+    }
 
     @Test
     public void blockCardIntentTest() throws Exception {

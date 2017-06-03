@@ -7,10 +7,14 @@ import model.banking.Card;
 import model.banking.StandingOrder;
 import org.joda.time.DateTime;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
@@ -22,19 +26,20 @@ public class AccountTest {
 
     private static final Logger log = LoggerFactory.getLogger(AccountTest.class);
 
-    private Account dummyAccount;
     private static final String ACCOUNT_NUMBER = "0000000000";
     private static final String ACCOUNT_NUMBER2 = "0000000001";
     private static final String CARD_NUMBER = "0000000001";
 
-    @Before
-    public void setUp() {
-        dummyAccount = new Account();
-        dummyAccount.setNumber(ACCOUNT_NUMBER);
-        dummyAccount.setBalance(1234);
-        dummyAccount.setOpeningDate(new DateTime(2017, 5, 1, 12, 0).toLocalDate().toString());
+    private static String getCurrentOpeningDate() {
+        Calendar cal = Calendar.getInstance();
+        Date time = cal.getTime();
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        return formatter.format(time);
+    }
 
-        AccountAPI.createAccount(dummyAccount);
+    @BeforeClass
+    public static void setUpAccount() {
+        AccountAPI.createAccount(ACCOUNT_NUMBER, 1250000, getCurrentOpeningDate());
     }
 
     /**
@@ -49,10 +54,9 @@ public class AccountTest {
     public void testGetAccount() {
         Account account = AccountAPI.getAccount(ACCOUNT_NUMBER);
 
-        // check value
-        assertEquals(account.getBalance().doubleValue(), dummyAccount.getBalance().doubleValue(), 0);
-        assertEquals(account.getNumber(), dummyAccount.getNumber());
-        assertEquals(account.getOpeningDate(), dummyAccount.getOpeningDate());
+        // We can't check for balance here because maybe another transaction / standing order already modified the balance
+        assertEquals(account.getNumber(), ACCOUNT_NUMBER);
+        assertEquals(account.getOpeningDate(), getCurrentOpeningDate());
     }
 
     @Test

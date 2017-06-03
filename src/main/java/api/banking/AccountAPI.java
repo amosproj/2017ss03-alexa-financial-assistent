@@ -28,7 +28,7 @@ public class AccountAPI {
 
 	private static BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
 
-	public static Account createAccount(String accountNumber, Double balance, String openingDate) {
+	public static Account createAccount(String accountNumber, Number balance, String openingDate) {
 		Account newAccount = new Account();
 		newAccount.setNumber(accountNumber);
 		newAccount.setBalance(balance);
