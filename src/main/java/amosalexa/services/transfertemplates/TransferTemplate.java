@@ -1,8 +1,5 @@
 package amosalexa.services.transfertemplates;
 
-import com.amazon.speech.speechlet.IntentRequest;
-import com.amazonaws.services.s3.transfer.Transfer;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +18,7 @@ public class TransferTemplate {
     private Date createdAt;
 
     private static int LAST_ID = 0;
+    private static String DEFAULT_FILENAME = "transfer_templates.csv";
 
     public TransferTemplate(String target, double amount) {
         this.id = ++LAST_ID;
@@ -59,7 +56,7 @@ public class TransferTemplate {
 
         this.id = Integer.parseInt(values[0]);
         this.target = values[1];
-        this.amount = Integer.parseInt(values[2]);
+        this.amount = Double.parseDouble(values[2]);
         this.createdAt = new Date(Long.parseLong(values[3]));
     }
 
@@ -68,9 +65,13 @@ public class TransferTemplate {
     }
 
     public static Map<Integer, TransferTemplate> readTransferTemplate() throws IOException {
+        return readTransferTemplate(DEFAULT_FILENAME);
+    }
+
+    public static Map<Integer, TransferTemplate> readTransferTemplate(String filename) throws IOException {
         Map<Integer, TransferTemplate> templateMap = new HashMap<>();
 
-        Files.lines(FileSystems.getDefault().getPath("transfer_templates.csv"), Charset.forName("UTF-8")).forEach(l -> {
+        Files.lines(FileSystems.getDefault().getPath(filename), Charset.forName("UTF-8")).forEach(l -> {
             TransferTemplate transferTemplate = new TransferTemplate(l);
             templateMap.put(transferTemplate.id, transferTemplate);
         });
@@ -79,12 +80,26 @@ public class TransferTemplate {
     }
 
     public static void writeTransferTemplates(Map<Integer, TransferTemplate> templateMap) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter("transfer_templates.csv", "UTF-8");
+        writeTransferTemplates(DEFAULT_FILENAME, templateMap);
+    }
+
+    public static void writeTransferTemplates(String filename, Map<Integer, TransferTemplate> templateMap) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter writer = new PrintWriter(filename, "UTF-8");
 
         for (Map.Entry<Integer, TransferTemplate> entry : templateMap.entrySet()) {
             writer.print(entry.getValue().toCSVLine() + "\n");
         }
 
         writer.close();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TransferTemplate)) {
+            return false;
+        }
+
+        TransferTemplate tt = (TransferTemplate) obj;
+        return id == tt.id && amount == tt.amount && target.equals(tt.target) && createdAt.equals(tt.createdAt);
     }
 }
