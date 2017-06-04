@@ -1,11 +1,19 @@
 package model.banking;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.ResourceSupport;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /*
   This class represents a standing order.
  */
 public class StandingOrder extends ResourceSupport {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandingOrder.class);
 
     private Number standingOrderId;
     private String payee;
@@ -60,6 +68,19 @@ public class StandingOrder extends ResourceSupport {
     public String getFirstExecution() {
         return firstExecution;
     }
+
+    public String getFirstExecutionSpeechString() {
+        SimpleDateFormat formatIn = new SimpleDateFormat("yyyyy-MM-dd");
+        SimpleDateFormat formatOut = new SimpleDateFormat("dd.MM.yyyy");
+        try {
+            Date date = formatIn.parse(firstExecution);
+            return formatOut.format(date);
+        } catch (ParseException e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
 
     public void setFirstExecution(String firstExecution) {
         this.firstExecution = firstExecution;

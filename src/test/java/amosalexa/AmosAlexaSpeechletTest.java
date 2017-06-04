@@ -2,14 +2,12 @@ package amosalexa;
 
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
-import com.amazon.speech.speechlet.Context;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,8 +20,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AmosAlexaSpeechletTest {
 

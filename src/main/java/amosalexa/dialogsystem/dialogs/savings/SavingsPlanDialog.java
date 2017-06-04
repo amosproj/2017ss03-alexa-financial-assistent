@@ -3,7 +3,6 @@ package amosalexa.dialogsystem.dialogs.savings;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
 import api.banking.AccountAPI;
-import api.banking.BankingRESTClient;
 import api.banking.TransactionAPI;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -13,13 +12,14 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
 import com.amazon.speech.ui.SsmlOutputSpeech;
-import com.amazonaws.util.json.JSONException;
-import com.amazonaws.util.json.JSONObject;
 import model.banking.StandingOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 //TODO Refactor to amosalexa.services.SpeechService
@@ -32,9 +32,7 @@ public class SavingsPlanDialog implements DialogHandler {
     private static final String DESCRIPTION = "Savings Plan";
     private static final String STANDING_ORDER_ACCOUNT = "9999999999";
     private static final String PAYEE = "Max Mustermann";
-    private static final String FIRST_EXECUTION = "2017-06-01";
     private static final StandingOrder.ExecutionRate EXECUTION_RATE = StandingOrder.ExecutionRate.MONTHLY;
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanDialog.class);
 
@@ -143,10 +141,11 @@ public class SavingsPlanDialog implements DialogHandler {
         String grundbetrag = (String) storage.get(GRUNDBETRAG_KEY);
         String monatlicheZahlung = (String) storage.get(EINZAHLUNG_MONAT_KEY);
         createSavingsPlanOneOffPayment(grundbetrag);
-        createSavingsPlanStandingOrder(monatlicheZahlung);
+        StandingOrder so = createSavingsPlanStandingOrder(monatlicheZahlung);
         //TODO replace date
         speech.setText("Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von " + grundbetrag + " Euro wird deinem Sparkonto " +
-                "gutgeschrieben. Die erste regelmaeßige Einzahlung von " + monatlicheZahlung + " Euro erfolgt am 01.06.2017.");
+                "gutgeschrieben. Die erste regelmaeßige Einzahlung von " + monatlicheZahlung + " Euro erfolgt am "
+                + so.getFirstExecutionSpeechString() + ".");
         return SpeechletResponse.newTellResponse(speech);
     }
 
@@ -155,9 +154,28 @@ public class SavingsPlanDialog implements DialogHandler {
         TransactionAPI.createTransaction(amount, SOURCE_ACCOUNT, DESTINATION_ACCOUNT, VALUE_DATE, DESCRIPTION);
     }
 
-    private void createSavingsPlanStandingOrder(String monatlicheZahlung) {
+    private StandingOrder createSavingsPlanStandingOrder(String monatlicheZahlung) {
         Number amount = Integer.parseInt(monatlicheZahlung);
-        AccountAPI.createStandingOrderForAccount(STANDING_ORDER_ACCOUNT, PAYEE, amount, DESTINATION_ACCOUNT, FIRST_EXECUTION, EXECUTION_RATE, DESCRIPTION);
+        String firstExecution = formatDate(getFirstExecutionDate(), "yyyy-MM-dd");
+        LOGGER.info("FirstExecution: " + firstExecution);
+        return AccountAPI.createStandingOrderForAccount(STANDING_ORDER_ACCOUNT, PAYEE, amount, DESTINATION_ACCOUNT, firstExecution, EXECUTION_RATE, DESCRIPTION);
+    }
+
+    private Date getFirstExecutionDate() {
+        Calendar today = Calendar.getInstance();
+        Calendar next = Calendar.getInstance();
+        next.clear();
+        next.set(Calendar.YEAR, today.get(Calendar.YEAR));
+        next.set(Calendar.MONTH, today.get(Calendar.MONTH) + 1);
+        next.set(Calendar.DAY_OF_MONTH, 1);
+        LOGGER.info("Next.getTime :" + next.getTime());
+        return next.getTime();
+    }
+
+    //TODO helper method, should be moved
+    private String formatDate(Date date, String pattern) {
+        SimpleDateFormat dt = new SimpleDateFormat(pattern);
+        return dt.format(date);
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
