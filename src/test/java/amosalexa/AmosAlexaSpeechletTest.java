@@ -8,6 +8,7 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -54,6 +56,26 @@ public class AmosAlexaSpeechletTest {
         testIntent(
                 "AMAZON.YesIntent",
                 "Karte 123 wurde gesperrt.");
+    }
+
+    @Test
+    public void standingOrdersInfoTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Keine Dauerauftraege vorhanden.");
+            add("Du hast momentan einen Dauerauftrag. " +
+                    "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+            add("Du hast momentan (.*) Dauerauftraege. " +
+                    "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+        }};
+        testIntentMatches(
+                "StandingOrdersInfoIntent", StringUtils.join(possibleAnswers, "|"));
+        testIntentMatches(
+                "AMAZON.YesIntent",
+                "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+        testIntentMatches(
+                "AMAZON.NoIntent", "Okay, tschuess!");
     }
 
     @Test
