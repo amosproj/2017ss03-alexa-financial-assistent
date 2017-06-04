@@ -4,7 +4,6 @@ import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.dialogs.ReplacementCardDialog;
 import amosalexa.dialogsystem.dialogs.TestListDialog;
-import amosalexa.dialogsystem.dialogs.savings.SavingsPlanDialog;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
@@ -27,7 +26,6 @@ public class DialogResponseManager {
         // TODO: Registering new DialogHandlers should happen automatically, not in this class
         registerDialogHandler(new TestListDialog());
         registerDialogHandler(new ReplacementCardDialog());
-        registerDialogHandler(new SavingsPlanDialog());
     }
 
     public static DialogResponseManager getInstance() {

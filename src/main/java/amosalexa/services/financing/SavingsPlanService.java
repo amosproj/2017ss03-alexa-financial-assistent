@@ -1,11 +1,14 @@
-package amosalexa.dialogsystem.dialogs.savings;
+package amosalexa.services.financing;
 
-import amosalexa.SessionStorage;
-import amosalexa.dialogsystem.DialogHandler;
+import amosalexa.SpeechletSubject;
+import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
+import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
+import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
@@ -22,8 +25,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
-//TODO Refactor to amosalexa.services.SpeechService
-public class SavingsPlanDialog implements DialogHandler {
+public class SavingsPlanService implements SpeechService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanService.class);
 
     // FIXME: Hardcoded Strings
     private static final String SOURCE_ACCOUNT = "DE42100000009999999999";
@@ -34,7 +38,7 @@ public class SavingsPlanDialog implements DialogHandler {
     private static final String PAYEE = "Max Mustermann";
     private static final StandingOrder.ExecutionRate EXECUTION_RATE = StandingOrder.ExecutionRate.MONTHLY;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanDialog.class);
+    private static final String CONTEXT = "DIALOG_CONTEXT";
 
     private static final String GRUNDBETRAG_KEY = "Grundbetrag";
 
@@ -42,29 +46,40 @@ public class SavingsPlanDialog implements DialogHandler {
 
     private static final String EINZAHLUNG_MONAT_KEY = "EinzahlungMonat";
 
-    @Override
-    public String getDialogName() {
-        return "SavingsPlan";
+    public SavingsPlanService(SpeechletSubject speechletSubject) {
+        subscribe(speechletSubject);
     }
 
     @Override
-    public SpeechletResponse handle(Intent intent, SessionStorage.Storage storage) throws SpeechletException {
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
+        Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
+        Session session = requestEnvelope.getSession();
         LOGGER.info("Intent Name: " + intentName);
+        String context = (String) session.getAttribute(CONTEXT);
 
         if ("SavingsPlanIntent".equals(intentName)) {
-            return askForSavingsParameter(intent, storage);
-        } else if ("AMAZON.YesIntent".equals(intentName)) {
-            return createSavingsPlan(intent, storage);
-        } else if ("AMAZON.NoIntent".equals(intentName)) {
+            return askForSavingsParameter(intent, session);
+        } else if ("AMAZON.YesIntent".equals(intentName) && context != null && context.equals("SavingsPlan")) {
+            return createSavingsPlan(intent, session);
+        } else if ("AMAZON.NoIntent".equals(intentName) && context != null && context.equals("SavingsPlan")) {
             return cancelAction();
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
     }
 
-    private SpeechletResponse askForSavingsParameter(Intent intent, SessionStorage.Storage storage) {
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        speechletSubject.attachSpeechletObserver(this, "SavingsPlanIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
+    }
+
+    private SpeechletResponse askForSavingsParameter(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
+        session.setAttribute(CONTEXT, "SavingsPlan");
+
         String grundbetrag = slots.get(GRUNDBETRAG_KEY).getValue();
         String anzahlJahre = slots.get(ANZAHL_JAHRE_KEY).getValue();
         String monatlicheEinzahlung = slots.get(EINZAHLUNG_MONAT_KEY).getValue();
@@ -74,38 +89,38 @@ public class SavingsPlanDialog implements DialogHandler {
         LOGGER.info("Grundbetrag: " + grundbetrag);
         LOGGER.info("Jahre: " + anzahlJahre);
         LOGGER.info("monatliche Einzahlung: " + monatlicheEinzahlung);
-        LOGGER.info("Storage Before: " + storage);
+        LOGGER.debug("Storage Before: " + session.getAttributes());
 
-        if (grundbetrag != null && storage.containsKey(GRUNDBETRAG_KEY)) {
+        if (grundbetrag != null && session.getAttributes().containsKey(GRUNDBETRAG_KEY)) {
             monatlicheEinzahlung = grundbetrag;
             grundbetrag = null;
         }
 
         if (grundbetrag != null) {
-            storage.put(GRUNDBETRAG_KEY, grundbetrag);
+            session.setAttribute(GRUNDBETRAG_KEY, grundbetrag);
         }
         if (anzahlJahre != null) {
-            storage.put(ANZAHL_JAHRE_KEY, anzahlJahre);
+            session.setAttribute(ANZAHL_JAHRE_KEY, anzahlJahre);
         }
         if (monatlicheEinzahlung != null) {
-            storage.put(EINZAHLUNG_MONAT_KEY, monatlicheEinzahlung);
+            session.setAttribute(EINZAHLUNG_MONAT_KEY, monatlicheEinzahlung);
         }
 
-        if (grundbetrag == null && !storage.containsKey(GRUNDBETRAG_KEY)) {
+        if (grundbetrag == null && !session.getAttributes().containsKey(GRUNDBETRAG_KEY)) {
             speechText = "Was moechtest du als Grundbetrag anlegen?";
             repromptText = speechText;
             return getSpeechletResponse(speechText, repromptText, true);
         }
 
-        if (anzahlJahre == null && !storage.containsKey(ANZAHL_JAHRE_KEY)) {
+        if (anzahlJahre == null && !session.getAttributes().containsKey(ANZAHL_JAHRE_KEY)) {
             speechText = "Wie viele Jahre moechtest du das Geld anlegen?";
             //TODO better use duration?
             repromptText = speechText;
             return getSpeechletResponse(speechText, repromptText, true);
         }
 
-        if (monatlicheEinzahlung == null && !storage.containsKey(EINZAHLUNG_MONAT_KEY)) {
-            if (grundbetrag == null && !storage.containsKey(GRUNDBETRAG_KEY)) {
+        if (monatlicheEinzahlung == null && !session.getAttributes().containsKey(EINZAHLUNG_MONAT_KEY)) {
+            if (grundbetrag == null && !session.getAttributes().containsKey(GRUNDBETRAG_KEY)) {
                 speechText = "Du musst zuerst einen Grundbetrag angeben.";
                 repromptText = speechText;
                 return getSpeechletResponse(speechText, repromptText, true);
@@ -115,9 +130,9 @@ public class SavingsPlanDialog implements DialogHandler {
             return getSpeechletResponse(speechText, repromptText, true);
         }
 
-        String grundbetragString = (String) storage.get(GRUNDBETRAG_KEY);
-        String einzahlungMonatString = (String) storage.get(EINZAHLUNG_MONAT_KEY);
-        String anzahlJahreString = (String) storage.get(ANZAHL_JAHRE_KEY);
+        String grundbetragString = (String) session.getAttribute(GRUNDBETRAG_KEY);
+        String einzahlungMonatString = (String) session.getAttribute(EINZAHLUNG_MONAT_KEY);
+        String anzahlJahreString = (String) session.getAttribute(ANZAHL_JAHRE_KEY);
 
         String calculationString = calculateSavings(grundbetragString, einzahlungMonatString, anzahlJahreString);
 
@@ -130,16 +145,15 @@ public class SavingsPlanDialog implements DialogHandler {
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
 
-        //LOGGER.info("Session Afterwards: " + session.getAttributes());
-        LOGGER.info("Storage afterwards: " + storage);
+        LOGGER.debug("Session afterwards: " + session.getAttributes());
 
         return SpeechletResponse.newAskResponse(speech, reprompt);
     }
 
-    private SpeechletResponse createSavingsPlan(Intent intent, SessionStorage.Storage storage) {
+    private SpeechletResponse createSavingsPlan(Intent intent, Session session) {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        String grundbetrag = (String) storage.get(GRUNDBETRAG_KEY);
-        String monatlicheZahlung = (String) storage.get(EINZAHLUNG_MONAT_KEY);
+        String grundbetrag = (String) session.getAttribute(GRUNDBETRAG_KEY);
+        String monatlicheZahlung = (String) session.getAttribute(EINZAHLUNG_MONAT_KEY);
         createSavingsPlanOneOffPayment(grundbetrag);
         StandingOrder so = createSavingsPlanStandingOrder(monatlicheZahlung);
         //TODO replace date

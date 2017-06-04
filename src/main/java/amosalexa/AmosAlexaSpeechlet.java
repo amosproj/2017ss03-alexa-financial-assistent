@@ -15,6 +15,7 @@ import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
+import amosalexa.services.financing.SavingsPlanService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.pricequery.PriceQueryService;
 import api.banking.AccountAPI;
@@ -52,6 +53,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new StandingOrderService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
+        new SavingsPlanService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
         new SecuritiesAccountInformationService(amosAlexaSpeechlet);
         new AuthenticationManager(amosAlexaSpeechlet);
@@ -151,9 +153,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("ReplacementCardReasonIntent".equals(intentName)) {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-        } else if ("SavingsPlanIntent".equals(intentName)) {
-            sessionStorage.put(SessionStorage.CURRENTDIALOG, "SavingsPlan"); // Set CURRENTDIALOG to start the SavingsPlan dialog
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage);
         } else if ("FourDigitNumberIntent".equals(intentName)) {
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("AMAZON.YesIntent".equals(intentName)) {
