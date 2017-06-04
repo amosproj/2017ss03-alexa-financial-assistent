@@ -119,6 +119,19 @@ public class StandingOrder {
         this._links = _links;
     }
 
+    public boolean isSavingsPlanStandingOrder() {
+        //FIXME hardcoded savings account iban?
+        return destinationAccount.equals("DE39100000007777777777");
+    }
+
+    public String getSpeechOutput() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Dauerauftrag Nummer ").append(standingOrderId).append(": ").append("Ueberweise ").
+                append(getExecutionRateString()).append(amount).append(" Euro ").append(isSavingsPlanStandingOrder() ? "auf dein Sparkonto" : "an "
+                + payee).append(". ");
+        return builder.toString();
+    }
+
     public String getExecutionRateString() {
         if (this.executionRate.equals(ExecutionRate.MONTHLY))
             return "monatlich ";

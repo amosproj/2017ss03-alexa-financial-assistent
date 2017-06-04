@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -142,11 +141,11 @@ public class StandingOrderService implements SpeechService {
                 channelSlot.getValue() != null &&
                 channelSlot.getValue().equals("email");
 
-        StringBuilder textBuilder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
         if (sendPerEmail) {
             // TODO: Send standing orders to user's email address
-            textBuilder.append("Ich habe")
+            builder.append("Ich habe")
                     .append(standingOrders.size())
                     .append(" an deine E-Mail-Adresse gesendet.");
         } else {
@@ -157,134 +156,77 @@ public class StandingOrderService implements SpeechService {
 
             if (payee != null) {
                 // User specified a recipient
-
-                List<StandingOrder> orders = new LinkedList<>();
+                standingOrders.clear();
 
                 // Find closest standing orders that could match the request.
                 for (int i = 0; i < standingOrders.size(); i++) {
                     if (StringUtils.getLevenshteinDistance(payee, standingOrders.get(i).getPayee()) <=
                             standingOrders.get(i).getPayee().length() / 3) {
-                        orders.add(standingOrders.get(i));
+                        standingOrders.add(standingOrders.get(i));
                     }
                 }
 
-                textBuilder.append(orders.size() == 1 ? "Es wurde ein Dauerauftrag gefunden." :
-                        "Es wurden " + orders.size() +
-                                " Dauerauftraege gefunden.");
+                builder.append(standingOrders.size() == 1 ? "Es wurde ein Dauerauftrag gefunden. " :
+                        "Es wurden " + standingOrders.size() +
+                                " Dauerauftraege gefunden. ");
 
-                int i = 1;
-                for (StandingOrder order : orders) {
-                    textBuilder.append(' ');
+                for (int i = 0; i <= 1; i++) {
+                    builder.append(standingOrders.get(i).getSpeechOutput());
+                }
 
-                    textBuilder.append("Dauerauftrag ")
-                            .append(order.getStandingOrderId())
-                            .append(": ");
-
-                    textBuilder.append("Ueberweise ").append(order.getExecutionRateString())
-                            .append(order.getAmount())
-                            .append(" Euro an ")
-                            .append(order.getPayee())
-                            .append(".");
-
-                    i++;
+                if (standingOrders.size() > 2) {
+                    return askForFurtherStandingOrderEntry(session, builder, 2);
                 }
             } else {
                 // Just return all standing orders
 
-                textBuilder.append("Du hast momentan ")
+                builder.append("Du hast momentan ")
                         .append(standingOrders.size() == 1 ? "einen Dauerauftrag. " : standingOrders.size() + " Dauerauftraege. ");
+
                 for (int i = 0; i <= 1; i++) {
-                    textBuilder.append(' ');
-
-                    textBuilder.append("Dauerauftrag ")
-                            .append(standingOrders.get(i).getStandingOrderId())
-                            .append(": ");
-
-                    //FIXME hardcoded savings account iban?
-                    boolean isSavingsPlanStandingOrder = standingOrders.get(i).getDestinationAccount().equals("DE39100000007777777777");
-
-                    textBuilder.append("Ueberweise ").append(standingOrders.get(i).getExecutionRateString())
-                            .append(standingOrders.get(i).getAmount())
-                            .append(" Euro ")
-                            .append(isSavingsPlanStandingOrder ? "auf dein Sparkonto " : "an " + standingOrders.get(i).getPayee())
-                            .append(".");
+                    builder.append(standingOrders.get(i).getSpeechOutput());
                 }
 
                 if (standingOrders.size() > 2) {
-                    textBuilder.append(" Moechtest du einen weiteren Eintrag hoeren?");
-
-                    String text = textBuilder.toString();
-
-                    card.setContent(text);
-                    speech.setText(text);
-
-                    // Create reprompt
-                    Reprompt reprompt = new Reprompt();
-                    reprompt.setOutputSpeech(speech);
-
-                    // Save current list offset in this session
-                    session.setAttribute("NextStandingOrder", 2);
-
-                    return SpeechletResponse.newAskResponse(speech, reprompt);
+                    return askForFurtherStandingOrderEntry(session, builder, 2);
                 }
             }
         }
 
-        String text = textBuilder.toString();
-
+        String text = builder.toString();
         card.setContent(text);
         speech.setText(text);
 
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
+    private SpeechletResponse askForFurtherStandingOrderEntry(Session session, StringBuilder builder, int nextStandingOrder) {
+        builder.append("Moechtest du einen weiteren Eintrag hoeren? ");
+        String text = builder.toString();
+        // Save current list offset in this session
+        session.setAttribute("NextStandingOrder", nextStandingOrder);
+        return getSpeechletResponse(text, text, true);
+    }
+
     private SpeechletResponse getNextStandingOrderInfo(Session session) {
         int nextEntry = (int) session.getAttribute("NextStandingOrder");
-        StandingOrder nextSO;
-        StringBuilder textBuilder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
         if (nextEntry < standingOrders.size()) {
-            nextSO = standingOrders.get(nextEntry);
-            textBuilder.append("Dauerauftrag Nummer ")
-                    .append(nextSO.getStandingOrderId())
-                    .append(": ");
-
-            //FIXME hardcoded savings account iban?
-            boolean isSavingsPlanStandingOrder = standingOrders.get(nextEntry).getDestinationAccount().equals("DE39100000007777777777");
-
-            textBuilder.append("Ueberweise ").append(nextSO.getExecutionRateString())
-                    .append(nextSO.getAmount())
-                    .append(" Euro ")
-                    .append(isSavingsPlanStandingOrder ? "auf dein Sparkonto " : "an " + nextSO.getPayee())
-                    .append(".");
+            builder.append(standingOrders.get(nextEntry).getSpeechOutput());
 
             if (nextEntry == (standingOrders.size() - 1)) {
-                textBuilder.append(" Das waren alle vorhandenen Dauerauftraege.");
+                builder.append("Das waren alle vorhandenen Dauerauftraege. ");
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText(textBuilder.toString());
+                speech.setText(builder.toString());
                 return SpeechletResponse.newTellResponse(speech);
             } else {
-                textBuilder.append(" Moechtest du einen weiteren Eintrag hoeren?");
+                return askForFurtherStandingOrderEntry(session, builder, nextEntry + 1);
             }
-
-            // Save current list offset in this session
-            session.setAttribute("NextStandingOrder", nextEntry + 1);
-
-            String text = textBuilder.toString();
-
-            // Create the plain text output
-            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText(text);
-
-            // Create reprompt
-            Reprompt reprompt = new Reprompt();
-            reprompt.setOutputSpeech(speech);
-
-            return SpeechletResponse.newAskResponse(speech, reprompt);
         } else {
             // Create the plain text output
             PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText("Das waren alle vorhandenen Dauerauftraege.");
+            speech.setText("Das waren alle vorhandenen Dauerauftraege. ");
 
             return SpeechletResponse.newTellResponse(speech);
         }
