@@ -62,9 +62,10 @@ public class BankTransferDialog implements DialogHandler{
         BankAccount[] allBankAccounts = {anneBankAccount, christianBankAccount};
         String iban = "";
 
+        // check if person is in the contact list
         for (int i = 0; i < allBankAccounts.length; i++) {
-            if (allBankAccounts[0].getNamePerson().equals(name)) {
-                iban = allBankAccounts[0].getIban();
+            if (allBankAccounts[i].getNamePerson().equals(name)) {
+                iban = allBankAccounts[i].getIban();
             }
         }
 
@@ -125,13 +126,15 @@ public class BankTransferDialog implements DialogHandler{
         // get name + amount
         String amount = (String) storage.get(AMOUNT_KEY);
         String name = (String) storage.get(NAME_KEY);
+        String iban = (String) storage.get(IBAN_KEY);
+        LOGGER.info("Die IBAN, an die überwiesen wird, lautet: " + iban);
 
         //transferring money
         String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
         String urlParams = "{\n" +
                 "  \"amount\" : " + amount + ",\n" +
                 "  \"sourceAccount\" : \"DE50100000000000000001\",\n" +
-                "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
+                "  \"destinationAccount\" : \""+ iban + "\",\n" +
                 "  \"valueDate\" : \"2017-05-16\",\n" +
                 "  \"description\" : \"Beschreibung\"\n" +
                 "}";
