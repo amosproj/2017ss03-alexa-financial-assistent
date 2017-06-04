@@ -13,17 +13,14 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import com.amazonaws.util.json.JSONException;
-import com.amazonaws.util.json.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.banking.Account;
 import model.banking.StandingOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -115,7 +112,7 @@ public class StandingOrderService implements SpeechService {
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
 
-        if (standingOrdersCollection == null || standingOrdersCollection.size() == 0) {
+        if (standingOrdersCollection == null || standingOrdersCollection.isEmpty()) {
             card.setContent("Keine Daueraufträge vorhanden.");
             speech.setText("Keine Dauerauftraege vorhanden.");
             return SpeechletResponse.newTellResponse(speech, card);
@@ -133,8 +130,6 @@ public class StandingOrderService implements SpeechService {
 
         if (sendPerEmail) {
             // TODO: Send standing orders to user's email address
-            textBuilder.append("Ich habe")
-                    .append(standingOrdersCollection.size())
             builder.append("Ich habe")
                     .append(standingOrders.size())
                     .append(" an deine E-Mail-Adresse gesendet.");
@@ -283,7 +278,7 @@ public class StandingOrderService implements SpeechService {
 
         Number standingOrderNum = Integer.parseInt(standingOrderToDelete);
 
-        if(!AccountAPI.deleteStandingOrder(ACCOUNT_NUMBER, standingOrderNum)) {
+        if (!AccountAPI.deleteStandingOrder(ACCOUNT_NUMBER, standingOrderNum)) {
             card.setContent("Dauerauftrag Nummer " + standingOrderToDelete + " wurde nicht gefunden.");
             speech.setText("Dauerauftrag Nummer " + standingOrderToDelete + " wurde nicht gefunden.");
             return SpeechletResponse.newTellResponse(speech, card);
