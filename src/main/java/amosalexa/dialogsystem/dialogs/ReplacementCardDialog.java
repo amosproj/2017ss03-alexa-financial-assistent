@@ -1,17 +1,15 @@
 package amosalexa.dialogsystem.dialogs;
 
-import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
+import api.banking.AccountAPI;
 import com.amazon.speech.slu.Intent;
-import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SsmlOutputSpeech;
-import model.banking.AccountFactory;
-import model.banking.account.CardResponse;
+import model.banking.Card;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +55,7 @@ public class ReplacementCardDialog implements DialogHandler {
 	}
 
 	private SpeechletResponse askForCardNumber(SessionStorage.Storage storage, boolean errored) {
-		Collection<CardResponse> cards = AccountFactory.getInstance().getCardsForAccount("0000000000"); // TODO: Load account from session
+		Collection<Card> cards = AccountAPI.getCardsForAccount("0000000000"); // TODO: Load account from session
 
 		if(cards.size() == 0) {
 			// This user does not have any cards, ordering a replacement card is impossible.
@@ -77,17 +75,17 @@ public class ReplacementCardDialog implements DialogHandler {
 
 			List<String> userCards = new ArrayList<>();
 
-			for (CardResponse card : cards) {
+			for (Card card : cards) {
 				// Check if this card is active
-				if(card.status != CardResponse.Status.ACTIVE) {
+				if(card.getStatus() != Card.Status.ACTIVE) {
 					continue;
 				}
 
-				userCards.add(card.cardNumber);
+				userCards.add(card.getCardNumber());
 
-				String prefix = (card.cardType == CardResponse.CardType.CREDIT ? "Kredit" : "EC-");
+				String prefix = (card.getCardType() == Card.CardType.CREDIT ? "Kredit" : "EC-");
 				stringBuilder.append(prefix + "karte mit den Endziffern <say-as interpret-as=\"digits\">" +
-						card.cardNumber.substring(card.cardNumber.length() - 4) + "</say-as>. ");
+						card.getCardNumber().substring(card.getCardNumber().length() - 4) + "</say-as>. ");
 			}
 
 			// Store all card numbers in the session

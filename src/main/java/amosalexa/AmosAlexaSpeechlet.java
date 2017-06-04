@@ -17,6 +17,8 @@ import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.pricequery.PriceQueryService;
+import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -24,6 +26,7 @@ import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -244,19 +247,14 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         String amount = amountSlot.getValue();
         String name = nameSlot.getValue();
 
+        // FIXME: Not sure why this is needed
         //getting response regarding account balance
         this.getAccountBalanceResponse();
 
-        //transfering money
-        String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
-        String urlParams = "{\n" +
-                "  \"amount\" : " + amount + ",\n" +
-                "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
-                "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
-                "  \"valueDate\" : \"2017-05-16\",\n" +
-                "  \"description\" : \"Beschreibung\"\n" +
-                "}";
-        ApiHelper.sendPost(url, urlParams);
+
+        // FIXME: Hardcoded stuff
+        Number amountNum = Integer.parseInt(amount);
+        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung");
 
         //reply message
         String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";
@@ -284,12 +282,11 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse getAccountBalanceResponse() {
+        // FIXME: Hardcoded stuff
+        Account account = AccountAPI.getAccount("0000000000");
 
-        // This is just a dummy account balance. Will be replaced by an API.
-        // TODO: Implement GetAccountBalance with real data.
-
-        double accountBalance = 47.11;
-        String speechText = "Your account balance is " + Double.toString(accountBalance);
+        Number accountBalance = account.getBalance();
+        String speechText = "Your account balance is " + accountBalance;
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -313,9 +310,12 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse getCreditLimitResponse() {
-        double creditLimit = 2000.91;
+        // FIXME: Hardcoded stuff
+        Account account = AccountAPI.getAccount("0000000000");
 
-        String speechText = "Your credit limit is " + Double.toString(creditLimit);
+        Number creditLimit = account.getCreditLimit();
+
+        String speechText = "Your credit limit is " + creditLimit;
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();

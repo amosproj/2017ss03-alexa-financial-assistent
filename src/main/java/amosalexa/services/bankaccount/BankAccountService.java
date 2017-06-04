@@ -2,14 +2,15 @@ package amosalexa.services.bankaccount;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
+import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SimpleCard;
-import model.banking.AccountFactory;
-import model.banking.account.Account;
+import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ public class BankAccountService implements SpeechService {
     private static final String BANK_ACCOUNT_INTENT = "AccountInformation";
 
     private static final String CARD_NAME = "Konto Information";
+
     /**
      *
      */
@@ -52,7 +54,8 @@ public class BankAccountService implements SpeechService {
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
 
         IntentRequest request = requestEnvelope.getRequest();
-        Account account = AccountFactory.getInstance().getAccount(number);
+
+        Account account = AccountAPI.getAccount(number);
 
         String speechText = "Was möchtest du über dein Konto erfahren?";
 
