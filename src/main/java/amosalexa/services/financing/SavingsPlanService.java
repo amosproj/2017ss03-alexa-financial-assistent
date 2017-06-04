@@ -31,12 +31,11 @@ public class SavingsPlanService implements SpeechService {
 
     // FIXME: Hardcoded Strings
     private static final String SOURCE_ACCOUNT = "DE42100000009999999999";
-    private static final String DESTINATION_ACCOUNT = "DE39100000007777777777";
-    private static final String VALUE_DATE = "2017-05-24";
-    private static final String DESCRIPTION = "Savings Plan";
+    private static final String SAVINGS_ACCOUNT = "DE39100000007777777777";
     private static final String STANDING_ORDER_ACCOUNT = "9999999999";
     private static final String PAYEE = "Max Mustermann";
-    private static final StandingOrder.ExecutionRate EXECUTION_RATE = StandingOrder.ExecutionRate.MONTHLY;
+    private static final String DESCRIPTION_SAVINGS_PLAN = "Sparplan regelm. Einzahlung";
+    private static final String DESCRIPTION_ONE_OFF_PAYMENT = "Sparplan Einmalzahlung";
 
     private static final String CONTEXT = "DIALOG_CONTEXT";
 
@@ -156,7 +155,6 @@ public class SavingsPlanService implements SpeechService {
         String monatlicheZahlung = (String) session.getAttribute(EINZAHLUNG_MONAT_KEY);
         createSavingsPlanOneOffPayment(grundbetrag);
         StandingOrder so = createSavingsPlanStandingOrder(monatlicheZahlung);
-        //TODO replace date
         speech.setText("Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von " + grundbetrag + " Euro wird deinem Sparkonto " +
                 "gutgeschrieben. Die erste regelmaeßige Einzahlung von " + monatlicheZahlung + " Euro erfolgt am "
                 + so.getFirstExecutionSpeechString() + ".");
@@ -165,14 +163,16 @@ public class SavingsPlanService implements SpeechService {
 
     private void createSavingsPlanOneOffPayment(String betrag) {
         Number amount = Integer.parseInt(betrag);
-        TransactionAPI.createTransaction(amount, SOURCE_ACCOUNT, DESTINATION_ACCOUNT, VALUE_DATE, DESCRIPTION);
+        Date now = new Date();
+        String valueDate = formatDate(now, "yyyy-MM-dd");
+        TransactionAPI.createTransaction(amount, SOURCE_ACCOUNT, SAVINGS_ACCOUNT, valueDate, DESCRIPTION_ONE_OFF_PAYMENT);
     }
 
     private StandingOrder createSavingsPlanStandingOrder(String monatlicheZahlung) {
         Number amount = Integer.parseInt(monatlicheZahlung);
         String firstExecution = formatDate(getFirstExecutionDate(), "yyyy-MM-dd");
-        LOGGER.info("FirstExecution: " + firstExecution);
-        return AccountAPI.createStandingOrderForAccount(STANDING_ORDER_ACCOUNT, PAYEE, amount, DESTINATION_ACCOUNT, firstExecution, EXECUTION_RATE, DESCRIPTION);
+        LOGGER.debug("FirstExecution: " + firstExecution);
+        return AccountAPI.createStandingOrderForAccount(STANDING_ORDER_ACCOUNT, PAYEE, amount, SAVINGS_ACCOUNT, firstExecution, StandingOrder.ExecutionRate.MONTHLY, DESCRIPTION_SAVINGS_PLAN);
     }
 
     private Date getFirstExecutionDate() {
