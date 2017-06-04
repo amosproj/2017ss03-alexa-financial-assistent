@@ -2,8 +2,6 @@ package model.banking;
 
 import org.springframework.hateoas.ResourceSupport;
 
-import java.util.Date;
-
 /*
   This class represents a standing order.
  */
@@ -89,14 +87,6 @@ public class StandingOrder extends ResourceSupport {
 
     public void setStatus(StandingOrderStatus status) {
         this.status = status;
-    }
-
-    public model.banking.account._links get_links() {
-        return _links;
-    }
-
-    public void set_links(model.banking.account._links _links) {
-        this._links = _links;
     }
 
     public boolean isSavingsPlanStandingOrder() {
