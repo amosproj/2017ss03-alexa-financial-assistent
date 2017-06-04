@@ -18,11 +18,14 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 public class BankTransferDialog implements DialogHandler{
+
+    private static final String AMOUNT_KEY = "amount";
+    private static final String NAME_KEY = "name";
     private static final Logger LOGGER = LoggerFactory.getLogger(BankTransferDialog.class);
 
     @Override
     public String getDialogName() {
-        return "bankTransfer";
+        return "BankTransfer";
     }
 
     @Override
@@ -30,7 +33,8 @@ public class BankTransferDialog implements DialogHandler{
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
 
-        if ("bankTransfer".equals(intentName)) {
+        if ("BankTransferIntent".equals(intentName)) {
+            LOGGER.info("askForBankTransferConfirmation wird aufgerufen.");
             return askForBankTransferConfirmation(intent, storage);
         } else if ("AMAZON.YesIntent".equals(intentName)) {
             LOGGER.info("Intent Name: " + intentName);
@@ -45,16 +49,23 @@ public class BankTransferDialog implements DialogHandler{
 
     private SpeechletResponse askForBankTransferConfirmation(Intent intent, SessionStorage.Storage storage) {
         Map<String, Slot> slots = intent.getSlots();
+
         Slot amountSlot = slots.get("amount");
         Slot nameSlot = slots.get("name");
 
         String amount = amountSlot.getValue();
         String name = nameSlot.getValue();
 
-        // get account balance
-        Account account = AccountFactory.getInstance().getAccount("00000001");
+        storage.put(AMOUNT_KEY, amount);
+        storage.put(NAME_KEY, name);
 
-        String speechText = "Bist du sicher, dass du " + amount + " Euro an " + name + " überweisen willst?";
+        // get account balance
+        Account account = AccountFactory.getInstance().getAccount("0000000001");
+        String balanceBeforeTransation = String.valueOf(account.getBalance());
+        LOGGER.info("Der aktuelle Kontostand beträgt " + balanceBeforeTransation);
+
+        String speechText = "Aktuell beträgt dein Kontostand " + balanceBeforeTransation + " Euro. " +
+                "Bist du sicher, dass du " + amount + " Euro an " + name + " überweisen willst?";
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -77,33 +88,31 @@ public class BankTransferDialog implements DialogHandler{
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse proceedBankTransfer(Intent intent, SessionStorage.Storage storage) {
-        Map<String, Slot> slots = intent.getSlots();
-        Slot amountSlot = slots.get("amount");
-        Slot nameSlot = slots.get("name");
 
-        //LOGGER.info("Confirmation slot: " + slots.get("confirmation").getValue());
+        // get name + amount
+        String amount = (String) storage.get(AMOUNT_KEY);
+        String name = (String) storage.get(NAME_KEY);
 
-        // String amount = amountSlot.getValue();
-        //String name = nameSlot.getValue();
-        String name = "test";
-        String amount = "test";
-
-        //getting response regarding account balance
-        //this.getAccountBalanceResponse();
-
-        //transfering money
+        //transferring money
         String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
         String urlParams = "{\n" +
                 "  \"amount\" : " + amount + ",\n" +
-                "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
+                "  \"sourceAccount\" : \"DE50100000000000000001\",\n" +
                 "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
                 "  \"valueDate\" : \"2017-05-16\",\n" +
                 "  \"description\" : \"Beschreibung\"\n" +
                 "}";
         ApiHelper.sendPost(url, urlParams);
 
+        // get account balance
+        Account account = AccountFactory.getInstance().getAccount("0000000001");
+        String balanceAfterTransation = String.valueOf(account.getBalance());
+
+        LOGGER.info("Der aktuelle Kontostand beträgt " + balanceAfterTransation);
+
         //reply message
-        String speechText = "Ok, " + amount + " Euro wurden an " + name + " überwiesen.";
+        String speechText = "Ok, " + amount + " Euro wurden an " + name + " überwiesen." +
+                " Dein neuer Kontostand beträgt " + balanceAfterTransation + " Euro." ;
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();

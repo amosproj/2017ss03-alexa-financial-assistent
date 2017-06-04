@@ -24,6 +24,8 @@ import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+import model.banking.AccountFactory;
+import model.banking.account.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,8 +140,12 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return getAccountBalanceResponse();
         } else if ("checkCreditLimit".equals(intentName)) {
             return getCreditLimitResponse();
-        } else if ("bankTransfer".equals(intentName)) {
-            return bankTransfer(intent.getSlots());
+
+        } else if ("BankTransferIntent".equals(intentName)) {
+            LOGGER.info("intent: BankTransferIntent");
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "BankTransfer"); // Set CURRENTDIALOG to start the BankTransfer dialog
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage);
+
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
@@ -238,19 +244,19 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse bankTransfer(Map<String, Slot> slots) {
-        Slot amountSlot = slots.get("amount");
-        Slot nameSlot = slots.get("name");
 
-        LOGGER.info("Confirmation slot: " + slots.get("confirmation").getValue());
+
+        LOGGER.info("intent: Bank Transfer");
 
 
         if (slots.get("confirmation").getValue() == "Ja" || slots.get("confirmation").getValue() != null) {
 
-            String amount = amountSlot.getValue();
-            String name = nameSlot.getValue();
+            String amount = "2";
+            String name = "Paul";
 
             //getting response regarding account balance
-            this.getAccountBalanceResponse();
+            Account account = AccountFactory.getInstance().getAccount("0000000001");
+            String balance = String.valueOf(account.getBalance());
 
             //transfering money
             String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
@@ -264,7 +270,8 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             ApiHelper.sendPost(url, urlParams);
 
             // confirmation question
-            String speechText = "Die "+ amount + " Euro wurden zu " + name + " überwiesen";
+            String speechText = "Dein aktueller Kontostand beträgt " + balance + ". "
+            + "Möchtest du " + amount + " Euro an " + name + " überweisen?";
 
             // Create the Simple card content.
             SimpleCard card = new SimpleCard();
@@ -282,8 +289,8 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             return SpeechletResponse.newAskResponse(speech, reprompt, card);
         }
 
-        String amount = amountSlot.getValue();
-        String name = nameSlot.getValue();
+        String amount = "2";
+        String name = "Paul";
 
         //getting response regarding account balance
         this.getAccountBalanceResponse();
