@@ -27,8 +27,6 @@ import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import model.banking.AccountFactory;
-import model.banking.account.Account;
 import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,7 +245,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         Slot amountSlot = slots.get("amount");
         Slot nameSlot = slots.get("name");
 
-
         LOGGER.info("intent: Bank Transfer");
 
 
@@ -257,19 +254,12 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             String name = "Paul";
 
             //getting response regarding account balance
-            Account account = AccountFactory.getInstance().getAccount("0000000001");
+            Account account = AccountAPI.getAccount("0000000001");
             String balance = String.valueOf(account.getBalance());
 
-            //transfering money
-            String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
-            String urlParams = "{\n" +
-                    "  \"amount\" : " + amount + ",\n" +
-                    "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
-                    "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
-                    "  \"valueDate\" : \"2017-05-16\",\n" +
-                    "  \"description\" : \"Beschreibung\"\n" +
-                    "}";
-            ApiHelper.sendPost(url, urlParams);
+            // FIXME: Hardcoded IBAN and so on
+            Number amountNum = Integer.parseInt(amount);
+            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung");
 
             // confirmation question
             String speechText = "Dein aktueller Kontostand beträgt " + balance + ". "
@@ -297,16 +287,9 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         //getting response regarding account balance
         this.getAccountBalanceResponse();
 
-        //transfering money
-        String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
-        String urlParams = "{\n" +
-                "  \"amount\" : " + amount + ",\n" +
-                "  \"sourceAccount\" : \"DE23100000001234567890\",\n" +
-                "  \"destinationAccount\" : \"DE60643995205405578292\",\n" +
-                "  \"valueDate\" : \"2017-05-16\",\n" +
-                "  \"description\" : \"Beschreibung\"\n" +
-                "}";
-        ApiHelper.sendPost(url, urlParams);
+        // FIXME: Hardcoded strings
+        Number amountNum = Integer.parseInt(amount);
+        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung");
 
         //reply message
         String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";

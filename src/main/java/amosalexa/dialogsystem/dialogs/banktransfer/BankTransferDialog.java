@@ -1,8 +1,9 @@
 package amosalexa.dialogsystem.dialogs.banktransfer;
 
-import amosalexa.ApiHelper;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
+import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.SpeechletException;
@@ -10,8 +11,7 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import model.banking.AccountFactory;
-import model.banking.account.Account;
+import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +94,7 @@ public class BankTransferDialog implements DialogHandler{
         storage.put(IBAN_KEY, iban);
 
         // get account balance
-        Account account = AccountFactory.getInstance().getAccount("0000000001");
+        Account account = AccountAPI.getAccount("0000000001");
         String balanceBeforeTransation = String.valueOf(account.getBalance());
         LOGGER.info("Der aktuelle Kontostand beträgt " + balanceBeforeTransation);
 
@@ -129,19 +129,12 @@ public class BankTransferDialog implements DialogHandler{
         String iban = (String) storage.get(IBAN_KEY);
         LOGGER.info("Die IBAN, an die überwiesen wird, lautet: " + iban);
 
-        //transferring money
-        String url = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com/api/v1_0/transactions";
-        String urlParams = "{\n" +
-                "  \"amount\" : " + amount + ",\n" +
-                "  \"sourceAccount\" : \"DE50100000000000000001\",\n" +
-                "  \"destinationAccount\" : \""+ iban + "\",\n" +
-                "  \"valueDate\" : \"2017-05-16\",\n" +
-                "  \"description\" : \"Beschreibung\"\n" +
-                "}";
-        ApiHelper.sendPost(url, urlParams);
+        // FIXME: Hardcoded strings
+        Number amountNum = Integer.parseInt(amount);
+        TransactionAPI.createTransaction(amountNum, "DE50100000000000000001",iban, "2017-05-16", "Beschreibung");
 
         // get account balance
-        Account account = AccountFactory.getInstance().getAccount("0000000001");
+        Account account = AccountAPI.getAccount("0000000001");
         String balanceAfterTransation = String.valueOf(account.getBalance());
 
         LOGGER.info("Der aktuelle Kontostand beträgt " + balanceAfterTransation);
