@@ -222,6 +222,8 @@ public class StandingOrderService implements SpeechService {
                     }
                     double similarity = getStringSimilarity(s, keyword);
                     //LOGGER.info("Similarity: " + s + ", " + similarity);
+
+                    //0.9 seems to be a good value for similarity
                     if (similarity >= 0.9) {
                         standingOrders.add(so);
                     }
@@ -230,6 +232,11 @@ public class StandingOrderService implements SpeechService {
                 standingOrders.add(so);
                 continue;
             }
+        }
+
+        if (standingOrders.size() == 0) {
+            String answer = "Ich konnte keine Dauerauftraege finden, die zu diesem Stichwort passen.";
+            return getSpeechletResponse(answer, answer, false);
         }
 
         double total = 0;
