@@ -122,8 +122,17 @@ public class AmosAlexaSpeechletTest {
     public void replacementCardDialogTest() throws Exception {
         newSession();
 
-        String response = testIntentMatches("ReplacementCardIntent",
-                "Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: (.*)");
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: (.*)");
+            add("Es wurden keine Kredit- oder EC-Karten gefunden.");
+        }};
+
+        String response = testIntentMatches("ReplacementCardIntent", StringUtils.join(possibleAnswers, "|"));
+
+        if (response.equals("Es wurden keine Kredit- oder EC-Karten gefunden.")) {
+            //Fallback
+            return;
+        }
 
         Pattern p = Pattern.compile("karte mit den Endziffern ([0-9]+)\\.");
         Matcher m = p.matcher(response);
