@@ -26,9 +26,9 @@ public class AccountTest {
 
     private static final Logger log = LoggerFactory.getLogger(AccountTest.class);
 
-    private static final String ACCOUNT_NUMBER = "0000000000";
-    private static final String ACCOUNT_NUMBER2 = "0000000001";
-    private static final String CARD_NUMBER = "0000000001";
+    public static final String ACCOUNT_NUMBER = "0000000000";
+    public static final String ACCOUNT_NUMBER2 = "0000000001";
+    public static final String CARD_NUMBER = "0000000001";
 
     private static String getCurrentOpeningDate() {
         Calendar cal = Calendar.getInstance();

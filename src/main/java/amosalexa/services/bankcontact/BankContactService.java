@@ -2,7 +2,6 @@ package amosalexa.services.bankcontact;
 
 
 import amosalexa.SpeechletSubject;
-import amosalexa.security.AuthenticationManager;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.DeviceAddressUtil;
 import amosalexa.services.SpeechService;
@@ -141,8 +140,6 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
             default:
                 return getAskResponse(BANK_CONTACT_CARD, UNHANDLED_TEXT);
         }
-
-
     }
 
     /**
@@ -247,9 +244,8 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
         for (String hours : openingWeekdayHours) {
             stringBuilder.append(hours);
         }
-        SimpleCard card = getSimpleCard(BANK_CONTACT_CARD, stringBuilder.toString());
 
-        return getSSMLOutputSpeech(stringBuilder.toString(), card);
+        return getSSMLResponse(BANK_CONTACT_CARD, stringBuilder.toString());
     }
 
 

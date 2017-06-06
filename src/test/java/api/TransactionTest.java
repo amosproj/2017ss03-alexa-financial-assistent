@@ -12,9 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -60,6 +58,22 @@ public class TransactionTest {
 		}
 
 		assertTrue(foundTransaction);
+	}
+
+	@Test
+	public void getTransactions(){
+		Collection<Transaction> transactions = AccountAPI.getTransactionsForAccount(ACCOUNT_NUMBER1);
+		System.out.println(AccountAPI.getAccount(ACCOUNT_NUMBER1).getIban());
+
+		List<Transaction> txs = new ArrayList<>(transactions);
+		Collections.reverse(txs);
+
+		for(Transaction transaction : txs) {
+			System.out.println("ID: " + transaction.getTransactionId());
+			System.out.println("Source: " + transaction.getSourceAccount());
+			System.out.println("Destination: " + transaction.getDestinationAccount());
+			System.out.println("Date: " + transaction.getValueDate());
+		}
 	}
 
 }

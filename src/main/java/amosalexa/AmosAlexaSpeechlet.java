@@ -96,6 +96,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         for (SpeechletObserver speechService : list) {
             SpeechletResponse response = null;
             try {
+                LOGGER.info("IntentName: ", requestEnvelope.getRequest().getIntent().getName());
                 response = speechService.onIntent(requestEnvelope);
             } catch (SpeechletException e) {
                 LOGGER.error(e.getMessage());
@@ -131,6 +132,8 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         LOGGER.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
+
+
 
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
@@ -168,6 +171,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
                 return response;
             }
         }
+
 
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
