@@ -11,14 +11,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TransferTemplate {
+public class TransferTemplate implements Comparable<TransferTemplate> {
     private int id;
     private String target;
     private double amount;
     private Date createdAt;
 
     private static int LAST_ID = 0;
-    private static String DEFAULT_FILENAME = "transfer_templates.csv";
+    private static String DEFAULT_FILENAME = "test_transfer_templates.csv";
 
     public TransferTemplate(String target, double amount) {
         this.id = ++LAST_ID;
@@ -101,5 +101,16 @@ public class TransferTemplate {
 
         TransferTemplate tt = (TransferTemplate) obj;
         return id == tt.id && amount == tt.amount && target.equals(tt.target) && createdAt.equals(tt.createdAt);
+    }
+
+    @Override
+    public int compareTo(TransferTemplate o) {
+        if (id > o.id) {
+            return 1;
+        }
+        if (id < o.id) {
+            return -1;
+        }
+        return 0;
     }
 }

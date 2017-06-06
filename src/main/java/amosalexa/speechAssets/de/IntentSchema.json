@@ -111,7 +111,6 @@
         "Wie sind meine Daueraufträge",
         "Was sind meine Daueraufträge",
         "Nenne mir meine Daueraufträge",
-        "Sende Daueraufträge per {Channel}",
         "Daueraufträge an {Payee}"
       ],
       "slots": [
@@ -182,6 +181,28 @@
       "slots": [
         {
           "name": "BankCardNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "ListTransferTemplatesIntent",
+      "slots": []
+    },
+    {
+      "intent": "DeleteTransferTemplatesIntent",
+      "slots": [
+        {
+          "name": "TemplateID",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "EditTransferTemplateIntent",
+      "slots": [
+        {
+          "name": "TemplateID",
           "type": "AMAZON.NUMBER"
         }
       ]

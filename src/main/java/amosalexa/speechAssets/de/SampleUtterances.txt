@@ -35,3 +35,7 @@ ReplacementCardIntent Bestelle eine Ersatzkarte
 ReplacementCardIntent Ich brauche eine Ersatzkarte
 
 BlockCardIntent Sperre Karte {BankCardNumber}
+
+ListTransferTemplatesIntent Überweisungsvorlagen
+DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
+EditTransferTemplateIntent Bearbeite Vorlage {TemplateID}
