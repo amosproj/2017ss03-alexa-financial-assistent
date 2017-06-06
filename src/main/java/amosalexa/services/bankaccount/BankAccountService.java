@@ -86,6 +86,9 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
 
         Intent intent = requestEnvelope.getRequest().getIntent();
 
+        if(!intent.getName().equals(BANK_ACCOUNT_INTENT))
+            return null;
+
         sessionID = requestEnvelope.getSession().getSessionId();
         String slotValue = intent.getSlot(SLOT_NAME) != null ? intent.getSlot(SLOT_NAME).getValue() : null;
 
