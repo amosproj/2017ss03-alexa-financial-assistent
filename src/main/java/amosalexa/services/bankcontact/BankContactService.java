@@ -262,7 +262,7 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
     private SpeechletResponse getPermissionsResponse() {
 
         String speechText = "Dieser Skill hat keine Berechtigung auf deine Adresse " +
-                "Gib bitte diesem Skill die Berechtigung auf deine Adresses zuzugreifen";
+                "Gib bitte diesem Skill die Berechtigung auf deine Adresse zu zugreifen";
 
         AskForPermissionsConsentCard card = new AskForPermissionsConsentCard();
         card.setTitle(BANK_CONTACT_CARD);
