@@ -80,7 +80,7 @@ public class AmosAlexaSpeechletTest {
         String response = testIntentMatches("ReplacementCardIntent",
                 "Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: (.*)");
 
-        Pattern p = Pattern.compile("Kreditkarte mit den Endziffern ([0-9]+)\\.");
+        Pattern p = Pattern.compile("karte mit den Endziffern ([0-9]+)\\.");
         Matcher m = p.matcher(response);
 
         if (m.find()) {

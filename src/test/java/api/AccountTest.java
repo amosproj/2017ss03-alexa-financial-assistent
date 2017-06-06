@@ -28,7 +28,7 @@ public class AccountTest {
 
     public static final String ACCOUNT_NUMBER = "0000000000";
     public static final String ACCOUNT_NUMBER2 = "0000000001";
-    public static final String CARD_NUMBER = "0000000001";
+    public static final String CARD_NUMBER = "0000004711";
 
     private static String getCurrentOpeningDate() {
         Calendar cal = Calendar.getInstance();
@@ -83,7 +83,9 @@ public class AccountTest {
         for(Card card1 : cards) {
             if(card1.getCardNumber().equals(newCard.getCardNumber())) {
                 foundCard = true;
-                break;
+            } else {
+                // Clean up
+                AccountAPI.deleteCard(ACCOUNT_NUMBER, card1.getCardId());
             }
         }
 
