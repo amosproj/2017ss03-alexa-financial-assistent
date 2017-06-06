@@ -2,7 +2,6 @@ package amosalexa.services.bankcontact;
 
 
 import amosalexa.SpeechletSubject;
-import amosalexa.security.AuthenticationManager;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.DeviceAddressUtil;
 import amosalexa.services.SpeechService;
@@ -127,8 +126,7 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
         // check permission for device address
         if (consentToken == null) {
             log.info("Consent token is null. Ask for permission!");
-            // simulation environment does not support permission requests
-            // return getPermissionsResponse();
+            return getPermissionsResponse();
         }
 
         switch (intentName) {
@@ -141,8 +139,6 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
             default:
                 return getAskResponse(BANK_CONTACT_CARD, UNHANDLED_TEXT);
         }
-
-
     }
 
     /**
@@ -247,13 +243,8 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
         for (String hours : openingWeekdayHours) {
             stringBuilder.append(hours);
         }
-        SimpleCard card = getSimpleCard(BANK_CONTACT_CARD, stringBuilder.toString());
-        SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
-        outputSpeech.setSsml("<speak>" + stringBuilder.toString() + "</speak>");
 
-        log.info("Speech: " + stringBuilder.toString());
-
-        return SpeechletResponse.newTellResponse(outputSpeech, card);
+        return getSSMLResponse(BANK_CONTACT_CARD, stringBuilder.toString());
     }
 
 

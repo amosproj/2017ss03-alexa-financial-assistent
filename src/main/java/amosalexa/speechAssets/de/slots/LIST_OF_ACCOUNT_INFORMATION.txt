@@ -6,3 +6,5 @@ Abhebegebühr
 Zinssatz
 Kreditlimit
 Kreditkartenlimit
+Transaktionen
+Umsätze

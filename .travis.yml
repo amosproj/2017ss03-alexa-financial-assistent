@@ -6,7 +6,7 @@ script: ./gradlew test && ./gradlew buildZip
 deploy:
   - provider: lambda
     on:
-      branch: master
+      branch: develop
     skip_cleanup: true
     zip: build/distributions/amos-ss17-alexa-fat-1.0.zip
     function_name: amos-alexa

@@ -13,6 +13,9 @@
       "intent": "TestListIntent"
     },
     {
+      "intent": "SecuritiesAccountInformationIntent"
+    },
+    {
       "intent": "AccountInformation",
       "slots": [
         {
@@ -115,6 +118,19 @@
           "type": "AMAZON.DATE"
         }
       ]
+    },
+    {
+      "slots": [
+        {
+          "name": "StandingOrderKeyword",
+          "type": "LIST_OF_STANDING_ORDER_KEYWORDS"
+        },
+        {
+          "name": "TransactionKeyword",
+          "type": "LIST_OF_TRANSACTION_KEYWORDS"
+        }
+      ],
+      "intent": "StandingOrdersKeywordIntent"
     },
     {
       "intent": "FourDigitNumberIntent",

@@ -71,3 +71,14 @@ StandingOrdersInfoIntent Daueraufträge an {Payee}
 
 StandingOrdersModifyIntent Ändere den Betrag von Dauerauftrag Nummer {Number} auf {Amount} Euro
 StandingOrdersModifyIntent Ändere den Ausführungsrhythmus von Dauerauftrag Nummer {Number} auf {ExecutionRate} beginnend am {FirstExecution}
+
+StandingOrdersKeywordIntent Wie viel bezahle ich für {StandingOrderKeyword}
+StandingOrdersKeywordIntent Wie viel bezahle ich monatlich für {StandingOrderKeyword}
+StandingOrdersKeywordIntent Welchen Betrag bezahle ich für {StandingOrderKeyword}
+StandingOrdersKeywordIntent Welchen Betrag bezahle ich monatlich für {StandingOrderKeyword}
+StandingOrdersKeywordIntent Wie sind meine monatlichen {TransactionKeyword}
+
+SecuritiesAccountInformationIntent Wie sind meine Aktien
+SecuritiesAccountInformationIntent Wie ist der Stand meiner Aktien
+SecuritiesAccountInformationIntent Nenne mir meine Aktien
+SecuritiesAccountInformationIntent Wie ist mein Depotstatus
