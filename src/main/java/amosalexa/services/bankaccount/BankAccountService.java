@@ -4,6 +4,7 @@ import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
+import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
@@ -53,7 +54,7 @@ public class BankAccountService implements SpeechService {
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
 
-        IntentRequest request = requestEnvelope.getRequest();
+        Intent intent = requestEnvelope.getRequest().getIntent();
 
         Account account = AccountAPI.getAccount(number);
 
@@ -62,10 +63,13 @@ public class BankAccountService implements SpeechService {
         String repromptText = "Was möchtest du über dein Konto erfahren? Frage mich etwas!";
 
 
-        String slotValue = request.getIntent().getSlot(SLOT_NAME).getValue().toLowerCase();
-        log.info("SlotValue: " + slotValue);
+        String slotValue = intent.getSlot(SLOT_NAME) != null ? intent.getSlot(SLOT_NAME).getValue() : null;
+
+        log.info("account information intent - slot: " + slotValue);
 
         if(slotValue != null){
+            slotValue = slotValue.toLowerCase();
+
             String slot = "kontostand";
             if(slot.equals(slotValue)){
                 speechText = "Dein "  + slot + " beträgt " + account.getBalance();
