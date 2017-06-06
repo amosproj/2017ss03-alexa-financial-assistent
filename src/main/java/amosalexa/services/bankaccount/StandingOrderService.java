@@ -80,11 +80,14 @@ public class StandingOrderService implements SpeechService {
             return askForModificationConfirmation(intent, session);
         } else if ("StandingOrdersKeywordIntent".equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
+            session.setAttribute(CONTEXT, "StandingOrderKeyword");
             return getStandingOrdersInfoForKeyword(intent, session);
-        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderInfo")) {
+        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
             return getStandingOrdersDeleteResponse(intent, session);
+        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderKeyword")) {
+            return getStandingOrderKeywordResultsInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
             return getStandingOrdersModifyResponse(intent, session);
         } else if ("AMAZON.NoIntent".equals(intentName)) {
@@ -259,12 +262,33 @@ public class StandingOrderService implements SpeechService {
                 standingOrders.size() + " gefundenen Dauerauftraegen ")
                 .append("konnte ich berechnen, dass du monatlich " + total + " Euro ")
                 .append(keyword.equals("sparplan regelm. einzahlung") ? "zum Sparen zuruecklegst. " : "fuer " + keyword + " bezahlst. ");
+        builder.append("Soll ich die gefundenen Dauerauftraege aufzaehlen? ");
         builder.append("</speak>");
 
         SsmlOutputSpeech speech = new SsmlOutputSpeech();
         speech.setSsml(builder.toString());
 
-        return SpeechletResponse.newTellResponse(speech);
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    private SpeechletResponse getStandingOrderKeywordResultsInfo(Session session) {
+        session.setAttribute(CONTEXT, "StandingOrderInfo");
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i <= 1; i++) {
+            builder.append(standingOrders.get(i).getSpeechOutput());
+        }
+        if (standingOrders.size() > 2) {
+            return askForFurtherStandingOrderEntry(session, builder, 2);
+        } else {
+            builder.append("Das waren alle vorhandenen Dauerauftraege. ");
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText(builder.toString());
+            return SpeechletResponse.newTellResponse(speech);
+        }
     }
 
     private static double getStringSimilarity(String s1, String s2) {
