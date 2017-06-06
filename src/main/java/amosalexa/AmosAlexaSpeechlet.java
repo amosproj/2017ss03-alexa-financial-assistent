@@ -56,7 +56,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new SavingsPlanService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
         new SecuritiesAccountInformationService(amosAlexaSpeechlet);
-        new AuthenticationManager(amosAlexaSpeechlet);
+        //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
