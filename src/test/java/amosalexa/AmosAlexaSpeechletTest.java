@@ -161,9 +161,9 @@ public class AmosAlexaSpeechletTest {
                 i++;
             }
         }
-
-        AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
-        SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
+        
+        //AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
+        //SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
         assertEquals(expectedOutput, performIntent(intent, slots));
     }
 
