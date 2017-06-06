@@ -63,6 +63,19 @@ public abstract class AbstractSpeechService {
     }
 
     /**
+     * Helper method for retrieving an SsmlOutputSpeech object when given a string of TTS.
+     *
+     * @param ssmlText the text that should be spoken out to the user.
+     * @return an instance of SsmlOutputSpeech.
+     */
+    protected SsmlOutputSpeech getSSMLOutputSpeech(String ssmlText) {
+        SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
+        outputSpeech.setSsml("<speak>" + ssmlText + "</speak>");
+
+        return outputSpeech;
+    }
+
+    /**
      * Helper method that returns a reprompt object. This is used in Ask responses where you want
      * the user to be able to respond to your speech.
      *
@@ -91,18 +104,31 @@ public abstract class AbstractSpeechService {
         return card;
     }
 
-
     /**
      * response a ssml speech text (further information:
      * https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference)
+     * @param cardTitle card title
      * @param ssmlText string in ssml format
-     * @param card card object
      * @return SpeechletResponse
      */
-    protected SpeechletResponse getSSMLOutputSpeech(String ssmlText, Card card){
-        SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
-        outputSpeech.setSsml("<speak>" + ssmlText + "</speak>");
+    protected SpeechletResponse getSSMLResponse(String cardTitle, String ssmlText){
+        SimpleCard card = getSimpleCard(cardTitle, ssmlText);
+        SsmlOutputSpeech ssmlOutputSpeech = getSSMLOutputSpeech(ssmlText);
+        return SpeechletResponse.newTellResponse(ssmlOutputSpeech, card);
+    }
 
-        return SpeechletResponse.newTellResponse(outputSpeech, card);
+    /**
+     * Helper method for retrieving an Ask response with a simple card and reprompt included.
+     *
+     * @param cardTitle  Title of the card that you want displayed.
+     * @param speechText speech text that will be spoken to the user.
+     * @return the resulting card and speech text.
+     */
+    protected SpeechletResponse getSSMLAskResponse(String cardTitle, String speechText) {
+        SimpleCard card = getSimpleCard(cardTitle, speechText);
+        SsmlOutputSpeech ssmlOutputSpeech = getSSMLOutputSpeech(speechText);
+        Reprompt reprompt = getReprompt(ssmlOutputSpeech);
+
+        return SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
     }
 }
