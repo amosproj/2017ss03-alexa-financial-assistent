@@ -126,8 +126,7 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
         // check permission for device address
         if (consentToken == null) {
             log.info("Consent token is null. Ask for permission!");
-            // simulation environment does not support permission requests
-            // return getPermissionsResponse();
+            return getPermissionsResponse();
         }
 
         switch (intentName) {
