@@ -88,13 +88,13 @@ public class PriceQueryService implements SpeechService {
             List<Item> items = AWSLookup.itemSearch(keyword, 1, null);
 
             if (!items.isEmpty()) {
-                speechTextStart = "Bingo, Ich habe etwas gefunden!";
+                speechTextStart = "Hier sind die Ergebnisse von Amazon.de: ";
             }
             String specheTextItems = "";
 
             for (int i = 0; i < 3; i++) {
                 Offer offer = AWSLookup.offerLookup(items.get(i).getASIN());
-                specheTextItems = specheTextItems + AWSUtil.shortTitle(items.get(i).getTitle()) + "fuer " + offer.getLowestNewPrice() / 100 + " Euro";
+                specheTextItems = specheTextItems + AWSUtil.shortTitle(items.get(i).getTitle()) + "fuer " + offer.getLowestNewPrice() / 100 + " Euro ";
             }
 
             speechText = speechTextStart + specheTextItems;
