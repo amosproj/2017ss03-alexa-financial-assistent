@@ -1,6 +1,7 @@
 package amosalexa.services.bankaccount;
 
 import amosalexa.SpeechletSubject;
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -19,16 +20,22 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 
-public class BankAccountService implements SpeechService {
+public class BankAccountService extends AbstractSpeechService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
 
+    /**
+     * intents
+     */
     private static final String BANK_ACCOUNT_INTENT = "AccountInformation";
 
-    private static final String CARD_NAME = "Konto Information";
+    /**
+     * cards
+     */
+    private static final String CARD_NAME = "Kontoinformation";
 
     /**
-     *
+     * bank account number
      */
     private static final String number = "0000000001";
 
@@ -36,6 +43,13 @@ public class BankAccountService implements SpeechService {
      * Name for custom slot types
      */
     private static final String SLOT_NAME = "AccountInformationSlots";
+
+
+    /**
+     * speech texts
+     */
+    private static String speechText = "Was möchtest du über dein Konto erfahren?";
+    private static final String repromptText = "Was möchtest du über dein Konto erfahren? Frage mich etwas!";
 
     public BankAccountService(SpeechletSubject speechletSubject){
       subscribe(speechletSubject);
@@ -58,21 +72,18 @@ public class BankAccountService implements SpeechService {
 
         Account account = AccountAPI.getAccount(number);
 
-        String speechText = "Was möchtest du über dein Konto erfahren?";
-
-        String repromptText = "Was möchtest du über dein Konto erfahren? Frage mich etwas!";
-
-
         String slotValue = intent.getSlot(SLOT_NAME) != null ? intent.getSlot(SLOT_NAME).getValue() : null;
 
         log.info("account information intent - slot: " + slotValue);
+
 
         if(slotValue != null){
             slotValue = slotValue.toLowerCase();
 
             String slot = "kontostand";
             if(slot.equals(slotValue)){
-                speechText = "Dein "  + slot + " beträgt " + account.getBalance();
+                speechText = "Dein Kontostand beträgt <say-as interpret-as=\"unit\">€" + account.getBalance() + "</say-as>\n";
+                return getSSMLOutputSpeech( speechText, getSimpleCard(CARD_NAME, slot));
             }
 
             slot = "kontonummer";
@@ -92,7 +103,8 @@ public class BankAccountService implements SpeechService {
 
             slot = "abhebegebühr";
             if(slot.equals(slotValue)){
-                speechText = "Deine "  + slot + " beträgt " + account.getWithdrawalFee();
+                speechText = "Deine "  + slot + " beträgt <say-as interpret-as=\"unit\">€" + account.getWithdrawalFee() + "</say-as>\n" ;
+                return getSSMLOutputSpeech( speechText, getSimpleCard(CARD_NAME, slot));
             }
 
             slot = "zinssatz";
@@ -102,31 +114,21 @@ public class BankAccountService implements SpeechService {
 
             slot = "kreditlimit";
             if(slot.equals(slotValue)){
-                speechText = "Dein "  + slot + " ist " + account.getCreditLimit();
+                speechText = "Dein "  + slot + " beträgt <say-as interpret-as=\"unit\">€" + account.getCreditLimit() + "</say-as>\n" ;
+                return getSSMLOutputSpeech( speechText, getSimpleCard(CARD_NAME, slot));
             }
 
             slot = "kreditkartenlimit";
             if(slot.equals(slotValue)){
-                speechText = "Dein "  + slot + " beträgt " + account.getCreditcardLimit();
+                speechText = "Dein "  + slot + " beträgt <say-as interpret-as=\"unit\">€" + account.getCreditcardLimit() + "</say-as>\n" ;
+                return getSSMLOutputSpeech( speechText, getSimpleCard(CARD_NAME, slot));
             }
 
-            return getSpeechletResponse(speechText);
+            return getResponse(CARD_NAME, speechText);
 
         } else {
-            return getSpeechletResponse(repromptText);
+
+            return getResponse(CARD_NAME, repromptText);
         }
-    }
-
-
-    private SpeechletResponse getSpeechletResponse(String speechText){
-
-        SimpleCard card = new SimpleCard();
-        card.setTitle(CARD_NAME);
-        card.setContent(speechText);
-
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        return SpeechletResponse.newTellResponse(speech, card);
     }
 }

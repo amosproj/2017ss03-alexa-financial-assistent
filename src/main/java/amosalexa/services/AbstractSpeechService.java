@@ -3,10 +3,7 @@ package amosalexa.services;
 
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.OutputSpeech;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
-import com.amazon.speech.ui.Reprompt;
-import com.amazon.speech.ui.SimpleCard;
+import com.amazon.speech.ui.*;
 
 public abstract class AbstractSpeechService {
 
@@ -92,5 +89,20 @@ public abstract class AbstractSpeechService {
         card.setContent(content);
 
         return card;
+    }
+
+
+    /**
+     * response a ssml speech text (further information:
+     * https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference)
+     * @param ssmlText string in ssml format
+     * @param card card object
+     * @return SpeechletResponse
+     */
+    protected SpeechletResponse getSSMLOutputSpeech(String ssmlText, Card card){
+        SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
+        outputSpeech.setSsml("<speak>" + ssmlText + "</speak>");
+
+        return SpeechletResponse.newTellResponse(outputSpeech, card);
     }
 }

@@ -248,12 +248,8 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
             stringBuilder.append(hours);
         }
         SimpleCard card = getSimpleCard(BANK_CONTACT_CARD, stringBuilder.toString());
-        SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
-        outputSpeech.setSsml("<speak>" + stringBuilder.toString() + "</speak>");
 
-        log.info("Speech: " + stringBuilder.toString());
-
-        return SpeechletResponse.newTellResponse(outputSpeech, card);
+        return getSSMLOutputSpeech(stringBuilder.toString(), card);
     }
 
 
