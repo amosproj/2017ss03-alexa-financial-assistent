@@ -83,10 +83,8 @@ public class AccountTest {
         for(Card card1 : cards) {
             if(card1.getCardNumber().equals(newCard.getCardNumber())) {
                 foundCard = true;
-            } else {
-                // Clean up
-                AccountAPI.deleteCard(ACCOUNT_NUMBER, card1.getCardId());
             }
+            AccountAPI.deleteCard(ACCOUNT_NUMBER, card1.getCardId());
         }
 
         assertTrue(foundCard);

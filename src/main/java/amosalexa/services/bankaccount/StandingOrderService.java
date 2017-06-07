@@ -13,6 +13,7 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
+import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.banking.StandingOrder;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +25,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-//TODO write test
 public class StandingOrderService implements SpeechService {
 
     // FIXME: Get the current account number from the session
@@ -50,6 +50,7 @@ public class StandingOrderService implements SpeechService {
         speechletSubject.attachSpeechletObserver(this, "StandingOrdersInfoIntent");
         speechletSubject.attachSpeechletObserver(this, "StandingOrdersDeleteIntent");
         speechletSubject.attachSpeechletObserver(this, "StandingOrdersModifyIntent");
+        speechletSubject.attachSpeechletObserver(this, "StandingOrdersKeywordIntent");
         speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
         speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
         speechletSubject.attachSpeechletObserver(this, "AMAZON.StopIntent");
@@ -77,10 +78,16 @@ public class StandingOrderService implements SpeechService {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "StandingOrderModification");
             return askForModificationConfirmation(intent, session);
-        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderInfo")) {
+        } else if ("StandingOrdersKeywordIntent".equals(intentName)) {
+            LOGGER.info(getClass().toString() + " Intent started: " + intentName);
+            session.setAttribute(CONTEXT, "StandingOrderKeyword");
+            return getStandingOrdersInfoForKeyword(intent, session);
+        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
             return getStandingOrdersDeleteResponse(intent, session);
+        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderKeyword")) {
+            return getStandingOrderKeywordResultsInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
             return getStandingOrdersModifyResponse(intent, session);
         } else if ("AMAZON.NoIntent".equals(intentName)) {
@@ -183,6 +190,118 @@ public class StandingOrderService implements SpeechService {
         speech.setText(text);
 
         return SpeechletResponse.newTellResponse(speech, card);
+    }
+
+    private SpeechletResponse getStandingOrdersInfoForKeyword(Intent intent, Session session) {
+        Map<String, Slot> slots = intent.getSlots();
+        Slot standingOrderKeywordSlot = slots.get("StandingOrderKeyword");
+        Slot transactionKeywordSlot = slots.get("TransactionKeyword");
+
+        if ((standingOrderKeywordSlot == null || standingOrderKeywordSlot.getValue() == null) &&
+                (transactionKeywordSlot == null || transactionKeywordSlot.getValue() == null)) {
+            //TODO
+            return null;
+        }
+
+        String keyword = standingOrderKeywordSlot.getValue() != null ? standingOrderKeywordSlot.getValue() : transactionKeywordSlot.getValue();
+        LOGGER.info("Keyword: " + keyword);
+
+        if (keyword.equals("ersparnisse")) {
+            keyword = "sparplan regelm. einzahlung";
+        }
+
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
+        standingOrders = new ArrayList<>();
+
+        for (StandingOrder so : standingOrdersCollection) {
+            String description = so.getDescription().toLowerCase();
+            //LOGGER.info("Description: " + description);
+            if (!description.equals(keyword)) {
+                String[] singleWords = description.split("\\s+");
+                for (String s : singleWords) {
+                    if (keyword.equals(s)) {
+                        standingOrders.add(so);
+                        continue;
+                    }
+                    double similarity = getStringSimilarity(s, keyword);
+                    //LOGGER.info("Similarity: " + s + ", " + similarity);
+
+                    //0.9 seems to be a good value for similarity
+                    if (similarity >= 0.9) {
+                        standingOrders.add(so);
+                    }
+                }
+            } else {
+                standingOrders.add(so);
+                continue;
+            }
+        }
+
+        if (standingOrders.size() == 0) {
+            String answer = "Ich konnte keine Dauerauftraege finden, die zu diesem Stichwort passen.";
+            return getSpeechletResponse(answer, answer, false);
+        }
+
+        double total = 0;
+        for (StandingOrder so : standingOrders) {
+            if (so.getExecutionRate().equals(StandingOrder.ExecutionRate.MONTHLY)) {
+                total += so.getAmount().doubleValue();
+            } else if (so.getExecutionRate().equals(StandingOrder.ExecutionRate.QUARTERLY)) {
+                total += so.getAmount().doubleValue() / 3;
+            } else if (so.getExecutionRate().equals(StandingOrder.ExecutionRate.HALF_YEARLY)) {
+                total += so.getAmount().doubleValue() / 6;
+            } else if (so.getExecutionRate().equals(StandingOrder.ExecutionRate.YEARLY)) {
+                total += so.getAmount().doubleValue() / 12;
+            }
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("<speak>");
+        builder.append("Aus ").append(standingOrders.size() == 1 ? "<phoneme alphabet=\"ipa\" ph=\"ˈaɪ̯nəm\">einem</phoneme>" +
+                " gefundenen Dauerauftrag " :
+                standingOrders.size() + " gefundenen Dauerauftraegen ")
+                .append("konnte ich berechnen, dass du monatlich " + total + " Euro ")
+                .append(keyword.equals("sparplan regelm. einzahlung") ? "zum Sparen zuruecklegst. " : "fuer " + keyword + " bezahlst. ");
+        builder.append("Soll ich die gefundenen Dauerauftraege aufzaehlen? ");
+        builder.append("</speak>");
+
+        SsmlOutputSpeech speech = new SsmlOutputSpeech();
+        speech.setSsml(builder.toString());
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    private SpeechletResponse getStandingOrderKeywordResultsInfo(Session session) {
+        session.setAttribute(CONTEXT, "StandingOrderInfo");
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i <= 1; i++) {
+            builder.append(standingOrders.get(i).getSpeechOutput());
+        }
+        if (standingOrders.size() > 2) {
+            return askForFurtherStandingOrderEntry(session, builder, 2);
+        } else {
+            builder.append("Das waren alle vorhandenen Dauerauftraege. ");
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText(builder.toString());
+            return SpeechletResponse.newTellResponse(speech);
+        }
+    }
+
+    private static double getStringSimilarity(String s1, String s2) {
+        String longer = s1, shorter = s2;
+        if (s1.length() < s2.length()) { // longer should always have greater length
+            longer = s2;
+            shorter = s1;
+        }
+        int longerLength = longer.length();
+        if (longerLength == 0) {
+            return 1.0; /* both strings are zero length */
+        }
+        return (longerLength - StringUtils.getLevenshteinDistance(longer, shorter)) / (double) longerLength;
     }
 
     private SpeechletResponse askForFurtherStandingOrderEntry(Session session, StringBuilder builder, int nextStandingOrder) {
@@ -322,7 +441,7 @@ public class StandingOrderService implements SpeechService {
                                                    boolean isAskResponse) {
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
-        card.setTitle("Block Bank Card");
+        card.setTitle("Daueraufräge");
         card.setContent(speechText);
 
         // Create the plain text output.

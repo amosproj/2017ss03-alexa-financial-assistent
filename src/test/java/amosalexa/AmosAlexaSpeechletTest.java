@@ -8,15 +8,18 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
+import model.banking.StandingOrder;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,8 +28,15 @@ import static org.junit.Assert.assertTrue;
 
 public class AmosAlexaSpeechletTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
+
     private Session session;
     private final String SESSION_ID = "SessionId.2682fed6-193f-48b3-afd7-c6185d075ddf";
+
+    // FIXME: Get the current account number from the session
+    private static final String ACCOUNT_NUMBER = "9999999999";
+
+    private static Integer savingsPlanTestStandingOrderId;
 
     /*************************************
      *          Testing section          *
@@ -57,6 +67,26 @@ public class AmosAlexaSpeechletTest {
     }
 
     @Test
+    public void standingOrdersInfoTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Keine Dauerauftraege vorhanden.");
+            add("Du hast momentan einen Dauerauftrag. " +
+                    "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+            add("Du hast momentan (.*) Dauerauftraege. " +
+                    "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+        }};
+        testIntentMatches(
+                "StandingOrdersInfoIntent", StringUtils.join(possibleAnswers, "|"));
+        testIntentMatches(
+                "AMAZON.YesIntent",
+                "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+        testIntentMatches(
+                "AMAZON.NoIntent", "Okay, tschuess!");
+    }
+
+    @Test
     public void savingsPlanTest() throws Exception {
         newSession();
 
@@ -71,14 +101,38 @@ public class AmosAlexaSpeechletTest {
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + ".");
+
+        Collection<StandingOrder> allStandingOrders = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
+        final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
+        int latestStandingOrderId = allStandingOrders.stream().max(comp).get().getStandingOrderId().intValue();
+        LOGGER.info("Latest standing order ID: " + latestStandingOrderId);
+        savingsPlanTestStandingOrderId = latestStandingOrderId;
+
+        testIntent(
+                "StandingOrdersDeleteIntent",
+                "Number:" + latestStandingOrderId, "Moechtest du den Dauerauftrag mit der Nummer "
+                        + latestStandingOrderId + " wirklich loeschen?");
+
+        testIntent(
+                "AMAZON.YesIntent",
+                "Dauerauftrag Nummer " + latestStandingOrderId + " wurde geloescht.");
     }
 
     @Test
     public void replacementCardDialogTest() throws Exception {
         newSession();
 
-        String response = testIntentMatches("ReplacementCardIntent",
-                "Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: (.*)");
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: (.*)");
+            add("Es wurden keine Kredit- oder EC-Karten gefunden.");
+        }};
+
+        String response = testIntentMatches("ReplacementCardIntent", StringUtils.join(possibleAnswers, "|"));
+
+        if (response.equals("Es wurden keine Kredit- oder EC-Karten gefunden.")) {
+            //Fallback
+            return;
+        }
 
         Pattern p = Pattern.compile("karte mit den Endziffern ([0-9]+)\\.");
         Matcher m = p.matcher(response);
@@ -140,8 +194,8 @@ public class AmosAlexaSpeechletTest {
             }
         }
 
-        AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
-        SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
+        //AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
+        //SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
         assertEquals(expectedOutput, performIntent(intent, slots));
     }
 
