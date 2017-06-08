@@ -54,6 +54,22 @@ public class AmosAlexaSpeechletTest {
     }
 
     @Test
+    public void bankAccountIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Du hast keine Überweisungen in deinem Konto");
+            add("Du hast (.*) Transaktionen.  Transaktionsnummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    " Transaktionsnummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    " Transaktionsnummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    " Möchtest du weitere Transaktionen hören");
+            add("Möchtest du weitere Transaktionen hören");
+        }};
+
+        testIntentMatches("AccountInformation", "AccountInformationSlots:überweisungen",  StringUtils.join(possibleAnswers, "|"));
+    }
+
+    @Test
     public void blockCardIntentTest() throws Exception {
         newSession();
 

@@ -96,7 +96,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         for (SpeechletObserver speechService : list) {
             SpeechletResponse response = null;
             try {
-                LOGGER.info("IntentName: ", requestEnvelope.getRequest().getIntent().getName());
                 response = speechService.onIntent(requestEnvelope);
             } catch (SpeechletException e) {
                 LOGGER.error(e.getMessage());
