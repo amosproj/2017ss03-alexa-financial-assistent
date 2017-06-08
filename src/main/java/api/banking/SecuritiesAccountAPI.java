@@ -25,6 +25,12 @@ public class SecuritiesAccountAPI {
 
 	private static BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
 
+	/**
+	 * Create securities account.
+	 *
+	 * @param clearingAccount the clearing account
+	 * @return the securities account
+	 */
 	public static SecuritiesAccount createSecuritiesAccount(String clearingAccount) {
 		SecuritiesAccount newSecuritiesAccount = new SecuritiesAccount();
 		newSecuritiesAccount.setClearingAccount(clearingAccount);
@@ -32,12 +38,19 @@ public class SecuritiesAccountAPI {
 		return (SecuritiesAccount) bankingRESTClient.postBankingModelObject("/securitiesAccounts", newSecuritiesAccount, SecuritiesAccount.class);
 	}
 
+	/**
+	 * Get securities account.
+	 *
+	 * @param securitiesAccountId the securities account id
+	 * @return the securities account
+	 */
 	public static SecuritiesAccount getSecuritiesAccount(Number securitiesAccountId){
 		return (SecuritiesAccount) bankingRESTClient.getBankingModelObject("/securitiesAccounts/" + securitiesAccountId, SecuritiesAccount.class);
 	}
 
 	/**
-	 * Get all securities for the given securities account
+	 * Get all securities for the given securities account.
+	 *
 	 * @param securitiesAccountNumber Account number
 	 * @return Collection of securities
 	 * @throws HttpClientErrorException
@@ -59,7 +72,8 @@ public class SecuritiesAccountAPI {
 	}
 
 	/**
-	 * Delete a securities account
+	 * Delete a securities account.
+	 *
 	 * @param securitiesAccountNumber Account number
 	 * @return True on success, False otherwise
 	 */
@@ -73,6 +87,19 @@ public class SecuritiesAccountAPI {
 		}
 	}
 
+
+	/**
+	 * Add security to securities account.
+	 *
+	 * @param securitiesAccountId the securities account id
+	 * @param isin                the isin
+	 * @param wkn                 the wkn
+	 * @param description         the description
+	 * @param quantity            the quantity
+	 * @param costPrice           the cost price
+	 * @param securityType        the security type
+	 * @return the security
+	 */
 	public static Security addSecurityToAccount(Number securitiesAccountId, String isin, String wkn, String description, Number quantity, Number costPrice,
 												Security.SecurityType securityType) {
 		Security newSecurity = new Security();
@@ -87,7 +114,8 @@ public class SecuritiesAccountAPI {
 	}
 
 	/**
-	 * Update a standing order
+	 * Update a security.
+	 *
 	 * @param securitiesAccountId Securities account id
 	 * @param security Security
 	 * @return True on success, False otherwise
@@ -103,17 +131,19 @@ public class SecuritiesAccountAPI {
 	}
 
 	/**
-	 * Get a security
+	 * Get a security.
+	 *
 	 * @param securitiesAccountId Securities account number
 	 * @param securityId Security id
 	 * @return Security
 	 */
-	public static Security getStandingOrder(Number securitiesAccountId, Number securityId) {
+	public static Security getSecurity(Number securitiesAccountId, Number securityId) {
 		return (Security) bankingRESTClient.getBankingModelObject("/securitiesAccounts/" + securitiesAccountId + "/securities/" + securityId, Security.class);
 	}
 
 	/**
-	 * Delete a security
+	 * Delete a security.
+	 *
 	 * @param securitiesAccountId Securities account number
 	 * @param securityId Security id
 	 * @return True on success, False otherwise

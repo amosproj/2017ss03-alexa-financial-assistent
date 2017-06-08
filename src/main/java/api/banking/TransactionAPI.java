@@ -14,7 +14,7 @@ public class TransactionAPI {
 	private static BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
 
 	/**
-	 * Create transaction
+	 * Create transaction.
 	 *
 	 * @param amount          the amount
 	 * @param sourceIban      the source IBAN (NOT ACCOUNT NUMBER)
@@ -34,6 +34,12 @@ public class TransactionAPI {
 		return createTransaction(newTransaction);
 	}
 
+	/**
+	 * Create transaction.
+	 *
+	 * @param newTransaction the new transaction
+	 * @return the transaction
+	 */
 	public static Transaction createTransaction(Transaction newTransaction) {
 		return (Transaction) bankingRESTClient.postBankingModelObject("/transactions", newTransaction, Transaction.class);
 	}
