@@ -8,6 +8,7 @@ import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import model.banking.Account;
 import model.banking.Transaction;
@@ -82,13 +83,9 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
 
 
     @Override
-    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
 
         Intent intent = requestEnvelope.getRequest().getIntent();
-
-        if(!intent.getName().equals(BANK_ACCOUNT_INTENT))
-            return null;
-
         sessionID = requestEnvelope.getSession().getSessionId();
         String slotValue = intent.getSlot(SLOT_NAME) != null ? intent.getSlot(SLOT_NAME).getValue() : null;
 
@@ -100,17 +97,19 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
         // check for dialog
         if(furtherTransactionDialogIndex != null && currentDialog != null){
             if(intent.getName().equals("AMAZON.YesIntent")){
+                log.info("Account Information Intent - AMAZON.YesIntent");
                 return getNextTransaction(furtherTransactionDialogIndex);
             }
 
             if(intent.getName().equals("AMAZON.NoIntent")){
+                log.info("Account Information Intent - AMAZON.NoIntent");
                 return getResponse(CARD_NAME, "Verstanden!");
             }
         }
 
-        log.info("account information intent - slot: " + slotValue);
-
+        // check slot values
         if (slotValue != null) {
+            log.info("Account Information Intent - Slot: " + slotValue);
             slotValue = slotValue.toLowerCase();
 
             String slot = "kontostand";
@@ -160,10 +159,9 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
             if ("überweisungen".equals(slotValue) || "transaktionen".equals(slotValue)) {
                 return handleTransactionSpeech();
             }
-
-            return getResponse(CARD_NAME, speechText);
-        } else {
             return getAskResponse(CARD_NAME, repromptText);
+        } else {
+           throw new SpeechletException();
         }
     }
 
