@@ -141,10 +141,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         if ("AMAZON.HelpIntent".equals(intentName)) {
             return getHelpResponse();
-        } else if ("GetAccountBalance".equals(intentName)) {
-            return getAccountBalanceResponse();
-        } else if ("checkCreditLimit".equals(intentName)) {
-            return getCreditLimitResponse();
         } else if ("BankTransferIntent".equals(intentName)) {
             LOGGER.info("intent: BankTransferIntent");
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "BankTransfer"); // Set CURRENTDIALOG to start the BankTransfer dialog
@@ -287,8 +283,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         String amount = "2";
         String name = "Paul";
 
-        //getting response regarding account balance
-        this.getAccountBalanceResponse();
 
         // FIXME: Hardcoded strings
         Number amountNum = Integer.parseInt(amount);
@@ -312,63 +306,4 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
-
-
-    /**
-     * Creates and returns a {@code SpeechletResponse} with the current account balance.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getAccountBalanceResponse() {
-        // FIXME: Hardcoded stuff
-        Account account = AccountAPI.getAccount("0000000000");
-
-        Number accountBalance = account.getBalance();
-        String speechText = "Your account balance is " + accountBalance;
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("AccountBalance");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
-     * Creates and returns a {@code SpeechletResponse} with the current account balance.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getCreditLimitResponse() {
-        // FIXME: Hardcoded stuff
-        Account account = AccountAPI.getAccount("0000000000");
-
-        Number creditLimit = account.getCreditLimit();
-
-        String speechText = "Your credit limit is " + creditLimit;
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("CreditLimit");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
 }
