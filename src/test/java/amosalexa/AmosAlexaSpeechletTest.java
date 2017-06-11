@@ -67,7 +67,7 @@ public class AmosAlexaSpeechletTest {
     }
 
     @Test
-    public void bankTransferIntentTest() throws Throwable, NullPointerException {
+    public void bankTransferIntentTest() throws Throwable {
         newSession();
 
         testIntentMatches("BankTransferIntent", "name:anne", "amount:2",
