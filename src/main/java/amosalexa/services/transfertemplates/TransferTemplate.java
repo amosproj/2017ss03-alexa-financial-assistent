@@ -1,5 +1,10 @@
 package amosalexa.services.transfertemplates;
 
+import api.DynamoDBClient;
+import api.DynamoDbStorable;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import org.w3c.dom.Attr;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,8 +15,9 @@ import java.nio.file.Files;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class TransferTemplate implements Comparable<TransferTemplate> {
+public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbStorable {
     private int id;
     private String target;
     private double amount;
@@ -19,6 +25,11 @@ public class TransferTemplate implements Comparable<TransferTemplate> {
 
     private static int LAST_ID = 0;
     private static String DEFAULT_FILENAME = "test_transfer_templates.csv";
+
+    public static Factory factory = (Factory<TransferTemplate>) TransferTemplate::new;
+
+    private TransferTemplate() {
+    }
 
     public TransferTemplate(String target, double amount) {
         this.id = ++LAST_ID;
@@ -51,6 +62,7 @@ public class TransferTemplate implements Comparable<TransferTemplate> {
         return createdAt;
     }
 
+    @Deprecated
     private TransferTemplate(String csvLine) {
         String[] values = csvLine.split(";");
 
@@ -60,15 +72,18 @@ public class TransferTemplate implements Comparable<TransferTemplate> {
         this.createdAt = new Date(Long.parseLong(values[3]));
     }
 
+    @Deprecated
     private String toCSVLine() {
         return this.id + ";" + this.target + ";" + this.amount + ";" + createdAt.getTime();
     }
 
-    public static Map<Integer, TransferTemplate> readTransferTemplate() throws IOException {
-        return readTransferTemplate(DEFAULT_FILENAME);
+    @Deprecated
+    public static Map<Integer, TransferTemplate> readTransferTemplateFromFile() throws IOException {
+        return readTransferTemplateFromFile(DEFAULT_FILENAME);
     }
 
-    public static Map<Integer, TransferTemplate> readTransferTemplate(String filename) throws IOException {
+    @Deprecated
+    public static Map<Integer, TransferTemplate> readTransferTemplateFromFile(String filename) throws IOException {
         Map<Integer, TransferTemplate> templateMap = new HashMap<>();
 
         Files.lines(FileSystems.getDefault().getPath(filename), Charset.forName("UTF-8")).forEach(l -> {
@@ -79,11 +94,13 @@ public class TransferTemplate implements Comparable<TransferTemplate> {
         return templateMap;
     }
 
-    public static void writeTransferTemplates(Map<Integer, TransferTemplate> templateMap) throws FileNotFoundException, UnsupportedEncodingException {
-        writeTransferTemplates(DEFAULT_FILENAME, templateMap);
+    @Deprecated
+    public static void writeTransferTemplatesToFile(Map<Integer, TransferTemplate> templateMap) throws FileNotFoundException, UnsupportedEncodingException {
+        writeTransferTemplatesToFile(DEFAULT_FILENAME, templateMap);
     }
 
-    public static void writeTransferTemplates(String filename, Map<Integer, TransferTemplate> templateMap) throws FileNotFoundException, UnsupportedEncodingException {
+    @Deprecated
+    public static void writeTransferTemplatesToFile(String filename, Map<Integer, TransferTemplate> templateMap) throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter writer = new PrintWriter(filename, "UTF-8");
 
         for (Map.Entry<Integer, TransferTemplate> entry : templateMap.entrySet()) {
@@ -100,7 +117,9 @@ public class TransferTemplate implements Comparable<TransferTemplate> {
         }
 
         TransferTemplate tt = (TransferTemplate) obj;
-        return id == tt.id && amount == tt.amount && target.equals(tt.target) && createdAt.equals(tt.createdAt);
+
+        return this == tt ||
+                (id == tt.id && amount == tt.amount && target.equals(tt.target) && createdAt.equals(tt.createdAt));
     }
 
     @Override
@@ -113,4 +132,44 @@ public class TransferTemplate implements Comparable<TransferTemplate> {
         }
         return 0;
     }
+
+    @Override
+    public Map<String, AttributeValue> getDynamoDbItem() {
+        Map<String, AttributeValue> map = new TreeMap<>();
+
+        map.put("id", new AttributeValue().withN(Integer.toString(this.id)));
+        map.put("target", new AttributeValue(this.target));
+        map.put("amount", new AttributeValue().withN(Double.toString(this.amount)));
+        map.put("createdAt", new AttributeValue().withN(Long.toString(this.createdAt.getTime())));
+
+        return map;
+    }
+
+    @Override
+    public Map<String, AttributeValue> getDynamoDbKey() {
+        Map<String, AttributeValue> map = new TreeMap<>();
+        map.put("id", new AttributeValue().withN(Integer.toString(this.id)));
+        return map;
+    }
+
+    @Override
+    public void setDynamoDbAttribute(String attributeName, AttributeValue attributeValue) {
+        switch (attributeName) {
+            case "id":
+                this.id = Integer.parseInt(attributeValue.getN());
+                break;
+            case "target":
+                this.target = attributeValue.getS();
+                break;
+            case "amount":
+                this.amount = Double.parseDouble(attributeValue.getN());
+                break;
+            case "createdAt":
+                this.createdAt = new Date(Long.parseLong(attributeValue.getN()));
+                break;
+            default:
+                throw new RuntimeException("Unknown attribute");
+        }
+    }
+
 }

@@ -3,12 +3,10 @@ package amosalexa.services.transfertemplates;
 import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
-import amosalexa.services.bankcontact.AlexaDeviceAddressClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazonaws.services.s3.transfer.Transfer;
 
 import java.io.IOException;
 import java.util.*;
@@ -53,7 +51,7 @@ public class TransferTemplateService implements SpeechService {
         Map<Integer, TransferTemplate> templateMap = null;
 
         try {
-            templateMap = TransferTemplate.readTransferTemplate();
+            templateMap = TransferTemplate.readTransferTemplateFromFile();
         } catch (IOException e) {
             e.printStackTrace();
             return null;
