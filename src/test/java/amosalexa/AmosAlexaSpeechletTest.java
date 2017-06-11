@@ -67,6 +67,19 @@ public class AmosAlexaSpeechletTest {
     }
 
     @Test
+    public void bankTransferIntentTest() throws Throwable, NullPointerException {
+        newSession();
+
+        testIntentMatches("BankTransferIntent", "name:anne", "amount:2",
+                "Aktuell betraegt dein Kontostand (.*) Euro\\. Bist du sicher, dass du 2 Euro an anne ueberweisen willst\\?");
+
+        testIntentMatches("AMAZON.YesIntent",
+                "Ok, (.*) Euro wurden an anne ueberwiesen\\. Dein neuer Kontostand betraegt (.*) Euro\\.");
+
+
+    }
+
+    @Test
     public void standingOrdersInfoTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
