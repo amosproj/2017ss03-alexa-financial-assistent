@@ -7,10 +7,12 @@ import com.amazonaws.services.dynamodbv2.model.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class DynamoDBClient {
 
     private AmazonDynamoDBClient dynamoDB;
+    public final static DynamoDBClient instance = new DynamoDBClient();
 
     /**
      * Creates a new DynamoDB client.
@@ -50,6 +52,46 @@ public class DynamoDBClient {
         }
 
         return items;
+    }
+
+    public <T extends DynamoDbStorable> T getItem(String tableName, int id, DynamoDbStorable.Factory<T> factory) {
+        T newItem = factory.newInstance();
+        newItem.setId(id);
+        GetItemResult result = dynamoDB.getItem(tableName, newItem.getDynamoDbKey());
+
+        for (Map.Entry<String, AttributeValue> attribute : result.getItem().entrySet()) {
+            try {
+                newItem.setDynamoDbAttribute(attribute.getKey(), attribute.getValue());
+            } catch (DynamoDbStorable.UnknownAttributeException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return newItem;
+    }
+
+    public <T extends DynamoDbStorable> void createItem(String tableName, T newItem) {
+        Map<String, AttributeValue> request = new TreeMap<>();
+        request.put("table_name", new AttributeValue(tableName));
+
+        int id = 0;
+        try {
+            GetItemResult result = dynamoDB.getItem("last_ids", request);
+            if (result.getItem() != null) {
+                AttributeValue aid = result.getItem().get("id");
+                id = Integer.parseInt(aid.getN());
+            }
+        } catch (ResourceNotFoundException ignored) {
+        }
+
+        id++;
+        newItem.setId(id);
+
+        // now store the id
+        request.put("id", new AttributeValue().withN(Integer.toString(id)));
+        dynamoDB.putItem("last_ids", request);
+
+        putItem(tableName, newItem);
     }
 
     /**

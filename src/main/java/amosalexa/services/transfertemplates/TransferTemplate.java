@@ -23,19 +23,28 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
     private double amount;
     private Date createdAt;
 
-    private static int LAST_ID = 0;
-    private static String DEFAULT_FILENAME = "test_transfer_templates.csv";
-
     public static Factory factory = (Factory<TransferTemplate>) TransferTemplate::new;
+    private static String tableName = "transfer_template";
 
     private TransferTemplate() {
     }
 
-    public TransferTemplate(String target, double amount) {
-        this.id = ++LAST_ID;
+    private TransferTemplate(String target, double amount) {
         this.target = target;
         this.amount = amount;
         this.createdAt = new Date();
+    }
+
+    public static TransferTemplate make(String target, double amount) {
+        TransferTemplate transferTemplate = new TransferTemplate(target, amount);
+        DynamoDBClient.instance.createItem(tableName, transferTemplate);
+        DynamoDBClient.instance.putItem(tableName, transferTemplate);
+        return transferTemplate;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setTarget(String target) {
@@ -60,54 +69,6 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
 
     public Date getCreatedAt() {
         return createdAt;
-    }
-
-    @Deprecated
-    private TransferTemplate(String csvLine) {
-        String[] values = csvLine.split(";");
-
-        this.id = Integer.parseInt(values[0]);
-        this.target = values[1];
-        this.amount = Double.parseDouble(values[2]);
-        this.createdAt = new Date(Long.parseLong(values[3]));
-    }
-
-    @Deprecated
-    private String toCSVLine() {
-        return this.id + ";" + this.target + ";" + this.amount + ";" + createdAt.getTime();
-    }
-
-    @Deprecated
-    public static Map<Integer, TransferTemplate> readTransferTemplateFromFile() throws IOException {
-        return readTransferTemplateFromFile(DEFAULT_FILENAME);
-    }
-
-    @Deprecated
-    public static Map<Integer, TransferTemplate> readTransferTemplateFromFile(String filename) throws IOException {
-        Map<Integer, TransferTemplate> templateMap = new HashMap<>();
-
-        Files.lines(FileSystems.getDefault().getPath(filename), Charset.forName("UTF-8")).forEach(l -> {
-            TransferTemplate transferTemplate = new TransferTemplate(l);
-            templateMap.put(transferTemplate.id, transferTemplate);
-        });
-
-        return templateMap;
-    }
-
-    @Deprecated
-    public static void writeTransferTemplatesToFile(Map<Integer, TransferTemplate> templateMap) throws FileNotFoundException, UnsupportedEncodingException {
-        writeTransferTemplatesToFile(DEFAULT_FILENAME, templateMap);
-    }
-
-    @Deprecated
-    public static void writeTransferTemplatesToFile(String filename, Map<Integer, TransferTemplate> templateMap) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(filename, "UTF-8");
-
-        for (Map.Entry<Integer, TransferTemplate> entry : templateMap.entrySet()) {
-            writer.print(entry.getValue().toCSVLine() + "\n");
-        }
-
-        writer.close();
     }
 
     @Override

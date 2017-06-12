@@ -22,11 +22,10 @@ public class DynamoDBClientTest {
 
     @Test
     public void putAndDeleteItemTest() {
-        TransferTemplate transferTemplate1 = new TransferTemplate("max", 10.0);
-        TransferTemplate transferTemplate2 = new TransferTemplate("johannes", 10.0);
+        TransferTemplate transferTemplate1 = TransferTemplate.make("max", 10.0);
+        TransferTemplate transferTemplate2 = TransferTemplate.make("johannes", 10.0);
 
-        client.putItem("transfer_template", transferTemplate1);
-        client.putItem("transfer_template", transferTemplate2);
+        assertEquals(transferTemplate1.getId() + 1, transferTemplate2.getId());
 
         List<TransferTemplate> transferTemplateList = client.getItems("transfer_template", TransferTemplate.factory);
 

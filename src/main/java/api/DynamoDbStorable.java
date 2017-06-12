@@ -43,4 +43,14 @@ public interface DynamoDbStorable {
      */
     void setDynamoDbAttribute(String attributeName, AttributeValue attributeValue) throws UnknownAttributeException;
 
+    /**
+     * Sets the id of this object.
+     */
+    void setId(int id);
+
+    /**
+     * @return id of this object
+     */
+    int getId();
+
 }
