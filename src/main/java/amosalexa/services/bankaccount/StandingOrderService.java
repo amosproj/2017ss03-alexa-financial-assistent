@@ -90,7 +90,7 @@ public class StandingOrderService implements SpeechService {
             return getStandingOrderKeywordResultsInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
             return getStandingOrdersModifyResponse(intent, session);
-        } else if ("AMAZON.NoIntent".equals(intentName)) {
+        } else if ("AMAZON.NoIntent".equals(intentName) && dialogContext != null && dialogContext.startsWith("StandingOrder")) {
             return getSpeechletResponse("Okay, tschuess!", "", false);
         } else if ("AMAZON.StopIntent".equals(intentName)) {
             //TODO StopIntent not working? Test
