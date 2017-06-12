@@ -96,7 +96,8 @@ public class StandingOrderService implements SpeechService {
             //TODO StopIntent not working? Test
             return null;
         } else {
-            throw new SpeechletException("Unhandled intent: " + intentName);
+            return null;
+            //throw new SpeechletException("Unhandled intent: " + intentName);
         }
     }
 

@@ -31,7 +31,7 @@ public class SecuritiesAccountInformationService implements SpeechService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuritiesAccountInformationService.class);
 
-    private static final String CONTEXT = "CURRENT_CONTEXT";
+    private static final String CONTEXT = "DIALOG_CONTEXT";
 
     private List<Security> securities;
 

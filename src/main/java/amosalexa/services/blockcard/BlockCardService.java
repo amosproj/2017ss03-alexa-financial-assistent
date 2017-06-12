@@ -23,6 +23,9 @@ public class BlockCardService implements SpeechService {
      */
     private static final String number = "0000000001";
 
+    private static final String CONTEXT = "DIALOG_CONTEXT";
+    private static final String BLOCK_CARD_DIALOG = "BlockCardService";
+
     public BlockCardService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
@@ -44,6 +47,13 @@ public class BlockCardService implements SpeechService {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
+        String dialogContext = (String) session.getAttribute(CONTEXT);
+
+        if( (dialogContext == null && !request.getIntent().getName().equals("BlockCardIntent")) ||
+                (dialogContext != null && !dialogContext.equals(BLOCK_CARD_DIALOG))) {
+            return null;
+        }
+
         // TODO: Use account later to actually block a card
         Account account = AccountAPI.getAccount(number);
 
@@ -62,7 +72,9 @@ public class BlockCardService implements SpeechService {
         } else if (request.getIntent().getName().equals("AMAZON.NoIntent")) {
             session.setAttribute("BlockCardService.CardNumber", null);
             return getSpeechletResponse("Okay, tschüss.", "", false);
-        } else {
+        } else if (request.getIntent().getName().equals("BlockCardIntent")) {
+            session.setAttribute(CONTEXT, BLOCK_CARD_DIALOG);
+
             String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
 
             if (bankCardNumber == null) {
@@ -79,6 +91,8 @@ public class BlockCardService implements SpeechService {
                 return getSpeechletResponse(speechText, repromptText, true);
             }
         }
+
+        return null;
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
