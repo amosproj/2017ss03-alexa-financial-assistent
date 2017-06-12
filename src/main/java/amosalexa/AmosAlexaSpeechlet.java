@@ -140,9 +140,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-        if ("AMAZON.HelpIntent".equals(intentName)) {
-            return getHelpResponse();
-        } else if ("GetAccountBalance".equals(intentName)) {
+        if ("GetAccountBalance".equals(intentName)) {
             return getAccountBalanceResponse();
         } else if ("checkCreditLimit".equals(intentName)) {
             return getCreditLimitResponse();
@@ -172,7 +170,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             }
         }
 
-
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
         if (response == null) {
@@ -199,30 +196,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     private SpeechletResponse getWelcomeResponse() {
         String speechText = "Welcome to the Alexa Skills Kit, you can say hello";
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("HelloWorld");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
-     * Creates a {@code SpeechletResponse} for the help intent.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getHelpResponse() {
-        String speechText = "You can say hello to me!";
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
