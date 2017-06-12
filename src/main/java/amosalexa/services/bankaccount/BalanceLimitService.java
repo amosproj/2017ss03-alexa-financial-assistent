@@ -44,6 +44,7 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 
 		String dialogContext = (String)sessionStorage.get(CONTEXT);
 
+		// TODO: Temporary fix, handle this in AmosAlexaSpeechlet / SpeechService
 		if(!intent.getName().equals(SET_BALANCE_LIMIT_INTENT) && !dialogContext.equals(SET_BALANCE_LIMIT_DIALOG))
 			return null; // This intent must be handled by another service
 
@@ -60,6 +61,12 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 			}
 
 			String balanceLimitAmount = balanceLimitAmountSlot.getValue();
+
+			if(balanceLimitAmount.equals("?")) {
+				// TODO: Error handling
+				return null;
+			}
+
 			sessionStorage.put(NEW_BALANCE_LIMIT, balanceLimitAmount);
 			return getBalanceLimitAskResponse(balanceLimitAmount);
 
