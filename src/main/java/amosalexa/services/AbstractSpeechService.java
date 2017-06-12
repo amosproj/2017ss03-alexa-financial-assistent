@@ -47,8 +47,6 @@ public abstract class AbstractSpeechService {
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
-
-
     /**
      * Helper method for retrieving an OutputSpeech object when given a string of TTS.
      *

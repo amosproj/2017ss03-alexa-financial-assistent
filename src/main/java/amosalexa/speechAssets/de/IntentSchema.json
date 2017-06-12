@@ -170,6 +170,15 @@
         }
       ],
       "intent": "AuthenticationPIN"
+    },
+    {
+      "intent": "SetBalanceLimitIntent",
+      "slots": [
+        {
+          "name": "BalanceLimitAmount",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
     }
   ]
 }

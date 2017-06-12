@@ -82,3 +82,7 @@ SecuritiesAccountInformationIntent Wie sind meine Aktien
 SecuritiesAccountInformationIntent Wie ist der Stand meiner Aktien
 SecuritiesAccountInformationIntent Nenne mir meine Aktien
 SecuritiesAccountInformationIntent Wie ist mein Depotstatus
+
+SetBalanceLimitIntent Setze mein Kontolimit auf {BalanceLimitAmount} Euro
+SetBalanceLimitIntent Setze das Limit für mein Konto auf {BalanceLimitAmount} Euro
+SetBalanceLimitIntent Setze mein Limit auf {BalanceLimitAmount} Euro
