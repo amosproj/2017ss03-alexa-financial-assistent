@@ -11,6 +11,7 @@ package amosalexa;
 
 import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.security.AuthenticationManager;
+import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
@@ -56,6 +57,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new SavingsPlanService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
         new SecuritiesAccountInformationService(amosAlexaSpeechlet);
+        new BalanceLimitService(amosAlexaSpeechlet);
         //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
