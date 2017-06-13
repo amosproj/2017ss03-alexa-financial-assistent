@@ -91,7 +91,7 @@ public class StandingOrderService implements SpeechService {
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
             return getStandingOrdersModifyResponse(intent, session);
         } else if ("AMAZON.NoIntent".equals(intentName) && dialogContext != null && dialogContext.startsWith("StandingOrder")) {
-            return getSpeechletResponse("Okay, tschuess!", "", false);
+            return getCorrectionResponse(intent, session);
         } else if ("AMAZON.StopIntent".equals(intentName)) {
             //TODO StopIntent not working? Test
             return null;
@@ -436,6 +436,43 @@ public class StandingOrderService implements SpeechService {
         card.setContent("Dauerauftrag Nummer " + standingOrderToModify + " wurde geändert.");
         speech.setText("Dauerauftrag Nummer " + standingOrderToModify + " wurde geaendert.");
         return SpeechletResponse.newTellResponse(speech, card);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} that asks the user if he wants to correct his previous input.
+     * Should be called after an Amazon.NoIntent
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse getCorrectionResponse(Intent intent, Session session) {
+        String dialogContext = (String) session.getAttribute(CONTEXT);
+        LOGGER.info("Context: " + dialogContext);
+        Map<String, Slot> slots = intent.getSlots();
+        LOGGER.info("Slots: " + slots);
+        String standingOrderToModify = (String) session.getAttribute("StandingOrderToModify");
+
+        //Default
+        String answer = "Okay, bitte wiederhole die Anweisung oder breche den Vorgang ab, indem du \"Alexa, Stop!\" sagst.";
+
+        if (dialogContext.equals("StandingOrderDeletion")) {
+            answer = "Okay, sage die Nummer des Dauerauftrags, den du stattdessen loeschen willst oder " +
+                    "breche den Vorgang ab, indem du \"Alexa, Stop!\" sagst.";
+        } else if (dialogContext.equals("StandingOrderModification")) {
+            answer = "Okay, den Betrag, auf den du Dauerauftrag Nummer " + standingOrderToModify + " stattdessen" +
+                    " aendern willst, wiederhole die gesamte Aenderungsanweisung oder breche den Vorgang ab, indem du" +
+                    " \"Alexa, Stop!\" sagst.";
+        }
+        answer = "<speak>\n" +
+                "    <emphasis level=\"reduced\">" + answer + "</emphasis> \n" +
+                "</speak>";
+        SsmlOutputSpeech speech = new SsmlOutputSpeech();
+        speech.setSsml(answer);
+
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
     }
 
     private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,

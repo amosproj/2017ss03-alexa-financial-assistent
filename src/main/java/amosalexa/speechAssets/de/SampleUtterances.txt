@@ -70,6 +70,7 @@ StandingOrdersInfoIntent Sende Daueraufträge per {Channel}
 StandingOrdersInfoIntent Daueraufträge an {Payee}
 
 StandingOrdersModifyIntent Ändere den Betrag von Dauerauftrag Nummer {Number} auf {Amount} Euro
+StandingOrdersModifyIntent {Amount} Euro
 StandingOrdersModifyIntent Ändere den Ausführungsrhythmus von Dauerauftrag Nummer {Number} auf {ExecutionRate} beginnend am {FirstExecution}
 
 StandingOrdersKeywordIntent Wie viel bezahle ich für {StandingOrderKeyword}
