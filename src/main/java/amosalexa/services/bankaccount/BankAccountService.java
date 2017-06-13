@@ -1,135 +1,189 @@
 package amosalexa.services.bankaccount;
 
-import amosalexa.server.Launcher;
+import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
-import com.amazon.speech.slu.Slot;
+import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
-import com.amazon.speech.speechlet.Session;
+import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
-import com.amazon.speech.ui.SimpleCard;
-import model.banking.AccountFactory;
-import model.banking.account.Account;
+import model.banking.Account;
+import model.banking.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Map;
+/**
+ * speech service for bank account information
+ * <p>
+ * registered Intent @BANK_ACCOUNT_INTENT, @YES_INTENT, @NO_INTENT
+ */
+public class BankAccountService extends AbstractSpeechService implements SpeechService {
 
-
-public class BankAccountService implements SpeechService {
-
-    private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
-
-    private static final String BANK_ACCOUNT_INTENT = "AccountInformation";
 
     /**
-     *
+     * amount of transaction responded at once
      */
-    private static final String number = "0000000001";
-
+    public static final int TRANSACTION_LIMIT = 3;
+    private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
+    /**
+     * intents
+     */
+    private static final String BANK_ACCOUNT_INTENT = "AccountInformation";
+    /**
+     * cards
+     */
+    private static final String CARD_NAME = "Kontoinformation";
+    /**
+     * bank account number
+     */
+    private static final String number = "0000000020";
     /**
      * Name for custom slot types
      */
     private static final String SLOT_NAME = "AccountInformationSlots";
+    /**
+     * default speech texts
+     */
+    private static final String REPROMPT_TEXT = "Was möchtest du über dein Konto erfahren? Frage mich etwas!";
+    private static final String EMPTY_TRANSACTIONS_TEXT = "Du hast keine Transaktionen in deinem Konto";
+    private static final String LIST_END_TRANSACTIONS_TEXT = "Du hast keine weiteren Transaktionen";
+    private static final String ACCEPTANCE_TEXT = "Verstanden!";
+    /**
+     * account
+     */
+    private static Account account;
+    /**
+     * Slots for transactions
+     */
+    private final List<String> transactionSlots = new ArrayList<String>() {{
+        add("transaktionen");
+        add("überweisungen");
+        add("umsätze");
+    }};
+    /**
+     * session id
+     */
+    private String sessionID;
+    /**
+     * session attribute for transaction list indexe
+     */
+    private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index";
+    /**
+     *
+     */
+    private String TRANSACTION_DIALOG = "transaction_dialog";
 
-    public BankAccountService(SpeechletSubject speechletSubject){
-      subscribe(speechletSubject);
+
+    public BankAccountService(SpeechletSubject speechletSubject) {
+        subscribe(speechletSubject);
     }
 
     /**
      * ties the Speechlet Subject (Amos Alexa Speechlet) with an Speechlet Observer
+     *
      * @param speechletSubject service
      */
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
         speechletSubject.attachSpeechletObserver(this, BANK_ACCOUNT_INTENT);
+        speechletSubject.attachSpeechletObserver(this, YES_INTENT);
+        speechletSubject.attachSpeechletObserver(this, NO_INTENT);
     }
 
 
     @Override
-    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
 
-        IntentRequest request = requestEnvelope.getRequest();
-        Session session = requestEnvelope.getSession();
+        Intent intent = requestEnvelope.getRequest().getIntent();
+        sessionID = requestEnvelope.getSession().getSessionId();
 
-        Account account = AccountFactory.getInstance().getAccount(number);
+        // get dialog context index
+        SessionStorage sessionStorage = SessionStorage.getInstance();
+        Integer furtherTransactionDialogIndex = (Integer) sessionStorage.getObject(sessionID, CONTEXT_FURTHER_TRANSACTION_INDEX);
+        String currentDialog = (String) sessionStorage.getObject(sessionID, SessionStorage.CURRENTDIALOG);
 
-        String speechText = "What Information do you need about your bank account?";
+        if (furtherTransactionDialogIndex != null && currentDialog != null) {
+            if (intent.getName().equals(YES_INTENT)) {
+                return getNextTransaction(furtherTransactionDialogIndex);
+            }
 
-        String repromptText = "Say what you want do know about your bank account. For Example: What is my interest rate.";
-
-        Map<String, Slot> slots = request.getIntent().getSlots();
-
-        for (Map.Entry entry : slots.entrySet()) {
-            Slot slot = (Slot) entry.getValue();
-            log.info(entry.getKey() + ", " + slot.getValue());
+            if (intent.getName().equals(NO_INTENT)) {
+                return getResponse(CARD_NAME, ACCEPTANCE_TEXT);
+            }
         }
 
-        String slotValue = request.getIntent().getSlot(SLOT_NAME).getValue();
-
-        // TODO: Translate into German, see de/slots/LIST_OF_ACCOUNT_INFORMATION.txt
-
-        String slot = "balance";
-        if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " is " + account.getBalance();
+        String slotValue = intent.getSlot(SLOT_NAME) != null ? intent.getSlot(SLOT_NAME).getValue().toLowerCase() : null;
+        if (slotValue != null) {
+            setAccount();
+            if (transactionSlots.contains(slotValue)) {
+                return handleTransactionSpeech();
+            }
+            String speech = account.getSpeechTexts().get(slotValue);
+            return getSSMLResponse(CARD_NAME, speech);
         }
 
-        slot = "number";
-        if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " is " + account.getNumber();
-        }
-
-        slot = "iban";
-        if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " is " + account.getIban();
-        }
-
-        slot = "opening date";
-        if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " is " + account.getOpeningDate();
-        }
-
-        slot = "withdrawal fee";
-        if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " is " + account.getWithdrawalFee();
-        }
-
-        slot = "interest rate";
-        if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " is " + account.getInterestRate();
-        }
-
-        slot = "credit limit";
-        if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " is " + account.getCreditLimit();
-        }
-
-        slot = "credit card limit";
-        if(slot.equals(slotValue)){
-            speechText = "Your "  + slot + " is " + account.getCreditcardLimit();
-        }
-
-        log.warn("I'm here from Observer pattern");
-
-        return getSpeechletResponse(speechText, repromptText);
+        return null;
     }
 
-
-    private SpeechletResponse getSpeechletResponse(String speechText, String repromptText){
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Bank Information");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        return SpeechletResponse.newTellResponse(speech, card);
+    /**
+     * set up speech texts in account
+     */
+    private void setAccount() {
+        account = AccountAPI.getAccount(number);
+        account.setSpeechTexts();
     }
 
+    /**
+     * responses each transaction from a account
+     *
+     * @return SpeechletResponse to alexa
+     */
+    private SpeechletResponse handleTransactionSpeech() {
+        List<Transaction> transactions = Transaction.getTransactions(account);
 
+        if (transactions == null || transactions.isEmpty()) {
+            log.warn("Account: " + account.getNumber() + " has no transactions");
+            return getResponse(CARD_NAME, EMPTY_TRANSACTIONS_TEXT);
+        }
+
+        StringBuilder stringBuilder = new StringBuilder(Transaction.getTransactionSizeText(transactions.size()));
+        int i;
+        for (i = 0; i < TRANSACTION_LIMIT; i++) {
+            stringBuilder.append(Transaction.getTransactionText(transactions.get(i)));
+        }
+
+        if (i - 1 < transactions.size()) {
+            stringBuilder.append(Transaction.getAskMoreTransactionText());
+            SessionStorage sessionStorage = SessionStorage.getInstance();
+            sessionStorage.putObject(sessionID, CONTEXT_FURTHER_TRANSACTION_INDEX, i);
+            sessionStorage.putObject(sessionID, SessionStorage.CURRENTDIALOG, TRANSACTION_DIALOG);
+        } else {
+            return getResponse(CARD_NAME, LIST_END_TRANSACTIONS_TEXT);
+        }
+
+        return getSSMLAskResponse(CARD_NAME, stringBuilder.toString(), REPROMPT_TEXT);
+    }
+
+    /**
+     * returns a response with the next transaction in the list
+     * @param i index at the current postion in the transaction list
+     * @return speechletResponse
+     */
+    private SpeechletResponse getNextTransaction(int i) {
+        List<Transaction> transactions = Transaction.getTransactions(account);
+        String transactionText = Transaction.getTransactionText(transactions.get(i));
+        if (i - 1 < transactions.size()) {
+            transactionText = transactionText + Transaction.getAskMoreTransactionText();
+            SessionStorage sessionStorage = SessionStorage.getInstance();
+            sessionStorage.putObject(sessionID, CONTEXT_FURTHER_TRANSACTION_INDEX, i + 1);
+            sessionStorage.putObject(sessionID, SessionStorage.CURRENTDIALOG, TRANSACTION_DIALOG);
+        }
+        return getSSMLAskResponse(CARD_NAME, transactionText, REPROMPT_TEXT);
+    }
 }

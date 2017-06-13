@@ -3,9 +3,8 @@ package amosalexa.dialogsystem;
 import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.dialogs.ReplacementCardDialog;
-import amosalexa.dialogsystem.dialogs.StandingOrderDialog;
 import amosalexa.dialogsystem.dialogs.TestListDialog;
-import amosalexa.dialogsystem.dialogs.savings.SavingsPlanDialog;
+import amosalexa.dialogsystem.dialogs.banktransfer.BankTransferDialog;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
@@ -19,7 +18,7 @@ import java.util.HashMap;
  */
 public class DialogResponseManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
 
 
     private static DialogResponseManager instance;
@@ -28,8 +27,7 @@ public class DialogResponseManager {
         // TODO: Registering new DialogHandlers should happen automatically, not in this class
         registerDialogHandler(new TestListDialog());
         registerDialogHandler(new ReplacementCardDialog());
-        registerDialogHandler(new SavingsPlanDialog());
-        registerDialogHandler(new StandingOrderDialog());
+        registerDialogHandler(new BankTransferDialog());
     }
 
     public static DialogResponseManager getInstance() {
@@ -61,7 +59,7 @@ public class DialogResponseManager {
 
             return handler.handle(intent, storage);
         } catch (SpeechletException e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage());
 
             /*PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
             speech.setText("Ein Fehler ist aufgetreten.");

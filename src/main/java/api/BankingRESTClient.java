@@ -165,6 +165,20 @@ public class BankingRESTClient {
     }
 
     /**
+     * POST http request to the endpoint given by parameter URL
+     *
+     * @param objectPath endpoint object
+     * @param json       body
+     * @return banking object
+     */
+    public String postAnyObject(String objectPath, String json) {
+        log.info("POST from API: " + objectPath + " Body: " + json);
+        String response = doPostBankingModelObject(objectPath, json);
+        return response;
+        //return new ObjectMapper().readValue(response, cl);
+    }
+
+    /**
      * PUT http request to the banking endpoint
      *
      * @param objectPath endpoint object

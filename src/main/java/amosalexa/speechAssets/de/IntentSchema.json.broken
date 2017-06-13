@@ -1,6 +1,15 @@
 {
   "intents": [
     {
+      "intent": "StandingOrdersIntent",
+      "slots": [
+        {
+          "name": "Recipient",
+          "type": "AMAZON.DE_FIRST_NAME"
+        }
+      ]
+    },
+    {
       "intent": "ProductRequestIntent",
       "slots": [
         {
@@ -11,9 +20,6 @@
     },
     {
       "intent": "TestListIntent"
-    },
-    {
-      "intent": "SecuritiesAccountInformationIntent"
     },
     {
       "intent": "AccountInformation",
@@ -57,80 +63,111 @@
     },
     {
       "intent": "SavingsPlanIntent",
+      "samples": [
+        "Berechne mir einen Sparplan",
+        "Ich moechte monatlich Geld sparen",
+        "Erstelle einen Sparplan",
+        "Ich moechte monatlich {EinzahlungMonat} Euro anlegen.",
+        "Ich moechte einen Grundbetrag von {Grundbetrag} Euro anlegen.",
+        "{Grundbetrag} Euro",
+        "{AnzahlJahre} Jahre",
+        "Monatlich {EinzahlungMonat} Euro",
+        "Ich moechte einmalig {Grundbetrag} Euro anlegen",
+        "Ich moechte einen Sparplan erstellen und einmalig {Grundbetrag} Euro anlegen.",
+        "Ich moechte als Einmalzahlung {Grundbetrag} Euro anlegen",
+        "Ich moechte {AnzahlJahre} Jahre monatlich {EinzahlungMonat} Euro anlegen.",
+        "Ich moechte {AnzahlJahre} Jahre lang Geld anlegen.",
+        "{AnzahlJahre} Jahr",
+        "{EinzahlungMonat} Euro"
+      ],
       "slots": [
         {
           "name": "Grundbetrag",
-          "type": "AMAZON.NUMBER"
+          "type": "AMAZON.NUMBER",
+          "samples": []
         },
         {
           "name": "EinzahlungMonat",
-          "type": "AMAZON.NUMBER"
+          "type": "AMAZON.NUMBER",
+          "samples": []
         },
         {
           "name": "AnzahlJahre",
-          "type": "AMAZON.NUMBER"
+          "type": "AMAZON.NUMBER",
+          "samples": []
         }
       ]
     },
     {
       "intent": "StandingOrdersDeleteIntent",
+      "samples": [
+        "Lösche Dauerauftrag Nummer {Number} "
+      ],
       "slots": [
         {
           "name": "Payee",
-          "type": "AMAZON.DE_FIRST_NAME"
+          "type": "AMAZON.DE_FIRST_NAME",
+          "samples": []
         },
         {
           "name": "Number",
-          "type": "AMAZON.NUMBER"
+          "type": "AMAZON.NUMBER",
+          "samples": []
         }
       ]
     },
     {
       "intent": "StandingOrdersInfoIntent",
+      "samples": [
+        "Daueraufträge",
+        "Wie lauten meine Daueraufträge",
+        "Wie sind meine Daueraufträge",
+        "Was sind meine Daueraufträge",
+        "Nenne mir meine Daueraufträge",
+        "Sende Daueraufträge per {Channel}",
+        "Daueraufträge an {Payee}"
+      ],
       "slots": [
         {
           "name": "Channel",
-          "type": "LIST_OF_CHANNEL"
+          "type": "LIST_OF_CHANNEL",
+          "samples": []
         },
         {
           "name": "Payee",
-          "type": "AMAZON.DE_FIRST_NAME"
+          "type": "AMAZON.DE_FIRST_NAME",
+          "samples": []
         }
       ]
     },
     {
       "intent": "StandingOrdersModifyIntent",
+      "samples": [
+        "Ändere den Betrag von Dauerauftrag Nummer {Number} auf {Amount} Euro",
+        "Ändere den Ausführungsrhythmus von Dauerauftrag Nummer {Number} auf {ExecutionRate} beginnend am {FirstExecution} "
+      ],
       "slots": [
         {
           "name": "Number",
-          "type": "AMAZON.NUMBER"
+          "type": "AMAZON.NUMBER",
+          "samples": []
         },
         {
           "name": "Amount",
-          "type": "AMAZON.FOUR_DIGIT_NUMBER"
+          "type": "AMAZON.FOUR_DIGIT_NUMBER",
+          "samples": []
         },
         {
           "name": "ExecutionRate",
-          "type": "LIST_OF_EXECUTION_RATES"
+          "type": "LIST_OF_EXECUTION_RATES",
+          "samples": []
         },
         {
           "name": "FirstExecution",
-          "type": "AMAZON.DATE"
+          "type": "AMAZON.DATE",
+          "samples": []
         }
       ]
-    },
-    {
-      "slots": [
-        {
-          "name": "StandingOrderKeyword",
-          "type": "LIST_OF_STANDING_ORDER_KEYWORDS"
-        },
-        {
-          "name": "TransactionKeyword",
-          "type": "LIST_OF_TRANSACTION_KEYWORDS"
-        }
-      ],
-      "intent": "StandingOrdersKeywordIntent"
     },
     {
       "intent": "FourDigitNumberIntent",
@@ -170,40 +207,6 @@
         }
       ],
       "intent": "AuthenticationPIN"
-    },
-    {
-      "intent": "SetBalanceLimitIntent",
-      "slots": [
-        {
-          "name": "BalanceLimitAmount",
-          "type": "AMAZON.NUMBER"
-        }
-      ]
-    },
-    {
-      "intent": "ListTransferTemplatesIntent"
-    },
-    {
-      "slots": [
-        {
-          "name": "TemplateID",
-          "type": "AMAZON.NUMBER"
-        }
-      ],
-      "intent": "DeleteTransferTemplatesIntent"
-    },
-    {
-      "intent": "EditTransferTemplateIntent",
-      "slots": [
-        {
-          "name": "TemplateID",
-          "type": "AMAZON.NUMBER"
-        },
-        {
-          "name": "NewAmount",
-          "type": "AMAZON.NUMBER"
-        }
-      ]
     }
   ]
 }

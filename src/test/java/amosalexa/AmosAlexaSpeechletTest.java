@@ -1,36 +1,93 @@
 package amosalexa;
 
+import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
-import com.amazon.speech.speechlet.Context;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import model.banking.StandingOrder;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class AmosAlexaSpeechletTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
+    // FIXME: Get the current account number from the session
+    private static final String ACCOUNT_NUMBER = "9999999999";
+    private static Integer savingsPlanTestStandingOrderId;
     private Session session;
-    private final String SESSION_ID = "SessionId.2682fed6-193f-48b3-afd7-c6185d075ddf";
+    private String sessionId;
 
     /*************************************
      *          Testing section          *
      *************************************/
+
+    // Needed to ensure that the account balance is sufficient
+    @BeforeClass
+    public static void setUpAccount() {
+        Calendar cal = Calendar.getInstance();
+        Date time = cal.getTime();
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String openingDate = formatter.format(time);
+
+        AccountAPI.createAccount("9999999999", 1250000, openingDate);
+    }
+
+    @Test
+    public void bankAccountTransactionIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Du hast keine Transaktionen in deinem Konto");
+            add("Du hast (.*) Transaktionen. Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    "Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    "Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    " Möchtest du weitere Transaktionen hören");
+            add("Möchtest du weitere Transaktionen hören");
+        }};
+
+        testIntentMatches("AccountInformation", "AccountInformationSlots:überweisungen",  StringUtils.join(possibleAnswers, "|"));
+
+        ArrayList<String> possibleAnswersYES = new ArrayList<String>() {{
+            add("Du hast keine Überweisungen in deinem Konto");
+            add("Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    " Möchtest du weitere Transaktionen hören");
+        }};
+
+        testIntentMatches(
+                "AMAZON.YesIntent", StringUtils.join(possibleAnswersYES, "|"));
+    }
+
+    @Test
+    public void bankAccountInformationIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        testIntentMatches("AccountInformation", "AccountInformationSlots:zinssatz",  "Dein zinssatz ist aktuell (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kontostand",  "Dein kontostand beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:eröffnungsdatum",  "Dein eröffnungsdatum war (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditlimit",  "Dein kreditlimit beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditkartenlimit",  "Dein kreditkartenlimit beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kontonummer",  "Deine kontonummer lautet (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:abhebegebühr",  "Deine abhebegebühr beträgt (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:iban",  "Deine iban lautet (.*)");
+    }
 
     @Test
     public void blockCardIntentTest() throws Exception {
@@ -43,6 +100,39 @@ public class AmosAlexaSpeechletTest {
         testIntent(
                 "AMAZON.YesIntent",
                 "Karte 123 wurde gesperrt.");
+    }
+
+    @Test
+    public void bankTransferIntentTest() throws Throwable {
+        newSession();
+
+        testIntentMatches("BankTransferIntent", "name:anne", "amount:2",
+                "Aktuell betraegt dein Kontostand (.*) Euro\\. Bist du sicher, dass du 2 Euro an anne ueberweisen willst\\?");
+
+        testIntentMatches("AMAZON.YesIntent",
+                "Ok, (.*) Euro wurden an anne ueberwiesen\\. Dein neuer Kontostand betraegt (.*) Euro\\.");
+
+
+    }
+
+    @Test
+    public void standingOrdersInfoTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Keine Dauerauftraege vorhanden.");
+            add("Du hast momentan einen Dauerauftrag. " +
+                    "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+            add("Du hast momentan (.*) Dauerauftraege. " +
+                    "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+        }};
+        testIntentMatches(
+                "StandingOrdersInfoIntent", StringUtils.join(possibleAnswers, "|"));
+        testIntentMatches(
+                "AMAZON.YesIntent",
+                "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+        testIntentMatches(
+                "AMAZON.NoIntent", "Okay, tschuess!");
     }
 
     @Test
@@ -60,16 +150,40 @@ public class AmosAlexaSpeechletTest {
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + ".");
+
+        Collection<StandingOrder> allStandingOrders = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
+        final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
+        int latestStandingOrderId = allStandingOrders.stream().max(comp).get().getStandingOrderId().intValue();
+        LOGGER.info("Latest standing order ID: " + latestStandingOrderId);
+        savingsPlanTestStandingOrderId = latestStandingOrderId;
+
+        testIntent(
+                "StandingOrdersDeleteIntent",
+                "Number:" + latestStandingOrderId, "Moechtest du den Dauerauftrag mit der Nummer "
+                        + latestStandingOrderId + " wirklich loeschen?");
+
+        testIntent(
+                "AMAZON.YesIntent",
+                "Dauerauftrag Nummer " + latestStandingOrderId + " wurde geloescht.");
     }
 
     @Test
     public void replacementCardDialogTest() throws Exception {
         newSession();
 
-        String response = testIntentMatches("ReplacementCardIntent",
-                "Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: (.*)");
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: (.*)");
+            add("Es wurden keine Kredit- oder EC-Karten gefunden.");
+        }};
 
-        Pattern p = Pattern.compile("Kreditkarte mit den Endziffern ([0-9]+)\\.");
+        String response = testIntentMatches("ReplacementCardIntent", StringUtils.join(possibleAnswers, "|"));
+
+        if (response.equals("Es wurden keine Kredit- oder EC-Karten gefunden.")) {
+            //Fallback
+            return;
+        }
+
+        Pattern p = Pattern.compile("karte mit den Endziffern ([0-9]+)\\.");
         Matcher m = p.matcher(response);
 
         if (m.find()) {
@@ -172,8 +286,8 @@ public class AmosAlexaSpeechletTest {
             }
         }
 
-        AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
-        SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
+        //AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
+        //SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
         assertEquals(expectedOutput, performIntent(intent, slots));
     }
 
@@ -207,7 +321,8 @@ public class AmosAlexaSpeechletTest {
 
     private void newSession() {
         Session.Builder builder = Session.builder();
-        builder.withSessionId(SESSION_ID);
+        sessionId = "SessionId." + UUID.randomUUID();
+        builder.withSessionId(sessionId);
         session = builder.build();
     }
 
@@ -252,7 +367,7 @@ public class AmosAlexaSpeechletTest {
 
         String json = "{\n" +
                 "  \"session\": {\n" +
-                "    \"sessionId\": \"" + SESSION_ID + "\",\n" +
+                "    \"sessionId\": \"" + sessionId + "\",\n" +
                 "    \"application\": {\n" +
                 "      \"applicationId\": \"amzn1.ask.skill.38e33c69-1510-43cd-be1d-929f08a966b4\"\n" +
                 "    },\n" +
