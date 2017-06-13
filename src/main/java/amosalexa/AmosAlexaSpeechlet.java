@@ -139,11 +139,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-        if ("GetAccountBalance".equals(intentName)) {
-            return getAccountBalanceResponse();
-        } else if ("checkCreditLimit".equals(intentName)) {
-            return getCreditLimitResponse();
-        } else if ("BankTransferIntent".equals(intentName)) {
+        if ("BankTransferIntent".equals(intentName)) {
             LOGGER.info("intent: BankTransferIntent");
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "BankTransfer"); // Set CURRENTDIALOG to start the BankTransfer dialog
             return DialogResponseManager.getInstance().handle(intent, sessionStorage);

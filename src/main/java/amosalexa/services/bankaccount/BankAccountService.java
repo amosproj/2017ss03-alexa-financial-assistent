@@ -131,9 +131,9 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
 
             return getSSMLResponse(CARD_NAME, speechText);
 
-        } else {
-            return getAskResponse(CARD_NAME, repromptText);
         }
+
+        return null;
     }
 
     public void setAccount(){
