@@ -45,3 +45,5 @@ Eventuelle Rückfragen sind ebenfalls per Spracheingabe zu beantworten.
 - Depotinformationen
   - `Alexa, frag AMOS wie ist der Stand meiner Aktien.`
   - `Alexa, frag AMOS nach dem Depotstatus.`
+- Durchführen von Überweiseungen
+  - `Alexa, sag AMOS überweise 10 Euro an Christian.`
