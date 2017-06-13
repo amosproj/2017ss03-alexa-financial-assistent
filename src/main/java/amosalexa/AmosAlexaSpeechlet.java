@@ -10,6 +10,7 @@
 package amosalexa;
 
 import amosalexa.dialogsystem.DialogResponseManager;
+import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
