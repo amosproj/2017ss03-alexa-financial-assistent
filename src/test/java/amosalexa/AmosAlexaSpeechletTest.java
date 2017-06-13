@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,14 +29,11 @@ import static org.junit.Assert.assertTrue;
 public class AmosAlexaSpeechletTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
-
-    private Session session;
-    private String sessionId;
-
     // FIXME: Get the current account number from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
-
     private static Integer savingsPlanTestStandingOrderId;
+    private Session session;
+    private String sessionId;
 
     /*************************************
      *          Testing section          *
@@ -90,7 +86,6 @@ public class AmosAlexaSpeechletTest {
         testIntentMatches("AccountInformation", "AccountInformationSlots:kontonummer",  "Deine kontonummer lautet (.*)");
         testIntentMatches("AccountInformation", "AccountInformationSlots:abhebegebühr",  "Deine abhebegebühr beträgt (.*)");
         testIntentMatches("AccountInformation", "AccountInformationSlots:iban",  "Deine iban lautet (.*)");
-
     }
 
     @Test
