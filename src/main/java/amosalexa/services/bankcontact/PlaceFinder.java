@@ -52,7 +52,7 @@ public class PlaceFinder {
      * checks list of places for place with opening hours and containing the slot value name
      * @param places list of places
      * @param slotName slot value
-     * @return place
+     * @return place with opening hours
      */
     public static Place findOpeningHoursPlace(List<Place> places, String slotName){
         for(Place place : places){
@@ -70,14 +70,25 @@ public class PlaceFinder {
         return null;
     }
 
-    public static Place findPlace(List<Place> places, String slotValue){
+    /**
+     * looking for a place nearby your address with a telephone number
+     * @param places list of places
+     * @param slotName slot value
+     * @return place with telephone number
+     */
+    public static Place findTelephoneNumberPlace(List<Place> places, String slotName){
+
         for(Place place : places){
-            if(place.getName().toLowerCase().contains(slotValue.toLowerCase())){
-                return place;
+            place = place.getDetails();
+            if(place.getName().toLowerCase().contains(slotName.toLowerCase())){
+                if(place.getPhoneNumber() != null){
+                    return place;
+                }
             }
         }
         return null;
     }
+
 
     /**
      * get the day of the week
