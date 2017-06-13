@@ -2,6 +2,7 @@ package amosalexa.services.transfertemplates;
 
 import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.DynamoDbClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -11,7 +12,48 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 
 import java.util.*;
 
-public class TransferTemplateService implements SpeechService {
+public class TransferTemplateService extends AbstractSpeechService implements SpeechService {
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                LIST_TRANSFER_TEMPLATES_INTENT,
+                DELETE_TRANSFER_TEMPLATES_INTENT,
+                EDIT_TRANSFER_TEMPLATE_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                LIST_TRANSFER_TEMPLATES_INTENT,
+                DELETE_TRANSFER_TEMPLATES_INTENT,
+                EDIT_TRANSFER_TEMPLATE_INTENT,
+                YES_INTENT,
+                NO_INTENT
+        );
+    }
+
+    /**
+     * ties the Speechlet Subject (Amos Alexa Speechlet) with an Speechlet Observer
+     *
+     * @param speechletSubject service
+     */
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        for(String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
+    }
+
+    private static final String LIST_TRANSFER_TEMPLATES_INTENT = "ListTransferTemplatesIntent";
+    private static final String DELETE_TRANSFER_TEMPLATES_INTENT = "DeleteTransferTemplatesIntent";
+    private static final String EDIT_TRANSFER_TEMPLATE_INTENT = "EditTransferTemplateIntent";
 
     public TransferTemplateService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
@@ -23,7 +65,7 @@ public class TransferTemplateService implements SpeechService {
         Session session = requestEnvelope.getSession();
         String intentName = request.getIntent().getName();
 
-        if ("AMAZON.YesIntent".equals(intentName)) {
+        if (YES_INTENT.equals(intentName)) {
             Integer offset = (Integer) session.getAttribute("TransferTemplateService.offset");
             Integer templateId = (Integer) session.getAttribute("TransferTemplateService.delete");
             Integer editTemplateId = (Integer) session.getAttribute("TransferTemplateService.editTemplateId");
@@ -48,16 +90,16 @@ public class TransferTemplateService implements SpeechService {
 
                 return AmosAlexaSpeechlet.getSpeechletResponse("Vorlage wurde erfolgreich gespeichert.", "", false);
             }
-        } else if ("AMAZON.NoIntent".equals(intentName)) {
+        } else if (NO_INTENT.equals(intentName)) {
             if (session.getAttribute("TransferTemplateService.offset") != null ||
                     session.getAttribute("TransferTemplateService.delete") != null ||
                     session.getAttribute("TransferTemplateService.editTemplateId") != null ||
                     session.getAttribute("TransferTemplateService.newAmount") != null) {
                 return AmosAlexaSpeechlet.getSpeechletResponse("Okay, dann halt nicht. Tschüss!", "", false);
             }
-        } else if ("ListTransferTemplatesIntent".equals(intentName)) {
+        } else if (LIST_TRANSFER_TEMPLATES_INTENT.equals(intentName)) {
             return tellTemplates(session, 0, 3);
-        } else if ("DeleteTransferTemplatesIntent".equals(intentName)) {
+        } else if (DELETE_TRANSFER_TEMPLATES_INTENT.equals(intentName)) {
             String templateIdStr = request.getIntent().getSlot("TemplateID").getValue();
 
             if (templateIdStr == null || templateIdStr.equals("")) {
@@ -68,7 +110,7 @@ public class TransferTemplateService implements SpeechService {
 
                 return AmosAlexaSpeechlet.getSpeechletResponse("Möchtest du Vorlage Nummer " + templateId + " wirklich löschen?", "", true);
             }
-        } else if ("EditTransferTemplateIntent".equals(intentName)) {
+        } else if (EDIT_TRANSFER_TEMPLATE_INTENT.equals(intentName)) {
             String templateIdStr = request.getIntent().getSlot("TemplateID").getValue();
             String newAmountStr = request.getIntent().getSlot("NewAmount").getValue();
 
@@ -142,13 +184,4 @@ public class TransferTemplateService implements SpeechService {
         return AmosAlexaSpeechlet.getSpeechletResponse(response.toString(), "", isAskResponse);
     }
 
-    @Override
-    public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
-        speechletSubject.attachSpeechletObserver(this, "ListTransferTemplatesIntent");
-        speechletSubject.attachSpeechletObserver(this, "DeleteTransferTemplatesIntent");
-        speechletSubject.attachSpeechletObserver(this, "EditTransferTemplateIntent");
-        speechletSubject.attachSpeechletObserver(this, "DeleteTransferTemplateIntent");
-    }
 }
