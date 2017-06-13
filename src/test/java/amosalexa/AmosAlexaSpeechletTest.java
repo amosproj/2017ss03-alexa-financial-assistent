@@ -25,9 +25,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class AmosAlexaSpeechletTest {
 
@@ -61,7 +59,7 @@ public class AmosAlexaSpeechletTest {
         Launcher.server = new Server();
         Launcher.server.start();
 
-        testIntentMatches("BankTelephone","Sparkasse Nürnberg - Geldautomat hat die Telfonnummer 0911 2301000");
+        testIntentMatches("BankTelephone","Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
 
         Launcher.server.stop();
     }
