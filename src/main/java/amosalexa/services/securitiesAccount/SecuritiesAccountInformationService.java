@@ -2,7 +2,6 @@ package amosalexa.services.securitiesAccount;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
-import api.BankingRESTClient;
 import api.banking.SecuritiesAccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -18,7 +17,6 @@ import model.banking.SecuritiesAccount;
 import model.banking.Security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -33,7 +31,7 @@ public class SecuritiesAccountInformationService implements SpeechService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuritiesAccountInformationService.class);
 
-    private static final String CONTEXT = "CURRENT_CONTEXT";
+    private static final String CONTEXT = "DIALOG_CONTEXT";
 
     private List<Security> securities;
 
@@ -64,6 +62,10 @@ public class SecuritiesAccountInformationService implements SpeechService {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "SecuritiesAccountInformation");
             return getSecuritiesAccountInformation(request.getIntent(), session);
+        }
+
+        if(session.getAttribute(CONTEXT) == null || !session.getAttribute(CONTEXT).equals("SecuritiesAccountInformation")) {
+            return null;
         }
 
         //TODO: YES Intent without context

@@ -64,7 +64,8 @@ public class SavingsPlanService implements SpeechService {
         } else if ("AMAZON.NoIntent".equals(intentName) && context != null && context.equals("SavingsPlan")) {
             return cancelAction();
         } else {
-            throw new SpeechletException("Unhandled intent: " + intentName);
+            return null;
+            //throw new SpeechletException("Unhandled intent: " + intentName);
         }
     }
 
