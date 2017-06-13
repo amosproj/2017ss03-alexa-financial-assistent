@@ -481,14 +481,21 @@ public class StandingOrderService implements SpeechService {
         SimpleCard card = new SimpleCard();
         card.setTitle("Daueraufträge");
 
-        String name = "Max Mustermann";
+        Slot payeeSlot = slots.get("Payee");
+        String payee = (payeeSlot == null ? null : payeeSlot.getValue());
+
+        Slot payeeSecondNameSlot = slots.get("PayeeSecondName");
+        String payeeSecondName = (payeeSecondNameSlot == null ? null : payeeSecondNameSlot.getValue());
+
+        Slot numberSlot = slots.get("Number");
+        String number = (numberSlot == null ? null : numberSlot.getValue());
 
         for (int i = 0; i < standingOrders.size(); i++) {
-            if (standingOrders.get(i).getPayee().equals(name)) {
+            if (standingOrders.get(i).getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
 //            LOGGER.info(standingOrders.get(i).getPayee());
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText("gefunden?");
+                speech.setText("stimmt");
                 // Create reprompt
                 Reprompt reprompt = new Reprompt();
                 reprompt.setOutputSpeech(speech);
