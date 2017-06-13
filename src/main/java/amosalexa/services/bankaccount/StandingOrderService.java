@@ -88,7 +88,7 @@ public class StandingOrderService implements SpeechService {
             session.setAttribute(CONTEXT, "SmartCreateStandingOrderIntent");
             return smartCreateStandingOrderResponse(intent, session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("SmartCreateStandingOrderIntent"))) {
-            return smartUpdateStandingOrder(session);
+            return smartUpdateStandingOrderConfirmation(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
@@ -491,15 +491,19 @@ public class StandingOrderService implements SpeechService {
         Slot payeeSecondNameSlot = slots.get("PayeeSecondName");
         String payeeSecondName = (payeeSecondNameSlot == null ? null : payeeSecondNameSlot.getValue());
 
-        Slot numberSlot = slots.get("Number");
-        String number = (numberSlot == null ? null : numberSlot.getValue());
+        Slot amountSlot = slots.get("Amount");
+        String amount = (amountSlot == null ? null : amountSlot.getValue());
 
         for (int i = 0; i < standingOrders.size(); i++) {
             if (standingOrders.get(i).getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
-//            LOGGER.info(standingOrders.get(i).getPayee());
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + "existiert schon. Willst du den aktualisieren");
+                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " von " + amountSlot + " euro " +
+                                "existiert schon. Willst du den aktualisieren");
+
+                session.setAttribute("StandingOrderToModify", standingOrders.get(i).getStandingOrderId());
+                session.setAttribute("NewAmount", amountSlot.getValue());
+
                 // Create reprompt
                 Reprompt reprompt = new Reprompt();
                 reprompt.setOutputSpeech(speech);
@@ -507,6 +511,8 @@ public class StandingOrderService implements SpeechService {
                 return SpeechletResponse.newAskResponse(speech, reprompt);
             }
         }
+
+        //updating existing standing order
 
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
@@ -523,8 +529,37 @@ public class StandingOrderService implements SpeechService {
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
-    private SpeechletResponse smartUpdateStandingOrder(Session session) {
+    private SpeechletResponse smartUpdateStandingOrderConfirmation(Session session) {
+        LOGGER.info("SmartStandingOrders Confirmation called.");
+        int standingOrderToModify = (int) session.getAttribute("StandingOrderToModify");
+        String newAmount = (String) session.getAttribute("NewAmount");
+
+        StandingOrder standingOrder = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderToModify);
+
+        // TODO: Actually update the StandingOrder
+        standingOrder.setAmount(Integer.parseInt(newAmount));
+
+        AccountAPI.updateStandingOrder(ACCOUNT_NUMBER, standingOrder);
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Der Dauerauftrag Nummer " + standingOrderToModify +  " wurde erfolgreich aktualisiert ");
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartCreateStandingOrderConfirmation(Session session) {
         LOGGER.info("SmartStandingOrders called.");
+        String standingOrderToModify = (String) session.getAttribute("StandingOrderToModify");
+        String newAmount = (String) session.getAttribute("NewAmount");
 
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
