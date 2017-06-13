@@ -127,7 +127,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
-        LOGGER.info("Authenticated: " + AuthenticationManager.isAuthenticated());
+        //LOGGER.info("Authenticated: " + AuthenticationManager.isAuthenticated());
 
         LOGGER.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
