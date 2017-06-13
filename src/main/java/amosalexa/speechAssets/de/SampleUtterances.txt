@@ -1,9 +1,17 @@
 TestListIntent Teste Liste
 
-ProductRequestIntent Was kostet {ProductKeyword}
+ProductRequestIntent Was kostet ein {ProductKeyword}
+ProductRequestIntent Was kostet eine {ProductKeyword}
+ProductRequestIntent Was kostet das {ProductKeyword}
+ProductRequestIntent Was kostet die {ProductKeyword}
+ProductRequestIntent Was kostet der {ProductKeyword}
 ProductRequestIntent Sag mir den Preis von {ProductKeyword}
-ProductRequestIntent Finde {ProductKeyword}
-ProductRequestIntent Wie viel kostet {ProductKeyword}
+ProductRequestIntent Sag mir den Preis vom {ProductKeyword}
+ProductRequestIntent Wie viel kostet ein {ProductKeyword}
+ProductRequestIntent Wie viel kostet eine {ProductKeyword}
+ProductRequestIntent Wie viel kostet das {ProductKeyword}
+ProductRequestIntent Wie viel kostet der {ProductKeyword}
+ProductRequestIntent Wie viel kostet die {ProductKeyword}
 
 AccountInformation Wie ist mein {AccountInformationSlots}
 AccountInformation Wie ist meine {AccountInformationSlots}
