@@ -25,16 +25,25 @@ public class GeoCoder {
      */
     public static LatLng getLatLng(Address address){
 
+        if(address == null){
+            address = new Address();
+        }
+
         GeoApiContext context = new GeoApiContext().setApiKey(GOOGLE_MAP_API_KEY);
         GeocodingResult[] results = null;
         try {
             //log.info("Address: " + encoded);
-            results =  GeocodingApi.geocode(context, "Nürnberg 90459 Bulmannstraße 44").await();
+            results =  GeocodingApi.geocode(context, address.getAddressLine1() + " " + address.getCity() + " " + address.getPostalCode()).await();
         } catch (ApiException | InterruptedException | IOException e) {
             e.printStackTrace();
         }
 
         assert results != null : "GeoCoder could not convert address to lat lang!";
+
+        for(int i = 0; i < results.length; i++){
+            System.out.println(results[i]);
+        }
+
         return results[0].geometry.location;
     }
 

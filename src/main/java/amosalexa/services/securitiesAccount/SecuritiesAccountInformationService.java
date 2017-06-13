@@ -66,6 +66,7 @@ public class SecuritiesAccountInformationService implements SpeechService {
             return getSecuritiesAccountInformation(request.getIntent(), session);
         }
 
+        //TODO: YES Intent without context
         if ("AMAZON.YesIntent".equals(intentName)) {
             return getNextSecuritiesAccountInformation(request.getIntent(), session);
         } else if ("AMAZON.NoIntent".equals(intentName)) {
