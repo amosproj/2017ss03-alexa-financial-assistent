@@ -20,46 +20,15 @@ import java.util.*;
 
 public class BankContactService extends AbstractSpeechService implements SpeechService {
 
-    @Override
-    public String getDialogName() {
-        return this.getClass().getName();
-    }
-
-    @Override
-    public List<String> getStartIntents() {
-        return Arrays.asList(
-                BANK_ADDRESS_INTENT,
-                BANK_OPENING_HOURS_INTENT
-        );
-    }
-
-    @Override
-    public List<String> getHandledIntents() {
-        return Arrays.asList(
-                BANK_ADDRESS_INTENT,
-                BANK_OPENING_HOURS_INTENT
-        );
-    }
-
-    @Override
-    public void subscribe(SpeechletSubject speechletSubject) {
-        for(String intent : getHandledIntents()) {
-            speechletSubject.attachSpeechletObserver(this, intent);
-        }
-    }
-
     private static final Logger log = LoggerFactory.getLogger(BankContactService.class);
-
     /**
      * This is the default title that this skill will be using for cards.
      */
     private static final String BANK_CONTACT_CARD = "Bank Kontakt Informationen";
-
     /**
      * Slots with different bank names
      */
     private static final String SLOT_BANK_NAME = "BankNameSlots";
-
     /**
      * Slot for dates
      */
@@ -99,16 +68,38 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
      */
     private String slotBankNameValue;
     private String slotDateValue;
-
     public BankContactService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
 
     @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                BANK_ADDRESS_INTENT,
+                BANK_OPENING_HOURS_INTENT,
+                BANK_TELEPHONE_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                BANK_ADDRESS_INTENT,
+                BANK_OPENING_HOURS_INTENT,
+                BANK_TELEPHONE_INTENT
+        );
+    }
+
+    @Override
     public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, BANK_ADDRESS_INTENT);
-        speechletSubject.attachSpeechletObserver(this, BANK_TELEPHONE_INTENT);
-        speechletSubject.attachSpeechletObserver(this, BANK_OPENING_HOURS_INTENT);
+        for(String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
     }
 
     @Override
