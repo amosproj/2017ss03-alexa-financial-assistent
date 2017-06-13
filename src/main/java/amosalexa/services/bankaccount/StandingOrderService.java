@@ -84,7 +84,11 @@ public class StandingOrderService implements SpeechService {
             session.setAttribute(CONTEXT, "StandingOrderKeyword");
             return getStandingOrdersInfoForKeyword(intent, session);
         } else if ("SmartCreateStandingOrderIntent".equals(intentName)){
+            LOGGER.info(getClass().toString() + " Intent started: " + intentName);
+            session.setAttribute(CONTEXT, "SmartCreateStandingOrderIntent");
             return smartCreateStandingOrderResponse(intent, session);
+        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("SmartCreateStandingOrderIntent"))) {
+            return smartUpdateStandingOrder(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
@@ -495,7 +499,7 @@ public class StandingOrderService implements SpeechService {
 //            LOGGER.info(standingOrders.get(i).getPayee());
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText("stimmt");
+                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + "existiert schon. Willst du den aktualisieren");
                 // Create reprompt
                 Reprompt reprompt = new Reprompt();
                 reprompt.setOutputSpeech(speech);
@@ -507,6 +511,24 @@ public class StandingOrderService implements SpeechService {
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText("Soll ich den Betrag von Dauerauftrag Nummer wirklich auf Euro aendern?");
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartUpdateStandingOrder(Session session) {
+        LOGGER.info("SmartStandingOrders called.");
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Der Betrag wurde erfolgreich aktualisiert?");
         // Create reprompt
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
