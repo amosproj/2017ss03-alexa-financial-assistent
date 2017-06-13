@@ -59,7 +59,7 @@ public class BankingRESTClient {
     }
 
     /**
-     * GET HTTP request to the banking endpoint
+     * GET HTTP request to the banking endpoint.
      *
      * @param objectPath object path of the API interface
      * @param cl         response mapping class
@@ -72,7 +72,7 @@ public class BankingRESTClient {
     }
 
     /**
-     * POST HTTP request to the banking endpoint
+     * POST HTTP request to the banking endpoint.
      *
      * @param objectPath object path of the API interface
      * @param request    post object
@@ -86,7 +86,7 @@ public class BankingRESTClient {
     }
 
     /**
-     * PUT HTTP request to the banking endpoint
+     * PUT HTTP request to the banking endpoint.
      *
      * @param objectPath endpoint object
      * @param request    post object
@@ -98,7 +98,7 @@ public class BankingRESTClient {
     }
 
     /**
-     * DELETE HTTP request to the banking endpoint
+     * DELETE HTTP request to the banking endpoint.
      *
      * @param objectPath endpoint object
      */

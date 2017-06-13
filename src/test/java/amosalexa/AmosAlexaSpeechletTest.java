@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,7 @@ public class AmosAlexaSpeechletTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
 
     private Session session;
-    private final String SESSION_ID = "SessionId.2682fed6-193f-48b3-afd7-c6185d075ddf";
+    private String sessionId;
 
     // FIXME: Get the current account number from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
@@ -64,6 +65,19 @@ public class AmosAlexaSpeechletTest {
         testIntent(
                 "AMAZON.YesIntent",
                 "Karte 123 wurde gesperrt.");
+    }
+
+    @Test
+    public void bankTransferIntentTest() throws Throwable {
+        newSession();
+
+        testIntentMatches("BankTransferIntent", "name:anne", "amount:2",
+                "Aktuell betraegt dein Kontostand (.*) Euro\\. Bist du sicher, dass du 2 Euro an anne ueberweisen willst\\?");
+
+        testIntentMatches("AMAZON.YesIntent",
+                "Ok, (.*) Euro wurden an anne ueberwiesen\\. Dein neuer Kontostand betraegt (.*) Euro\\.");
+
+
     }
 
     @Test
@@ -229,7 +243,8 @@ public class AmosAlexaSpeechletTest {
 
     private void newSession() {
         Session.Builder builder = Session.builder();
-        builder.withSessionId(SESSION_ID);
+        sessionId = "SessionId." + UUID.randomUUID();
+        builder.withSessionId(sessionId);
         session = builder.build();
     }
 
@@ -274,7 +289,7 @@ public class AmosAlexaSpeechletTest {
 
         String json = "{\n" +
                 "  \"session\": {\n" +
-                "    \"sessionId\": \"" + SESSION_ID + "\",\n" +
+                "    \"sessionId\": \"" + sessionId + "\",\n" +
                 "    \"application\": {\n" +
                 "      \"applicationId\": \"amzn1.ask.skill.38e33c69-1510-43cd-be1d-929f08a966b4\"\n" +
                 "    },\n" +

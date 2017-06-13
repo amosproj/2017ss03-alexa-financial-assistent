@@ -47,6 +47,13 @@ public class BankTransferDialog implements DialogHandler{
         }
     }
 
+    /**
+     * Saves the slot values "name" and "amount" in the session storage and asks for confirmation.
+     * Does NOT transfer money yet. If contact not found or not enough in account in declines the transaction.
+     *
+     * @return SpeechletResponse, that asks for confirmation.
+     */
+
 
     private SpeechletResponse askForBankTransferConfirmation(Intent intent, SessionStorage.Storage storage) {
         Map<String, Slot> slots = intent.getSlots();
@@ -56,6 +63,7 @@ public class BankTransferDialog implements DialogHandler{
         String name = slots.get("name").getValue();
         LOGGER.info("Slot name hat folgenden Wert: " + name);
 
+        // TODO: as soon as API also contains name this should be deleted / adjusted
         // create bank accounts
         BankAccount anneBankAccount = new BankAccount("anne", "0000000001", "DE50100000000000000001");
         BankAccount christianBankAccount = new BankAccount("christian", "0000000000", "DE60643995205405578292");
@@ -85,7 +93,25 @@ public class BankTransferDialog implements DialogHandler{
             Reprompt reprompt = new Reprompt();
             reprompt.setOutputSpeech(speech);
 
-            return SpeechletResponse.newAskResponse(speech, reprompt, card);
+            return SpeechletResponse.newTellResponse(speech, card);
+        }
+
+        // there is not enough money on the account
+        if (enoughMoneyforTransaction("0000000001", Double.valueOf(amount)) == false) {
+
+            String speechText = "Dein Kontostand reicht leider nicht aus, um " + amount + " Euro zu ueberweisen." +
+                    " Ich habe die Transaktion daher nicht durchgefuehrt.";
+
+            // Create the Simple card content.
+            SimpleCard card = new SimpleCard();
+            card.setTitle("Überweisung nicht möglich.");
+            card.setContent(speechText);
+
+            // Create the plain text output.
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText(speechText);
+
+            return SpeechletResponse.newTellResponse(speech, card);
         }
 
         // put amount + name in the storage.
@@ -98,8 +124,8 @@ public class BankTransferDialog implements DialogHandler{
         String balanceBeforeTransation = String.valueOf(account.getBalance());
         LOGGER.info("Der aktuelle Kontostand beträgt " + balanceBeforeTransation);
 
-        String speechText = "Aktuell beträgt dein Kontostand " + balanceBeforeTransation + " Euro. " +
-                "Bist du sicher, dass du " + amount + " Euro an " + name + " überweisen willst?";
+        String speechText = "Aktuell betraegt dein Kontostand " + balanceBeforeTransation + " Euro. " +
+                "Bist du sicher, dass du " + amount + " Euro an " + name + " ueberweisen willst?";
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -137,11 +163,11 @@ public class BankTransferDialog implements DialogHandler{
         Account account = AccountAPI.getAccount("0000000001");
         String balanceAfterTransation = String.valueOf(account.getBalance());
 
-        LOGGER.info("Der aktuelle Kontostand beträgt " + balanceAfterTransation);
+        LOGGER.info("Der aktuelle Kontostand betraegt " + balanceAfterTransation);
 
         //reply message
-        String speechText = "Ok, " + amount + " Euro wurden an " + name + " überwiesen." +
-                " Dein neuer Kontostand beträgt " + balanceAfterTransation + " Euro." ;
+        String speechText = "Ok, " + amount + " Euro wurden an " + name + " ueberwiesen." +
+                " Dein neuer Kontostand betraegt " + balanceAfterTransation + " Euro." ;
 
         // Create the Simple card content.
         SimpleCard card = new SimpleCard();
@@ -156,12 +182,32 @@ public class BankTransferDialog implements DialogHandler{
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
 
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        return SpeechletResponse.newTellResponse(speech, card);
     }
+
+    /**
+     * Checks if there is a enough money in the account to do the transaction.
+     *
+     * @return boolean equals false if there is not enough money in the account.
+     */
+    private boolean enoughMoneyforTransaction(String accountNumber, double amountToTransfer) {
+
+        // TODO: get the specific money limit for the account (User Story 36)
+        int limitForTransaction = 0;
+        double accountBalance = (double) AccountAPI.getAccount(accountNumber).getBalance();
+
+        if (accountBalance - amountToTransfer >= limitForTransaction) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 
     private SpeechletResponse cancelAction() {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("OK tschuess!");
+        speech.setText("OK, ich fuehre die Ueberweisung nicht aus.");
         return SpeechletResponse.newTellResponse(speech);
     }
 
