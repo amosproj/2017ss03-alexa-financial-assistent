@@ -201,6 +201,19 @@ public class AmosAlexaSpeechletTest {
         }
     }
 
+    @Test
+    public void setBalanceLimitTest() throws Exception {
+        newSession();
+
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
+        testIntent("AMAZON.YesIntent", "Okay, dein Kontolimit wurde auf 100 Euro gesetzt.");
+
+        newSession();
+
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
+        testIntent("AMAZON.NoIntent", "");
+    }
+
     /************************************
      *          Helper methods          *
      ************************************/
