@@ -65,16 +65,26 @@
       "intent": "AMAZON.HelpIntent"
     },
     {
-      "intent": "SavingsPlanIntent",
+      "intent": "SavingsPlanIntroIntent",
       "slots": [
         {
-          "name": "Grundbetrag",
+          "name": "Betrag",
           "type": "AMAZON.NUMBER"
-        },
+        }
+      ]
+    },
+    {
+      "intent": "SavingsPlanAmountIntent",
+      "slots": [
         {
-          "name": "EinzahlungMonat",
+          "name": "Betrag",
           "type": "AMAZON.NUMBER"
-        },
+        }
+      ]
+    },
+    {
+      "intent": "SavingsPlanNumberOfYearsIntent",
+      "slots": [
         {
           "name": "AnzahlJahre",
           "type": "AMAZON.NUMBER"
