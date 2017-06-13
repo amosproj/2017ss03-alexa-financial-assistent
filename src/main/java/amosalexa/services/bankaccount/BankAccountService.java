@@ -39,9 +39,9 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     private static final String number = "0000000001";
 
     /**
-     * your account
+     * account
      */
-    private final Account account = AccountAPI.getAccount(number);
+    private static Account account;
 
     /**
      * Name for custom slot types
@@ -110,58 +110,18 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
         // check slot values
         if (slotValue != null) {
             log.info("Account Information Intent - Slot: " + slotValue);
+
             slotValue = slotValue.toLowerCase();
-
-            String slot = "kontostand";
-            if (slot.equals(slotValue)) {
-                speechText = "Dein Kontostand beträgt <say-as interpret-as=\"unit\">€" + account.getBalance() + "</say-as>\n";
-                return getSSMLResponse(CARD_NAME, speechText);
-            }
-
-            slot = "kontonummer";
-            if (slot.equals(slotValue)) {
-                speechText = "Deine " + slot + " lautet " + account.getNumber();
-            }
-
-            slot = "iban";
-            if (slot.equals(slotValue)) {
-                speechText = "Deine " + slot + " lautet " + account.getIban();
-            }
-
-            slot = "eröffnungsdatum";
-            if (slot.equals(slotValue)) {
-                speechText = "Dein " + slot + " war " + account.getOpeningDate();
-            }
-
-            slot = "abhebegebühr";
-            if (slot.equals(slotValue)) {
-                speechText = "Deine " + slot + " beträgt <say-as interpret-as=\"unit\">€" + account.getWithdrawalFee() + "</say-as>\n";
-                return getSSMLResponse(CARD_NAME, speechText);
-            }
-
-            slot = "zinssatz";
-            if (slot.equals(slotValue)) {
-                speechText = "Dein " + slot + " ist aktuell " + account.getInterestRate();
-            }
-
-            slot = "kreditlimit";
-            if (slot.equals(slotValue)) {
-                speechText = "Dein " + slot + " beträgt <say-as interpret-as=\"unit\">€" + account.getCreditLimit() + "</say-as>\n";
-                return getSSMLResponse(CARD_NAME, speechText);
-            }
-
-            slot = "kreditkartenlimit";
-            if (slot.equals(slotValue)) {
-                speechText = "Dein " + slot + " beträgt <say-as interpret-as=\"unit\">€" + account.getCreditcardLimit() + "</say-as>\n";
-                return getSSMLResponse(CARD_NAME, speechText);
-            }
+            account = AccountAPI.getAccount(number);
 
             if ("überweisungen".equals(slotValue) || "transaktionen".equals(slotValue)) {
                 return handleTransactionSpeech();
             }
-            return getAskResponse(CARD_NAME, repromptText);
+
+            return getSSMLResponse(CARD_NAME, account.getSpeechTexts().get(slotValue));
+
         } else {
-           throw new SpeechletException();
+            return getAskResponse(CARD_NAME, repromptText);
         }
     }
 
@@ -172,25 +132,33 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     private SpeechletResponse handleTransactionSpeech() {
         List<Transaction> transactions = getTransactions();
 
-        if (transactions.isEmpty())
+        if (transactions == null || transactions.isEmpty())
             return getResponse(CARD_NAME, EMPTY_TRANSACTIONS);
 
         // transaction list intro
         StringBuilder stringBuilder = new StringBuilder("Du hast " + transactions.size() + " Transaktionen. ");
         int i;
         for ( i = 0; i < 3; i++) {
-            stringBuilder.append("<break time=\"1s\"/> Transaktionsnummer " + (i + 1) + " ");
+            stringBuilder.append(getTransactionIdText(transactions.get(i)));
             stringBuilder.append(getTransactionText(transactions.get(i)));
         }
 
         if(i - 1 < transactions.size()){
-            stringBuilder.append("<break time=\"1s\"/> Möchtest du weitere Transaktionen hören");
+            stringBuilder.append(getAskMoreTransactionText());
             SessionStorage sessionStorage = SessionStorage.getInstance();
             sessionStorage.putObject(sessionID, CONTEXT_FURTHER_TRANSACTION_INDEX, i);
             sessionStorage.putObject(sessionID, SessionStorage.CURRENTDIALOG, "transactionsDialog");
         }
 
         return getSSMLAskResponse(CARD_NAME, stringBuilder.toString());
+    }
+
+    private String getTransactionIdText(Transaction transaction){
+        return "<break time=\"1s\"/> Nummer " + transaction.getTransactionId() + " ";
+    }
+
+    private String getAskMoreTransactionText(){
+        return "<break time=\"1s\"/> Möchtest du weitere Transaktionen hören";
     }
 
     private String getTransactionText(Transaction transaction){
@@ -206,7 +174,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     }
 
     private String getTransactionFromAccountText(Transaction transaction) {
-        return "Von deinem Konto auf das Konto " + transaction.getDestinationAccount() +
+        return  getTransactionIdText(transaction) + "Von deinem Konto auf das Konto " + transaction.getDestinationAccount() +
                 " in Höhe von <say-as interpret-as=\"unit\">€"
                 + Math.abs(transaction.getAmount().doubleValue()) + "</say-as>\n";
     }
@@ -227,13 +195,11 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
         List<Transaction> transactions = getTransactions();
         String transactionText = getTransactionText(transactions.get(i));
         if(i - 1 < transactions.size()){
-            transactionText = transactionText + "<break time=\"1s\"/> Möchtest du weitere Transaktionen hören";
+            transactionText = transactionText + getAskMoreTransactionText();
             SessionStorage sessionStorage = SessionStorage.getInstance();
             sessionStorage.putObject(sessionID, CONTEXT_FURTHER_TRANSACTION_INDEX, i + 1);
             sessionStorage.putObject(sessionID, SessionStorage.CURRENTDIALOG, "transactionsDialog");
         }
-
         return getSSMLAskResponse(CARD_NAME, transactionText);
     }
-
 }
