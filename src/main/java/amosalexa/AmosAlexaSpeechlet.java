@@ -88,6 +88,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     @Override
     public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
         List<SpeechletObserver> list = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
+        LOGGER.warn("Test: {}", requestEnvelope.getRequest().getIntent().getName());
 
         if (list == null) {
             return null;
@@ -171,7 +172,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
                 return response;
             }
         }
-
 
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 

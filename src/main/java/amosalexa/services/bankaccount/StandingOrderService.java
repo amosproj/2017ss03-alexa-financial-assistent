@@ -84,15 +84,7 @@ public class StandingOrderService implements SpeechService {
             session.setAttribute(CONTEXT, "StandingOrderKeyword");
             return getStandingOrdersInfoForKeyword(intent, session);
         } else if ("SmartCreateStandingOrderIntent".equals(intentName)){
-            SimpleCard card = new SimpleCard();
-            card.setTitle("Daueraufträge");
-
-            // Create the plain text output.
-            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-
-            card.setContent("Keine Daueraufträge vorhanden.");
-            speech.setText("Keine Dauerauftraege vorhanden.");
-            return SpeechletResponse.newTellResponse(speech, card);
+            return smartCreateStandingOrderResponse(intent, session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
@@ -478,6 +470,33 @@ public class StandingOrderService implements SpeechService {
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse smartCreateStandingOrderResponse(Intent intent, Session session) {
+        LOGGER.info("SmartStandingOrders called.");
+
+        Map<String, Slot> slots = intent.getSlots();
+
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
+
+        standingOrders = new ArrayList<>(standingOrdersCollection);
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Daueraufträge");
+
+        String name = "Max Mustermann";
+
+        for (int i = 0; i < standingOrders.size(); i++) {
+            if (standingOrders.get(i).getPayee().equals(name)) {
+//            LOGGER.info(standingOrders.get(i).getPayee());
+                // Create the plain text output
+                PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+                speech.setText("gefunden?");
+                // Create reprompt
+                Reprompt reprompt = new Reprompt();
+                reprompt.setOutputSpeech(speech);
+
+                return SpeechletResponse.newAskResponse(speech, reprompt);
+            }
+        }
+
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText("Soll ich den Betrag von Dauerauftrag Nummer wirklich auf Euro aendern?");

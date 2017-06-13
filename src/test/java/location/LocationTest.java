@@ -27,18 +27,18 @@ public class LocationTest {
     public void placesTest() throws InterruptedException {
         Address dummyAddress = new Address();
         String slotValue = "Sparkasse";
-        LatLng deviceLocation = GeoCoder.getLatLng(dummyAddress);
-        List<Place> places = PlaceFinder.findNearbyPlace(deviceLocation, slotValue);
-
-        Place place = PlaceFinder.findOpeningHoursPlace(places, slotValue);
-
-        log.warn("Addresse: " + place.getAddress());
-
-        for(Hours.Period period : place.getHours().getPeriods()){
-            log.info("Place: " + period.getOpeningDay());
-            log.info("Place: " + period.getOpeningTime());
-            log.info("Place: " + period.getClosingTime());
-        }
+//        LatLng deviceLocation = GeoCoder.getLatLng(dummyAddress);
+//        List<Place> places = PlaceFinder.findNearbyPlace(deviceLocation, slotValue);
+//
+//        Place place = PlaceFinder.findOpeningHoursPlace(places, slotValue);
+//
+//        log.warn("Addresse: " + place.getAddress());
+//
+//        for(Hours.Period period : place.getHours().getPeriods()){
+//            log.info("Place: " + period.getOpeningDay());
+//            log.info("Place: " + period.getOpeningTime());
+//            log.info("Place: " + period.getClosingTime());
+//        }
     }
 
     @Test
