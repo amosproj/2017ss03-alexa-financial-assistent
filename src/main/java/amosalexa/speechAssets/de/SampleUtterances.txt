@@ -11,6 +11,9 @@ AccountInformation Was ist mein {AccountInformationSlots}
 AccountInformation Was ist meine {AccountInformationSlots}
 AccountInformation Wie hoch ist mein {AccountInformationSlots}
 AccountInformation Wie hoch ist meine {AccountInformationSlots}
+AccountInformation Was sind meine {AccountInformationSlots}
+AccountInformation Was sind mein {AccountInformationSlots}
+
 
 ReplacementCardReasonIntent Die Karte wurde {ReplacementReason}
 ReplacementCardReasonIntent Die Karte ist {ReplacementReason}
@@ -29,19 +32,26 @@ ReplacementCardIntent Ich brauche eine Ersatzkarte
 
 BlockCardIntent Sperre Karte {BankCardNumber}
 
-AuthenticationPIN {AuthenticationPINSlots}
-
 BankAddress Bankadresse
 BankAddress Wo finde ich meine Bank
 BankAddress Wo ist meine Bank
 BankAddress Wie ist die Adresse von {BankNameSlots}
 BankAddress Wo ist die {BankNameSlots}
+BankAddress gib mir die Adresse von {BankNameSlots}
+BankAddress suche die {BankNameSlots} in der nähe
+BankAddress wo ist die nächste {BankNameSlots}
+BankAddress finde die nächste {BankNameSlots}
 
 BankOpeningHours Öffnungszeiten
+BankOpeningHours Öffnungszeiten meiner Bank
 BankOpeningHours Wann hat die {BankNameSlots} am {OpeningHoursDate} geöffnet
 BankOpeningHours Wann hat die {BankNameSlots} geöffnet
 BankOpeningHours Öffnungszeiten meiner Bank
 BankOpeningHours Wann hat die {BankNameSlots} geöffnet
+BankOpeningHours {BankNameSlots} Öffnungszeiten
+BankOpeningHours Öffnungszeiten der {BankNameSlots}
+BankOpeningHours wann hat {BankNameSlots} offen
+BankOpeningHours hat die {BankNameSlots} {OpeningHoursDate} geöffnet
 
 SavingsPlanIntent Berechne mir einen Sparplan
 SavingsPlanIntent Ich moechte monatlich Geld sparen
