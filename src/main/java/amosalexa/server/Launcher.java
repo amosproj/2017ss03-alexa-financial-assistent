@@ -9,17 +9,12 @@ package amosalexa.server; /**
  */
 
 import amosalexa.AmosAlexaSpeechlet;
-import amosalexa.SpeechletObserver;
-import amosalexa.services.bankaccount.BankAccountService;
-import amosalexa.services.pricequery.PriceQueryService;
 import com.amazon.speech.speechlet.SpeechletV2;
 import com.amazon.speech.speechlet.servlet.SpeechletServlet;
 import org.apache.log4j.PropertyConfigurator;
-import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +35,11 @@ public final class Launcher {
     private static final String HTTPS_SCHEME = "https";
 
     /**
+     *
+     */
+    public static Server server;
+
+    /**
      * default constructor.
      */
     private Launcher() {
@@ -55,7 +55,7 @@ public final class Launcher {
     public static void main(final String[] args) throws Exception {
         PropertyConfigurator.configure(Thread.currentThread().getContextClassLoader().getResource("log4j.properties"));
 
-        Server server = newServer();
+        server = newServer();
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
