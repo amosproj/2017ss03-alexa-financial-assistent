@@ -14,7 +14,6 @@ import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
-import com.amazon.speech.ui.SimpleCard;
 import com.amazon.speech.ui.SsmlOutputSpeech;
 import model.banking.StandingOrder;
 import org.slf4j.Logger;
@@ -26,6 +25,7 @@ import java.util.*;
 
 public class SavingsPlanService extends AbstractSpeechService implements SpeechService {
 
+
     @Override
     public String getDialogName() {
         return this.getClass().getName();
@@ -34,14 +34,16 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     @Override
     public List<String> getStartIntents() {
         return Arrays.asList(
-                SAVINGS_PLAN_INTENT
+                SAVINGS_PLAN_INTRO_INTENT
         );
     }
 
     @Override
     public List<String> getHandledIntents() {
         return Arrays.asList(
-                SAVINGS_PLAN_INTENT,
+                SAVINGS_PLAN_INTRO_INTENT,
+                SAVINGS_PLAN_AMOUNT_INTENT,
+                SAVINGS_PLAN_NUMBER_OF_YEARS_INTENT,
                 YES_INTENT,
                 NO_INTENT
         );
@@ -49,7 +51,19 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanService.class);
 
-    // FIXME: Hardcoded Strings
+    /**
+     * Default value for cards
+     */
+    private static final String SAVINGS_PLAN = "Sparplan";
+
+    private static final String CONTEXT = "DIALOG_CONTEXT";
+
+    //Intent names
+    private static final String SAVINGS_PLAN_INTRO_INTENT = "SavingsPlanIntroIntent";
+    private static final String SAVINGS_PLAN_AMOUNT_INTENT = "SavingsPlanAmountIntent";
+    private static final String SAVINGS_PLAN_NUMBER_OF_YEARS_INTENT = "SavingsPlanNumberOfYearsIntent";
+
+    // FIXME: Hardcoded Strings for account
     private static final String SOURCE_ACCOUNT = "DE42100000009999999999";
     private static final String SAVINGS_ACCOUNT = "DE39100000007777777777";
     private static final String STANDING_ORDER_ACCOUNT = "9999999999";
@@ -57,17 +71,20 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     private static final String DESCRIPTION_SAVINGS_PLAN = "Sparplan regelm. Einzahlung";
     private static final String DESCRIPTION_ONE_OFF_PAYMENT = "Sparplan Einmalzahlung";
 
-    private static final String CONTEXT = "DIALOG_CONTEXT";
-    private static final String SAVINGS_PLAN_INTENT = "SavingsPlanIntent";
-
-    private static final String GRUNDBETRAG_KEY = "Grundbetrag";
-
-    private static final String ANZAHL_JAHRE_KEY = "AnzahlJahre";
-
-    private static final String EINZAHLUNG_MONAT_KEY = "EinzahlungMonat";
+    //Static keys for the three savings plan parameters (used as slot keys as well as session keys!)
+    private static final String AMOUNT_KEY = "Betrag";
+    private static final String NUMBER_OF_YEARS_KEY = "AnzahlJahre";
+    private static final String MONTHLY_PAYMENT_KEY = "MonthlyPayment";
 
     public SavingsPlanService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
+    }
+
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        for (String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
     }
 
     @Override
@@ -78,103 +95,93 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         LOGGER.info("Intent Name: " + intentName);
         String context = (String) session.getAttribute(CONTEXT);
 
-        if ("SavingsPlanIntent".equals(intentName)) {
+        if (SAVINGS_PLAN_INTRO_INTENT.equals(intentName)) {
             return askForSavingsParameter(intent, session);
+        } else if (SAVINGS_PLAN_AMOUNT_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
+            return saveAmountAndContinue(intent, session);
+        } else if (SAVINGS_PLAN_NUMBER_OF_YEARS_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
+            return saveNumberOfYearsAndContinue(intent, session);
         } else if (YES_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
             return createSavingsPlan(intent, session);
         } else if (NO_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
             return cancelAction();
         } else {
-            return null;
-            //throw new SpeechletException("Unhandled intent: " + intentName);
+            //return null;
+            throw new SpeechletException("Unhandled intent: " + intentName);
         }
     }
 
-    @Override
-    public void subscribe(SpeechletSubject speechletSubject) {
-        for(String intent : getHandledIntents()) {
-            speechletSubject.attachSpeechletObserver(this, intent);
+    private SpeechletResponse saveAmountAndContinue(Intent intent, Session session) {
+        //Amount may either be basic amount or monthly payment amount, so we
+        //have to check first, if basic amount has already been set in the session.
+        //(Whole process must be sequential)
+        if (!session.getAttributes().containsKey(AMOUNT_KEY)) {
+            Map<String, Slot> slots = intent.getSlots();
+            String basicAmount = slots.get(AMOUNT_KEY).getValue();
+            LOGGER.info("BasicAmount: " + basicAmount);
+            session.setAttribute(AMOUNT_KEY, basicAmount);
+
+            String answer = "Wie viele Jahre moechtest du das Geld anlegen?";
+            //TODO better use duration?
+            return getAskResponse(SAVINGS_PLAN, answer);
+        } else {
+            Map<String, Slot> slots = intent.getSlots();
+            String monthlyPayment = slots.get(AMOUNT_KEY).getValue();
+            LOGGER.info("MonthlyPayment: " + monthlyPayment);
+            session.setAttribute(MONTHLY_PAYMENT_KEY, monthlyPayment);
+
+            String grundbetragString = (String) session.getAttribute(AMOUNT_KEY);
+            String einzahlungMonatString = (String) session.getAttribute(MONTHLY_PAYMENT_KEY);
+            String anzahlJahreString = (String) session.getAttribute(NUMBER_OF_YEARS_KEY);
+
+            String calculationString = calculateSavings(grundbetragString, einzahlungMonatString, anzahlJahreString);
+
+            SsmlOutputSpeech speech = new SsmlOutputSpeech();
+            speech.setSsml("<speak>Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende " +
+                    "des Zeitraums insgesamt <say-as interpret-as=\"number\">" + calculationString
+                    + "</say-as> Euro. Soll ich diesen Sparplan fuer dich anlegen?</speak>");
+
+            // Create reprompt
+            Reprompt reprompt = new Reprompt();
+            reprompt.setOutputSpeech(speech);
+
+            LOGGER.debug("Session afterwards: " + session.getAttributes());
+
+            return SpeechletResponse.newAskResponse(speech, reprompt);
         }
+    }
+
+    private SpeechletResponse saveNumberOfYearsAndContinue(Intent intent, Session session) {
+        Map<String, Slot> slots = intent.getSlots();
+        String numberOfYears = slots.get(NUMBER_OF_YEARS_KEY).getValue();
+        LOGGER.info("NumberOfYears: " + numberOfYears);
+        session.setAttribute(NUMBER_OF_YEARS_KEY, numberOfYears);
+
+        String answer = "Welchen Geldbetrag moechtest du monatlich investieren?";
+        return getAskResponse(SAVINGS_PLAN, answer);
     }
 
     private SpeechletResponse askForSavingsParameter(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
         session.setAttribute(CONTEXT, "SavingsPlan");
 
-        String grundbetrag = slots.get(GRUNDBETRAG_KEY).getValue();
-        String anzahlJahre = slots.get(ANZAHL_JAHRE_KEY).getValue();
-        String monatlicheEinzahlung = slots.get(EINZAHLUNG_MONAT_KEY).getValue();
+        LOGGER.info("Slots: " + slots);
 
-        String speechText, repromptText;
+        String speechText;
 
-        LOGGER.info("Grundbetrag: " + grundbetrag);
-        LOGGER.info("Jahre: " + anzahlJahre);
-        LOGGER.info("monatliche Einzahlung: " + monatlicheEinzahlung);
         LOGGER.debug("Storage Before: " + session.getAttributes());
 
-        if (grundbetrag != null && session.getAttributes().containsKey(GRUNDBETRAG_KEY)) {
-            monatlicheEinzahlung = grundbetrag;
-            grundbetrag = null;
-        }
-
-        if (grundbetrag != null) {
-            session.setAttribute(GRUNDBETRAG_KEY, grundbetrag);
-        }
-        if (anzahlJahre != null) {
-            session.setAttribute(ANZAHL_JAHRE_KEY, anzahlJahre);
-        }
-        if (monatlicheEinzahlung != null) {
-            session.setAttribute(EINZAHLUNG_MONAT_KEY, monatlicheEinzahlung);
-        }
-
-        if (grundbetrag == null && !session.getAttributes().containsKey(GRUNDBETRAG_KEY)) {
+        if (!session.getAttributes().containsKey(AMOUNT_KEY)) {
             speechText = "Was moechtest du als Grundbetrag anlegen?";
-            repromptText = speechText;
-            return getSpeechletResponse(speechText, repromptText, true);
+            return getAskResponse(SAVINGS_PLAN, speechText);
         }
-
-        if (anzahlJahre == null && !session.getAttributes().containsKey(ANZAHL_JAHRE_KEY)) {
-            speechText = "Wie viele Jahre moechtest du das Geld anlegen?";
-            //TODO better use duration?
-            repromptText = speechText;
-            return getSpeechletResponse(speechText, repromptText, true);
-        }
-
-        if (monatlicheEinzahlung == null && !session.getAttributes().containsKey(EINZAHLUNG_MONAT_KEY)) {
-            if (grundbetrag == null && !session.getAttributes().containsKey(GRUNDBETRAG_KEY)) {
-                speechText = "Du musst zuerst einen Grundbetrag angeben.";
-                repromptText = speechText;
-                return getSpeechletResponse(speechText, repromptText, true);
-            }
-            speechText = "Wie viel Geld moechtest du monatlich investieren?";
-            repromptText = speechText;
-            return getSpeechletResponse(speechText, repromptText, true);
-        }
-
-        String grundbetragString = (String) session.getAttribute(GRUNDBETRAG_KEY);
-        String einzahlungMonatString = (String) session.getAttribute(EINZAHLUNG_MONAT_KEY);
-        String anzahlJahreString = (String) session.getAttribute(ANZAHL_JAHRE_KEY);
-
-        String calculationString = calculateSavings(grundbetragString, einzahlungMonatString, anzahlJahreString);
-
-        SsmlOutputSpeech speech = new SsmlOutputSpeech();
-        speech.setSsml("<speak>Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende " +
-                "des Zeitraums insgesamt <say-as interpret-as=\"number\">" + calculationString
-                + "</say-as> Euro. Soll ich diesen Sparplan fuer dich anlegen?</speak>");
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        LOGGER.debug("Session afterwards: " + session.getAttributes());
-
-        return SpeechletResponse.newAskResponse(speech, reprompt);
+        return null;
     }
 
     private SpeechletResponse createSavingsPlan(Intent intent, Session session) {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        String grundbetrag = (String) session.getAttribute(GRUNDBETRAG_KEY);
-        String monatlicheZahlung = (String) session.getAttribute(EINZAHLUNG_MONAT_KEY);
+        String grundbetrag = (String) session.getAttribute(AMOUNT_KEY);
+        String monatlicheZahlung = (String) session.getAttribute(MONTHLY_PAYMENT_KEY);
         createSavingsPlanOneOffPayment(grundbetrag);
         StandingOrder so = createSavingsPlanStandingOrder(monatlicheZahlung);
         speech.setText("Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von " + grundbetrag + " Euro wird deinem Sparkonto " +
@@ -187,7 +194,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         Number amount = Integer.parseInt(betrag);
         Date now = new Date();
         String valueDate = formatDate(now, "yyyy-MM-dd");
-        TransactionAPI.createTransaction(amount, SOURCE_ACCOUNT, SAVINGS_ACCOUNT, valueDate, DESCRIPTION_ONE_OFF_PAYMENT, "Hans" , "Helga");
+        TransactionAPI.createTransaction(amount, SOURCE_ACCOUNT, SAVINGS_ACCOUNT, valueDate, DESCRIPTION_ONE_OFF_PAYMENT, "Hans", "Helga");
     }
 
     private StandingOrder createSavingsPlanStandingOrder(String monatlicheZahlung) {
@@ -212,31 +219,6 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     private String formatDate(Date date, String pattern) {
         SimpleDateFormat dt = new SimpleDateFormat(pattern);
         return dt.format(date);
-    }
-
-    private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
-                                                   boolean isAskResponse) {
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Session");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-        //TODO: duplicate code
-        if (isAskResponse) {
-            // Create reprompt
-            PlainTextOutputSpeech repromptSpeech = new PlainTextOutputSpeech();
-            repromptSpeech.setText(repromptText);
-            Reprompt reprompt = new Reprompt();
-            reprompt.setOutputSpeech(repromptSpeech);
-
-            return SpeechletResponse.newAskResponse(speech, reprompt, card);
-
-        } else {
-            return SpeechletResponse.newTellResponse(speech, card);
-        }
     }
 
     private SpeechletResponse cancelAction() {

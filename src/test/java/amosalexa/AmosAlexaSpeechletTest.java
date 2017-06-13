@@ -108,7 +108,7 @@ public class AmosAlexaSpeechletTest {
             add("Möchtest du weitere Transaktionen hören");
         }};
 
-        testIntentMatches("AccountInformation", "AccountInformationSlots:überweisungen",  StringUtils.join(possibleAnswers, "|"));
+        testIntentMatches("AccountInformation", "AccountInformationSlots:überweisungen", StringUtils.join(possibleAnswers, "|"));
 
         ArrayList<String> possibleAnswersYES = new ArrayList<String>() {{
             add("Du hast keine Überweisungen in deinem Konto");
@@ -123,14 +123,14 @@ public class AmosAlexaSpeechletTest {
     @Test
     public void bankAccountInformationIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
-        testIntentMatches("AccountInformation", "AccountInformationSlots:zinssatz",  "Dein zinssatz ist aktuell (.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:kontostand",  "Dein kontostand beträgt €(.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:eröffnungsdatum",  "Dein eröffnungsdatum war (.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditlimit",  "Dein kreditlimit beträgt €(.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditkartenlimit",  "Dein kreditkartenlimit beträgt €(.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:kontonummer",  "Deine kontonummer lautet (.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:abhebegebühr",  "Deine abhebegebühr beträgt (.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:iban",  "Deine iban lautet (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:zinssatz", "Dein zinssatz ist aktuell (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kontostand", "Dein kontostand beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:eröffnungsdatum", "Dein eröffnungsdatum war (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditlimit", "Dein kreditlimit beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditkartenlimit", "Dein kreditkartenlimit beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kontonummer", "Deine kontonummer lautet (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:abhebegebühr", "Deine abhebegebühr beträgt (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:iban", "Deine iban lautet (.*)");
     }
 
     @Test
@@ -183,11 +183,20 @@ public class AmosAlexaSpeechletTest {
     public void savingsPlanTest() throws Exception {
         newSession();
 
-        testIntentMatches(
-                "SavingsPlanIntent", "AnzahlJahre:2", "EinzahlungMonat:150", "Grundbetrag:1500",
+        testIntent("SavingsPlanIntroIntent",
+                "Was moechtest du als Grundbetrag anlegen?"
+        );
+        testIntent("SavingsPlanAmountIntent", "Betrag:1500",
+                "Wie viele Jahre moechtest du das Geld anlegen?"
+        );
+        testIntent("SavingsPlanNumberOfYearsIntent", "AnzahlJahre:2",
+                "Welchen Geldbetrag moechtest du monatlich investieren?"
+        );
+        testIntentMatches("SavingsPlanAmountIntent", "Betrag:150",
                 "Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende des Zeitraums insgesamt (.*) Euro\\. Soll ich diesen Sparplan fuer dich anlegen\\?"
         );
 
+        //Calculate what first payment date of the savings plan should be (depending on today´s date)
         Calendar calendar = Calendar.getInstance();
         String nextPayin = String.format("01.%02d.%d", calendar.get(Calendar.MONTH) + 2, calendar.get(Calendar.YEAR));
 
@@ -262,8 +271,8 @@ public class AmosAlexaSpeechletTest {
             int templateId = Integer.parseInt(m.group(1));
             double amount = Double.parseDouble(m.group(3));
 
-            testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:"+(amount*2),
-                    "Möchtest du den Betrag von Vorlage " + templateId + " von " + amount + " auf " + (amount*2) + " ändern?");
+            testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:" + (amount * 2),
+                    "Möchtest du den Betrag von Vorlage " + templateId + " von " + amount + " auf " + (amount * 2) + " ändern?");
 
             testIntent(
                     "AMAZON.YesIntent",
@@ -276,10 +285,10 @@ public class AmosAlexaSpeechletTest {
 
             if (m.find()) {
                 assertEquals(templateId, Integer.parseInt(m.group(1)));
-                assert(Math.abs(amount*2 - Double.parseDouble(m.group(3))) < 0.001);
+                assert (Math.abs(amount * 2 - Double.parseDouble(m.group(3))) < 0.001);
 
-                testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:"+amount,
-                        "Möchtest du den Betrag von Vorlage " + templateId + " von " + (amount*2) + " auf " + amount + " ändern?");
+                testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:" + amount,
+                        "Möchtest du den Betrag von Vorlage " + templateId + " von " + (amount * 2) + " auf " + amount + " ändern?");
 
                 testIntent(
                         "AMAZON.YesIntent",
