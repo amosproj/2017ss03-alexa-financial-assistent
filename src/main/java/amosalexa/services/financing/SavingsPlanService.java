@@ -202,7 +202,7 @@ public class SavingsPlanService implements SpeechService {
         // Create the plain text output.
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText(speechText);
-
+        //TODO: duplicate code
         if (isAskResponse) {
             // Create reprompt
             PlainTextOutputSpeech repromptSpeech = new PlainTextOutputSpeech();

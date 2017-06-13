@@ -8,8 +8,9 @@ import com.amazon.speech.ui.*;
 public abstract class AbstractSpeechService {
 
 
-    protected String YES_INTENT = "AMAZON.YesIntent";
-    protected String NO_INTENT = "AMAZON.NoIntent";
+    protected static final String YES_INTENT = "AMAZON.YesIntent";
+    protected static final String NO_INTENT = "AMAZON.NoIntent";
+    protected static final String HELP_INTENT = "AMAZON.HelpIntent";
 
     /**
      * Helper method that will get the intent name from a provided Intent object. If a name does not

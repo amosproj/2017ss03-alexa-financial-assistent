@@ -1,5 +1,6 @@
 package amosalexa;
 
+import amosalexa.server.Launcher;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -10,6 +11,7 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
 import model.banking.StandingOrder;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.server.Server;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -48,6 +50,35 @@ public class AmosAlexaSpeechletTest {
         String openingDate = formatter.format(time);
 
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
+    }
+
+    @Test
+    public void bankContactAddressTest() throws Exception {
+
+        // pretend local environment
+        Launcher.server = new Server();
+        Launcher.server.start();
+
+        newSession();
+
+        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Allersberger Str. 64, 90461 Nürnberg, Germany");
+        testIntentMatches("BankAddress", "BankNameSlots:Deutsche Bank", "Deutsche Bank Filiale hat die Adresse: Landgrabenstraße 144, 90459 Nürnberg, Germany");
+
+        Launcher.server.stop();
+    }
+
+    @Test
+    public void bankContactOpeningHoursTest() throws Exception {
+
+        // pretend local environment
+        Launcher.server = new Server();
+        Launcher.server.start();
+
+        newSession();
+        testIntentMatches("BankOpeningHours", "Sparkasse Nürnberg - Geschäftsstelle hat am (.*)");
+        testIntentMatches("BankOpeningHours", "OpeningHoursDate:2017-06-13", "Sparkasse Nürnberg - Geschäftsstelle Geöffnet am Dienstag von (.*) bis (.*)");
+
+        Launcher.server.stop();
     }
 
     @Test
