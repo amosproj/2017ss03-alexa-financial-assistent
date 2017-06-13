@@ -7,6 +7,10 @@ import com.amazon.speech.ui.*;
 
 public abstract class AbstractSpeechService {
 
+
+    protected String YES_INTENT = "AMAZON.YesIntent";
+    protected String NO_INTENT = "AMAZON.NoIntent";
+
     /**
      * Helper method that will get the intent name from a provided Intent object. If a name does not
      * exist then this method will return null.
@@ -122,12 +126,14 @@ public abstract class AbstractSpeechService {
      *
      * @param cardTitle  Title of the card that you want displayed.
      * @param speechText speech text that will be spoken to the user.
+     * @param repromptText
      * @return the resulting card and speech text.
      */
-    protected SpeechletResponse getSSMLAskResponse(String cardTitle, String speechText) {
+    protected SpeechletResponse getSSMLAskResponse(String cardTitle, String speechText, String repromptText) {
         SimpleCard card = getSimpleCard(cardTitle, speechText);
         SsmlOutputSpeech ssmlOutputSpeech = getSSMLOutputSpeech(speechText);
-        Reprompt reprompt = getReprompt(ssmlOutputSpeech);
+        SsmlOutputSpeech repromptSpeech = getSSMLOutputSpeech(repromptText);
+        Reprompt reprompt = getReprompt(repromptSpeech);
 
         return SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
     }

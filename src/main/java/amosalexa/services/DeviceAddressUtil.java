@@ -1,8 +1,8 @@
 package amosalexa.services;
 
 
+import amosalexa.services.bankcontact.Address;
 import amosalexa.services.bankcontact.AlexaDeviceAddressClient;
-import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.bankcontact.exceptions.DeviceAddressClientException;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.Context;
@@ -20,28 +20,23 @@ public class DeviceAddressUtil {
      * tries to get the device address
      * @param requestEnvelope SpeechletRequestEnvelope
      */
-    public static void getDeviceAddress(SpeechletRequestEnvelope<IntentRequest> requestEnvelope){
+    public static Address getDeviceAddress(SpeechletRequestEnvelope<IntentRequest> requestEnvelope){
 
         try {
-
-            BankContactService.consentToken = requestEnvelope.getSession().getUser().getPermissions().getConsentToken();
+            String consentToken = requestEnvelope.getSession().getUser().getPermissions().getConsentToken();
             SystemState systemState = getSystemState(requestEnvelope.getContext());
             String deviceId = systemState.getDevice().getDeviceId();
             String apiEndpoint = systemState.getApiEndpoint();
+            AlexaDeviceAddressClient alexaDeviceAddressClient = new AlexaDeviceAddressClient(deviceId, consentToken, apiEndpoint);
 
-            AlexaDeviceAddressClient alexaDeviceAddressClient = new AlexaDeviceAddressClient(deviceId, BankContactService.consentToken , apiEndpoint);
-
-            BankContactService.deviceAddress = alexaDeviceAddressClient.getFullAddress();
-
-            if (BankContactService.deviceAddress == null) {
-                log.error("Requested device address is null");
-            }
-
+            return alexaDeviceAddressClient.getFullAddress();
         } catch (DeviceAddressClientException e) {
-            log.error("Device Address Client failed to successfully return the address.");
+            log.error("Device address client failed to successfully return the address.");
         } catch (NullPointerException e){
-            log.warn("No Permission!");
+            log.warn("No Permission to request device address!");
         }
+
+        return null;
     }
 
     /**

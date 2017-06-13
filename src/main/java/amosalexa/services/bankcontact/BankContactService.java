@@ -2,13 +2,17 @@ package amosalexa.services.bankcontact;
 
 
 import amosalexa.SpeechletSubject;
+import amosalexa.server.Launcher;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.DeviceAddressUtil;
 import amosalexa.services.SpeechService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
-import com.amazon.speech.speechlet.*;
-import com.amazon.speech.ui.*;
+import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.SpeechletResponse;
+import com.amazon.speech.ui.AskForPermissionsConsentCard;
+import com.amazon.speech.ui.PlainTextOutputSpeech;
+import com.amazon.speech.ui.SimpleCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.walkercrou.places.Place;
@@ -36,17 +40,10 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
      * Slot for dates
      */
     private static final String SLOT_NAME_OPENING_HOURS_DATE = "OpeningHoursDate";
-
-    /**
-     * Address of device - for simulation only dummy values possible
-     */
-    public static Address deviceAddress = new Address();
-
     /**
      * bank slot fall back
      */
     private static final String SLOT_NAME_BANK_FALLBACK = "Sparkasse";
-
     /**
      * The permissions that this skill relies on for retrieving addresses. If the consent token isn't
      * available or invalid, we will request the user to grant us the following permission
@@ -57,8 +54,6 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
      * Be sure to check your permissions settings for your skill on https://developer.amazon.com/
      */
     private static final String ALL_ADDRESS_PERMISSION = "read::alexa:device:all:address";
-
-
     /**
      * default speech texts
      */
@@ -66,24 +61,22 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
     private static final String UNHANDLED_TEXT = "Das weiß ich nicht. Bitte, frage etwas anderes.";
     private static final String ERROR_TEXT = "Es ist ein Fehler aufgetreten. Bitte, versuche es noch einmal.";
     private static final String NO_OPENING_HOURS = "Es konnten keine Öffnungszeiten gefunden werden!";
-
-
     /**
      * Intents
      */
     private static final String BANK_OPENING_HOURS_INTENT = "BankOpeningHours";
     private static final String BANK_ADDRESS_INTENT = "BankAddress";
-
+    /**
+     * Address of device - for simulation only dummy values possible
+     */
+    private static Address deviceAddress = new Address();
     /**
      * Slots
      */
     private String slotBankNameValue;
     private String slotDateValue;
 
-    /**
-     * Permissions
-     */
-    public static String consentToken = null;
+
 
     public BankContactService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
@@ -118,15 +111,16 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
         AuthenticationManager.revokeAuthentication();
         */
 
-
-
         // try to get device address - needs user permission and real device
-        DeviceAddressUtil.getDeviceAddress(requestEnvelope);
+        Address address = DeviceAddressUtil.getDeviceAddress(requestEnvelope);
 
         // check permission for device address
-        if (consentToken == null) {
-            log.info("Consent token is null. Ask for permission!");
-            return getPermissionsResponse();
+        if (address == null) {
+            if(!Launcher.server.isRunning()){
+                log.warn("Running on Lambda: Consent token is null. Ask for permission!");
+                return getPermissionsResponse();
+            }
+            log.warn("Running locally: Using dummy address data.");
         }
 
         switch (intentName) {

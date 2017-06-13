@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,14 +29,11 @@ import static org.junit.Assert.assertTrue;
 public class AmosAlexaSpeechletTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
-
-    private Session session;
-    private String sessionId;
-
     // FIXME: Get the current account number from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
-
     private static Integer savingsPlanTestStandingOrderId;
+    private Session session;
+    private String sessionId;
 
     /*************************************
      *          Testing section          *
@@ -52,6 +48,44 @@ public class AmosAlexaSpeechletTest {
         String openingDate = formatter.format(time);
 
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
+    }
+
+    @Test
+    public void bankAccountTransactionIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        ArrayList<String> possibleAnswers = new ArrayList<String>() {{
+            add("Du hast keine Transaktionen in deinem Konto");
+            add("Du hast (.*) Transaktionen. Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    "Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    "Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    " Möchtest du weitere Transaktionen hören");
+            add("Möchtest du weitere Transaktionen hören");
+        }};
+
+        testIntentMatches("AccountInformation", "AccountInformationSlots:überweisungen",  StringUtils.join(possibleAnswers, "|"));
+
+        ArrayList<String> possibleAnswersYES = new ArrayList<String>() {{
+            add("Du hast keine Überweisungen in deinem Konto");
+            add("Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+                    " Möchtest du weitere Transaktionen hören");
+        }};
+
+        testIntentMatches(
+                "AMAZON.YesIntent", StringUtils.join(possibleAnswersYES, "|"));
+    }
+
+    @Test
+    public void bankAccountInformationIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        testIntentMatches("AccountInformation", "AccountInformationSlots:zinssatz",  "Dein zinssatz ist aktuell (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kontostand",  "Dein kontostand beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:eröffnungsdatum",  "Dein eröffnungsdatum war (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditlimit",  "Dein kreditlimit beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditkartenlimit",  "Dein kreditkartenlimit beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kontonummer",  "Deine kontonummer lautet (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:abhebegebühr",  "Deine abhebegebühr beträgt (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:iban",  "Deine iban lautet (.*)");
     }
 
     @Test
@@ -186,6 +220,9 @@ public class AmosAlexaSpeechletTest {
         }
 
         String actual = performIntent(intent, slots);
+
+
+
 
         boolean condition = actual.matches(expectedOutput);
 
