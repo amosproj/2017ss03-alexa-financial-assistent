@@ -15,7 +15,6 @@ import org.springframework.web.client.RestClientException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Date;
 
 import static org.springframework.hateoas.client.Hop.rel;
 
@@ -28,6 +27,14 @@ public class AccountAPI {
 
 	private static BankingRESTClient bankingRESTClient = BankingRESTClient.getInstance();
 
+	/**
+	 * Create account.
+	 *
+	 * @param accountNumber the account number
+	 * @param balance       the balance
+	 * @param openingDate   the opening date
+	 * @return the account
+	 */
 	public static Account createAccount(String accountNumber, Number balance, String openingDate) {
 		Account newAccount = new Account();
 		newAccount.setNumber(accountNumber);
@@ -37,14 +44,36 @@ public class AccountAPI {
 		return createAccount(newAccount);
 	}
 
+	/**
+	 * Create account.
+	 *
+	 * @param newAccount the new account
+	 * @return the account
+	 */
 	public static Account createAccount(Account newAccount) {
 		return (Account) bankingRESTClient.postBankingModelObject("/accounts/generate", newAccount, Account.class);
 	}
 
+	/**
+	 * Get account.
+	 *
+	 * @param accountNumber the account number
+	 * @return the account
+	 */
 	public static Account getAccount(String accountNumber){
 		return (Account) bankingRESTClient.getBankingModelObject("/accounts/" + accountNumber, Account.class);
 	}
 
+	/**
+	 * Create card.
+	 *
+	 * @param accountNumber  the account number
+	 * @param cardType       the card type
+	 * @param cardNumber     the card number
+	 * @param status         the status
+	 * @param expirationDate the expiration date
+	 * @return the card
+	 */
 	public static Card createCardForAccount(String accountNumber, Card.CardType cardType, String cardNumber, Card.Status status, String expirationDate) {
 		Card newCard = new Card();
 		newCard.setCardType(cardType);
@@ -55,16 +84,31 @@ public class AccountAPI {
 		return createCardForAccount(accountNumber, newCard);
 	}
 
+	/**
+	 * Create card.
+	 *
+	 * @param accountNumber the account number
+	 * @param newCard       the new card
+	 * @return the card
+	 */
 	public static Card createCardForAccount(String accountNumber, Card newCard) {
 		return (Card) bankingRESTClient.postBankingModelObject("/accounts/" + accountNumber + "/cards", newCard, Card.class);
 	}
 
+	/**
+	 * Get card.
+	 *
+	 * @param accountNumber the account number
+	 * @param cardId        the card id
+	 * @return the card
+	 */
 	public static Card getCardForAccount(String accountNumber, Number cardId){
 		return (Card) bankingRESTClient.getBankingModelObject("/accounts/" + accountNumber + "/cards/" + cardId, Card.class);
 	}
 
 	/**
-	 * Get all cards (credit / debit) for the given account
+	 * Get all cards (credit / debit) for the given account.
+	 *
 	 * @param accountNumber Account number
 	 * @return Collection of Cards
 	 * @throws HttpClientErrorException
@@ -86,7 +130,8 @@ public class AccountAPI {
 	}
 
 	/**
-	 * Update a card
+	 * Update a card.
+	 *
 	 * @param accountNumber Account number
 	 * @param card Card
 	 * @return True on success, False otherwise
@@ -102,7 +147,8 @@ public class AccountAPI {
 	}
 
 	/**
-	 * Delete a card
+	 * Delete a card.
+	 *
 	 * @param accountNumber Account number
 	 * @param cardId Card id
 	 * @return True on success, False otherwise
@@ -118,7 +164,8 @@ public class AccountAPI {
 	}
 
 	/**
-	 * Get all transactions for the given account
+	 * Get all transactions for the given account.
+	 *
 	 * @param accountNumber Account number
 	 * @return Collection of Cards
 	 * @throws HttpClientErrorException
@@ -126,8 +173,10 @@ public class AccountAPI {
 	public static Collection<Transaction> getTransactionsForAccount(String accountNumber) throws HttpClientErrorException {
 		// TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
 		Traverson traverson = null;
+		String uri = BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/transactions";
+		log.info("URI: " + uri);
 		try {
-			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/transactions"),
+			traverson = new Traverson(new URI(uri),
 					MediaTypes.HAL_JSON);
 		} catch (URISyntaxException e) {
 			log.error("getTransactionsForAccount failed", e);
@@ -140,7 +189,8 @@ public class AccountAPI {
 	}
 
 	/**
-	 * Get all standing orders for the given account
+	 * Get all standing orders for the given account.
+	 *
 	 * @param accountNumber Account number
 	 * @return Collection of StandingOrders
 	 * @throws HttpClientErrorException
@@ -161,6 +211,18 @@ public class AccountAPI {
 		return resResponses.getContent();
 	}
 
+	/**
+	 * Create standing order.
+	 *
+	 * @param accountNumber      the account number
+	 * @param payee              the payee
+	 * @param amount             the amount
+	 * @param destinationAccount the destination account
+	 * @param firstExecution     the first execution
+	 * @param executionRate      the execution rate
+	 * @param description        the description
+	 * @return the standing order
+	 */
 	public static StandingOrder createStandingOrderForAccount(String accountNumber, String payee, Number amount, String destinationAccount,
 															  String firstExecution, StandingOrder.ExecutionRate executionRate, String description) {
 		StandingOrder newStandingOrder = new StandingOrder();
@@ -174,12 +236,20 @@ public class AccountAPI {
 		return createStandingOrderForAccount(accountNumber, newStandingOrder);
 	}
 
+	/**
+	 * Create standing order.
+	 *
+	 * @param accountNumber    the account number
+	 * @param newStandingOrder the new standing order
+	 * @return the standing order
+	 */
 	public static StandingOrder createStandingOrderForAccount(String accountNumber, StandingOrder newStandingOrder) {
 		return (StandingOrder) bankingRESTClient.postBankingModelObject("/accounts/" + accountNumber + "/standingorders", newStandingOrder, StandingOrder.class);
 	}
 
 	/**
-	 * Get a standing order
+	 * Get a standing order.
+	 *
 	 * @param accountNumber Account number
 	 * @param standingOrderId Standing order id
 	 * @return StandingOrder
@@ -189,7 +259,8 @@ public class AccountAPI {
 	}
 
 	/**
-	 * Delete a standing order
+	 * Delete a standing order.
+	 *
 	 * @param accountNumber Account number
 	 * @param standingOrderId Standing order id
 	 * @return True on success, False otherwise
@@ -205,7 +276,8 @@ public class AccountAPI {
 	}
 
 	/**
-	 * Update a standing order
+	 * Update a standing order.
+	 *
 	 * @param accountNumber Account number
 	 * @param standingOrder Standing order
 	 * @return True on success, False otherwise

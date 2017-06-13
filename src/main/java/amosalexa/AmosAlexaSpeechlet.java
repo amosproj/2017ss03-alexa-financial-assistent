@@ -10,14 +10,15 @@
 package amosalexa;
 
 import amosalexa.dialogsystem.DialogResponseManager;
-import amosalexa.security.AuthenticationManager;
+import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.financing.SavingsPlanService;
-import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.pricequery.PriceQueryService;
+import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
+import amosalexa.services.transfertemplates.TransferTemplateService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -42,10 +43,8 @@ import java.util.Map;
 public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
-
-    private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
-
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
+    private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
 
     public static AmosAlexaSpeechlet getInstance() {
 
@@ -55,10 +54,36 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
+        new TransferTemplateService(amosAlexaSpeechlet);
         new SecuritiesAccountInformationService(amosAlexaSpeechlet);
+        new BalanceLimitService(amosAlexaSpeechlet);
         //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
+    }
+
+    public static SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
+                                                         boolean isAskResponse) {
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Block Bank Card");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        if (isAskResponse) {
+            // Create reprompt
+            PlainTextOutputSpeech repromptSpeech = new PlainTextOutputSpeech();
+            repromptSpeech.setText(repromptText);
+            Reprompt reprompt = new Reprompt();
+            reprompt.setOutputSpeech(repromptSpeech);
+
+            return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        } else {
+            return SpeechletResponse.newTellResponse(speech, card);
+        }
     }
 
     /**
@@ -69,6 +94,19 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     @Override
     public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName) {
+        // Check for duplicate start Intents
+        for(List<SpeechletObserver> observerList : speechServiceObservers.values()) {
+            for(SpeechletObserver observer : observerList) {
+                for(String startIntent : speechletObserver.getStartIntents()) {
+                    if(observer.getStartIntents().contains(startIntent) && !observer.getDialogName().equals(speechletObserver.getDialogName())) {
+                        // Oh no, duplicate start Intent!
+                        throw new IllegalArgumentException("Duplicate start Intent [" + startIntent + "], defined by both [" + observer.getDialogName() + "] " +
+                        "and [" + speechletObserver.getDialogName() + "]!");
+                    }
+                }
+            }
+        }
+
         List<SpeechletObserver> list = speechServiceObservers.get(intentName);
 
         if (list == null) {
@@ -87,16 +125,51 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     @Override
     public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
-        List<SpeechletObserver> list = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
+        String intentName = requestEnvelope.getRequest().getIntent().getName();
+        String sessionId = requestEnvelope.getSession().getSessionId();
+        SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(sessionId);
+
+        List<SpeechletObserver> list = speechServiceObservers.get(intentName);
 
         if (list == null) {
             return null;
         }
 
         for (SpeechletObserver speechService : list) {
+            boolean validIntent = false;
+
+            // Check if this Service should handle this Intent
+            if(!speechService.getHandledIntents().contains(intentName)) {
+                continue;
+            }
+
+            // Check if a dialog is active
+            String currentDialogContext = (String)sessionStorage.get(SessionStorage.CURRENTDIALOG);
+            if(currentDialogContext != null && !currentDialogContext.equals(speechService.getDialogName())) {
+                // A dialog is active, but not for this service
+                continue;
+            }
+
+            // Check if this Intent starts this Service
+            if(currentDialogContext == null && speechService.getStartIntents().contains(intentName)) {
+                // Set the dialog context in the current session
+                sessionStorage.put(SessionStorage.CURRENTDIALOG, speechService.getDialogName());
+                validIntent = true;
+            }
+
+            // Check if the active dialog is intended for this Service
+            if(!validIntent && currentDialogContext != null && currentDialogContext.equals(speechService.getDialogName())) {
+                validIntent =  true;
+            }
+
+            if(!validIntent) {
+                // Invalid intent, we should not let the Service handle it
+                LOGGER.error("Invalid intent [" + intentName + "]!");
+                continue;
+            }
+
             SpeechletResponse response = null;
             try {
-                LOGGER.info("IntentName: ", requestEnvelope.getRequest().getIntent().getName());
                 response = speechService.onIntent(requestEnvelope);
             } catch (SpeechletException e) {
                 LOGGER.error(e.getMessage());
@@ -128,7 +201,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
-        LOGGER.info("Authenticated: " + AuthenticationManager.isAuthenticated());
+        //LOGGER.info("Authenticated: " + AuthenticationManager.isAuthenticated());
 
         LOGGER.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
@@ -140,13 +213,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-        if ("AMAZON.HelpIntent".equals(intentName)) {
-            return getHelpResponse();
-        } else if ("GetAccountBalance".equals(intentName)) {
-            return getAccountBalanceResponse();
-        } else if ("checkCreditLimit".equals(intentName)) {
-            return getCreditLimitResponse();
-        } else if ("BankTransferIntent".equals(intentName)) {
+        if ("BankTransferIntent".equals(intentName)) {
             LOGGER.info("intent: BankTransferIntent");
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "BankTransfer"); // Set CURRENTDIALOG to start the BankTransfer dialog
             return DialogResponseManager.getInstance().handle(intent, sessionStorage);
@@ -171,7 +238,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
                 return response;
             }
         }
-
 
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
@@ -217,30 +283,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     }
 
     /**
-     * Creates a {@code SpeechletResponse} for the help intent.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getHelpResponse() {
-        String speechText = "You can say hello to me!";
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("HelloWorld");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
      * Transfers money and returns response with
      *
      * @return SpeechletResponse spoken and visual response for the given intent
@@ -263,7 +305,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
             // FIXME: Hardcoded IBAN and so on
             Number amountNum = Integer.parseInt(amount);
-            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung");
+            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans" , "Helga");
 
             // confirmation question
             String speechText = "Dein aktueller Kontostand beträgt " + balance + ". "
@@ -288,12 +330,10 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         String amount = "2";
         String name = "Paul";
 
-        //getting response regarding account balance
-        this.getAccountBalanceResponse();
 
         // FIXME: Hardcoded strings
         Number amountNum = Integer.parseInt(amount);
-        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung");
+        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung","Hans" , "Helga" );
 
         //reply message
         String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";
@@ -313,63 +353,4 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
-
-
-    /**
-     * Creates and returns a {@code SpeechletResponse} with the current account balance.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getAccountBalanceResponse() {
-        // FIXME: Hardcoded stuff
-        Account account = AccountAPI.getAccount("0000000000");
-
-        Number accountBalance = account.getBalance();
-        String speechText = "Your account balance is " + accountBalance;
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("AccountBalance");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
-     * Creates and returns a {@code SpeechletResponse} with the current account balance.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getCreditLimitResponse() {
-        // FIXME: Hardcoded stuff
-        Account account = AccountAPI.getAccount("0000000000");
-
-        Number creditLimit = account.getCreditLimit();
-
-        String speechText = "Your credit limit is " + creditLimit;
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("CreditLimit");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
 }

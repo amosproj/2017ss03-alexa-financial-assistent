@@ -14,7 +14,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TransactionTest {
 
@@ -37,7 +38,7 @@ public class TransactionTest {
 
 	@Test
 	public void testAndGetTransaction() {
-		Transaction newTransaction = TransactionAPI.createTransaction(1, ACCOUNT_IBAN1, ACCOUNT_IBAN2, VALUE_DATE, "TestDescription");
+		Transaction newTransaction = TransactionAPI.createTransaction(1, ACCOUNT_IBAN1, ACCOUNT_IBAN2, VALUE_DATE, "TestDescription", "Hans" , "Helga" );
 
 		assertEquals(1, newTransaction.getValue());
 		assertEquals(ACCOUNT_IBAN1, newTransaction.getSourceAccount());

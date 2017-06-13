@@ -1,12 +1,10 @@
 package api;
 
 import api.banking.AccountAPI;
-import com.amazonaws.util.json.JSONException;
 import model.banking.Account;
 import model.banking.Card;
 import model.banking.StandingOrder;
 import org.joda.time.DateTime;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -17,18 +15,17 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class AccountTest {
 
-    private static final Logger log = LoggerFactory.getLogger(AccountTest.class);
-
     public static final String ACCOUNT_NUMBER = "0000000000";
     public static final String ACCOUNT_NUMBER2 = "0000000001";
     public static final String CARD_NUMBER = "0000004711";
+    private static final Logger log = LoggerFactory.getLogger(AccountTest.class);
 
     private static String getCurrentOpeningDate() {
         Calendar cal = Calendar.getInstance();
@@ -37,9 +34,16 @@ public class AccountTest {
         return formatter.format(time);
     }
 
+    private static String getLastWeekOpeningDate() {
+        DateTime today = DateTime.now();
+        DateTime sameDayLastWeek = today.minusWeeks(1);
+        return sameDayLastWeek.toString("yyyy-MM-dd");
+    }
+
     @BeforeClass
     public static void setUpAccount() {
         AccountAPI.createAccount(ACCOUNT_NUMBER, 1250000, getCurrentOpeningDate());
+        //AccountAPI.createAccount("0000000020", 1250000, getLastWeekOpeningDate());
     }
 
     /**

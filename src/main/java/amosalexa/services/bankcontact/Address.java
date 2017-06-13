@@ -25,7 +25,7 @@ public class Address {
     private String city = "Nürnberg";
     private String countryCode = null;
     private String postalCode = "90459";
-    private String addressLine1 = "Wölknerstraße 11";
+    private String addressLine1 = "Wölkernstraße 11";
     private String addressLine2;
     private String addressLine3;
     private String districtOrCounty;

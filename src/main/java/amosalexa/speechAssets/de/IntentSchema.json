@@ -1,13 +1,13 @@
 {
   "intents": [
     {
+      "intent": "ProductRequestIntent",
       "slots": [
         {
           "name": "ProductKeyword",
           "type": "LIST_OF_KEYWORDS"
         }
-      ],
-      "intent": "ProductRequestIntent"
+      ]
     },
     {
       "intent": "TestListIntent"
@@ -16,15 +16,16 @@
       "intent": "SecuritiesAccountInformationIntent"
     },
     {
+      "intent": "AccountInformation",
       "slots": [
         {
           "name": "AccountInformationSlots",
           "type": "LIST_OF_ACCOUNT_INFORMATION"
         }
-      ],
-      "intent": "AccountInformation"
+      ]
     },
     {
+      "intent": "BankOpeningHours",
       "slots": [
         {
           "name": "OpeningHoursDate",
@@ -34,17 +35,25 @@
           "name": "BankNameSlots",
           "type": "LIST_OF_BANKS"
         }
-      ],
-      "intent": "BankOpeningHours"
+      ]
     },
     {
+      "intent": "BankAddress",
       "slots": [
         {
           "name": "BankNameSlots",
           "type": "LIST_OF_BANKS"
         }
-      ],
-      "intent": "BankAddress"
+      ]
+    },
+    {
+      "intent": "BankTelephone",
+      "slots": [
+        {
+          "name": "BankNameSlots",
+          "type": "LIST_OF_BANKS"
+        }
+      ]
     },
     {
       "intent": "AMAZON.YesIntent"
@@ -56,23 +65,34 @@
       "intent": "AMAZON.HelpIntent"
     },
     {
+      "intent": "SavingsPlanIntroIntent",
       "slots": [
         {
-          "name": "Grundbetrag",
+          "name": "Betrag",
           "type": "AMAZON.NUMBER"
-        },
+        }
+      ]
+    },
+    {
+      "intent": "SavingsPlanAmountIntent",
+      "slots": [
         {
-          "name": "EinzahlungMonat",
+          "name": "Betrag",
           "type": "AMAZON.NUMBER"
-        },
+        }
+      ]
+    },
+    {
+      "intent": "SavingsPlanNumberOfYearsIntent",
+      "slots": [
         {
           "name": "AnzahlJahre",
           "type": "AMAZON.NUMBER"
         }
-      ],
-      "intent": "SavingsPlanIntent"
+      ]
     },
     {
+      "intent": "StandingOrdersDeleteIntent",
       "slots": [
         {
           "name": "Payee",
@@ -82,10 +102,10 @@
           "name": "Number",
           "type": "AMAZON.NUMBER"
         }
-      ],
-      "intent": "StandingOrdersDeleteIntent"
+      ]
     },
     {
+      "intent": "StandingOrdersInfoIntent",
       "slots": [
         {
           "name": "Channel",
@@ -95,10 +115,10 @@
           "name": "Payee",
           "type": "AMAZON.DE_FIRST_NAME"
         }
-      ],
-      "intent": "StandingOrdersInfoIntent"
+      ]
     },
     {
+      "intent": "StandingOrdersModifyIntent",
       "slots": [
         {
           "name": "Number",
@@ -116,8 +136,7 @@
           "name": "FirstExecution",
           "type": "AMAZON.DATE"
         }
-      ],
-      "intent": "StandingOrdersModifyIntent"
+      ]
     },
     {
       "slots": [
@@ -133,34 +152,34 @@
       "intent": "StandingOrdersKeywordIntent"
     },
     {
+      "intent": "FourDigitNumberIntent",
       "slots": [
         {
           "name": "FourDigits",
           "type": "AMAZON.NUMBER"
         }
-      ],
-      "intent": "FourDigitNumberIntent"
+      ]
     },
     {
       "intent": "ReplacementCardIntent"
     },
     {
+      "intent": "ReplacementCardReasonIntent",
       "slots": [
         {
           "name": "ReplacementReason",
           "type": "LIST_OF_REPLACEMENT_REASONS"
         }
-      ],
-      "intent": "ReplacementCardReasonIntent"
+      ]
     },
     {
+      "intent": "BlockCardIntent",
       "slots": [
         {
           "name": "BankCardNumber",
           "type": "AMAZON.NUMBER"
         }
-      ],
-      "intent": "BlockCardIntent"
+      ]
     },
     {
       "slots": [
@@ -172,26 +191,38 @@
       "intent": "AuthenticationPIN"
     },
     {
-      "slots": [
-        {
-          "name": "amount",
-          "type": "AMAZON.FOUR_DIGIT_NUMBER"
-        }, 
-        {
-          "name": "name",
-          "type": "AMAZON.DE_FIRST_NAME"
-        }
-     ],
-      "intent": "BankTransferIntent"
-    },
-    {
+      "intent": "SetBalanceLimitIntent",
       "slots": [
         {
           "name": "BalanceLimitAmount",
           "type": "AMAZON.NUMBER"
         }
+      ]
+    },
+    {
+      "intent": "ListTransferTemplatesIntent"
+    },
+    {
+      "slots": [
+        {
+          "name": "TemplateID",
+          "type": "AMAZON.NUMBER"
+        }
       ],
-      "intent": "SetBalanceLimitIntent"
+      "intent": "DeleteTransferTemplatesIntent"
+    },
+    {
+      "intent": "EditTransferTemplateIntent",
+      "slots": [
+        {
+          "name": "TemplateID",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "NewAmount",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
     }
   ]
 }

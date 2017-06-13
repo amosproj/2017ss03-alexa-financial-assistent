@@ -1,8 +1,8 @@
 package amosalexa.services.securitiesAccount;
 
 import amosalexa.SpeechletSubject;
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
-import api.BankingRESTClient;
 import api.banking.SecuritiesAccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -18,14 +18,31 @@ import model.banking.SecuritiesAccount;
 import model.banking.Security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class SecuritiesAccountInformationService implements SpeechService {
+public class SecuritiesAccountInformationService extends AbstractSpeechService implements SpeechService {
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                SECURITIES_ACCOUNT_INFORMATION_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                SECURITIES_ACCOUNT_INFORMATION_INTENT,
+                YES_INTENT,
+                NO_INTENT
+        );
+    }
 
     // FIXME: Hardcoded SecuritiesAccount Id
     private static final Number SEC_ACCOUNT_ID = 1;
@@ -33,7 +50,9 @@ public class SecuritiesAccountInformationService implements SpeechService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuritiesAccountInformationService.class);
 
-    private static final String CONTEXT = "CURRENT_CONTEXT";
+    private static final String CONTEXT = "DIALOG_CONTEXT";
+
+    private static final String SECURITIES_ACCOUNT_INFORMATION_INTENT = "SecuritiesAccountInformationIntent";
 
     private List<Security> securities;
 
@@ -48,9 +67,9 @@ public class SecuritiesAccountInformationService implements SpeechService {
      */
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, "SecuritiesAccountInformationIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
+        for(String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
     }
 
     @Override
@@ -60,20 +79,23 @@ public class SecuritiesAccountInformationService implements SpeechService {
         String intentName = request.getIntent().getName();
         LOGGER.info("Intent Name: " + intentName);
 
-        if ("SecuritiesAccountInformationIntent".equals(intentName)) {
+        if (SECURITIES_ACCOUNT_INFORMATION_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "SecuritiesAccountInformation");
             return getSecuritiesAccountInformation(request.getIntent(), session);
         }
 
-        if ("AMAZON.YesIntent".equals(intentName)) {
-            return getNextSecuritiesAccountInformation(request.getIntent(), session);
-        } else if ("AMAZON.NoIntent".equals(intentName)) {
-            return getSpeechletResponse("Okay, tschuess!", "", false);
-        } else if ("AMAZON.StopIntent".equals(intentName)) {
+        if(session.getAttribute(CONTEXT) == null || !session.getAttribute(CONTEXT).equals("SecuritiesAccountInformation")) {
             return null;
         }
-        throw new SpeechletException("Unhandled intent: " + intentName);
+
+        if (YES_INTENT.equals(intentName)) {
+            return getNextSecuritiesAccountInformation(request.getIntent(), session);
+        } else if (NO_INTENT.equals(intentName)) {
+            return getSpeechletResponse("Okay, tschuess!", "", false);
+        } else {
+            return null;
+        }
     }
 
     private SpeechletResponse getSecuritiesAccountInformation(Intent intent, Session session) {

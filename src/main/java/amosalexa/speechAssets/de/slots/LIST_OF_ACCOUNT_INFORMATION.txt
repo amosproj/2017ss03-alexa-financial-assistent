@@ -8,3 +8,4 @@ Kreditlimit
 Kreditkartenlimit
 Transaktionen
 Umsätze
+Überweisungen
