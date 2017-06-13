@@ -73,7 +73,9 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     /**
      * session attribute for transaction list indexe
      */
-    private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index";
+    private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index"
+
+            ;
     public BankAccountService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
