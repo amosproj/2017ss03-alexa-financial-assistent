@@ -42,6 +42,19 @@ BankAddress suche die {BankNameSlots} in der nähe
 BankAddress wo ist die nächste {BankNameSlots}
 BankAddress finde die nächste {BankNameSlots}
 
+BankTelephone wie ist die telefonnummer meiner bank
+BankTelephone wie lautet die telephonnummer meiner bank
+BankTelephone gib mir die telephonnummer meiner bank
+BankTelephone wie ist die nummer meiner bank
+BankTelephone finde die nummer meiner bank
+BankTelephone was ist die telefonnummer meiner bank
+BankTelephone wie ist die telefonnummer {BankNameSlots}
+BankTelephone wie lautet die telephonnummer {BankNameSlots}
+BankTelephone gib mir die telephonnummer {BankNameSlots}
+BankTelephone wie ist die nummer {BankNameSlots}
+BankTelephone finde die nummer {BankNameSlots}
+BankTelephone was ist die telefonnummer {BankNameSlots}
+
 BankOpeningHours Öffnungszeiten
 BankOpeningHours Öffnungszeiten meiner Bank
 BankOpeningHours Wann hat die {BankNameSlots} am {OpeningHoursDate} geöffnet
