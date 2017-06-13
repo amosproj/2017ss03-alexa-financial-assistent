@@ -1,6 +1,7 @@
 package amosalexa.services.bankaccount;
 
 import amosalexa.SpeechletSubject;
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -25,7 +26,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class StandingOrderService implements SpeechService {
+public class StandingOrderService extends AbstractSpeechService implements SpeechService {
+
+    /**
+     * Default value for cards
+     */
+    private static final String STANDING_ORDERS = "Daueraufträge";
 
     // FIXME: Get the current account number from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
@@ -240,7 +246,7 @@ public class StandingOrderService implements SpeechService {
 
         if (standingOrders.size() == 0) {
             String answer = "Ich konnte keine Dauerauftraege finden, die zu diesem Stichwort passen.";
-            return getSpeechletResponse(answer, answer, false);
+            return getResponse(STANDING_ORDERS, answer);
         }
 
         double total = 0;
@@ -310,7 +316,7 @@ public class StandingOrderService implements SpeechService {
         String text = builder.toString();
         // Save current list offset in this session
         session.setAttribute("NextStandingOrder", nextStandingOrder);
-        return getSpeechletResponse(text, text, true);
+        return getAskResponse(STANDING_ORDERS, text);
     }
 
     private SpeechletResponse getNextStandingOrderInfo(Session session) {
@@ -365,7 +371,7 @@ public class StandingOrderService implements SpeechService {
 
         if (numberSlot.getValue() == null || (amountSlot.getValue() == null && executionRateSlot.getValue() == null && firstExecutionSlot.getValue() == null)) {
             String text = "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.";
-            return getSpeechletResponse(text, text, true);
+            return getAskResponse(STANDING_ORDERS, text);
         }
 
         session.setAttribute("StandingOrderToModify", numberSlot.getValue());
@@ -473,29 +479,5 @@ public class StandingOrderService implements SpeechService {
         reprompt.setOutputSpeech(speech);
 
         return SpeechletResponse.newAskResponse(speech, reprompt);
-    }
-
-    private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
-                                                   boolean isAskResponse) {
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Daueraufräge");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        if (isAskResponse) {
-            // Create reprompt
-            PlainTextOutputSpeech repromptSpeech = new PlainTextOutputSpeech();
-            repromptSpeech.setText(repromptText);
-            Reprompt reprompt = new Reprompt();
-            reprompt.setOutputSpeech(repromptSpeech);
-
-            return SpeechletResponse.newAskResponse(speech, reprompt, card);
-        } else {
-            return SpeechletResponse.newTellResponse(speech, card);
-        }
     }
 }
