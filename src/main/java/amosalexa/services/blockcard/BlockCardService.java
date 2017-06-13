@@ -1,5 +1,6 @@
 package amosalexa.services.blockcard;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
@@ -65,57 +66,32 @@ public class BlockCardService implements SpeechService {
 
                 // TODO: Lock card with number cardNumber
 
-                return getSpeechletResponse("Karte " + cardNumberObj + " wurde gesperrt.", "", false);
+                return AmosAlexaSpeechlet.getSpeechletResponse("Karte " + cardNumberObj + " wurde gesperrt.", "", false);
             }
 
             return null;
         } else if (request.getIntent().getName().equals("AMAZON.NoIntent")) {
             session.setAttribute("BlockCardService.CardNumber", null);
-            return getSpeechletResponse("Okay, tschüss.", "", false);
+            return AmosAlexaSpeechlet.getSpeechletResponse("Okay, tschüss.", "", false);
         } else if (request.getIntent().getName().equals("BlockCardIntent")) {
             session.setAttribute(CONTEXT, BLOCK_CARD_DIALOG);
-
             String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
 
             if (bankCardNumber == null) {
                 String speechText = "Wie lautet die Nummber der Karte?";
                 String repromptText = "Sagen Sie auch die Nummer der Karte. Zum Beispiel: Sperre Karte 12345.";
 
-                return getSpeechletResponse(speechText, repromptText, false);
+                return AmosAlexaSpeechlet.getSpeechletResponse(speechText, repromptText, false);
             } else {
                 session.setAttribute("BlockCardService.CardNumber", bankCardNumber);
 
                 String speechText = "Möchten Sie die Karte " + bankCardNumber + " wirklich sperren?";
                 String repromptText = "Bitte bestätigen Sie, indem Sie 'ja' sagen.";
 
-                return getSpeechletResponse(speechText, repromptText, true);
+                return AmosAlexaSpeechlet.getSpeechletResponse(speechText, repromptText, true);
             }
         }
 
         return null;
-    }
-
-    private SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
-                                                   boolean isAskResponse) {
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Block Bank Card");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        if (isAskResponse) {
-            // Create reprompt
-            PlainTextOutputSpeech repromptSpeech = new PlainTextOutputSpeech();
-            repromptSpeech.setText(repromptText);
-            Reprompt reprompt = new Reprompt();
-            reprompt.setOutputSpeech(repromptSpeech);
-
-            return SpeechletResponse.newAskResponse(speech, reprompt, card);
-        } else {
-            return SpeechletResponse.newTellResponse(speech, card);
-        }
     }
 }

@@ -179,6 +179,31 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "intent": "ListTransferTemplatesIntent"
+    },
+    {
+      "slots": [
+        {
+          "name": "TemplateID",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "DeleteTransferTemplatesIntent"
+    },
+    {
+      "intent": "EditTransferTemplateIntent",
+      "slots": [
+        {
+          "name": "TemplateID",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "NewAmount",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
     }
   ]
 }

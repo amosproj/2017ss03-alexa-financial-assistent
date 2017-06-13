@@ -17,6 +17,7 @@ import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.financing.SavingsPlanService;
 import amosalexa.services.pricequery.PriceQueryService;
+import amosalexa.services.transfertemplates.TransferTemplateService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
@@ -53,6 +54,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
+        new TransferTemplateService(amosAlexaSpeechlet);
         new SecuritiesAccountInformationService(amosAlexaSpeechlet);
         new BalanceLimitService(amosAlexaSpeechlet);
         //new AuthenticationManager(amosAlexaSpeechlet);
@@ -277,5 +279,29 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         reprompt.setOutputSpeech(speech);
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    public static SpeechletResponse getSpeechletResponse(String speechText, String repromptText,
+                                                         boolean isAskResponse) {
+        // Create the Simple card content.
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Block Bank Card");
+        card.setContent(speechText);
+
+        // Create the plain text output.
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        if (isAskResponse) {
+            // Create reprompt
+            PlainTextOutputSpeech repromptSpeech = new PlainTextOutputSpeech();
+            repromptSpeech.setText(repromptText);
+            Reprompt reprompt = new Reprompt();
+            reprompt.setOutputSpeech(repromptSpeech);
+
+            return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        } else {
+            return SpeechletResponse.newTellResponse(speech, card);
+        }
     }
 }

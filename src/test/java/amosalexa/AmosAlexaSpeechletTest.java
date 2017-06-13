@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class AmosAlexaSpeechletTest {
 
@@ -228,7 +229,50 @@ public class AmosAlexaSpeechletTest {
                     "AMAZON.YesIntent",
                     "Okay, eine Ersatzkarte wurde bestellt.");
         } else {
-            assertTrue(false);
+            fail("Cannot find credit card.");
+        }
+    }
+
+    @Test
+    public void transferTemplatesTest() throws Exception {
+        newSession();
+
+        String response = performIntent("ListTransferTemplatesIntent");
+
+        Pattern p = Pattern.compile("Vorlage ([0-9]+) vom ([0-9\\.]+): Überweise ([0-9\\.]+) Euro an ([a-zA-Z]+).");
+        Matcher m = p.matcher(response);
+
+        if (m.find()) {
+            int templateId = Integer.parseInt(m.group(1));
+            double amount = Double.parseDouble(m.group(3));
+
+            testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:"+(amount*2),
+                    "Möchtest du den Betrag von Vorlage " + templateId + " von " + amount + " auf " + (amount*2) + " ändern?");
+
+            testIntent(
+                    "AMAZON.YesIntent",
+                    "Vorlage wurde erfolgreich gespeichert.");
+
+            response = performIntent("ListTransferTemplatesIntent");
+
+            p = Pattern.compile("Vorlage ([0-9]+) vom ([0-9\\.]+): Überweise ([0-9\\.]+) Euro an ([a-zA-Z]+).");
+            m = p.matcher(response);
+
+            if (m.find()) {
+                assertEquals(templateId, Integer.parseInt(m.group(1)));
+                assert(Math.abs(amount*2 - Double.parseDouble(m.group(3))) < 0.001);
+
+                testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:"+amount,
+                        "Möchtest du den Betrag von Vorlage " + templateId + " von " + (amount*2) + " auf " + amount + " ändern?");
+
+                testIntent(
+                        "AMAZON.YesIntent",
+                        "Vorlage wurde erfolgreich gespeichert.");
+            } else {
+                fail("Cannot find transfer template.");
+            }
+        } else {
+            fail("Cannot find transfer template.");
         }
     }
 
@@ -264,9 +308,6 @@ public class AmosAlexaSpeechletTest {
         }
 
         String actual = performIntent(intent, slots);
-
-
-
 
         boolean condition = actual.matches(expectedOutput);
 
