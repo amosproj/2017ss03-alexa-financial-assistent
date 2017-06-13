@@ -305,6 +305,29 @@ public class AmosAlexaSpeechletTest {
         testIntent("AMAZON.NoIntent", "");
     }
 
+    @Test
+    public void sameServiceTest() throws Exception {
+        // pretend local environment
+        Launcher.server = new Server();
+        Launcher.server.start();
+
+        newSession();
+
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
+
+        // Switching to another Service should fail because the BalanceLimit dialog is currently active.
+        testIntentMatches("BankAddress", "Ein Fehler ist aufgetreten.");
+
+        newSession();
+
+        // Switching to another Service works if a new session is started.
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
+        newSession();
+        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Allersberger Str. 64, 90461 Nürnberg, Germany");
+
+        Launcher.server.stop();
+    }
+
     /************************************
      *          Helper methods          *
      ************************************/
