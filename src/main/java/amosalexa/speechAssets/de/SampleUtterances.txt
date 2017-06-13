@@ -86,3 +86,5 @@ SecuritiesAccountInformationIntent Wie ist mein Depotstatus
 SetBalanceLimitIntent Setze mein Kontolimit auf {BalanceLimitAmount} Euro
 SetBalanceLimitIntent Setze das Limit für mein Konto auf {BalanceLimitAmount} Euro
 SetBalanceLimitIntent Setze mein Limit auf {BalanceLimitAmount} Euro
+SetBalanceLimitIntent Ich möchte mein Limit auf {BalanceLimitAmount} Euro setzen
+SetBalanceLimitIntent Ich möchte mein Kontolimit auf {BalanceLimitAmount} Euro setzen

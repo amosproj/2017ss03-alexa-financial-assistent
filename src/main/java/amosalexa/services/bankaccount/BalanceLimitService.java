@@ -56,7 +56,9 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 			Slot balanceLimitAmountSlot = slots.get("BalanceLimitAmount");
 
 			if(balanceLimitAmountSlot == null || balanceLimitAmountSlot.getValue() == null) {
-				return getErrorResponse();
+				// TODO: This interferes with the SavingsPlanService
+				return getAskResponse(CARD_TITLE, "Auf welchen Betrag möchtest du dein Kontolimit setzen?");
+				//return getErrorResponse();
 			}
 
 			String balanceLimitAmount = balanceLimitAmountSlot.getValue();
