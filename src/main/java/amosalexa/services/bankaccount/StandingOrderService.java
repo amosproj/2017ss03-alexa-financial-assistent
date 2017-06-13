@@ -51,6 +51,7 @@ public class StandingOrderService implements SpeechService {
         speechletSubject.attachSpeechletObserver(this, "StandingOrdersDeleteIntent");
         speechletSubject.attachSpeechletObserver(this, "StandingOrdersModifyIntent");
         speechletSubject.attachSpeechletObserver(this, "StandingOrdersKeywordIntent");
+        speechletSubject.attachSpeechletObserver(this, "SmartCreateStandingOrderIntent");
         speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
         speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
         speechletSubject.attachSpeechletObserver(this, "AMAZON.StopIntent");
@@ -82,6 +83,16 @@ public class StandingOrderService implements SpeechService {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "StandingOrderKeyword");
             return getStandingOrdersInfoForKeyword(intent, session);
+        } else if ("SmartCreateStandingOrderIntent".equals(intentName)){
+            SimpleCard card = new SimpleCard();
+            card.setTitle("Daueraufträge");
+
+            // Create the plain text output.
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+
+            card.setContent("Keine Daueraufträge vorhanden.");
+            speech.setText("Keine Dauerauftraege vorhanden.");
+            return SpeechletResponse.newTellResponse(speech, card);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
@@ -459,5 +470,21 @@ public class StandingOrderService implements SpeechService {
         } else {
             return SpeechletResponse.newTellResponse(speech, card);
         }
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartCreateStandingOrderResponse(Intent intent, Session session) {
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Soll ich den Betrag von Dauerauftrag Nummer wirklich auf Euro aendern?");
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
     }
 }
