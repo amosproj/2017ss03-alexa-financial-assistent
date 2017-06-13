@@ -56,15 +56,13 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 			Slot balanceLimitAmountSlot = slots.get("BalanceLimitAmount");
 
 			if(balanceLimitAmountSlot == null || balanceLimitAmountSlot.getValue() == null) {
-				// TODO: Error handling
-				return null;
+				return getErrorResponse();
 			}
 
 			String balanceLimitAmount = balanceLimitAmountSlot.getValue();
 
 			if(balanceLimitAmount.equals("?")) {
-				// TODO: Error handling
-				return null;
+				return getErrorResponse("Der angegebene Betrag ist ungültig.");
 			}
 
 			sessionStorage.put(NEW_BALANCE_LIMIT, balanceLimitAmount);
@@ -72,8 +70,7 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 
 		} else if(intent.getName().equals("AMAZON.YesIntent")) {
 			if(!sessionStorage.containsKey(NEW_BALANCE_LIMIT)) {
-				// TODO: Error handling
-				return null;
+				return getErrorResponse();
 			}
 			return setBalanceLimit((String)sessionStorage.get(NEW_BALANCE_LIMIT));
 		} else if(intent.getName().equals("AMAZON.NoIntent")) {

@@ -129,4 +129,27 @@ public abstract class AbstractSpeechService {
 
         return SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
     }
+
+    /**
+     * Gets error response.
+     *
+     * @param errorDetail error details
+     * @return the error response
+     */
+    protected SpeechletResponse getErrorResponse(String errorDetail) {
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Ein Fehler ist aufgetreten. " + errorDetail);
+
+        return SpeechletResponse.newTellResponse(speech);
+    }
+
+    /**
+     * Gets error response.
+     *
+     * @return the error response
+     */
+    protected SpeechletResponse getErrorResponse() {
+        return getErrorResponse("");
+    }
+
 }
