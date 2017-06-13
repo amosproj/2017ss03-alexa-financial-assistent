@@ -170,7 +170,7 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
      * @return SpeechletResponse
      */
     private SpeechletResponse doBankTelephoneNumberResponse(Place place) {
-        String speechText = place.getName() + " hat die Telfonnummer " + place.getPhoneNumber();
+        String speechText = place.getName() + " hat die Telefonnummer " + place.getPhoneNumber();
 
         return getResponse(BANK_CONTACT_CARD, speechText);
     }
