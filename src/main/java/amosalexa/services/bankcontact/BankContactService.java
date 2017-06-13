@@ -37,6 +37,7 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
     public List<String> getHandledIntents() {
         return Arrays.asList(
                 BANK_ADDRESS_INTENT,
+                BANK_TELEPHONE_INTENT,
                 BANK_OPENING_HOURS_INTENT
         );
     }
@@ -102,13 +103,6 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
 
     public BankContactService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
-    }
-
-    @Override
-    public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, BANK_ADDRESS_INTENT);
-        speechletSubject.attachSpeechletObserver(this, BANK_TELEPHONE_INTENT);
-        speechletSubject.attachSpeechletObserver(this, BANK_OPENING_HOURS_INTENT);
     }
 
     @Override
