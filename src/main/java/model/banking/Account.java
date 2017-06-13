@@ -7,46 +7,61 @@ public class Account {
 
     private Number creditcardLimit;
     private final static String creditcardLimitSlot = "kreditkartenlimit";
-    private String creditcardLimitText = "Dein " + creditcardLimitSlot + " beträgt <say-as interpret-as=\"unit\">€" + creditcardLimit + "</say-as>\n";
+    private String creditcardLimitText;
 
     private Number balance;
     private final static String balanceSlot = "kontostand";
-    private String balanceText = "Dein " + balanceSlot + " beträgt <say-as interpret-as=\"unit\">€" + balance + "</say-as>\n";
+    private String balanceText;
 
     private String openingDate;
     private final static String openingDateSlot = "eröffnungsdatum";
-    private String openingDateText = "Dein " + openingDateSlot + " war " + openingDate;
+    private String openingDateText;
 
     private Number creditLimit;
     private final static String creditLimitSlot = "kreditlimit";
-    private String creditLimitText = "Dein " + creditLimitSlot + " beträgt <say-as interpret-as=\"unit\">€" + creditcardLimit + "</say-as>\n";
+    private String creditLimitText;
 
     private String number;
     private final static String  numberSlot = "kontonummer";
-    private String numberText = "Deine " + numberSlot + " lautet " + number;
+    private String numberText;
 
     private Number interestRate;
     private final static String interestRateSlot = "zinssatz";
-    private String interestRateText = "Dein " + interestRateSlot + " ist aktuell " + interestRate;
+    private String interestRateText;
 
     private Number withdrawalFee;
     private final static String withdrawalFeeSlot = "abhebegebühr";
-    private String withdrawalFeeText = "Deine " + withdrawalFeeSlot + " beträgt <say-as interpret-as=\"unit\">€" + withdrawalFee + "</say-as>\n";
+    private String withdrawalFeeText;
 
     private String iban;
     private final static String ibanSlot = "iban";
-    private String ibanText = "Deine " + ibanSlot + " lautet " + iban;
+    private String ibanText;
 
-    private final Map<String, String> speechTexts = new HashMap<String, String>(){{
-        put(creditcardLimitSlot, creditcardLimitText);
-        put(balanceSlot, balanceText);
-        put(openingDateSlot, openingDateText);
-        put(creditcardLimitSlot, creditLimitText);
-        put(numberSlot, numberText);
-        put(interestRateSlot, interestRateText);
-        put(withdrawalFeeSlot, withdrawalFeeText);
-        put(ibanSlot, ibanText);
-    }};
+
+    private Map<String, String> speechTexts;
+
+    public void setSpeechTexts(){
+        creditcardLimitText = "Dein " + creditcardLimitSlot + " beträgt <say-as interpret-as=\"unit\">€" + creditcardLimit + "</say-as>";
+        balanceText = "Dein " + balanceSlot + " beträgt <say-as interpret-as=\"unit\">€" + balance + "</say-as>";
+        openingDateText = "Dein " + openingDateSlot + " war " + openingDate;
+        creditLimitText = "Dein " + creditLimitSlot + " beträgt <say-as interpret-as=\"unit\">€" + creditcardLimit + "</say-as>";
+        numberText = "Deine " + numberSlot + " lautet " + number;
+        interestRateText = "Dein " + interestRateSlot + " ist aktuell " + interestRate;
+        withdrawalFeeText = "Deine " + withdrawalFeeSlot + " beträgt <say-as interpret-as=\"unit\">€" + withdrawalFee + "</say-as>";
+        ibanText = "Deine " + ibanSlot + " lautet " + iban;
+
+        speechTexts = new HashMap<String, String>(){{
+            put(creditcardLimitSlot, creditcardLimitText);
+            put(balanceSlot, balanceText);
+            put(openingDateSlot, openingDateText);
+            put(creditLimitSlot, creditLimitText);
+            put(numberSlot, numberText);
+            put(interestRateSlot, interestRateText);
+            put(withdrawalFeeSlot, withdrawalFeeText);
+            put(ibanSlot, ibanText);
+        }};
+
+    }
 
     public Number getCreditcardLimit ()
     {

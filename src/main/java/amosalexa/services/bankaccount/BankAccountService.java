@@ -63,7 +63,18 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      */
     private static String speechText = "Was möchtest du über dein Konto erfahren?";
     private static final String repromptText = "Was möchtest du über dein Konto erfahren? Frage mich etwas!";
-    private static final String EMPTY_TRANSACTIONS = "Du hast keine Überweisungen in deinem Konto";
+    private static final String EMPTY_TRANSACTIONS = "Du hast keine Transaktionen in deinem Konto";
+
+
+    /**
+     * Slots for transactions
+     */
+    private final List<String> transactionSlots = new ArrayList<String>(){{
+        add("transaktionen");
+        add("überweisungen");
+        add("umsätze");
+    }};
+
 
     public BankAccountService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
@@ -87,7 +98,6 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
 
         Intent intent = requestEnvelope.getRequest().getIntent();
         sessionID = requestEnvelope.getSession().getSessionId();
-        String slotValue = intent.getSlot(SLOT_NAME) != null ? intent.getSlot(SLOT_NAME).getValue() : null;
 
         // get dialog context index
         SessionStorage sessionStorage = SessionStorage.getInstance();
@@ -108,21 +118,27 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
         }
 
         // check slot values
+        String slotValue = intent.getSlot(SLOT_NAME) != null ? intent.getSlot(SLOT_NAME).getValue().toLowerCase() : null;
         if (slotValue != null) {
             log.info("Account Information Intent - Slot: " + slotValue);
+            setAccount();
 
-            slotValue = slotValue.toLowerCase();
-            account = AccountAPI.getAccount(number);
-
-            if ("überweisungen".equals(slotValue) || "transaktionen".equals(slotValue)) {
+            if (transactionSlots.contains(slotValue)) {
                 return handleTransactionSpeech();
             }
 
-            return getSSMLResponse(CARD_NAME, account.getSpeechTexts().get(slotValue));
+            speechText = account.getSpeechTexts().get(slotValue);
+
+            return getSSMLResponse(CARD_NAME, speechText);
 
         } else {
             return getAskResponse(CARD_NAME, repromptText);
         }
+    }
+
+    public void setAccount(){
+        account = AccountAPI.getAccount(number);
+        account.setSpeechTexts();
     }
 
     /**
@@ -139,7 +155,6 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
         StringBuilder stringBuilder = new StringBuilder("Du hast " + transactions.size() + " Transaktionen. ");
         int i;
         for ( i = 0; i < 3; i++) {
-            stringBuilder.append(getTransactionIdText(transactions.get(i)));
             stringBuilder.append(getTransactionText(transactions.get(i)));
         }
 
@@ -154,7 +169,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     }
 
     private String getTransactionIdText(Transaction transaction){
-        return "<break time=\"1s\"/> Nummer " + transaction.getTransactionId() + " ";
+        return "<break time=\"1s\"/>Nummer " + transaction.getTransactionId() + " ";
     }
 
     private String getAskMoreTransactionText(){
