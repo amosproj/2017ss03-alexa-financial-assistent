@@ -47,6 +47,15 @@
       ]
     },
     {
+      "intent": "BankTelephone",
+      "slots": [
+        {
+          "name": "BankNameSlots",
+          "type": "LIST_OF_BANKS"
+        }
+      ]
+    },
+    {
       "intent": "AMAZON.YesIntent"
     },
     {

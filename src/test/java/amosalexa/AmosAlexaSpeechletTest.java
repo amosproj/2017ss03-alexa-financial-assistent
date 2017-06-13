@@ -54,6 +54,19 @@ public class AmosAlexaSpeechletTest {
     }
 
     @Test
+    public void bankContactTelephoneNumberTest() throws Exception {
+        newSession();
+
+        // pretend local environment
+        Launcher.server = new Server();
+        Launcher.server.start();
+
+        testIntentMatches("BankTelephone","Sparkasse Nürnberg - Geldautomat hat die Telfonnummer 0911 2301000");
+
+        Launcher.server.stop();
+    }
+
+    @Test
     public void bankContactAddressTest() throws Exception {
 
         // pretend local environment
