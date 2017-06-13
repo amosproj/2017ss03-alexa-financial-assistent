@@ -24,38 +24,86 @@ public class TransferTemplateService implements SpeechService {
         String intentName = request.getIntent().getName();
 
         if ("AMAZON.YesIntent".equals(intentName)) {
-            Integer offset = (Integer)session.getAttribute("TransferTemplateService.offset");
+            Integer offset = (Integer) session.getAttribute("TransferTemplateService.offset");
+            Integer templateId = (Integer) session.getAttribute("TransferTemplateService.delete");
+            Integer editTemplateId = (Integer) session.getAttribute("TransferTemplateService.editTemplateId");
 
             if (offset != null) {
                 return tellTemplates(session, offset, 3);
             }
-        } else if ("AMAZON.NoIntent".equals(intentName)) {
-            String offsetStr = (String)session.getAttribute("TransferTemplateService.offset");
 
-            if (offsetStr != null) {
-                session.setAttribute("TransferTemplateService.offset", null);
-                return AmosAlexaSpeechlet.getSpeechletResponse("Okay, tschüss!", "", false);
+            if (templateId != null) {
+                TransferTemplate transferTemplate = new TransferTemplate(templateId);
+                DynamoDbClient.instance.deleteItem(TransferTemplate.TABLE_NAME, transferTemplate);
+
+                return AmosAlexaSpeechlet.getSpeechletResponse("Vorlage wurde gelöscht.", "", false);
+            }
+
+            if (editTemplateId != null) {
+                Double newAmount = Double.parseDouble(session.getAttribute("TransferTemplateService.newAmount").toString());
+
+                TransferTemplate transferTemplate = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, editTemplateId, TransferTemplate.factory);
+                transferTemplate.setAmount(newAmount);
+                DynamoDbClient.instance.putItem(TransferTemplate.TABLE_NAME, transferTemplate);
+
+                return AmosAlexaSpeechlet.getSpeechletResponse("Vorlage wurde erfolgreich gespeichert.", "", false);
+            }
+        } else if ("AMAZON.NoIntent".equals(intentName)) {
+            if (session.getAttribute("TransferTemplateService.offset") != null ||
+                    session.getAttribute("TransferTemplateService.delete") != null ||
+                    session.getAttribute("TransferTemplateService.editTemplateId") != null ||
+                    session.getAttribute("TransferTemplateService.newAmount") != null) {
+                return AmosAlexaSpeechlet.getSpeechletResponse("Okay, dann halt nicht. Tschüss!", "", false);
             }
         } else if ("ListTransferTemplatesIntent".equals(intentName)) {
             return tellTemplates(session, 0, 3);
         } else if ("DeleteTransferTemplatesIntent".equals(intentName)) {
+            String templateIdStr = request.getIntent().getSlot("TemplateID").getValue();
 
+            if (templateIdStr == null || templateIdStr.equals("")) {
+                return null;
+            } else {
+                int templateId = Integer.parseInt(templateIdStr);
+                session.setAttribute("TransferTemplateService.delete", templateId);
+
+                return AmosAlexaSpeechlet.getSpeechletResponse("Möchtest du Vorlage Nummer " + templateId + " wirklich löschen?", "", true);
+            }
         } else if ("EditTransferTemplateIntent".equals(intentName)) {
+            String templateIdStr = request.getIntent().getSlot("TemplateID").getValue();
+            String newAmountStr = request.getIntent().getSlot("NewAmount").getValue();
 
+            if (templateIdStr == null || templateIdStr.equals("") || newAmountStr == null || newAmountStr.equals("")) {
+                return null;
+            } else {
+                int templateId = Integer.parseInt(templateIdStr);
+
+                TransferTemplate template = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, templateId, TransferTemplate.factory);
+
+                if (template == null) {
+                    return AmosAlexaSpeechlet.getSpeechletResponse("Ich kann Vorlage " + templateId + " nicht finden.", "", false);
+                }
+
+                double newAmount = 0;
+                try {
+                    newAmount = Double.parseDouble(newAmountStr);
+                } catch (NumberFormatException ignored) {
+                    // TODO: Maybe do some error handling here
+                }
+
+                session.setAttribute("TransferTemplateService.editTemplateId", templateId);
+                session.setAttribute("TransferTemplateService.newAmount", newAmount);
+
+                return AmosAlexaSpeechlet.getSpeechletResponse("Möchtest du den Betrag von Vorlage " + templateId + " von " + template.getAmount() + " auf " + newAmount + " ändern?", "", true);
+            }
         }
 
         return null;
     }
 
     SpeechletResponse tellTemplates(Session session, int offset, int limit) {
-        Map<Integer, TransferTemplate> templateMap = null;
         List<TransferTemplate> templates = DynamoDbClient.instance.getItems("transfer_template", TransferTemplate.factory);
+        List<TransferTemplate> transferTemplates = new ArrayList<TransferTemplate>(templates);
 
-        for (TransferTemplate template : templates) {
-            templateMap.put(template.getId(), template);
-        }
-
-        List<TransferTemplate> transferTemplates = new ArrayList<TransferTemplate>(templateMap.values());
 
         if (offset >= transferTemplates.size()) {
             session.setAttribute("TransferTemplateService.offset", null);
@@ -81,7 +129,7 @@ public class TransferTemplateService implements SpeechService {
             response.append("Überweise " + template.getAmount() + " Euro an " + template.getTarget() + ". ");
         }
 
-        boolean isAskResponse = transferTemplates.size() >= offset + limit;
+        boolean isAskResponse = transferTemplates.size() > offset + limit;
 
         if (isAskResponse) {
             response.append("Weitere Vorlagen vorlesen?");

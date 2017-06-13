@@ -9,13 +9,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbStorable {
-    private int id;
-    private String target;
-    private double amount;
-    private Date createdAt;
+    protected int id;
+    protected String target;
+    protected double amount;
+    protected Date createdAt;
 
     public static Factory factory = (Factory<TransferTemplate>) TransferTemplate::new;
-    private static final String tableName = "transfer_template";
+    public static final String TABLE_NAME = "transfer_template";
 
     private TransferTemplate() {
     }
@@ -26,10 +26,13 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
         this.createdAt = new Date();
     }
 
+    public TransferTemplate(int id) {
+        this.id = id;
+    }
+
     public static TransferTemplate make(String target, double amount) {
         TransferTemplate transferTemplate = new TransferTemplate(target, amount);
-        DynamoDbClient.instance.putItem(tableName, transferTemplate);
-        DynamoDbClient.instance.putItem(tableName, transferTemplate);
+        DynamoDbClient.instance.putItem(TABLE_NAME, transferTemplate);
         return transferTemplate;
     }
 

@@ -38,4 +38,4 @@ BlockCardIntent Sperre Karte {BankCardNumber}
 
 ListTransferTemplatesIntent Überweisungsvorlagen
 DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
-EditTransferTemplateIntent Bearbeite Vorlage {TemplateID}
+EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmount}

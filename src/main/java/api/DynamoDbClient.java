@@ -70,6 +70,10 @@ public class DynamoDbClient {
         newItem.setId(id);
         GetItemResult result = dynamoDB.getItem(tableName, newItem.getDynamoDbKey());
 
+        if (result == null || result.getItem() == null) {
+            return null;
+        }
+
         for (Map.Entry<String, AttributeValue> attribute : result.getItem().entrySet()) {
             try {
                 newItem.setDynamoDbAttribute(attribute.getKey(), attribute.getValue());

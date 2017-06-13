@@ -204,6 +204,10 @@
         {
           "name": "TemplateID",
           "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "NewAmount",
+          "type": "AMAZON.NUMBER"
         }
       ]
     }
