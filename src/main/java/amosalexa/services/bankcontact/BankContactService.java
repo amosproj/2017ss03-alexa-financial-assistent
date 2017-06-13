@@ -81,6 +81,7 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
     public List<String> getStartIntents() {
         return Arrays.asList(
                 BANK_ADDRESS_INTENT,
+                BANK_TELEPHONE_INTENT,
                 BANK_OPENING_HOURS_INTENT
         );
     }

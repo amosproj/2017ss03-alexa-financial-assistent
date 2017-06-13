@@ -136,6 +136,8 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         }
 
         for (SpeechletObserver speechService : list) {
+            boolean validIntent = false;
+
             // Check if this Service should handle this Intent
             if(!speechService.getHandledIntents().contains(intentName)) {
                 continue;
@@ -144,6 +146,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             // Check if a dialog is active
             String currentDialogContext = (String)sessionStorage.get(SessionStorage.CURRENTDIALOG);
             if(currentDialogContext != null && !currentDialogContext.equals(speechService.getDialogName())) {
+                // A dialog is active, but not for this service
                 continue;
             }
 
@@ -151,6 +154,18 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             if(currentDialogContext == null && speechService.getStartIntents().contains(intentName)) {
                 // Set the dialog context in the current session
                 sessionStorage.put(SessionStorage.CURRENTDIALOG, speechService.getDialogName());
+                validIntent = true;
+            }
+
+            // Check if the active dialog is intended for this Service
+            if(!validIntent && currentDialogContext != null && currentDialogContext.equals(speechService.getDialogName())) {
+                validIntent =  true;
+            }
+
+            if(!validIntent) {
+                // Invalid intent, we should not let the Service handle it
+                LOGGER.error("Invalid intent [" + intentName + "]!");
+                continue;
             }
 
             SpeechletResponse response = null;
