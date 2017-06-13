@@ -2,6 +2,7 @@ package amosalexa.dialogsystem.dialogs;
 
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
+import amosalexa.services.AbstractSpeechService;
 import api.banking.AccountAPI;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class ReplacementCardDialog implements DialogHandler {
+public class ReplacementCardDialog extends AbstractSpeechService implements DialogHandler {
 
 	private enum ReplacementReason {
 		BLOCKED,
@@ -45,9 +46,9 @@ public class ReplacementCardDialog implements DialogHandler {
 			return askIfBlockedOrDamaged(intent, storage);
 		} else if("ReplacementCardReasonIntent".equals(intentName)) {
 			return askForConfirmation(intent, storage);
-		} else if("AMAZON.YesIntent".equals(intentName)) {
+		} else if(YES_INTENT.equals(intentName)) {
 			return orderReplacement(intent, storage);
-		} else if("AMAZON.NoIntent".equals(intentName)) {
+		} else if(NO_INTENT.equals(intentName)) {
 			return cancelDialog();
 		} else {
 			throw new SpeechletException("Unhandled intent: " + intentName);

@@ -188,6 +188,9 @@ public class AmosAlexaSpeechletTest {
         LOGGER.info("Latest standing order ID: " + latestStandingOrderId);
         savingsPlanTestStandingOrderId = latestStandingOrderId;
 
+        // We need to start a new session here because the dialog ends after the YesIntent
+        newSession();
+
         testIntent(
                 "StandingOrdersDeleteIntent",
                 "Number:" + latestStandingOrderId, "Moechtest du den Dauerauftrag mit der Nummer "

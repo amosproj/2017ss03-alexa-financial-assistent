@@ -13,14 +13,34 @@ import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class BalanceLimitService extends AbstractSpeechService implements SpeechService {
 
+	@Override
+	public String getDialogName() {
+		return this.getClass().getName();
+	}
+
+	@Override
+	public List<String> getStartIntents() {
+		return Arrays.asList(
+				SET_BALANCE_LIMIT_INTENT
+		);
+	}
+
+	@Override
+	public List<String> getHandledIntents() {
+		return Arrays.asList(
+				SET_BALANCE_LIMIT_INTENT,
+				YES_INTENT,
+				NO_INTENT
+		);
+	}
+
 	private static final String SET_BALANCE_LIMIT_INTENT = "SetBalanceLimitIntent";
-	private static final String SET_BALANCE_LIMIT_DIALOG = "BalanceLimitService";
-	private static final String CONTEXT = "DIALOG_CONTEXT";
 	private static final String CARD_TITLE = "Kontolimit";
 	private static final String NEW_BALANCE_LIMIT = "NewBalanceLimit";
 
@@ -30,9 +50,9 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 
 	@Override
 	public void subscribe(SpeechletSubject speechletSubject) {
-		speechletSubject.attachSpeechletObserver(this, SET_BALANCE_LIMIT_INTENT);
-		speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
-		speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
+		for(String intent : getHandledIntents()) {
+			speechletSubject.attachSpeechletObserver(this, intent);
+		}
 	}
 
 	@Override
@@ -42,16 +62,7 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 
 		SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-		String dialogContext = (String)sessionStorage.get(CONTEXT);
-
-		// TODO: Temporary fix, handle this in AmosAlexaSpeechlet / SpeechService
-		if(!intent.getName().equals(SET_BALANCE_LIMIT_INTENT) && !dialogContext.equals(SET_BALANCE_LIMIT_DIALOG))
-			return null; // This intent must be handled by another service
-
 		if(intent.getName().equals(SET_BALANCE_LIMIT_INTENT)) {
-			// Set context
-			sessionStorage.put(CONTEXT, SET_BALANCE_LIMIT_DIALOG);
-
 			Map<String, Slot> slots = intent.getSlots();
 			Slot balanceLimitAmountSlot = slots.get("BalanceLimitAmount");
 
@@ -70,12 +81,12 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 			sessionStorage.put(NEW_BALANCE_LIMIT, balanceLimitAmount);
 			return getBalanceLimitAskResponse(balanceLimitAmount);
 
-		} else if(intent.getName().equals("AMAZON.YesIntent")) {
+		} else if(intent.getName().equals(YES_INTENT)) {
 			if(!sessionStorage.containsKey(NEW_BALANCE_LIMIT)) {
 				return getErrorResponse();
 			}
 			return setBalanceLimit((String)sessionStorage.get(NEW_BALANCE_LIMIT));
-		} else if(intent.getName().equals("AMAZON.NoIntent")) {
+		} else if(intent.getName().equals(NO_INTENT)) {
 			return getResponse(CARD_TITLE, "");
 		}
 

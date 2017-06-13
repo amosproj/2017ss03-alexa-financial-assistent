@@ -21,10 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StandingOrderService extends AbstractSpeechService implements SpeechService {
 
@@ -32,6 +29,38 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
      * Default value for cards
      */
     private static final String STANDING_ORDERS = "Daueraufträge";
+    
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                STANDING_ORDERS_INFO_INTENT,
+                STANDING_ORDERS_DELETE_INTENT,
+                STANDING_ORDERS_MODIFY_INTENT,
+                STANDING_ORDERS_KEYWORD_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                STANDING_ORDERS_INFO_INTENT,
+                STANDING_ORDERS_DELETE_INTENT,
+                STANDING_ORDERS_MODIFY_INTENT,
+                STANDING_ORDERS_KEYWORD_INTENT,
+                YES_INTENT,
+                NO_INTENT
+        );
+    }
+
+    private static final String STANDING_ORDERS_INFO_INTENT = "StandingOrdersInfoIntent";
+    private static final String STANDING_ORDERS_DELETE_INTENT = "StandingOrdersDeleteIntent";
+    private static final String STANDING_ORDERS_MODIFY_INTENT = "StandingOrdersModifyIntent";
+    private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrdersKeywordIntent";
 
     // FIXME: Get the current account number from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
@@ -53,13 +82,9 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
      */
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, "StandingOrdersInfoIntent");
-        speechletSubject.attachSpeechletObserver(this, "StandingOrdersDeleteIntent");
-        speechletSubject.attachSpeechletObserver(this, "StandingOrdersModifyIntent");
-        speechletSubject.attachSpeechletObserver(this, "StandingOrdersKeywordIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.StopIntent");
+        for(String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
     }
 
     @Override
@@ -72,44 +97,40 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         LOGGER.info("Intent Name: " + intentName);
         LOGGER.info("Context: " + dialogContext);
 
-        if ("StandingOrdersInfoIntent".equals(intentName)) {
+        if (STANDING_ORDERS_INFO_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "StandingOrderInfo");
             return getStandingOrdersInfoResponse(intent, session);
-        } else if ("StandingOrdersDeleteIntent".equals(intentName)) {
+        } else if (STANDING_ORDERS_DELETE_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "StandingOrderDeletion");
             return askForDDeletionConfirmation(intent, session);
-        } else if ("StandingOrdersModifyIntent".equals(intentName)) {
+        } else if (STANDING_ORDERS_MODIFY_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "StandingOrderModification");
             return askForModificationConfirmation(intent, session);
-        } else if ("StandingOrdersKeywordIntent".equals(intentName)) {
+        } else if (STANDING_ORDERS_KEYWORD_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "StandingOrderKeyword");
             return getStandingOrdersInfoForKeyword(intent, session);
-        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
+        } else if (YES_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
-        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
+        } else if (YES_INTENT.equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
             return getStandingOrdersDeleteResponse(intent, session);
-        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderKeyword")) {
+        } else if (YES_INTENT.equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderKeyword")) {
             return getStandingOrderKeywordResultsInfo(session);
-        } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
+        } else if (YES_INTENT.equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
             return getStandingOrdersModifyResponse(intent, session);
-        } else if ("AMAZON.NoIntent".equals(intentName) && dialogContext != null && !(dialogContext.equals("StandingOrderDeletion") || dialogContext.equals("StandingOrderModification"))) {
+        } else if (NO_INTENT.equals(intentName) && dialogContext != null && !(dialogContext.equals("StandingOrderDeletion") || dialogContext.equals("StandingOrderModification"))) {
             //General NoIntent for StandingOrderInfo (if asked 'Moechtest du einen weiteren Eintrag hoeren?')
             //Simply quit session with 'Tschuess'
             return getResponse(STANDING_ORDERS, "Okay, tschuess!");
-        } else if ("AMAZON.NoIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderDeletion") || dialogContext.equals("StandingOrderModification"))) {
+        } else if (NO_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderDeletion") || dialogContext.equals("StandingOrderModification"))) {
             //Specific NoIntent for Modification or Deletion
             //Ask for a correction afterwards
             return getCorrectionResponse(intent, session);
-        } else if ("AMAZON.StopIntent".equals(intentName)) {
-            //TODO StopIntent not working? Test
-            return null;
         } else {
             return null;
-            //throw new SpeechletException("Unhandled intent: " + intentName);
         }
     }
 
