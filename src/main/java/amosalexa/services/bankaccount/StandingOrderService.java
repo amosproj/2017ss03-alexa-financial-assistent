@@ -96,7 +96,13 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
             return getStandingOrderKeywordResultsInfo(session);
         } else if ("AMAZON.YesIntent".equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
             return getStandingOrdersModifyResponse(intent, session);
-        } else if ("AMAZON.NoIntent".equals(intentName) && dialogContext != null && dialogContext.startsWith("StandingOrder")) {
+        } else if ("AMAZON.NoIntent".equals(intentName) && dialogContext != null && !(dialogContext.equals("StandingOrderDeletion") || dialogContext.equals("StandingOrderModification"))) {
+            //General NoIntent for StandingOrderInfo (if asked 'Moechtest du einen weiteren Eintrag hoeren?')
+            //Simply quit session with 'Tschuess'
+            return getResponse(STANDING_ORDERS, "Okay, tschuess!");
+        } else if ("AMAZON.NoIntent".equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderDeletion") || dialogContext.equals("StandingOrderModification"))) {
+            //Specific NoIntent for Modification or Deletion
+            //Ask for a correction afterwards
             return getCorrectionResponse(intent, session);
         } else if ("AMAZON.StopIntent".equals(intentName)) {
             //TODO StopIntent not working? Test
