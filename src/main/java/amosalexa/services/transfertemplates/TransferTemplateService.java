@@ -3,13 +3,12 @@ package amosalexa.services.transfertemplates;
 import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.SpeechService;
-import api.DynamoDBClient;
+import api.DynamoDbClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 
-import java.io.IOException;
 import java.util.*;
 
 public class TransferTemplateService implements SpeechService {
@@ -50,7 +49,7 @@ public class TransferTemplateService implements SpeechService {
 
     SpeechletResponse tellTemplates(Session session, int offset, int limit) {
         Map<Integer, TransferTemplate> templateMap = null;
-        List<TransferTemplate> templates = DynamoDBClient.instance.getItems("transfer_template", TransferTemplate.factory);
+        List<TransferTemplate> templates = DynamoDbClient.instance.getItems("transfer_template", TransferTemplate.factory);
 
         for (TransferTemplate template : templates) {
             templateMap.put(template.getId(), template);

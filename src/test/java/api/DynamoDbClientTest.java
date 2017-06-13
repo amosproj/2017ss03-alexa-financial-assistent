@@ -8,12 +8,8 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class DynamoDBClientTest {
-    private DynamoDBClient client;
-
-    @Before public void initialize() {
-        client = new DynamoDBClient();
-    }
+public class DynamoDbClientTest {
+    private DynamoDbClient client = DynamoDbClient.instance;
 
     @Test
     public void getItemsTest() {

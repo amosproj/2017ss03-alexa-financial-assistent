@@ -1,19 +1,10 @@
 package amosalexa.services.transfertemplates;
 
-import api.DynamoDBClient;
+import api.DynamoDbClient;
 import api.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import org.w3c.dom.Attr;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -24,7 +15,7 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
     private Date createdAt;
 
     public static Factory factory = (Factory<TransferTemplate>) TransferTemplate::new;
-    private static String tableName = "transfer_template";
+    private static final String tableName = "transfer_template";
 
     private TransferTemplate() {
     }
@@ -37,8 +28,8 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
 
     public static TransferTemplate make(String target, double amount) {
         TransferTemplate transferTemplate = new TransferTemplate(target, amount);
-        DynamoDBClient.instance.createItem(tableName, transferTemplate);
-        DynamoDBClient.instance.putItem(tableName, transferTemplate);
+        DynamoDbClient.instance.putItem(tableName, transferTemplate);
+        DynamoDbClient.instance.putItem(tableName, transferTemplate);
         return transferTemplate;
     }
 

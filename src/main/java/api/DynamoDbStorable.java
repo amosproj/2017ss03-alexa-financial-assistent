@@ -11,7 +11,7 @@ public interface DynamoDbStorable {
 
     interface Factory<T extends DynamoDbStorable> {
         /**
-         * Called by {@link DynamoDBClient#getItems(String, Class)} to build a list of items.
+         * Called by {@link DynamoDbClient#getItems(String, Class)} to build a list of items.
          *
          * @return blank instance that is used to set values afterwards
          */

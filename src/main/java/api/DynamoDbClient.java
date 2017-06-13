@@ -9,15 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class DynamoDBClient {
+public class DynamoDbClient {
 
     private AmazonDynamoDBClient dynamoDB;
-    public final static DynamoDBClient instance = new DynamoDBClient();
+    public final static DynamoDbClient instance = new DynamoDbClient();
 
     /**
      * Creates a new DynamoDB client.
      */
-    public DynamoDBClient() {
+    private DynamoDbClient() {
+        // TODO: Use credentials of common AMOS ALEXA account
+        // Currently we are using the credentials of Julian's private AWS account
         BasicAWSCredentials credentials = new BasicAWSCredentials("AKIAIUOLL3674W3T67IQ", "X4KiAVCPab5aiW0c/93y7PnABVsPlj6YYqmfSkng");
         dynamoDB = new AmazonDynamoDBClient(credentials);
         dynamoDB.setEndpoint("http://dynamodb.us-east-1.amazonaws.com");
@@ -54,6 +56,15 @@ public class DynamoDBClient {
         return items;
     }
 
+    /**
+     * Gets an item from the DynamoDB.
+     *
+     * @param tableName name of the DynamoDB table
+     * @param id id of the item to get
+     * @param factory implementation of the {@link DynamoDbStorable.Factory} interface which is used to create the items
+     * @param <T> type of the item to get
+     * @return the item with the specified id
+     */
     public <T extends DynamoDbStorable> T getItem(String tableName, int id, DynamoDbStorable.Factory<T> factory) {
         T newItem = factory.newInstance();
         newItem.setId(id);
@@ -70,41 +81,45 @@ public class DynamoDBClient {
         return newItem;
     }
 
-    public <T extends DynamoDbStorable> void createItem(String tableName, T newItem) {
-        Map<String, AttributeValue> request = new TreeMap<>();
-        request.put("table_name", new AttributeValue(tableName));
-
-        int id = 0;
-        try {
-            GetItemResult result = dynamoDB.getItem("last_ids", request);
-            if (result.getItem() != null) {
-                AttributeValue aid = result.getItem().get("id");
-                id = Integer.parseInt(aid.getN());
-            }
-        } catch (ResourceNotFoundException ignored) {
-        }
-
-        id++;
-        newItem.setId(id);
-
-        // now store the id
-        request.put("id", new AttributeValue().withN(Integer.toString(id)));
-        dynamoDB.putItem("last_ids", request);
-
-        putItem(tableName, newItem);
-    }
-
     /**
      * Inserts or updates the item.
+     * <p>
+     * Creates a new item if the id of the item is {@code 0}, otherwise updates the item.
      *
      * @param tableName name of the DynamoDB table
      * @param item item to insert or update
      * @param <T> implementation of {@link DynamoDbStorable}
      */
     public <T extends DynamoDbStorable> void putItem(String tableName, T item) {
+        if (item.getId() == 0) {
+            // Create a new item by fetching the id first.
+            Map<String, AttributeValue> request = new TreeMap<>();
+            request.put("table_name", new AttributeValue(tableName));
+
+            // Try to get the last id and leave it at 0 if cannot find last id
+            int id = 0;
+            try {
+                GetItemResult result = dynamoDB.getItem("last_ids", request);
+                if (result.getItem() != null) {
+                    AttributeValue aid = result.getItem().get("id");
+                    id = Integer.parseInt(aid.getN());
+                }
+            } catch (ResourceNotFoundException ignored) {
+            }
+
+            // Increment the id
+            id++;
+
+            // Set the id to the item and leave other fields unchanged
+            item.setId(id);
+
+            // Store the id
+            request.put("id", new AttributeValue().withN(Integer.toString(id)));
+            dynamoDB.putItem("last_ids", request);
+        }
+
         dynamoDB.putItem(tableName, item.getDynamoDbItem());
     }
-
 
     /**
      * Deletes the item.
