@@ -21,15 +21,20 @@ public class TransactionAPI {
 	 * @param destinationIban the destination IBAN (NOT ACCOUNT NUMBER)
 	 * @param valueDate       the value date
 	 * @param description     the description
-	 * @return the transaction
+	 * @param payee the payee
+	 * @param remitter the remitter
+	 *  @return the transaction
 	 */
-	public static Transaction createTransaction(Number amount, String sourceIban, String destinationIban, String valueDate, String description) {
+	public static Transaction createTransaction(Number amount, String sourceIban,
+												String destinationIban, String valueDate, String description, String payee, String remitter) {
 		Transaction newTransaction = new Transaction();
 		newTransaction.setAmount(amount);
 		newTransaction.setSourceAccount(sourceIban);
 		newTransaction.setDestinationAccount(destinationIban);
 		newTransaction.setValueDate(valueDate);
 		newTransaction.setDescription(description);
+		newTransaction.setPayee(payee);
+		newTransaction.setRemitter(remitter);
 
 		return createTransaction(newTransaction);
 	}

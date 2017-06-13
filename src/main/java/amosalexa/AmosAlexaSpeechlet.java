@@ -10,14 +10,13 @@
 package amosalexa;
 
 import amosalexa.dialogsystem.DialogResponseManager;
-import amosalexa.security.AuthenticationManager;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.financing.SavingsPlanService;
-import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.pricequery.PriceQueryService;
+import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -42,10 +41,8 @@ import java.util.Map;
 public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
-
-    private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
-
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
+    private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
 
     public static AmosAlexaSpeechlet getInstance() {
 
@@ -231,7 +228,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
             // FIXME: Hardcoded IBAN and so on
             Number amountNum = Integer.parseInt(amount);
-            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung");
+            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans" , "Helga");
 
             // confirmation question
             String speechText = "Dein aktueller Kontostand beträgt " + balance + ". "
@@ -259,7 +256,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         // FIXME: Hardcoded strings
         Number amountNum = Integer.parseInt(amount);
-        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung");
+        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung","Hans" , "Helga" );
 
         //reply message
         String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";

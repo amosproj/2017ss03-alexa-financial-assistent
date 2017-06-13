@@ -157,7 +157,7 @@ public class BankTransferDialog implements DialogHandler{
 
         // FIXME: Hardcoded strings
         Number amountNum = Integer.parseInt(amount);
-        TransactionAPI.createTransaction(amountNum, "DE50100000000000000001",iban, "2017-05-16", "Beschreibung");
+        TransactionAPI.createTransaction(amountNum, "DE50100000000000000001",iban, "2017-05-16", "Beschreibung", "Hans" , "Helga");
 
         // get account balance
         Account account = AccountAPI.getAccount("0000000001");
@@ -196,11 +196,7 @@ public class BankTransferDialog implements DialogHandler{
         int limitForTransaction = 0;
         double accountBalance = (double) AccountAPI.getAccount(accountNumber).getBalance();
 
-        if (accountBalance - amountToTransfer >= limitForTransaction) {
-            return true;
-        } else {
-            return false;
-        }
+        return accountBalance - amountToTransfer >= limitForTransaction;
     }
 
 

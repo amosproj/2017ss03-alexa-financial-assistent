@@ -42,7 +42,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     /**
      * bank account number
      */
-    private static final String number = "0000000001";
+    private static final String number = "0000000020";
     /**
      * Name for custom slot types
      */

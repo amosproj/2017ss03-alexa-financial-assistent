@@ -165,7 +165,7 @@ public class SavingsPlanService implements SpeechService {
         Number amount = Integer.parseInt(betrag);
         Date now = new Date();
         String valueDate = formatDate(now, "yyyy-MM-dd");
-        TransactionAPI.createTransaction(amount, SOURCE_ACCOUNT, SAVINGS_ACCOUNT, valueDate, DESCRIPTION_ONE_OFF_PAYMENT);
+        TransactionAPI.createTransaction(amount, SOURCE_ACCOUNT, SAVINGS_ACCOUNT, valueDate, DESCRIPTION_ONE_OFF_PAYMENT, "Hans" , "Helga");
     }
 
     private StandingOrder createSavingsPlanStandingOrder(String monatlicheZahlung) {

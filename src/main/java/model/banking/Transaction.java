@@ -30,13 +30,13 @@ public class Transaction extends ResourceSupport {
 	}
 
 	private static String getTransactionFromAccountText(Transaction transaction) {
-		return  Transaction.getTransactionIdText(transaction) + "Von deinem Konto auf das Konto " + transaction.getDestinationAccount() +
+		return  Transaction.getTransactionIdText(transaction) + "Von deinem Konto auf das Konto von " + transaction.getPayee() +
 				" in Höhe von <say-as interpret-as=\"unit\">€"
 				+ Math.abs(transaction.getAmount().doubleValue()) + "</say-as>\n";
 	}
 
 	private static String getTransactionToAccountText(Transaction transaction) {
-		return "Von " + transaction.getSourceAccount() + " auf dein Konto in Höhe von <say-as interpret-as=\"unit\">€"
+		return "Von " + transaction.getRemitter()+ " auf dein Konto in Höhe von <say-as interpret-as=\"unit\">€"
 				+ Math.abs(transaction.getAmount().doubleValue()) + "</say-as>\n";
 	}
 
@@ -129,11 +129,26 @@ public class Transaction extends ResourceSupport {
 	}
 
 	public String getPayee() {
+		if(payee == null){
+			return getDestinationAccount();
+		}
 		return payee;
 	}
 
+	public Transaction setPayee(String payee) {
+		this.payee = payee;
+		return this;
+	}
+
 	public String getRemitter() {
+		if(remitter == null){
+			return getSourceAccount();
+		}
 		return remitter;
 	}
 
+	public Transaction setRemitter(String remitter) {
+		this.remitter = remitter;
+		return this;
+	}
 }
