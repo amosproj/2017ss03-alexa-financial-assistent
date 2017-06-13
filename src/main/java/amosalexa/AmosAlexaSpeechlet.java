@@ -70,6 +70,19 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     @Override
     public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName) {
+        // Check for duplicate start Intents
+        for(List<SpeechletObserver> observerList : speechServiceObservers.values()) {
+            for(SpeechletObserver observer : observerList) {
+                for(String startIntent : speechletObserver.getStartIntents()) {
+                    if(observer.getStartIntents().contains(startIntent) && !observer.getDialogName().equals(speechletObserver.getDialogName())) {
+                        // Oh no, duplicate start Intent!
+                        throw new IllegalArgumentException("Duplicate start Intent [" + startIntent + "], defined by both [" + observer.getDialogName() + "] " +
+                        "and [" + speechletObserver.getDialogName() + "]!");
+                    }
+                }
+            }
+        }
+
         List<SpeechletObserver> list = speechServiceObservers.get(intentName);
 
         if (list == null) {
