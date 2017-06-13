@@ -24,12 +24,32 @@ import amosalexa.services.pricequery.aws.model.Offer;
 import amosalexa.services.pricequery.aws.request.AWSLookup;
 import amosalexa.services.pricequery.aws.util.AWSUtil;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * This feature lets alexa request product information from amazon
  */
 public class PriceQueryService implements SpeechService {
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                PRICE_QUERY_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                PRICE_QUERY_INTENT
+        );
+    }
 
     private static final Logger log = LoggerFactory.getLogger(PriceQueryService.class);
 

@@ -1,6 +1,7 @@
 package amosalexa.services.blockcard;
 
 import amosalexa.SpeechletSubject;
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -14,7 +15,31 @@ import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BlockCardService implements SpeechService {
+import java.util.Arrays;
+import java.util.List;
+
+public class BlockCardService extends AbstractSpeechService implements SpeechService {
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                BLOCK_CARD_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                BLOCK_CARD_INTENT,
+                YES_INTENT,
+                NO_INTENT
+        );
+    }
 
     private static final Logger log = LoggerFactory.getLogger(BlockCardService.class);
 
@@ -23,8 +48,7 @@ public class BlockCardService implements SpeechService {
      */
     private static final String number = "0000000001";
 
-    private static final String CONTEXT = "DIALOG_CONTEXT";
-    private static final String BLOCK_CARD_DIALOG = "BlockCardService";
+    private static final String BLOCK_CARD_INTENT = "BlockCardIntent";
 
     public BlockCardService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
@@ -37,9 +61,9 @@ public class BlockCardService implements SpeechService {
      */
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, "BlockCardIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
+        for(String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
     }
 
     @Override
@@ -47,17 +71,10 @@ public class BlockCardService implements SpeechService {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
-        String dialogContext = (String) session.getAttribute(CONTEXT);
-
-        if( (dialogContext == null && !request.getIntent().getName().equals("BlockCardIntent")) ||
-                (dialogContext != null && !dialogContext.equals(BLOCK_CARD_DIALOG))) {
-            return null;
-        }
-
         // TODO: Use account later to actually block a card
         Account account = AccountAPI.getAccount(number);
 
-        if (request.getIntent().getName().equals("AMAZON.YesIntent")) {
+        if (request.getIntent().getName().equals(YES_INTENT)) {
             String cardNumberObj = (String) session.getAttribute("BlockCardService.CardNumber");
 
             if (cardNumberObj != null) {
@@ -69,12 +86,10 @@ public class BlockCardService implements SpeechService {
             }
 
             return null;
-        } else if (request.getIntent().getName().equals("AMAZON.NoIntent")) {
+        } else if (request.getIntent().getName().equals(NO_INTENT)) {
             session.setAttribute("BlockCardService.CardNumber", null);
             return getSpeechletResponse("Okay, tschüss.", "", false);
-        } else if (request.getIntent().getName().equals("BlockCardIntent")) {
-            session.setAttribute(CONTEXT, BLOCK_CARD_DIALOG);
-
+        } else if (request.getIntent().getName().equals(BLOCK_CARD_INTENT)) {
             String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
 
             if (bankCardNumber == null) {

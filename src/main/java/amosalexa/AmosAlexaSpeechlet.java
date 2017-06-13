@@ -86,13 +86,34 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
      */
     @Override
     public SpeechletResponse notifyOnIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
-        List<SpeechletObserver> list = speechServiceObservers.get(requestEnvelope.getRequest().getIntent().getName());
+        String intentName = requestEnvelope.getRequest().getIntent().getName();
+        String sessionId = requestEnvelope.getSession().getSessionId();
+        SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(sessionId);
+
+        List<SpeechletObserver> list = speechServiceObservers.get(intentName);
 
         if (list == null) {
             return null;
         }
 
         for (SpeechletObserver speechService : list) {
+            // Check if this Service should handle this Intent
+            if(!speechService.getHandledIntents().contains(intentName)) {
+                continue;
+            }
+
+            // Check if a dialog is active
+            String currentDialogContext = (String)sessionStorage.get(SessionStorage.CURRENTDIALOG);
+            if(currentDialogContext != null && !currentDialogContext.equals(speechService.getDialogName())) {
+                continue;
+            }
+
+            // Check if this Intent starts this Service
+            if(currentDialogContext == null && speechService.getStartIntents().contains(intentName)) {
+                // Set the dialog context in the current session
+                sessionStorage.put(SessionStorage.CURRENTDIALOG, speechService.getDialogName());
+            }
+
             SpeechletResponse response = null;
             try {
                 response = speechService.onIntent(requestEnvelope);

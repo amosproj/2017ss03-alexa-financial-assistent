@@ -17,12 +17,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.walkercrou.places.Place;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 public class BankContactService extends AbstractSpeechService implements SpeechService {
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                BANK_ADDRESS_INTENT,
+                BANK_OPENING_HOURS_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                BANK_ADDRESS_INTENT,
+                BANK_OPENING_HOURS_INTENT
+        );
+    }
+
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        speechletSubject.attachSpeechletObserver(this, BANK_ADDRESS_INTENT);
+        speechletSubject.attachSpeechletObserver(this, BANK_OPENING_HOURS_INTENT);
+    }
 
     private static final Logger log = LoggerFactory.getLogger(BankContactService.class);
 
@@ -75,8 +99,6 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
      */
     private String slotBankNameValue;
     private String slotDateValue;
-
-
 
     public BankContactService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
@@ -131,7 +153,8 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
             case "AMAZON.HelpIntent":
                 return getAskResponse(BANK_CONTACT_CARD, HELP_TEXT);
             default:
-                return getAskResponse(BANK_CONTACT_CARD, UNHANDLED_TEXT);
+                return null;
+                //return getAskResponse(BANK_CONTACT_CARD, UNHANDLED_TEXT);
         }
     }
 
@@ -239,13 +262,6 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
         }
 
         return getSSMLResponse(BANK_CONTACT_CARD, stringBuilder.toString());
-    }
-
-
-    @Override
-    public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, BANK_ADDRESS_INTENT);
-        speechletSubject.attachSpeechletObserver(this, BANK_OPENING_HOURS_INTENT);
     }
 
     /**

@@ -1,6 +1,7 @@
 package amosalexa.services.financing;
 
 import amosalexa.SpeechletSubject;
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
@@ -21,11 +22,30 @@ import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
-public class SavingsPlanService implements SpeechService {
+public class SavingsPlanService extends AbstractSpeechService implements SpeechService {
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                SAVINGS_PLAN_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                SAVINGS_PLAN_INTENT,
+                YES_INTENT,
+                NO_INTENT
+        );
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanService.class);
 
@@ -38,6 +58,7 @@ public class SavingsPlanService implements SpeechService {
     private static final String DESCRIPTION_ONE_OFF_PAYMENT = "Sparplan Einmalzahlung";
 
     private static final String CONTEXT = "DIALOG_CONTEXT";
+    private static final String SAVINGS_PLAN_INTENT = "SavingsPlanIntent";
 
     private static final String GRUNDBETRAG_KEY = "Grundbetrag";
 
@@ -59,9 +80,9 @@ public class SavingsPlanService implements SpeechService {
 
         if ("SavingsPlanIntent".equals(intentName)) {
             return askForSavingsParameter(intent, session);
-        } else if ("AMAZON.YesIntent".equals(intentName) && context != null && context.equals("SavingsPlan")) {
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
             return createSavingsPlan(intent, session);
-        } else if ("AMAZON.NoIntent".equals(intentName) && context != null && context.equals("SavingsPlan")) {
+        } else if (NO_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
             return cancelAction();
         } else {
             return null;
@@ -71,9 +92,9 @@ public class SavingsPlanService implements SpeechService {
 
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, "SavingsPlanIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
-        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
+        for(String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
     }
 
     private SpeechletResponse askForSavingsParameter(Intent intent, Session session) {
