@@ -28,7 +28,6 @@ import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
