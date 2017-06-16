@@ -32,6 +32,8 @@ public class Item {
 
     private Offer offer;
 
+    private String titleShort;
+
     public Item(){
         this.locale = "de";
     }
@@ -141,4 +143,21 @@ public class Item {
         this.locale = locale;
     }
 
+    public Offer getOffer() {
+        return offer;
+    }
+
+    public Item setOffer(Offer offer) {
+        this.offer = offer;
+        return this;
+    }
+
+    public String getTitleShort() {
+        return titleShort;
+    }
+
+    public Item setTitleShort(String titleShort) {
+        this.titleShort = titleShort;
+        return this;
+    }
 }

@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 public class AmosAlexaSpeechletTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
-    // FIXME: Get the current account number from the session
+    // FIXME: Get the current account AccountNumber from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
     private static Integer savingsPlanTestStandingOrderId;
     private Session session;
@@ -62,6 +62,17 @@ public class AmosAlexaSpeechletTest {
         testIntentMatches("BankTelephone","Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
 
         Launcher.server.stop();
+    }
+
+    @Test
+    public void affordabilityTest() throws Exception {
+
+
+        newSession();
+        testIntentMatches("AffordProduct","ProductKeyword:Samsung", "Produkt 1 Samsung Galaxy J5 kostet €168 Produkt 2 Samsung Galaxy J5 kostet €159 Produkt 3 Samsung Galaxy J3 kostet €129 Sag mir welches Produkt du kaufen möchtest?");
+
+
+
     }
 
     @Test
