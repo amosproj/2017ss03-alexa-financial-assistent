@@ -42,7 +42,7 @@ public class TransferTemplateService implements SpeechService {
             if (editTemplateId != null) {
                 Double newAmount = Double.parseDouble(session.getAttribute("TransferTemplateService.newAmount").toString());
 
-                TransferTemplate transferTemplate = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, editTemplateId, TransferTemplate.factory);
+                TransferTemplate transferTemplate = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, editTemplateId, TransferTemplate::new);
                 transferTemplate.setAmount(newAmount);
                 DynamoDbClient.instance.putItem(TransferTemplate.TABLE_NAME, transferTemplate);
 
@@ -77,7 +77,7 @@ public class TransferTemplateService implements SpeechService {
             } else {
                 int templateId = Integer.parseInt(templateIdStr);
 
-                TransferTemplate template = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, templateId, TransferTemplate.factory);
+                TransferTemplate template = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, templateId, TransferTemplate::new);
 
                 if (template == null) {
                     return AmosAlexaSpeechlet.getSpeechletResponse("Ich kann Vorlage " + templateId + " nicht finden.", "", false);
@@ -101,7 +101,7 @@ public class TransferTemplateService implements SpeechService {
     }
 
     SpeechletResponse tellTemplates(Session session, int offset, int limit) {
-        List<TransferTemplate> templates = DynamoDbClient.instance.getItems("transfer_template", TransferTemplate.factory);
+        List<TransferTemplate> templates = DynamoDbClient.instance.getItems("transfer_template", TransferTemplate::new);
         List<TransferTemplate> transferTemplates = new ArrayList<TransferTemplate>(templates);
 
 

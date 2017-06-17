@@ -14,7 +14,7 @@ public class DynamoDbClientTest {
 
     @Test
     public void getItemsTest() {
-        client.getItems(TransferTemplate.TABLE_NAME, TransferTemplate.factory);
+        client.getItems(TransferTemplate.TABLE_NAME, TransferTemplate::new);
     }
 
     @Test
@@ -24,21 +24,21 @@ public class DynamoDbClientTest {
 
         assertEquals(transferTemplate1.getId() + 1, transferTemplate2.getId());
 
-        List<TransferTemplate> transferTemplateList = client.getItems(TransferTemplate.TABLE_NAME, TransferTemplate.factory);
+        List<TransferTemplate> transferTemplateList = client.getItems(TransferTemplate.TABLE_NAME, TransferTemplate::new);
 
         assert(transferTemplateList.contains(transferTemplate1));
         assert(transferTemplateList.contains(transferTemplate2));
 
         client.deleteItem(TransferTemplate.TABLE_NAME, transferTemplate1);
 
-        transferTemplateList = client.getItems("transfer_template", TransferTemplate.factory);
+        transferTemplateList = client.getItems("transfer_template", TransferTemplate::new);
 
         assertFalse(transferTemplateList.contains(transferTemplate1));
         assert(transferTemplateList.contains(transferTemplate2));
 
         client.deleteItem(TransferTemplate.TABLE_NAME, transferTemplate2);
 
-        transferTemplateList = client.getItems("transfer_template", TransferTemplate.factory);
+        transferTemplateList = client.getItems("transfer_template", TransferTemplate::new);
 
         assertFalse(transferTemplateList.contains(transferTemplate1));
         assertFalse(transferTemplateList.contains(transferTemplate2));
@@ -63,7 +63,7 @@ public class DynamoDbClientTest {
 
         client.deleteItem(TransferTemplate.TABLE_NAME, mockTemplate);
 
-        List<TransferTemplate> transferTemplateList = client.getItems("transfer_template", TransferTemplate.factory);
+        List<TransferTemplate> transferTemplateList = client.getItems("transfer_template", TransferTemplate::new);
 
         assertFalse(transferTemplateList.contains(mockTemplate));
     }

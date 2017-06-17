@@ -14,10 +14,9 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
     protected double amount;
     protected Date createdAt;
 
-    public static Factory factory = (Factory<TransferTemplate>) TransferTemplate::new;
     public static final String TABLE_NAME = "transfer_template";
 
-    private TransferTemplate() {
+    public TransferTemplate() {
     }
 
     private TransferTemplate(String target, double amount) {
