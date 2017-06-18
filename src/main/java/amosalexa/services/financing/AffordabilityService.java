@@ -44,7 +44,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      * speech texts
      */
     private static final String DESIRE_ASK = "Möchtest du ein Produkt kaufen?";
-    private static final String SELECTION_ASK = "Welches Produkt möchtest du kaufen?";
+    private static final String SELECTION_ASK = "Welches Produkt möchtest du kaufen? Sag produkt a, b oder c ";
     private static final String ERROR = "Ich konnte deine Eingabe nicht verstehen. Sprich Lauter!";
     private static final String NO_RESULTS = "Die Suche ergab keine Ergebnisse";
     private static final String TOO_FEW_RESULTS = "Die Suche ergab keine Ergebnisse";
@@ -166,7 +166,9 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      */
     private SpeechletResponse getAffordabilityResponse(){
 
-        Item selectedItem = (Item) SessionStorage.getInstance().getObject(session.getSessionId(), productSelectionSlot);
+
+        log.info("Selection: " + "produkt " + productSelectionSlot.toLowerCase());
+        Item selectedItem = (Item) SessionStorage.getInstance().getObject(session.getSessionId(), "produkt " + productSelectionSlot.toLowerCase());
 
         if(selectedItem == null){
             log.error("selected item is null");
@@ -189,8 +191,10 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                     + " " + CANT_AFFORD + " " + OTHER_SELECTION);
         }
 
+        String confirmationText = "Produkt " + productSelectionSlot + " " +  selectedItem.getTitleShort() + " ";
+
         setDialogState("cart?");
-        return getAskResponse(CARD, BUY_ASK);
+        return getAskResponse(CARD, confirmationText + BUY_ASK);
     }
 
     /**
@@ -224,7 +228,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 items.get(i).setOffer(offer);
 
                 // save in session
-                SessionStorage.getInstance().putObject(session.getSessionId(), "Produkt " + i, items.get(0));
+                SessionStorage.getInstance().putObject(session.getSessionId(), "produkt " + (char) ('a' + i) , items.get(0));
 
                 // shorten title
                 String productTitle = AWSUtil.shortTitle(items.get(i).getTitle());
@@ -232,7 +236,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
                 // build respond
                 text.append("Produkt ")
-                        .append(i + 1)
+                        .append((char) ('a' + i))
                         .append(" ")
                         .append(getItemText(items.get(i)));
             }
@@ -252,11 +256,11 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      * get all slot values
      */
     private void getSlots(){
-        keywordSlot = intent.getSlot(KEYWORD_SLOT) != null ? intent.getSlot(KEYWORD_SLOT).getValue().toLowerCase() : null;
+        keywordSlot = intent.getSlot(KEYWORD_SLOT) != null ? intent.getSlot(KEYWORD_SLOT).getValue() : null;
 
         log.info("Search Keyword: " + keywordSlot);
 
-        productSelectionSlot = intent.getSlot(PRODUCT_SLOT) != null ? intent.getSlot(PRODUCT_SLOT).getValue().toLowerCase() : null;
+        productSelectionSlot = intent.getSlot(PRODUCT_SLOT) != null ? intent.getSlot(PRODUCT_SLOT).getValue() : null;
 
         log.info("Product Selection: " + productSelectionSlot);
     }

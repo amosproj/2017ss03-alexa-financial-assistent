@@ -207,12 +207,16 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
                 session.getSessionId());
 
 
-
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
 
+
+        LOGGER.info("Intent: " + intentName);
+
+
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
+        //TODO: @all use the new dialog system to handle for intents
         if ("BankTransferIntent".equals(intentName)) {
             LOGGER.info("intent: BankTransferIntent");
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "BankTransfer"); // Set CURRENTDIALOG to start the BankTransfer dialog
