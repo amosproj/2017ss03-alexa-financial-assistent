@@ -15,8 +15,8 @@ import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
+import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.SavingsPlanService;
-import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
 import api.banking.AccountAPI;
@@ -50,7 +50,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         new BankAccountService(amosAlexaSpeechlet);
         new StandingOrderService(amosAlexaSpeechlet);
-        new PriceQueryService(amosAlexaSpeechlet);
+        new AffordabilityService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
@@ -207,15 +207,22 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
                 session.getSessionId());
 
 
-
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
 
+
+        LOGGER.info("Intent: " + intentName);
+
+
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
+        //TODO: @all use the new dialog system to handle for intents
         if ("BankTransferIntent".equals(intentName)) {
             LOGGER.info("intent: BankTransferIntent");
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "BankTransfer"); // Set CURRENTDIALOG to start the BankTransfer dialog
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage);
+        } else if ("PriceQueryService".equals(intentName) || "AffordIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "ProductSearch");
             return DialogResponseManager.getInstance().handle(intent, sessionStorage);
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog

@@ -26,6 +26,10 @@ import java.util.List;
  */
 public class BankAccountService extends AbstractSpeechService implements SpeechService {
 
+    /**
+     * bank account AccountNumber
+     */
+    public static final String AccountNumber = "0000000020";
     private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
     /**
      * amount of transaction responded at once
@@ -40,7 +44,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      */
     private static final String CARD_NAME = "Kontoinformation";
     /**
-     * bank account number
+     * name for custom slot types
      */
     private static final String number = "0000000001";
     /**
@@ -59,7 +63,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      */
     private static Account account;
     /**
-     * Slots for transactions
+     * slots for transactions
      */
     private final List<String> transactionSlots = new ArrayList<String>() {{
         add("transaktionen");
@@ -73,9 +77,9 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     /**
      * session attribute for transaction list indexe
      */
-    private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index"
 
-            ;
+    private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index";
+
     public BankAccountService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
@@ -149,7 +153,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      * set up speech texts in account
      */
     private void setAccount() {
-        account = AccountAPI.getAccount(number);
+        account = AccountAPI.getAccount(AccountNumber);
         account.setSpeechTexts();
     }
 

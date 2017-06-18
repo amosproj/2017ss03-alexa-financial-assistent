@@ -1,4 +1,4 @@
-package amosalexa.dialogsystem.dialogs.banktransfer;
+package amosalexa.services.bankaccount.banktransfer;
 
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
