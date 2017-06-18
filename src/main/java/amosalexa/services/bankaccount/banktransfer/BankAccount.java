@@ -1,4 +1,4 @@
-package amosalexa.dialogsystem.dialogs.banktransfer;
+package amosalexa.services.bankaccount.banktransfer;
 
 public class BankAccount {
     private String namePerson;

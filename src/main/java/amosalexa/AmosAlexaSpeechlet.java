@@ -221,6 +221,9 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             LOGGER.info("intent: BankTransferIntent");
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "BankTransfer"); // Set CURRENTDIALOG to start the BankTransfer dialog
             return DialogResponseManager.getInstance().handle(intent, sessionStorage);
+        } else if ("PriceQueryService".equals(intentName) || "AffordIntent".equals(intentName)) {
+            sessionStorage.put(SessionStorage.CURRENTDIALOG, "ProductSearch");
+            return DialogResponseManager.getInstance().handle(intent, sessionStorage);
         } else if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent

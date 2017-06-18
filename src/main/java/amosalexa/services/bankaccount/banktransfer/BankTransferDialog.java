@@ -1,4 +1,4 @@
-package amosalexa.dialogsystem.dialogs.banktransfer;
+package amosalexa.services.bankaccount.banktransfer;
 
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
@@ -67,7 +67,7 @@ public class BankTransferDialog extends AbstractSpeechService implements DialogH
         // TODO: as soon as API also contains name this should be deleted / adjusted
         // create bank accounts
         BankAccount anneBankAccount = new BankAccount("anne", "0000000001", "DE50100000000000000001");
-        BankAccount christianBankAccount = new BankAccount("christian", "0000000000", "DE60643995205405578292");
+        BankAccount christianBankAccount = new BankAccount("jan", "0000000000", "DE60643995205405578292");
         BankAccount[] allBankAccounts = {anneBankAccount, christianBankAccount};
         String iban = "";
 

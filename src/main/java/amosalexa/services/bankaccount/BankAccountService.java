@@ -46,6 +46,10 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     /**
      * name for custom slot types
      */
+    private static final String number = "0000000001";
+    /**
+     * Name for custom slot types
+     */
     private static final String SLOT_NAME = "AccountInformationSlots";
     /**
      * default speech texts
