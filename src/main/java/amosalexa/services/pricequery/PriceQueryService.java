@@ -16,9 +16,11 @@ import amosalexa.services.pricequery.aws.model.Item;
 import amosalexa.services.pricequery.aws.model.Offer;
 import amosalexa.services.pricequery.aws.request.AWSLookup;
 import amosalexa.services.pricequery.aws.util.AWSUtil;
+import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,22 +78,33 @@ public class PriceQueryService extends AbstractSpeechService implements SpeechSe
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
 
+
+        Session session = requestEnvelope.getSession();
         Intent intent = requestEnvelope.getRequest().getIntent();
         String keyword = intent.getSlot(KEYWORD_SLOT) != null ? intent.getSlot(KEYWORD_SLOT).getValue().toLowerCase() : null;
 
         log.info("Amazon Price Query -  Keyword: " + keyword);
 
-        if(keyword == null){
-            return getErrorResponse("Ich konnte deine Suche nicht verstehen");
-        }
+        if (intent.getName().equals("ProductRequestIntent")) {
 
-        return getProductInformation(keyword);
+            log.info("ProductRequestIntent. Keyword: " + keyword);
+            if (keyword == null) {
+                return getErrorResponse("Ich konnte deine Suche nicht verstehen");
+            }
+            return getProductInformation(keyword, session);
+
+        } else if (intent.getName().equals("AffordIntent")) {
+            log.info("AffordIntent. Preis des Produkts: " + session.getAttributes().get("PRICE_KEY"));
+            return getAffordInformation(session);
+        }
+        return getErrorResponse("Ich kann dir leider nicht weiterhelfen");
     }
 
-    private SpeechletResponse getProductInformation(String keyword) {
+    private SpeechletResponse getProductInformation(String keyword, Session session) {
         if (keyword != null) {
 
             List<Item> items = AWSLookup.itemSearch(keyword, 1, null);
+
 
             if (items.isEmpty()) {
                 log.error("no results by keyword: " + keyword);
@@ -100,10 +113,11 @@ public class PriceQueryService extends AbstractSpeechService implements SpeechSe
 
             StringBuilder text = new StringBuilder();
 
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 1; i++) {
 
                 Offer offer = AWSLookup.offerLookup(items.get(i).getASIN());
                 String productTitle = AWSUtil.shortTitle(items.get(i).getTitle());
+                session.setAttribute("PRICE_KEY", String.valueOf(offer.getLowestNewPrice()/100));
 
                 text
                     .append(productTitle)
@@ -112,8 +126,25 @@ public class PriceQueryService extends AbstractSpeechService implements SpeechSe
                     .append("</say-as> ")
                     .append("<break time=\"1s\"/>");
             }
-            return getSSMLResponse(CARD_TITLE, text.toString());
+
+            return getSSMLAskResponse(CARD_TITLE, text.toString(), "Du kannst fragen, ob dir das Produkt leisten kannst.");
+            //return getSSMLResponse(CARD_TITLE, text.toString());
         }
         return getErrorResponse();
+    }
+
+    private SpeechletResponse getAffordInformation(Session session) {
+        String priceOfProduct = (String) session.getAttributes().get("PRICE_KEY");
+        double accountBalance = (double) AccountAPI.getAccount("0000000001").getBalance();
+
+        if (accountBalance >= Double.valueOf(priceOfProduct)) {
+            String returnMessage = "Dein Kontostand beträgt " + String.valueOf(accountBalance) + " Euro. " +
+                    "Du kannst dir das Produkt also kaufen.";
+            return getResponse("Produktkauf möglich", returnMessage);
+        } else {
+            String returnMessage = "Deine Konstostand beträgt " + String.valueOf(accountBalance) + " Euro. " +
+                    "Das reicht leider nicht aus, um das Produkt zu kaufen.";
+            return getResponse("Produktkauf nicht möglich", returnMessage);
+        }
     }
 }
