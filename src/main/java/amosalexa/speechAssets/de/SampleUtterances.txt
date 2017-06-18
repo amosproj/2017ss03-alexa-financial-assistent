@@ -118,3 +118,5 @@ SetBalanceLimitIntent Ich möchte mein Kontolimit auf {BalanceLimitAmount} Euro 
 ListTransferTemplatesIntent Überweisungsvorlagen
 DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
 EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmount}
+
+BankTransferIntent Überweise {Amount} Euro an {Name}
