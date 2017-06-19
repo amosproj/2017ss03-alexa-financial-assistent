@@ -121,3 +121,6 @@ DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
 EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmount}
 
 BankTransferIntent Überweise {Amount} Euro an {Name}
+
+TestEMailIntent Sende mir eine Test E-Mail
+TestEMailIntent Schicke mir eine TestE-Mail

@@ -1,7 +1,7 @@
 package api;
 
 import amosalexa.services.transfertemplates.TransferTemplate;
-import org.junit.Before;
+import api.aws.DynamoDbClient;
 import org.junit.Test;
 
 import java.util.Date;

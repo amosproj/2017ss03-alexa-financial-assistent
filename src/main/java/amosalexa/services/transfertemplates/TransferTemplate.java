@@ -1,7 +1,7 @@
 package amosalexa.services.transfertemplates;
 
-import api.DynamoDbClient;
-import api.DynamoDbStorable;
+import api.aws.DynamoDbClient;
+import api.aws.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
 import java.util.Date;

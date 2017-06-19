@@ -249,6 +249,9 @@
           "type": "LIST_OF_SELECTABLE_PRODUCTS"
         }
       ]
+    },
+    {
+      "intent": "TestEMailIntent"
     }
   ]
 }
