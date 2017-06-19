@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Represents a contact to which we can transfer money.
  */
-public class Contact implements DynamoDbStorable {
+public class Contact implements Comparable<Contact>, DynamoDbStorable {
     private int id;
     private String name;
     private String iban;
@@ -80,5 +80,18 @@ public class Contact implements DynamoDbStorable {
 
         Contact oc = (Contact) o;
         return oc.id == id && oc.name.equals(name) && oc.iban.equals(iban) && oc.createdAt.equals(createdAt);
+    }
+
+    @Override
+    public int compareTo(Contact o) {
+        return Integer.compare(id, o.id);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getIban() {
+        return iban;
     }
 }

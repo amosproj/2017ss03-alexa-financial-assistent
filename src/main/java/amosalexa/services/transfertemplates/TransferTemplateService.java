@@ -9,6 +9,7 @@ import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import model.banking.TransferTemplate;
 
 import java.util.*;
 
@@ -142,36 +143,43 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
         return null;
     }
 
-    SpeechletResponse tellTemplates(Session session, int offset, int limit) {
-        List<TransferTemplate> templates = DynamoDbClient.instance.getItems("transfer_template", TransferTemplate::new);
-        List<TransferTemplate> transferTemplates = new ArrayList<TransferTemplate>(templates);
+    private SpeechletResponse tellTemplates(Session session, int offset, int limit) {
+        List<TransferTemplate> templateList = DynamoDbClient.instance.getItems(TransferTemplate.TABLE_NAME, TransferTemplate::new);
+        List<TransferTemplate> templates = new ArrayList<>(templateList);
 
-
-        if (offset >= transferTemplates.size()) {
+        if (offset >= templates.size()) {
             session.setAttribute("TransferTemplateService.offset", null);
             return AmosAlexaSpeechlet.getSpeechletResponse("Keine weiteren Vorlagen.", "", false);
         }
 
-        if (offset + limit >= transferTemplates.size()) {
-            limit = transferTemplates.size() - offset;
+        if (offset + limit >= templates.size()) {
+            limit = templates.size() - offset;
         }
 
-        Collections.sort(transferTemplates);
+        Collections.sort(templates);
 
         StringBuilder response = new StringBuilder();
 
         for (int i = offset; i < offset + limit; i++) {
-            TransferTemplate template = transferTemplates.get(i);
+            TransferTemplate template = templates.get(i);
 
             Calendar calendar = new GregorianCalendar();
             calendar.setTime(template.getCreatedAt());
             String dateFormatted = String.format("01.%02d.%d", calendar.get(Calendar.MONTH) + 2, calendar.get(Calendar.YEAR));
 
-            response.append("Vorlage " + template.getId() + " vom " + dateFormatted + ": ");
-            response.append("Überweise " + template.getAmount() + " Euro an " + template.getTarget() + ". ");
+            response.append("Vorlage ")
+                    .append(template.getId())
+                    .append(" vom ")
+                    .append(dateFormatted)
+                    .append(": ");
+            response.append("Überweise ")
+                    .append(template.getAmount())
+                    .append(" Euro an ")
+                    .append(template.getTarget())
+                    .append(". ");
         }
 
-        boolean isAskResponse = transferTemplates.size() > offset + limit;
+        boolean isAskResponse = templates.size() > offset + limit;
 
         if (isAskResponse) {
             response.append("Weitere Vorlagen vorlesen?");

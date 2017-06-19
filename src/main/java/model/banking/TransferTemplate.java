@@ -1,4 +1,4 @@
-package amosalexa.services.transfertemplates;
+package model.banking;
 
 import api.DynamoDbClient;
 import api.DynamoDbStorable;
@@ -78,13 +78,7 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
 
     @Override
     public int compareTo(TransferTemplate o) {
-        if (id > o.id) {
-            return 1;
-        }
-        if (id < o.id) {
-            return -1;
-        }
-        return 0;
+        return Integer.compare(id, o.id);
     }
 
     @Override

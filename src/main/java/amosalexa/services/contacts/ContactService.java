@@ -1,5 +1,6 @@
 package amosalexa.services.contacts;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
@@ -17,9 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Service for contact and contact list related intents.
@@ -78,13 +77,17 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
 
         if (CONTACT_LIST_INFO_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, intent.getName());
-            return getContactListInfo(session);
+            session.setAttribute(CONTEXT, CONTACT_LIST_INFO_INTENT);
+            return readContacts(session, 0, 3);
         } else if (CONTACT_ADD_INTENT.equals(intentName)) {
-            session.setAttribute(CONTEXT, intent.getName());
+            session.setAttribute(CONTEXT, CONTACT_ADD_INTENT);
             return askForNewContactConfirmation(intent, session);
         } else if (YES_INTENT.equals(intentName) && context.equals(CONTACT_ADD_INTENT)) {
             return createNewContact(session);
+        } else if (YES_INTENT.equals(intentName) && context.equals(CONTACT_LIST_INFO_INTENT)) {
+            return continueReadingContacts(intent, session);
+        } else if (NO_INTENT.equals(intentName)) {
+            return getResponse(CONTACTS, "OK, dann nicht. Auf wiedersehen!");
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
@@ -149,8 +152,56 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         return getAskResponse(CONTACTS, speechText);
     }
 
-    private SpeechletResponse getContactListInfo(Session session) {
-        //TODO ...
-        return null;
+    private SpeechletResponse continueReadingContacts(Intent intent, Session session) {
+        Integer offset = (Integer) session.getAttribute(CONTACTS + ".offset");
+
+        if (offset == null) {
+            offset = 0;
+        }
+
+        return readContacts(session, offset, 3);
+    }
+
+    private SpeechletResponse readContacts(Session session, int offset, int limit) {
+        List<Contact> contactList = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        List<Contact> contacts = new ArrayList<>(contactList);
+
+        if (offset >= contacts.size()) {
+            session.setAttribute(CONTACTS + ".offset", null);
+            return AmosAlexaSpeechlet.getSpeechletResponse("Keine weiteren Kontakte.", "", false);
+        }
+
+        if (offset + limit >= contacts.size()) {
+            limit = contacts.size() - offset;
+        }
+
+        Collections.sort(contacts);
+
+        StringBuilder response = new StringBuilder();
+
+        for (int i = offset; i < offset + limit; i++) {
+            Contact contact = contacts.get(i);
+
+            response.append("Kontakt ")
+                    .append(contact.getId())
+                    .append(": ");
+            response.append("Name: ")
+                    .append(contact.getName())
+                    .append(", IBAN: ")
+                    .append(contact.getIban())
+                    .append(". ");
+        }
+
+        boolean isAskResponse = contacts.size() > offset + limit;
+
+        if (isAskResponse) {
+            response.append("Weitere Kontakte vorlesen?");
+            session.setAttribute(CONTACTS + ".offset", offset + limit);
+        } else {
+            response.append("Keine weiteren Kontakte.");
+            session.setAttribute(CONTACTS + ".offset", null);
+        }
+
+        return AmosAlexaSpeechlet.getSpeechletResponse(response.toString(), "", isAskResponse);
     }
 }

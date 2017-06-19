@@ -1,7 +1,6 @@
 package api;
 
-import amosalexa.services.transfertemplates.TransferTemplate;
-import org.junit.Before;
+import model.banking.TransferTemplate;
 import org.junit.Test;
 
 import java.util.Date;
