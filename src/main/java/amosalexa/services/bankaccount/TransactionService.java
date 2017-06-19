@@ -12,9 +12,6 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
-import com.amazon.speech.ui.Reprompt;
-import com.amazon.speech.ui.SimpleCard;
 import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +77,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
             session.setAttribute(CONTEXT, "BankTransfer");
             return askForBankTransferConfirmation(intent, session);
         } else if ("AMAZON.YesIntent".equals(intentName)) {
-            return proceedBankTransfer(intent, session);
+            return proceedBankTransfer(session);
         } else if ("AMAZON.NoIntent".equals(intentName)) {
             return cancelAction();
         } else {
@@ -123,14 +120,14 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         }
 
         // there is not enough money on the account
-        if (enoughMoneyforTransaction("0000000001", Double.valueOf(amount)) == false) {
+        if (enoughMoneyForTransaction("0000000001", Double.valueOf(amount)) == false) {
 
             String speechText = "Dein Kontostand reicht leider nicht aus, um " + amount + " Euro zu ueberweisen." +
                     " Ich habe die Transaktion daher nicht durchgefuehrt.";
             return getResponse("Überweisung nicht möglich", speechText);
         }
 
-        // put amount + name in the storage.
+        // put amount + name + iban in the session.
         session.setAttribute(AMOUNT_KEY, amount);
         session.setAttribute(NAME_KEY, name);
         session.setAttribute(IBAN_KEY, iban);
@@ -151,7 +148,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
-    private SpeechletResponse proceedBankTransfer(Intent intent, Session session) {
+    private SpeechletResponse proceedBankTransfer(Session session) {
 
         // get name + amount
         String amount = (String) session.getAttribute(AMOUNT_KEY);
@@ -173,20 +170,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         String speechText = "Ok, " + amount + " Euro wurden an " + name + " ueberwiesen." +
                 " Dein neuer Kontostand betraegt " + balanceAfterTransation + " Euro.";
 
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("CreditLimit");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newTellResponse(speech, card);
+        return getResponse(TRANSACTION, speechText);
     }
 
     /**
@@ -194,7 +178,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
      *
      * @return boolean equals false if there is not enough money in the account.
      */
-    private boolean enoughMoneyforTransaction(String accountNumber, double amountToTransfer) {
+    private boolean enoughMoneyForTransaction(String accountNumber, double amountToTransfer) {
         // TODO: get the specific money limit for the account (User Story 36)
         int limitForTransaction = 0;
         double accountBalance = (double) AccountAPI.getAccount(accountNumber).getBalance();
@@ -202,8 +186,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
     }
 
     private SpeechletResponse cancelAction() {
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("OK, ich fuehre die Ueberweisung nicht aus.");
-        return SpeechletResponse.newTellResponse(speech);
+        String speech = "OK, ich fuehre die Ueberweisung nicht aus.";
+        return getResponse(TRANSACTION, speech);
     }
 }
