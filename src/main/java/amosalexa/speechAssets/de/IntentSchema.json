@@ -236,6 +236,18 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "intent": "ContactListInfoIntent"
+    },
+    {
+      "intent": "ContactAddIntent",
+      "slots": [
+        {
+          "name": "TransactionNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
     }
   ]
 }
