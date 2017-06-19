@@ -1,7 +1,7 @@
 language: java
 jdk:
 - oraclejdk8
-script: ./gradlew test && ./gradlew buildZip
+script: ./gradlew buildZip
 
 before_install:
   - pip install --user awscli
