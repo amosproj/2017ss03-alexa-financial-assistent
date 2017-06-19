@@ -43,16 +43,17 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
     /**
      * speech texts
      */
-    private static final String DESIRE_ASK = "Möchtest du ein Produkt kaufen?";
-    private static final String SELECTION_ASK = "Welches Produkt möchtest du kaufen? Sag produkt a, b oder c ";
-    private static final String ERROR = "Ich konnte deine Eingabe nicht verstehen. Sprich Lauter!";
-    private static final String NO_RESULTS = "Die Suche ergab keine Ergebnisse";
-    private static final String TOO_FEW_RESULTS = "Die Suche ergab keine Ergebnisse";
-    private static final String CANT_AFFORD = "Das Produkt kannst du dir nicht leisten!";
-    private static final String OTHER_SELECTION = "Möchtest du nach etwas anderem suchen?";
-    private static final String BUY_ASK = "Willst du das Produkt in den Warenkorb legen?";
-    private static final String CART_ACK = "Das Produkt wurde in deinen Warenkorb gelegt";
-    private static final String SEARCH_ASK = "Was suchst du? Beginne deine Anfrage mit Ich suche ";
+    public static final String DESIRE_ASK = "Möchtest du ein Produkt kaufen";
+    public static final String SELECTION_ASK = "Welches Produkt möchtest du kaufen Sag produkt a, b oder c";
+    public static final String ERROR = "Ich konnte deine Eingabe nicht verstehen. Sprich Lauter!";
+    public static final String NO_RESULTS = "Die Suche ergab keine Ergebnisse";
+    public static final String TOO_FEW_RESULTS = "Die Suche ergab zu wenig Ergebnisse";
+    public static final String CANT_AFFORD = "Das Produkt kannst du dir nicht leisten!";
+    public static final String OTHER_SELECTION = "Möchtest du nach etwas anderem suchen";
+    public static final String BUY_ASK = "Willst du das Produkt in den Warenkorb legen";
+    public static final String CART_ACK = "Das Produkt wurde in deinen Warenkorb gelegt";
+    public static final String SEARCH_ASK = "Was suchst du. Frage mich zum Beispiel was ein Samsung Galaxy kostet";
+    public static final String BYE = "Ok, Tschüss!";
     /**
      * attributes
      */
@@ -157,7 +158,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      * @return SpeechletResponse
      */
     private SpeechletResponse exitDialogRespond(){
-        return getResponse(CARD, "Ok, Tschüss!");
+        return getResponse(CARD, BYE);
     }
 
     /**
@@ -172,7 +173,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
         if(selectedItem == null){
             log.error("selected item is null");
-            return getAskResponse(CARD, DESIRE_ASK);
+            return getAskResponse(CARD, SELECTION_ASK);
         }
 
         // save selection in session
