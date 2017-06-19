@@ -66,12 +66,8 @@ public class AmosAlexaSpeechletTest {
 
     @Test
     public void affordabilityTest() throws Exception {
-
-
         newSession();
         testIntentMatches("AffordProduct","ProductKeyword:Samsung", "Produkt 1 Samsung Galaxy J5 kostet €168 Produkt 2 Samsung Galaxy J5 kostet €159 Produkt 3 Samsung Galaxy J3 kostet €129 Sag mir welches Produkt du kaufen möchtest?");
-
-
 
     }
 
@@ -84,7 +80,7 @@ public class AmosAlexaSpeechletTest {
 
         newSession();
 
-        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Allersberger Str. 64, 90461 Nürnberg, Germany");
+        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Lorenzer Pl. 12, 90402 Nürnberg, Germany");
         testIntentMatches("BankAddress", "BankNameSlots:Deutsche Bank", "Deutsche Bank Filiale hat die Adresse: Landgrabenstraße 144, 90459 Nürnberg, Germany");
 
         Launcher.server.stop();
