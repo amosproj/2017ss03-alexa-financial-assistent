@@ -3,6 +3,7 @@ package amosalexa.services.bankaccount;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import api.aws.EMailClient;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -165,15 +166,20 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         Slot channelSlot = slots.get("Channel");
         boolean sendPerEmail = channelSlot != null &&
                 channelSlot.getValue() != null &&
-                channelSlot.getValue().equals("email");
+                channelSlot.getValue().toLowerCase().replace(" ", "").equals("email");
 
         StringBuilder builder = new StringBuilder();
 
         if (sendPerEmail) {
-            // TODO: Send standing orders to user's email address
-            builder.append("Ich habe")
+            StringBuilder standingOrderMailBody = new StringBuilder();
+            for(StandingOrder so : standingOrders) {
+                standingOrderMailBody.append(so.getSpeechOutput() + "\n");
+            }
+            EMailClient.SendEMail("Daueraufträge", standingOrderMailBody.toString());
+
+            builder.append("Ich habe eine Übersicht deiner ")
                     .append(standingOrders.size())
-                    .append(" an deine E-Mail-Adresse gesendet.");
+                    .append(" Daueraufträge an deine E-Mail-Adresse gesendet.");
         } else {
             // We want to directly return standing orders here
 
