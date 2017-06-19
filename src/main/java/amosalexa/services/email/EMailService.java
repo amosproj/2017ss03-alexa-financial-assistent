@@ -52,8 +52,8 @@ public class EMailService extends AbstractSpeechService implements SpeechService
 		IntentRequest request = requestEnvelope.getRequest();
 
 		if (request.getIntent().getName().equals(TEST_EMAIL_INTENT)) {
-			String answer = "Okay, ich habe dir eine E-Mail gesendet.";
-			if(!EMailClient.SendEMail("Test-Mail", "Hello, World!")) {
+			String answer = "Okay, ich habe dir eine Test-E-Mail gesendet.";
+			if(!EMailClient.SendEMail("Test-Mail", "Hello, World! :)")) {
 				answer = "Leider konnte die E-Mail nicht gesendet werden.";
 			}
 			return AmosAlexaSpeechlet.getSpeechletResponse(answer, "", false);
