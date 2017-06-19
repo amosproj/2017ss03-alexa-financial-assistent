@@ -1,13 +1,15 @@
-package amosalexa.dialogsystem.dialogs.banktransfer;
+package amosalexa.services.bankaccount;
 
-import amosalexa.SessionStorage;
-import amosalexa.dialogsystem.DialogHandler;
+import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
-import amosalexa.services.bankaccount.BankAccount;
+import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
+import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
+import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
@@ -17,32 +19,69 @@ import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
-public class BankTransferDialog extends AbstractSpeechService implements DialogHandler {
+public class TransactionService extends AbstractSpeechService implements SpeechService {
 
-    private static final String AMOUNT_KEY = "amount";
-    private static final String NAME_KEY = "name";
-    private static final String IBAN_KEY = "iban";
-    private static final Logger LOGGER = LoggerFactory.getLogger(BankTransferDialog.class);
+    /**
+     * Default value for cards
+     */
+    private static final String TRANSACTION = "Überweisung";
 
     @Override
     public String getDialogName() {
-        return "BankTransfer";
+        return this.getClass().getName();
     }
 
     @Override
-    public SpeechletResponse handle(Intent intent, SessionStorage.Storage storage) throws SpeechletException {
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                BANK_TRANSFER_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                BANK_TRANSFER_INTENT,
+                YES_INTENT,
+                NO_INTENT
+        );
+    }
+
+    public TransactionService(SpeechletSubject speechletSubject) {
+        subscribe(speechletSubject);
+    }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
+    private static final String CONTEXT = "DIALOG_CONTEXT";
+    private static final String BANK_TRANSFER_INTENT = "BankTransferIntent";
+    private static final String AMOUNT_KEY = "Amount";
+    private static final String NAME_KEY = "Name";
+    private static final String IBAN_KEY = "iban";
+
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        speechletSubject.attachSpeechletObserver(this, "BankTransferIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.YesIntent");
+        speechletSubject.attachSpeechletObserver(this, "AMAZON.NoIntent");
+    }
+
+    @Override
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
+        Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
+        Session session = requestEnvelope.getSession();
 
         if ("BankTransferIntent".equals(intentName)) {
-            LOGGER.info("askForBankTransferConfirmation wird aufgerufen.");
-            return askForBankTransferConfirmation(intent, storage);
-        } else if (YES_INTENT.equals(intentName)) {
-            LOGGER.info("Intent Name: " + intentName);
-            return proceedBankTransfer(intent, storage);
-        } else if (NO_INTENT.equals(intentName)) {
+            session.setAttribute(CONTEXT, "BankTransfer");
+            return askForBankTransferConfirmation(intent, session);
+        } else if ("AMAZON.YesIntent".equals(intentName)) {
+            return proceedBankTransfer(intent, session);
+        } else if ("AMAZON.NoIntent".equals(intentName)) {
             return cancelAction();
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
@@ -55,20 +94,18 @@ public class BankTransferDialog extends AbstractSpeechService implements DialogH
      *
      * @return SpeechletResponse, that asks for confirmation.
      */
-
-
-    private SpeechletResponse askForBankTransferConfirmation(Intent intent, SessionStorage.Storage storage) {
+    private SpeechletResponse askForBankTransferConfirmation(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
+        LOGGER.info("Slots: " + slots);
 
         // get amount + name from slots.
-        String amount = slots.get("amount").getValue();
-        String name = slots.get("name").getValue();
-        LOGGER.info("Slot name hat folgenden Wert: " + name);
+        String amount = slots.get(AMOUNT_KEY) != null ? slots.get(AMOUNT_KEY).getValue() : null;
+        String name = slots.get(NAME_KEY) != null ? slots.get(NAME_KEY).getValue() : null;
 
         // TODO: as soon as API also contains name this should be deleted / adjusted
         // create bank accounts
-        BankAccount anneBankAccount = null;//new BankAccount("anne", "0000000001", "DE50100000000000000001");
-        BankAccount christianBankAccount = null;//new BankAccount("jan", "0000000000", "DE60643995205405578292");
+        BankAccount anneBankAccount = new BankAccount("anne", "0000000001", "DE50100000000000000001");
+        BankAccount christianBankAccount = new BankAccount("christian", "0000000000", "DE60643995205405578292");
         BankAccount[] allBankAccounts = {anneBankAccount, christianBankAccount};
         String iban = "";
 
@@ -82,20 +119,7 @@ public class BankTransferDialog extends AbstractSpeechService implements DialogH
         // the name was not found in list of contacts
         if (iban.equals("")) {
             String speechText = "Ich habe " + name + " leider nicht in der Liste deiner Kontakte finden können.";
-
-            // Create the Simple card content.
-            SimpleCard card = new SimpleCard();
-            card.setTitle("Kontakt nicht gefunden");
-            card.setContent(speechText);
-
-            // Create the plain text output.
-            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText(speechText);
-
-            Reprompt reprompt = new Reprompt();
-            reprompt.setOutputSpeech(speech);
-
-            return SpeechletResponse.newTellResponse(speech, card);
+            return getResponse("Kontakt nicht gefunden", speechText);
         }
 
         // there is not enough money on the account
@@ -103,23 +127,13 @@ public class BankTransferDialog extends AbstractSpeechService implements DialogH
 
             String speechText = "Dein Kontostand reicht leider nicht aus, um " + amount + " Euro zu ueberweisen." +
                     " Ich habe die Transaktion daher nicht durchgefuehrt.";
-
-            // Create the Simple card content.
-            SimpleCard card = new SimpleCard();
-            card.setTitle("Überweisung nicht möglich.");
-            card.setContent(speechText);
-
-            // Create the plain text output.
-            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText(speechText);
-
-            return SpeechletResponse.newTellResponse(speech, card);
+            return getResponse("Überweisung nicht möglich", speechText);
         }
 
         // put amount + name in the storage.
-        storage.put(AMOUNT_KEY, amount);
-        storage.put(NAME_KEY, name);
-        storage.put(IBAN_KEY, iban);
+        session.setAttribute(AMOUNT_KEY, amount);
+        session.setAttribute(NAME_KEY, name);
+        session.setAttribute(IBAN_KEY, iban);
 
         // get account balance
         Account account = AccountAPI.getAccount("0000000001");
@@ -129,19 +143,7 @@ public class BankTransferDialog extends AbstractSpeechService implements DialogH
         String speechText = "Aktuell betraegt dein Kontostand " + balanceBeforeTransation + " Euro. " +
                 "Bist du sicher, dass du " + amount + " Euro an " + name + " ueberweisen willst?";
 
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("CreditLimit");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        return getAskResponse(TRANSACTION, speechText);
     }
 
     /**
@@ -149,12 +151,12 @@ public class BankTransferDialog extends AbstractSpeechService implements DialogH
      *
      * @return SpeechletResponse spoken and visual response for the given intent
      */
-    private SpeechletResponse proceedBankTransfer(Intent intent, SessionStorage.Storage storage) {
+    private SpeechletResponse proceedBankTransfer(Intent intent, Session session) {
 
         // get name + amount
-        String amount = (String) storage.get(AMOUNT_KEY);
-        String name = (String) storage.get(NAME_KEY);
-        String iban = (String) storage.get(IBAN_KEY);
+        String amount = (String) session.getAttribute(AMOUNT_KEY);
+        String name = (String) session.getAttribute(NAME_KEY);
+        String iban = (String) session.getAttribute(IBAN_KEY);
         LOGGER.info("Die IBAN, an die überwiesen wird, lautet: " + iban);
 
         // FIXME: Hardcoded strings
@@ -193,11 +195,9 @@ public class BankTransferDialog extends AbstractSpeechService implements DialogH
      * @return boolean equals false if there is not enough money in the account.
      */
     private boolean enoughMoneyforTransaction(String accountNumber, double amountToTransfer) {
-
         // TODO: get the specific money limit for the account (User Story 36)
         int limitForTransaction = 0;
         double accountBalance = (double) AccountAPI.getAccount(accountNumber).getBalance();
-
         return accountBalance - amountToTransfer >= limitForTransaction;
     }
 
@@ -206,5 +206,4 @@ public class BankTransferDialog extends AbstractSpeechService implements DialogH
         speech.setText("OK, ich fuehre die Ueberweisung nicht aus.");
         return SpeechletResponse.newTellResponse(speech);
     }
-
 }

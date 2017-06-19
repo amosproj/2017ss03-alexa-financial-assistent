@@ -13,6 +13,7 @@ import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
+import amosalexa.services.bankaccount.TransactionService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
 import amosalexa.services.financing.SavingsPlanService;
@@ -50,6 +51,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         new BankAccountService(amosAlexaSpeechlet);
         new StandingOrderService(amosAlexaSpeechlet);
+        new TransactionService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
@@ -95,13 +97,13 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     @Override
     public void attachSpeechletObserver(SpeechletObserver speechletObserver, String intentName) {
         // Check for duplicate start Intents
-        for(List<SpeechletObserver> observerList : speechServiceObservers.values()) {
-            for(SpeechletObserver observer : observerList) {
-                for(String startIntent : speechletObserver.getStartIntents()) {
-                    if(observer.getStartIntents().contains(startIntent) && !observer.getDialogName().equals(speechletObserver.getDialogName())) {
+        for (List<SpeechletObserver> observerList : speechServiceObservers.values()) {
+            for (SpeechletObserver observer : observerList) {
+                for (String startIntent : speechletObserver.getStartIntents()) {
+                    if (observer.getStartIntents().contains(startIntent) && !observer.getDialogName().equals(speechletObserver.getDialogName())) {
                         // Oh no, duplicate start Intent!
                         throw new IllegalArgumentException("Duplicate start Intent [" + startIntent + "], defined by both [" + observer.getDialogName() + "] " +
-                        "and [" + speechletObserver.getDialogName() + "]!");
+                                "and [" + speechletObserver.getDialogName() + "]!");
                     }
                 }
             }
@@ -139,30 +141,30 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             boolean validIntent = false;
 
             // Check if this Service should handle this Intent
-            if(!speechService.getHandledIntents().contains(intentName)) {
+            if (!speechService.getHandledIntents().contains(intentName)) {
                 continue;
             }
 
             // Check if a dialog is active
-            String currentDialogContext = (String)sessionStorage.get(SessionStorage.CURRENTDIALOG);
-            if(currentDialogContext != null && !currentDialogContext.equals(speechService.getDialogName())) {
+            String currentDialogContext = (String) sessionStorage.get(SessionStorage.CURRENTDIALOG);
+            if (currentDialogContext != null && !currentDialogContext.equals(speechService.getDialogName())) {
                 // A dialog is active, but not for this service
                 continue;
             }
 
             // Check if this Intent starts this Service
-            if(currentDialogContext == null && speechService.getStartIntents().contains(intentName)) {
+            if (currentDialogContext == null && speechService.getStartIntents().contains(intentName)) {
                 // Set the dialog context in the current session
                 sessionStorage.put(SessionStorage.CURRENTDIALOG, speechService.getDialogName());
                 validIntent = true;
             }
 
             // Check if the active dialog is intended for this Service
-            if(!validIntent && currentDialogContext != null && currentDialogContext.equals(speechService.getDialogName())) {
-                validIntent =  true;
+            if (!validIntent && currentDialogContext != null && currentDialogContext.equals(speechService.getDialogName())) {
+                validIntent = true;
             }
 
-            if(!validIntent) {
+            if (!validIntent) {
                 // Invalid intent, we should not let the Service handle it
                 LOGGER.error("Invalid intent [" + intentName + "]!");
                 continue;
@@ -207,17 +209,12 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
                 session.getSessionId());
 
 
-
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-        if ("BankTransferIntent".equals(intentName)) {
-            LOGGER.info("intent: BankTransferIntent");
-            sessionStorage.put(SessionStorage.CURRENTDIALOG, "BankTransfer"); // Set CURRENTDIALOG to start the BankTransfer dialog
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage);
-        } else if ("TestListIntent".equals(intentName)) {
+        if ("TestListIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
             return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
         } else if ("ReplacementCardIntent".equals(intentName)) {
@@ -305,11 +302,11 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
             // FIXME: Hardcoded IBAN and so on
             Number amountNum = Integer.parseInt(amount);
-            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans" , "Helga");
+            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans", "Helga");
 
             // confirmation question
             String speechText = "Dein aktueller Kontostand beträgt " + balance + ". "
-            + "Möchtest du " + amount + " Euro an " + name + " überweisen?";
+                    + "Möchtest du " + amount + " Euro an " + name + " überweisen?";
 
             // Create the Simple card content.
             SimpleCard card = new SimpleCard();
@@ -333,7 +330,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         // FIXME: Hardcoded strings
         Number amountNum = Integer.parseInt(amount);
-        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung","Hans" , "Helga" );
+        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans", "Helga");
 
         //reply message
         String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";
