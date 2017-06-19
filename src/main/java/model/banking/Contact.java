@@ -1,4 +1,4 @@
-package amosalexa.services.contacts;
+package model.banking;
 
 import api.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;

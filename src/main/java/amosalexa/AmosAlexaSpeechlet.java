@@ -16,6 +16,7 @@ import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankaccount.TransactionService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.blockcard.BlockCardService;
+import amosalexa.services.contacts.ContactService;
 import amosalexa.services.financing.SavingsPlanService;
 import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
@@ -59,6 +60,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new TransferTemplateService(amosAlexaSpeechlet);
         new SecuritiesAccountInformationService(amosAlexaSpeechlet);
         new BalanceLimitService(amosAlexaSpeechlet);
+        new ContactService(amosAlexaSpeechlet);
         //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;

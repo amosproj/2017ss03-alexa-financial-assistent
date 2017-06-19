@@ -1,6 +1,7 @@
 package amosalexa.services.contacts;
 
 import api.DynamoDbClient;
+import model.banking.Contact;
 import org.junit.Test;
 
 import java.util.List;
