@@ -59,7 +59,7 @@ public class AmosAlexaSpeechletTest {
         Launcher.server = new Server();
         Launcher.server.start();
 
-        testIntentMatches("BankTelephone","Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
+        testIntentMatches("BankTelephone", "Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
 
         Launcher.server.stop();
     }
@@ -147,14 +147,11 @@ public class AmosAlexaSpeechletTest {
     @Test
     public void bankTransferIntentTest() throws Throwable {
         newSession();
-
-        testIntentMatches("BankTransferIntent", "name:anne", "amount:2",
+        testIntentMatches("BankTransferIntent", "Name:anne", "Amount:2",
                 "Aktuell betraegt dein Kontostand (.*) Euro\\. Bist du sicher, dass du 2 Euro an anne ueberweisen willst\\?");
 
         testIntentMatches("AMAZON.YesIntent",
                 "Ok, (.*) Euro wurden an anne ueberwiesen\\. Dein neuer Kontostand betraegt (.*) Euro\\.");
-
-
     }
 
     @Test
