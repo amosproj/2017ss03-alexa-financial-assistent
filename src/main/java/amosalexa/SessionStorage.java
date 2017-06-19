@@ -11,7 +11,7 @@ public class SessionStorage {
 
     private static SessionStorage instance;
 
-    public static String CURRENTDIALOG = "CURRENTDIALOG";
+    public static final String CURRENTDIALOG = "CURRENTDIALOG";
 
     /**
      * This class contains session related values.

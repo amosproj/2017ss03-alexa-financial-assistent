@@ -1,9 +1,17 @@
 TestListIntent Teste Liste
 
-ProductRequestIntent Was kostet {ProductKeyword}
+ProductRequestIntent Was kostet ein {ProductKeyword}
+ProductRequestIntent Was kostet eine {ProductKeyword}
+ProductRequestIntent Was kostet das {ProductKeyword}
+ProductRequestIntent Was kostet die {ProductKeyword}
+ProductRequestIntent Was kostet der {ProductKeyword}
 ProductRequestIntent Sag mir den Preis von {ProductKeyword}
-ProductRequestIntent Finde {ProductKeyword}
-ProductRequestIntent Wie viel kostet {ProductKeyword}
+ProductRequestIntent Sag mir den Preis vom {ProductKeyword}
+ProductRequestIntent Wie viel kostet ein {ProductKeyword}
+ProductRequestIntent Wie viel kostet eine {ProductKeyword}
+ProductRequestIntent Wie viel kostet das {ProductKeyword}
+ProductRequestIntent Wie viel kostet der {ProductKeyword}
+ProductRequestIntent Wie viel kostet die {ProductKeyword}
 
 AccountInformation Wie ist mein {AccountInformationSlots}
 AccountInformation Wie ist meine {AccountInformationSlots}
@@ -13,7 +21,6 @@ AccountInformation Wie hoch ist mein {AccountInformationSlots}
 AccountInformation Wie hoch ist meine {AccountInformationSlots}
 AccountInformation Was sind meine {AccountInformationSlots}
 AccountInformation Was sind mein {AccountInformationSlots}
-
 
 ReplacementCardReasonIntent Die Karte wurde {ReplacementReason}
 ReplacementCardReasonIntent Die Karte ist {ReplacementReason}
@@ -42,6 +49,19 @@ BankAddress suche die {BankNameSlots} in der nähe
 BankAddress wo ist die nächste {BankNameSlots}
 BankAddress finde die nächste {BankNameSlots}
 
+BankTelephone wie ist die telefonnummer meiner bank
+BankTelephone wie lautet die telephonnummer meiner bank
+BankTelephone gib mir die telephonnummer meiner bank
+BankTelephone wie ist die nummer meiner bank
+BankTelephone finde die nummer meiner bank
+BankTelephone was ist die telefonnummer meiner bank
+BankTelephone wie ist die telefonnummer {BankNameSlots}
+BankTelephone wie lautet die telephonnummer {BankNameSlots}
+BankTelephone gib mir die telephonnummer {BankNameSlots}
+BankTelephone wie ist die nummer {BankNameSlots}
+BankTelephone finde die nummer {BankNameSlots}
+BankTelephone was ist die telefonnummer {BankNameSlots}
+
 BankOpeningHours Öffnungszeiten
 BankOpeningHours Öffnungszeiten meiner Bank
 BankOpeningHours Wann hat die {BankNameSlots} am {OpeningHoursDate} geöffnet
@@ -53,23 +73,16 @@ BankOpeningHours Öffnungszeiten der {BankNameSlots}
 BankOpeningHours wann hat {BankNameSlots} offen
 BankOpeningHours hat die {BankNameSlots} {OpeningHoursDate} geöffnet
 
-SavingsPlanIntent Berechne mir einen Sparplan
-SavingsPlanIntent Ich moechte monatlich Geld sparen
-SavingsPlanIntent Erstelle einen Sparplan
-SavingsPlanIntent Ich moechte monatlich {EinzahlungMonat} Euro anlegen.
-SavingsPlanIntent Ich moechte einen Grundbetrag von {Grundbetrag} Euro anlegen.
-SavingsPlanIntent {Grundbetrag} Euro
-SavingsPlanIntent {AnzahlJahre} Jahre
-SavingsPlanIntent Monatlich {EinzahlungMonat} Euro
-SavingsPlanIntent Ich moechte einmalig {Grundbetrag} Euro anlegen
-SavingsPlanIntent Ich moechte einen Sparplan erstellen und einmalig {Grundbetrag} Euro anlegen.
-SavingsPlanIntent Ich moechte als Einmalzahlung {Grundbetrag} Euro anlegen
-SavingsPlanIntent Ich moechte {AnzahlJahre} Jahre monatlich {EinzahlungMonat} Euro anlegen.
-SavingsPlanIntent Ich moechte {AnzahlJahre} Jahre lang Geld anlegen.
-SavingsPlanIntent {AnzahlJahre} Jahr
-SavingsPlanIntent {EinzahlungMonat} Euro
+SavingsPlanIntroIntent Erstelle einen Sparplan
+SavingsPlanIntroIntent Berechne mir einen Sparplan
+SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von {Betrag} Euro
+SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
+SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
 
-StandingOrdersDeleteIntent Lösche Dauerauftrag Nummer {Number}
+SavingsPlanAmountIntent {Betrag} Euro
+
+SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahr
+SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahre
 
 StandingOrdersInfoIntent Daueraufträge
 StandingOrdersInfoIntent Wie lauten meine Daueraufträge
@@ -79,7 +92,10 @@ StandingOrdersInfoIntent Nenne mir meine Daueraufträge
 StandingOrdersInfoIntent Sende Daueraufträge per {Channel}
 StandingOrdersInfoIntent Daueraufträge an {Payee}
 
+StandingOrdersDeleteIntent Lösche Dauerauftrag Nummer {Number}
+
 StandingOrdersModifyIntent Ändere den Betrag von Dauerauftrag Nummer {Number} auf {Amount} Euro
+StandingOrdersModifyIntent {Amount} Euro
 StandingOrdersModifyIntent Ändere den Ausführungsrhythmus von Dauerauftrag Nummer {Number} auf {ExecutionRate} beginnend am {FirstExecution}
 
 StandingOrdersKeywordIntent Wie viel bezahle ich für {StandingOrderKeyword}
@@ -102,3 +118,5 @@ SetBalanceLimitIntent Ich möchte mein Kontolimit auf {BalanceLimitAmount} Euro 
 ListTransferTemplatesIntent Überweisungsvorlagen
 DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
 EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmount}
+
+BankTransferIntent Überweise {Amount} Euro an {Name}

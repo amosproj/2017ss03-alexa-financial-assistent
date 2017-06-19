@@ -2,6 +2,7 @@ package amosalexa.dialogsystem.dialogs.banktransfer;
 
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.DialogHandler;
+import amosalexa.services.AbstractSpeechService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import com.amazon.speech.slu.Intent;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class BankTransferDialog implements DialogHandler{
+public class BankTransferDialog extends AbstractSpeechService implements DialogHandler {
 
     private static final String AMOUNT_KEY = "amount";
     private static final String NAME_KEY = "name";
@@ -37,10 +38,10 @@ public class BankTransferDialog implements DialogHandler{
         if ("BankTransferIntent".equals(intentName)) {
             LOGGER.info("askForBankTransferConfirmation wird aufgerufen.");
             return askForBankTransferConfirmation(intent, storage);
-        } else if ("AMAZON.YesIntent".equals(intentName)) {
+        } else if (YES_INTENT.equals(intentName)) {
             LOGGER.info("Intent Name: " + intentName);
             return proceedBankTransfer(intent, storage);
-        } else if ("AMAZON.NoIntent".equals(intentName)) {
+        } else if (NO_INTENT.equals(intentName)) {
             return cancelAction();
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
@@ -66,7 +67,7 @@ public class BankTransferDialog implements DialogHandler{
         // TODO: as soon as API also contains name this should be deleted / adjusted
         // create bank accounts
         BankAccount anneBankAccount = new BankAccount("anne", "0000000001", "DE50100000000000000001");
-        BankAccount christianBankAccount = new BankAccount("christian", "0000000000", "DE60643995205405578292");
+        BankAccount christianBankAccount = new BankAccount("jan", "0000000000", "DE60643995205405578292");
         BankAccount[] allBankAccounts = {anneBankAccount, christianBankAccount};
         String iban = "";
 
@@ -198,8 +199,6 @@ public class BankTransferDialog implements DialogHandler{
 
         return accountBalance - amountToTransfer >= limitForTransaction;
     }
-
-
 
     private SpeechletResponse cancelAction() {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();

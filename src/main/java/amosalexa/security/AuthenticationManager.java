@@ -13,7 +13,29 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class AuthenticationManager extends AbstractSpeechService implements SpeechService {
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                AUTHENTICATION_PIN_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                AUTHENTICATION_PIN_INTENT
+        );
+    }
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationManager.class);
 

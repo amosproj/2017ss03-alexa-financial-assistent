@@ -47,6 +47,15 @@
       ]
     },
     {
+      "intent": "BankTelephone",
+      "slots": [
+        {
+          "name": "BankNameSlots",
+          "type": "LIST_OF_BANKS"
+        }
+      ]
+    },
+    {
       "intent": "AMAZON.YesIntent"
     },
     {
@@ -56,16 +65,26 @@
       "intent": "AMAZON.HelpIntent"
     },
     {
-      "intent": "SavingsPlanIntent",
+      "intent": "SavingsPlanIntroIntent",
       "slots": [
         {
-          "name": "Grundbetrag",
+          "name": "Betrag",
           "type": "AMAZON.NUMBER"
-        },
+        }
+      ]
+    },
+    {
+      "intent": "SavingsPlanAmountIntent",
+      "slots": [
         {
-          "name": "EinzahlungMonat",
+          "name": "Betrag",
           "type": "AMAZON.NUMBER"
-        },
+        }
+      ]
+    },
+    {
+      "intent": "SavingsPlanNumberOfYearsIntent",
+      "slots": [
         {
           "name": "AnzahlJahre",
           "type": "AMAZON.NUMBER"
@@ -170,6 +189,19 @@
         }
       ],
       "intent": "AuthenticationPIN"
+    },
+    {
+      "intent": "BankTransferIntent",
+      "slots": [
+        {
+          "name": "Amount",
+          "type": "AMAZON.FOUR_DIGIT_NUMBER"
+        },
+        {
+          "name": "Name",
+          "type": "AMAZON.DE_FIRST_NAME"
+        }
+      ]
     },
     {
       "intent": "SetBalanceLimitIntent",

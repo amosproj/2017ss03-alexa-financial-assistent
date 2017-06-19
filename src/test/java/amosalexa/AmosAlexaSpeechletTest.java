@@ -25,9 +25,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class AmosAlexaSpeechletTest {
 
@@ -51,6 +49,19 @@ public class AmosAlexaSpeechletTest {
         String openingDate = formatter.format(time);
 
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
+    }
+
+    @Test
+    public void bankContactTelephoneNumberTest() throws Exception {
+        newSession();
+
+        // pretend local environment
+        Launcher.server = new Server();
+        Launcher.server.start();
+
+        testIntentMatches("BankTelephone","Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
+
+        Launcher.server.stop();
     }
 
     @Test
@@ -95,7 +106,7 @@ public class AmosAlexaSpeechletTest {
             add("Möchtest du weitere Transaktionen hören");
         }};
 
-        testIntentMatches("AccountInformation", "AccountInformationSlots:überweisungen",  StringUtils.join(possibleAnswers, "|"));
+        testIntentMatches("AccountInformation", "AccountInformationSlots:überweisungen", StringUtils.join(possibleAnswers, "|"));
 
         ArrayList<String> possibleAnswersYES = new ArrayList<String>() {{
             add("Du hast keine Überweisungen in deinem Konto");
@@ -110,14 +121,14 @@ public class AmosAlexaSpeechletTest {
     @Test
     public void bankAccountInformationIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
-        testIntentMatches("AccountInformation", "AccountInformationSlots:zinssatz",  "Dein zinssatz ist aktuell (.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:kontostand",  "Dein kontostand beträgt €(.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:eröffnungsdatum",  "Dein eröffnungsdatum war (.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditlimit",  "Dein kreditlimit beträgt €(.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditkartenlimit",  "Dein kreditkartenlimit beträgt €(.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:kontonummer",  "Deine kontonummer lautet (.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:abhebegebühr",  "Deine abhebegebühr beträgt (.*)");
-        testIntentMatches("AccountInformation", "AccountInformationSlots:iban",  "Deine iban lautet (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:zinssatz", "Dein zinssatz ist aktuell (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kontostand", "Dein kontostand beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:eröffnungsdatum", "Dein eröffnungsdatum war (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditlimit", "Dein kreditlimit beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kreditkartenlimit", "Dein kreditkartenlimit beträgt €(.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:kontonummer", "Deine kontonummer lautet (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:abhebegebühr", "Deine abhebegebühr beträgt (.*)");
+        testIntentMatches("AccountInformation", "AccountInformationSlots:iban", "Deine iban lautet (.*)");
     }
 
     @Test
@@ -170,11 +181,20 @@ public class AmosAlexaSpeechletTest {
     public void savingsPlanTest() throws Exception {
         newSession();
 
-        testIntentMatches(
-                "SavingsPlanIntent", "AnzahlJahre:2", "EinzahlungMonat:150", "Grundbetrag:1500",
+        testIntent("SavingsPlanIntroIntent",
+                "Was moechtest du als Grundbetrag anlegen?"
+        );
+        testIntent("SavingsPlanAmountIntent", "Betrag:1500",
+                "Wie viele Jahre moechtest du das Geld anlegen?"
+        );
+        testIntent("SavingsPlanNumberOfYearsIntent", "AnzahlJahre:2",
+                "Welchen Geldbetrag moechtest du monatlich investieren?"
+        );
+        testIntentMatches("SavingsPlanAmountIntent", "Betrag:150",
                 "Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende des Zeitraums insgesamt (.*) Euro\\. Soll ich diesen Sparplan fuer dich anlegen\\?"
         );
 
+        //Calculate what first payment date of the savings plan should be (depending on today´s date)
         Calendar calendar = Calendar.getInstance();
         String nextPayin = String.format("01.%02d.%d", calendar.get(Calendar.MONTH) + 2, calendar.get(Calendar.YEAR));
 
@@ -187,6 +207,9 @@ public class AmosAlexaSpeechletTest {
         int latestStandingOrderId = allStandingOrders.stream().max(comp).get().getStandingOrderId().intValue();
         LOGGER.info("Latest standing order ID: " + latestStandingOrderId);
         savingsPlanTestStandingOrderId = latestStandingOrderId;
+
+        // We need to start a new session here because the dialog ends after the YesIntent
+        newSession();
 
         testIntent(
                 "StandingOrdersDeleteIntent",
@@ -246,8 +269,8 @@ public class AmosAlexaSpeechletTest {
             int templateId = Integer.parseInt(m.group(1));
             double amount = Double.parseDouble(m.group(3));
 
-            testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:"+(amount*2),
-                    "Möchtest du den Betrag von Vorlage " + templateId + " von " + amount + " auf " + (amount*2) + " ändern?");
+            testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:" + (amount * 2),
+                    "Möchtest du den Betrag von Vorlage " + templateId + " von " + amount + " auf " + (amount * 2) + " ändern?");
 
             testIntent(
                     "AMAZON.YesIntent",
@@ -260,10 +283,10 @@ public class AmosAlexaSpeechletTest {
 
             if (m.find()) {
                 assertEquals(templateId, Integer.parseInt(m.group(1)));
-                assert(Math.abs(amount*2 - Double.parseDouble(m.group(3))) < 0.001);
+                assert (Math.abs(amount * 2 - Double.parseDouble(m.group(3))) < 0.001);
 
-                testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:"+amount,
-                        "Möchtest du den Betrag von Vorlage " + templateId + " von " + (amount*2) + " auf " + amount + " ändern?");
+                testIntent("EditTransferTemplateIntent", "TemplateID:" + templateId, "NewAmount:" + amount,
+                        "Möchtest du den Betrag von Vorlage " + templateId + " von " + (amount * 2) + " auf " + amount + " ändern?");
 
                 testIntent(
                         "AMAZON.YesIntent",
@@ -287,6 +310,29 @@ public class AmosAlexaSpeechletTest {
 
         testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
         testIntent("AMAZON.NoIntent", "");
+    }
+
+    @Test
+    public void sameServiceTest() throws Exception {
+        // pretend local environment
+        Launcher.server = new Server();
+        Launcher.server.start();
+
+        newSession();
+
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
+
+        // Switching to another Service should fail because the BalanceLimit dialog is currently active.
+        testIntentMatches("BankAddress", "Ein Fehler ist aufgetreten.");
+
+        newSession();
+
+        // Switching to another Service works if a new session is started.
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
+        newSession();
+        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Allersberger Str. 64, 90461 Nürnberg, Germany");
+
+        Launcher.server.stop();
     }
 
     /************************************

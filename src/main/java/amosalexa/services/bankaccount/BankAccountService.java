@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,12 +26,11 @@ import java.util.List;
  */
 public class BankAccountService extends AbstractSpeechService implements SpeechService {
 
-
+    private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
     /**
      * amount of transaction responded at once
      */
-    public static final int TRANSACTION_LIMIT = 3;
-    private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
+    private static final int TRANSACTION_LIMIT = 3;
     /**
      * intents
      */
@@ -42,7 +42,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     /**
      * bank account number
      */
-    private static final String number = "0000000020";
+    private static final String number = "0000000001";
     /**
      * Name for custom slot types
      */
@@ -73,15 +73,32 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     /**
      * session attribute for transaction list indexe
      */
-    private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index";
-    /**
-     *
-     */
-    private String TRANSACTION_DIALOG = "transaction_dialog";
+    private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index"
 
-
+            ;
     public BankAccountService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
+    }
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                BANK_ACCOUNT_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                BANK_ACCOUNT_INTENT,
+                YES_INTENT,
+                NO_INTENT
+        );
     }
 
     /**
@@ -91,24 +108,21 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      */
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
-        speechletSubject.attachSpeechletObserver(this, BANK_ACCOUNT_INTENT);
-        speechletSubject.attachSpeechletObserver(this, YES_INTENT);
-        speechletSubject.attachSpeechletObserver(this, NO_INTENT);
+        for(String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
     }
-
 
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
-
         Intent intent = requestEnvelope.getRequest().getIntent();
         sessionID = requestEnvelope.getSession().getSessionId();
 
         // get dialog context index
         SessionStorage sessionStorage = SessionStorage.getInstance();
         Integer furtherTransactionDialogIndex = (Integer) sessionStorage.getObject(sessionID, CONTEXT_FURTHER_TRANSACTION_INDEX);
-        String currentDialog = (String) sessionStorage.getObject(sessionID, SessionStorage.CURRENTDIALOG);
 
-        if (furtherTransactionDialogIndex != null && currentDialog != null) {
+        if (furtherTransactionDialogIndex != null) {
             if (intent.getName().equals(YES_INTENT)) {
                 return getNextTransaction(furtherTransactionDialogIndex);
             }
@@ -162,7 +176,6 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
             stringBuilder.append(Transaction.getAskMoreTransactionText());
             SessionStorage sessionStorage = SessionStorage.getInstance();
             sessionStorage.putObject(sessionID, CONTEXT_FURTHER_TRANSACTION_INDEX, i);
-            sessionStorage.putObject(sessionID, SessionStorage.CURRENTDIALOG, TRANSACTION_DIALOG);
         } else {
             return getResponse(CARD_NAME, LIST_END_TRANSACTIONS_TEXT);
         }
@@ -182,7 +195,6 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
             transactionText = transactionText + Transaction.getAskMoreTransactionText();
             SessionStorage sessionStorage = SessionStorage.getInstance();
             sessionStorage.putObject(sessionID, CONTEXT_FURTHER_TRANSACTION_INDEX, i + 1);
-            sessionStorage.putObject(sessionID, SessionStorage.CURRENTDIALOG, TRANSACTION_DIALOG);
         }
         return getSSMLAskResponse(CARD_NAME, transactionText, REPROMPT_TEXT);
     }
