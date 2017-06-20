@@ -157,8 +157,10 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         LOGGER.info("Die IBAN, an die überwiesen wird, lautet: " + iban);
 
         // FIXME: Hardcoded strings
+        // TODO replace payee with the name from account holder
         Number amountNum = Integer.parseInt(amount);
-        TransactionAPI.createTransaction(amountNum, "DE50100000000000000001", iban, "2017-05-16", "Beschreibung", "Hans", "Helga");
+        TransactionAPI.createTransaction(amountNum, "DE50100000000000000001", iban, "2017-05-16",
+                "Beschreibung", "Hans", null);
 
         // get account balance
         Account account = AccountAPI.getAccount("0000000001");
