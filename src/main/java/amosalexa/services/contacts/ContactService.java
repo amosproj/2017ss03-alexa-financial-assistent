@@ -171,7 +171,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
                 int contactId = Integer.parseInt(contactIdStr);
                 session.setAttribute(CONTACTS + ".delete", contactId);
 
-                return getAskResponse(CONTACTS, "Möchtest du Kontakt Nummer " + contactId + " wirklich löschen?");
+                return getAskResponse(CONTACTS, "Moechtest du Kontakt Nummer " + contactId + " wirklich loeschen?");
             }
         } else {
             Integer contactId = (Integer) session.getAttribute(CONTACTS + ".delete");
@@ -180,7 +180,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
                 Contact contact = new Contact(contactId);
                 DynamoDbClient.instance.deleteItem(Contact.TABLE_NAME, contact);
 
-                return getResponse("Kontakt wurde gelöscht.", "");
+                return getResponse(CONTACTS, "Kontakt wurde geloescht.");
             }
         }
 
@@ -201,6 +201,10 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         List<Contact> contactList = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
         List<Contact> contacts = new ArrayList<>(contactList);
         LOGGER.info("Contacts: " + contacts);
+
+        if (contacts.size() == 0) {
+            return getResponse(CONTACTS, "Du hast keine Kontakte in deiner Kontaktliste.");
+        }
 
         if (offset >= contacts.size()) {
             session.setAttribute(CONTACTS + ".offset", null);

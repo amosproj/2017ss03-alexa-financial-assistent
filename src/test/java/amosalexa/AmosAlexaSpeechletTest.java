@@ -2,6 +2,7 @@ package amosalexa;
 
 import amosalexa.server.Launcher;
 import amosalexa.services.financing.AffordabilityService;
+import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -11,6 +12,7 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
+import model.banking.Contact;
 import model.banking.StandingOrder;
 import model.banking.Transaction;
 import org.apache.commons.lang3.StringUtils;
@@ -220,30 +222,45 @@ public class AmosAlexaSpeechletTest {
     public void contactTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
+        //Get today´s date in the right format
         Date now = new Date();
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String todayDate = formatter.format(now);
 
-        TransactionAPI.createTransaction(1, "DE60100000000000000001",
+        //Create a transaction that we can use for ContactAddIntent (ingoing transaction)
+        Transaction transaction = TransactionAPI.createTransaction(1, "DE60100000000000000001",
                 "DE50100000000000000001", todayDate,
                 "Ueberweisung fuer Unit Test", null, "Sandra");
-        List<Transaction> allTransactions = Transaction.getTransactions("0000000001");
-        final Comparator<Transaction> comp = Comparator.comparingInt(t -> t.getTransactionId().intValue());
-        Transaction latestTransaction = allTransactions.stream().max(comp).get();
-        int latestTransactionId = latestTransaction.getTransactionId().intValue();
-        String latestTransactionRemitter = latestTransaction.getRemitter();
+        int transactionId = transaction.getTransactionId().intValue();
+        String transactionRemitter = transaction.getRemitter();
 
-        //LOGGER.info("Latest transaction id: " + latestTransactionId);
-        //LOGGER.info("Latest transaction remitter: " + latestTransactionRemitter);
+        LOGGER.info("Latest transaction id: " + transactionId);
+        LOGGER.info("Latest transaction remitter: " + transactionRemitter);
 
+        //Test add contact
         testIntent(
                 "ContactAddIntent",
-                "TransactionNumber:" + latestTransactionId, "Moechtest du " + latestTransactionRemitter + " als " +
+                "TransactionNumber:" + transactionId, "Moechtest du " + transactionRemitter + " als " +
                         "Kontakt speichern?");
-
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Der Kontakt Sandra wurde angelegt.");
+
+        //Get the contact that we just created by searching for the contact with highest id
+        List<Contact> allContacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        final Comparator<Contact> comp2 = Comparator.comparingInt(c -> c.getId());
+        Contact latestContact = allContacts.stream().max(comp2).get();
+        LOGGER.info("Contact: " + latestContact.getName());
+        String latestContactId = String.valueOf(latestContact.getId());
+
+        //Test delete contact. Therefore delete the contact that we just created.
+        testIntent(
+                "ContactDeleteIntent",
+                "ContactID:" + latestContactId, "Moechtest du Kontakt Nummer " + latestContactId + " wirklich " +
+                        "loeschen?");
+        testIntent(
+                "AMAZON.YesIntent",
+                "Kontakt wurde geloescht.");
 
         /*
         TODO
