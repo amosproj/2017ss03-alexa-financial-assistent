@@ -100,18 +100,8 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         }
     }
 
-    private SpeechletResponse createNewContact(Session session) {
-        //TODO test
-        //Acutally create and save contact
-        String contactName = (String) session.getAttribute("ContactName");
-        Contact contact = new Contact(contactName, " DE42100000009999999999");
-        DynamoDbClient.instance.putItem(Contact.TABLE_NAME, contact);
-        return getResponse(CONTACTS, "Kontakt wurde angelegt.");
-    }
-
     private SpeechletResponse askForNewContactConfirmation(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
-        LOGGER.info("Slots: " + slots);
 
         Slot transactionNumberSlot = slots.get("TransactionNumber");
 
@@ -120,20 +110,24 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             return getAskResponse(CONTACTS, speechText);
         }
 
+        LOGGER.info("TransactionNumber: " + transactionNumberSlot.getValue());
+
         String speechText = "";
-        List<Transaction> allTransactions = Transaction.getTransactions("9999999999");
+        List<Transaction> allTransactions = Transaction.getTransactions("0000000001");
         Number transactionNumber = Integer.valueOf(transactionNumberSlot.getValue());
 
         Transaction transaction = null;
         for (Transaction t : allTransactions) {
-            if (transactionNumber == t.getTransactionId()) {
+            if (transactionNumber.equals(t.getTransactionId())) {
                 transaction = t;
             }
         }
 
+        LOGGER.info("Found transaction: " + transaction);
+
         if (transaction == null) {
             speechText = "Ich habe keine Transaktion mit dieser Nummer gefunden. Bitte wiederhole deine Eingabe.";
-            getAskResponse(CONTACTS, speechText);
+            return getAskResponse(CONTACTS, speechText);
         }
 
         LOGGER.info("Payee: " + transaction.getPayee());
@@ -141,13 +135,12 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         String payee = transaction.getPayee();
         String remitter = transaction.getRemitter();
         String ibanRegex = "^DE([0-9a-zA-Z]\\s?){20}$";
-        LOGGER.info("outgoing: " + transaction.isOutgoing());
         if ((payee == null && remitter == null) || (transaction.isOutgoing() && payee.matches(ibanRegex)) ||
                 (!transaction.isOutgoing() && remitter.matches(ibanRegex))) {
             speechText = "Ich kann fuer diese Transaktion keine Kontaktdaten speichern, weil der Name des";
             speechText = speechText.concat(transaction.isOutgoing() ? " Zahlungsempfaengers" : " Auftraggebers");
             speechText = speechText.concat(" nicht bekannt ist. Bitte wiederhole deine Eingabe oder breche ab, indem du \"Alexa, Stop!\" sagst.");
-            getAskResponse(CONTACTS, speechText);
+            return getAskResponse(CONTACTS, speechText);
         } else {
             //TODO improve
             //Actually asking for confirmation
@@ -157,6 +150,15 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             speechText = speechText.concat(" als Kontakt speichern?");
         }
         return getAskResponse(CONTACTS, speechText);
+    }
+
+    private SpeechletResponse createNewContact(Session session) {
+        //TODO test
+        //Acutally create and save contact
+        String contactName = (String) session.getAttribute("ContactName");
+        Contact contact = new Contact(contactName, " DE50100000000000000001");
+        DynamoDbClient.instance.putItem(Contact.TABLE_NAME, contact);
+        return getResponse(CONTACTS, "Okay! Der Kontakt " + contactName + " wurde angelegt.");
     }
 
     private SpeechletResponse deleteContact(Intent intent, Session session, boolean confirmed) {
@@ -198,6 +200,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
     private SpeechletResponse readContacts(Session session, int offset, int limit) {
         List<Contact> contactList = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
         List<Contact> contacts = new ArrayList<>(contactList);
+        LOGGER.info("Contacts: " + contacts);
 
         if (offset >= contacts.size()) {
             session.setAttribute(CONTACTS + ".offset", null);
