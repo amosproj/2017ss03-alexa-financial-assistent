@@ -3,6 +3,7 @@ package amosalexa;
 import amosalexa.server.Launcher;
 import amosalexa.services.financing.AffordabilityService;
 import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
@@ -11,6 +12,7 @@ import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
 import model.banking.StandingOrder;
+import model.banking.Transaction;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.junit.BeforeClass;
@@ -34,7 +36,6 @@ public class AmosAlexaSpeechletTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
     // FIXME: Get the current account AccountNumber from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
-    private static Integer savingsPlanTestStandingOrderId;
     private Session session;
     private String sessionId;
 
@@ -84,23 +85,23 @@ public class AmosAlexaSpeechletTest {
         }};
 
         newSession();
-        testIntentMatches("AffordProduct","ProductKeyword:Samsung",  StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", "Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
         testIntent("AMAZON.YesIntent", AffordabilityService.CART_ACK);
 
         newSession();
-        testIntentMatches("AffordProduct","ProductKeyword:Samsung",  StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", "Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
         testIntent("AMAZON.NoIntent", AffordabilityService.BYE);
 
         newSession();
-        testIntentMatches("AffordProduct","ProductKeyword:Samsung",  StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntent("AMAZON.NoIntent", AffordabilityService.BYE);
 
         newSession();
-        testIntentMatches("AffordProduct","ProductKeyword:Samsung",  StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
     }
@@ -216,6 +217,43 @@ public class AmosAlexaSpeechletTest {
     }
 
     @Test
+    public void contactTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        Date now = new Date();
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String todayDate = formatter.format(now);
+
+        TransactionAPI.createTransaction(1, "DE60100000000000000001",
+                "DE50100000000000000001", todayDate,
+                "Ueberweisung fuer Unit Test", null, "Sandra");
+        List<Transaction> allTransactions = Transaction.getTransactions("0000000001");
+        final Comparator<Transaction> comp = Comparator.comparingInt(t -> t.getTransactionId().intValue());
+        Transaction latestTransaction = allTransactions.stream().max(comp).get();
+        int latestTransactionId = latestTransaction.getTransactionId().intValue();
+        String latestTransactionRemitter = latestTransaction.getRemitter();
+
+        //LOGGER.info("Latest transaction id: " + latestTransactionId);
+        //LOGGER.info("Latest transaction remitter: " + latestTransactionRemitter);
+
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + latestTransactionId, "Moechtest du " + latestTransactionRemitter + " als " +
+                        "Kontakt speichern?");
+
+        testIntent(
+                "AMAZON.YesIntent",
+                "Okay! Der Kontakt Sandra wurde angelegt.");
+
+        /*
+        TODO
+        testIntent(
+                "ContactListInfoIntent",
+                "TO DO..");
+        */
+    }
+
+    @Test
     public void savingsPlanTest() throws Exception {
         newSession();
 
@@ -244,7 +282,6 @@ public class AmosAlexaSpeechletTest {
         final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
         int latestStandingOrderId = allStandingOrders.stream().max(comp).get().getStandingOrderId().intValue();
         LOGGER.info("Latest standing order ID: " + latestStandingOrderId);
-        savingsPlanTestStandingOrderId = latestStandingOrderId;
 
         // We need to start a new session here because the dialog ends after the YesIntent
         newSession();
