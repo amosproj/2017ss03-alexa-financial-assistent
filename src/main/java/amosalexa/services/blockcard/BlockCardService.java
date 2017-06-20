@@ -42,6 +42,11 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
         );
     }
 
+    /**
+     * Default value for cards
+     */
+    private static final String BLOCK_CARD = "Block card";
+
     private static final Logger log = LoggerFactory.getLogger(BlockCardService.class);
 
     /**
@@ -83,28 +88,21 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
 
                 // TODO: Lock card with number cardNumber
 
-                return getResponse("Karte " + cardNumberObj + " wurde gesperrt.", "");
+                return getResponse(BLOCK_CARD, "Karte " + cardNumberObj + " wurde gesperrt.");
             }
 
             return null;
         } else if (request.getIntent().getName().equals(NO_INTENT)) {
             session.setAttribute("BlockCardService.CardNumber", null);
-            return getResponse("Okay, tschüss.", "");
+            return getResponse(BLOCK_CARD, "Okay, tschüss.");
         } else if (request.getIntent().getName().equals(BLOCK_CARD_INTENT)) {
             String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
 
             if (bankCardNumber == null) {
-                String speechText = "Wie lautet die Nummber der Karte?";
-                String repromptText = "Sagen Sie auch die Nummer der Karte. Zum Beispiel: Sperre Karte 12345.";
-
-                return getResponse(speechText, repromptText);
+                return getAskResponse(BLOCK_CARD, "Wie lautet die Nummber der Karte?");
             } else {
                 session.setAttribute("BlockCardService.CardNumber", bankCardNumber);
-
-                String speechText = "Möchten Sie die Karte " + bankCardNumber + " wirklich sperren?";
-                String repromptText = "Bitte bestätigen Sie, indem Sie 'ja' sagen.";
-
-                return getAskResponse(speechText, repromptText);
+                return getAskResponse(BLOCK_CARD, "Möchten Sie die Karte " + bankCardNumber + " wirklich sperren?");
             }
         }
 

@@ -231,11 +231,11 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         if (isAskResponse) {
             response.append("Weitere Kontakte vorlesen?");
             session.setAttribute(CONTACTS + ".offset", offset + limit);
-            return getAskResponse(response.toString(), "");
+            return getAskResponse(CONTACTS, "");
         } else {
             response.append("Keine weiteren Kontakte.");
             session.setAttribute(CONTACTS + ".offset", null);
-            return getResponse(response.toString(), "");
+            return getResponse(CONTACTS, "");
         }
     }
 }
