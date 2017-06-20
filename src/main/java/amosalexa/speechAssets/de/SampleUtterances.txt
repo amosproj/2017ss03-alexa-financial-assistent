@@ -136,3 +136,10 @@ ContactDeleteIntent Lösche Kontakt {ContactID}
 
 TestEMailIntent Sende mir eine Test E-Mail
 TestEMailIntent Schicke mir eine TestE-Mail
+
+SavingsPlanChangeParameterIntent {SavingsPlanParameter}
+SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}
+SavingsPlanChangeParameterIntent Ändere die {SavingsPlanParameter}
+
+SavingsPlanNewIntent Neu
+SavingsPlanNewIntent Neu beginnen

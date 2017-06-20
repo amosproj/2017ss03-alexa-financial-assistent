@@ -92,6 +92,18 @@
       ]
     },
     {
+      "intent": "SavingsPlanChangeParameterIntent",
+      "slots": [
+        {
+          "name": "SavingsPlanParameter",
+          "type": "LIST_OF_SAVINGS_PLAN_PARAMETER"
+        }
+      ]
+    },
+    {
+      "intent": "SavingsPlanNewIntent"
+    },
+    {
       "intent": "StandingOrdersDeleteIntent",
       "slots": [
         {
