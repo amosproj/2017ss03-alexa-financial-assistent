@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -341,15 +342,21 @@ public class AmosAlexaSpeechletTest {
 
     @Test
     public void setBalanceLimitTest() throws Exception {
-        newSession();
-
-        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
-        testIntent("AMAZON.YesIntent", "Okay, dein Kontolimit wurde auf 100 Euro gesetzt.");
+        int randomNum = ThreadLocalRandom.current().nextInt(100, 200);
 
         newSession();
 
-        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:" + randomNum, "Möchtest du dein Kontolimit wirklich auf " + randomNum + " Euro setzen?");
+        testIntent("AMAZON.YesIntent", "Okay, dein Kontolimit wurde auf " + randomNum + " Euro gesetzt.");
+
+        newSession();
+
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:" + randomNum, "Möchtest du dein Kontolimit wirklich auf " + randomNum + " Euro setzen?");
         testIntent("AMAZON.NoIntent", "");
+
+        newSession();
+
+        testIntent("GetBalanceLimitIntent", "Dein aktuelles Kontolimit beträgt " + randomNum + " Euro.");
     }
 
     @Test
