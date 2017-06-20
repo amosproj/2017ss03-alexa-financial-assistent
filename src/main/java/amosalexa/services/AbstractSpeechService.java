@@ -14,6 +14,7 @@ public abstract class AbstractSpeechService {
 
     protected static final String YES_INTENT = "AMAZON.YesIntent";
     protected static final String NO_INTENT = "AMAZON.NoIntent";
+    protected static final String STOP_INTENT = "AMAZON.StopIntent";
     protected static final String HELP_INTENT = "AMAZON.HelpIntent";
 
     /**

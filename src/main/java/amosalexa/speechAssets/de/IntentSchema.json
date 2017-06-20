@@ -288,6 +288,9 @@
     },
     {
       "intent": "TestEMailIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
     }
   ]
 }
