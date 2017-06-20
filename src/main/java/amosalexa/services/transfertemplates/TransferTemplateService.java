@@ -79,7 +79,7 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 TransferTemplate transferTemplate = new TransferTemplate(templateId);
                 DynamoDbClient.instance.deleteItem(TransferTemplate.TABLE_NAME, transferTemplate);
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Vorlage wurde gelöscht.", "", false);
+                return getResponse("Vorlage wurde gelöscht.", "");
             }
 
             if (editTemplateId != null) {
@@ -89,14 +89,14 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 transferTemplate.setAmount(newAmount);
                 DynamoDbClient.instance.putItem(TransferTemplate.TABLE_NAME, transferTemplate);
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Vorlage wurde erfolgreich gespeichert.", "", false);
+                return getResponse("Vorlage wurde erfolgreich gespeichert.", "");
             }
         } else if (NO_INTENT.equals(intentName)) {
             if (session.getAttribute("TransferTemplateService.offset") != null ||
                     session.getAttribute("TransferTemplateService.delete") != null ||
                     session.getAttribute("TransferTemplateService.editTemplateId") != null ||
                     session.getAttribute("TransferTemplateService.newAmount") != null) {
-                return AmosAlexaSpeechlet.getSpeechletResponse("Okay, dann halt nicht. Tschüss!", "", false);
+                return getResponse("Okay, dann halt nicht. Tschüss!", "");
             }
         } else if (LIST_TRANSFER_TEMPLATES_INTENT.equals(intentName)) {
             return tellTemplates(session, 0, 3);
@@ -109,7 +109,7 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 int templateId = Integer.parseInt(templateIdStr);
                 session.setAttribute("TransferTemplateService.delete", templateId);
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Möchtest du Vorlage Nummer " + templateId + " wirklich löschen?", "", true);
+                return getAskResponse("Möchtest du Vorlage Nummer " + templateId + " wirklich löschen?", "");
             }
         } else if (EDIT_TRANSFER_TEMPLATE_INTENT.equals(intentName)) {
             String templateIdStr = request.getIntent().getSlot("TemplateID").getValue();
@@ -123,7 +123,7 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 TransferTemplate template = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, templateId, TransferTemplate::new);
 
                 if (template == null) {
-                    return AmosAlexaSpeechlet.getSpeechletResponse("Ich kann Vorlage " + templateId + " nicht finden.", "", false);
+                    return getResponse("Ich kann Vorlage " + templateId + " nicht finden.", "");
                 }
 
                 double newAmount = 0;
@@ -136,7 +136,7 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 session.setAttribute("TransferTemplateService.editTemplateId", templateId);
                 session.setAttribute("TransferTemplateService.newAmount", newAmount);
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Möchtest du den Betrag von Vorlage " + templateId + " von " + template.getAmount() + " auf " + newAmount + " ändern?", "", true);
+                return getAskResponse("Möchtest du den Betrag von Vorlage " + templateId + " von " + template.getAmount() + " auf " + newAmount + " ändern?", "");
             }
         }
 
@@ -149,7 +149,7 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
 
         if (offset >= templates.size()) {
             session.setAttribute("TransferTemplateService.offset", null);
-            return AmosAlexaSpeechlet.getSpeechletResponse("Keine weiteren Vorlagen.", "", false);
+            return getResponse("Keine weiteren Vorlagen.", "");
         }
 
         if (offset + limit >= templates.size()) {
@@ -184,12 +184,12 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
         if (isAskResponse) {
             response.append("Weitere Vorlagen vorlesen?");
             session.setAttribute("TransferTemplateService.offset", offset + limit);
+            return getAskResponse(response.toString(), "");
         } else {
             response.append("Keine weiteren Vorlagen.");
             session.setAttribute("TransferTemplateService.offset", null);
+            return getResponse(response.toString(), "");
         }
-
-        return AmosAlexaSpeechlet.getSpeechletResponse(response.toString(), "", isAskResponse);
     }
 
 }

@@ -83,13 +83,13 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
 
                 // TODO: Lock card with number cardNumber
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Karte " + cardNumberObj + " wurde gesperrt.", "", false);
+                return getResponse("Karte " + cardNumberObj + " wurde gesperrt.", "");
             }
 
             return null;
         } else if (request.getIntent().getName().equals(NO_INTENT)) {
             session.setAttribute("BlockCardService.CardNumber", null);
-            return AmosAlexaSpeechlet.getSpeechletResponse("Okay, tschüss.", "", false);
+            return getResponse("Okay, tschüss.", "");
         } else if (request.getIntent().getName().equals(BLOCK_CARD_INTENT)) {
             String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
 
@@ -97,14 +97,14 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
                 String speechText = "Wie lautet die Nummber der Karte?";
                 String repromptText = "Sagen Sie auch die Nummer der Karte. Zum Beispiel: Sperre Karte 12345.";
 
-                return AmosAlexaSpeechlet.getSpeechletResponse(speechText, repromptText, false);
+                return getResponse(speechText, repromptText);
             } else {
                 session.setAttribute("BlockCardService.CardNumber", bankCardNumber);
 
                 String speechText = "Möchten Sie die Karte " + bankCardNumber + " wirklich sperren?";
                 String repromptText = "Bitte bestätigen Sie, indem Sie 'ja' sagen.";
 
-                return AmosAlexaSpeechlet.getSpeechletResponse(speechText, repromptText, true);
+                return getAskResponse(speechText, repromptText);
             }
         }
 
