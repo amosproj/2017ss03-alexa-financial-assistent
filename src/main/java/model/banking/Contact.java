@@ -27,6 +27,10 @@ public class Contact implements Comparable<Contact>, DynamoDbStorable {
         this.createdAt = new Date();
     }
 
+    public Contact(Integer id) {
+        this.id = id;
+    }
+
     @Override
     public Map<String, AttributeValue> getDynamoDbItem() {
         Map<String, AttributeValue> map = new HashMap<>();

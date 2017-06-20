@@ -248,6 +248,15 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "slots": [
+        {
+          "name": "ContactID",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "ContactDeleteIntent"
     }
   ]
 }
