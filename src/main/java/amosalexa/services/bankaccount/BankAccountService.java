@@ -77,9 +77,9 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     /**
      * session attribute for transaction list indexe
      */
-
     private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index";
 
+            ;
     public BankAccountService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
@@ -112,7 +112,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      */
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
-        for(String intent : getHandledIntents()) {
+        for (String intent : getHandledIntents()) {
             speechletSubject.attachSpeechletObserver(this, intent);
         }
     }
@@ -163,7 +163,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      * @return SpeechletResponse to alexa
      */
     private SpeechletResponse handleTransactionSpeech() {
-        List<Transaction> transactions = Transaction.getTransactions(account);
+        List<Transaction> transactions = Transaction.getTransactions(account.getNumber());
 
         if (transactions == null || transactions.isEmpty()) {
             log.warn("Account: " + account.getNumber() + " has no transactions");
@@ -189,11 +189,12 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
 
     /**
      * returns a response with the next transaction in the list
+     *
      * @param i index at the current postion in the transaction list
      * @return speechletResponse
      */
     private SpeechletResponse getNextTransaction(int i) {
-        List<Transaction> transactions = Transaction.getTransactions(account);
+        List<Transaction> transactions = Transaction.getTransactions(account.getNumber());
         String transactionText = Transaction.getTransactionText(transactions.get(i));
         if (i - 1 < transactions.size()) {
             transactionText = transactionText + Transaction.getAskMoreTransactionText();

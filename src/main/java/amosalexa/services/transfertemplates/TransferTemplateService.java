@@ -9,6 +9,7 @@ import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import model.banking.TransferTemplate;
 
 import java.util.*;
 
@@ -38,6 +39,11 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 NO_INTENT
         );
     }
+
+    /**
+     * Default value for cards
+     */
+    private static final String TRANSFER_TEMPLATES = "Transfer templates";
 
     /**
      * ties the Speechlet Subject (Amos Alexa Speechlet) with an Speechlet Observer
@@ -78,24 +84,24 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 TransferTemplate transferTemplate = new TransferTemplate(templateId);
                 DynamoDbClient.instance.deleteItem(TransferTemplate.TABLE_NAME, transferTemplate);
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Vorlage wurde gelöscht.", "", false);
+                return getResponse(TRANSFER_TEMPLATES, "Vorlage wurde gelöscht.");
             }
 
             if (editTemplateId != null) {
                 Double newAmount = Double.parseDouble(session.getAttribute("TransferTemplateService.newAmount").toString());
 
-                TransferTemplate transferTemplate = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, editTemplateId, TransferTemplate.factory);
+                TransferTemplate transferTemplate = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, editTemplateId, TransferTemplate::new);
                 transferTemplate.setAmount(newAmount);
                 DynamoDbClient.instance.putItem(TransferTemplate.TABLE_NAME, transferTemplate);
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Vorlage wurde erfolgreich gespeichert.", "", false);
+                return getResponse(TRANSFER_TEMPLATES, "Vorlage wurde erfolgreich gespeichert.");
             }
         } else if (NO_INTENT.equals(intentName)) {
             if (session.getAttribute("TransferTemplateService.offset") != null ||
                     session.getAttribute("TransferTemplateService.delete") != null ||
                     session.getAttribute("TransferTemplateService.editTemplateId") != null ||
                     session.getAttribute("TransferTemplateService.newAmount") != null) {
-                return AmosAlexaSpeechlet.getSpeechletResponse("Okay, dann halt nicht. Tschüss!", "", false);
+                return getResponse(TRANSFER_TEMPLATES, "Okay, dann halt nicht. Tschüss!");
             }
         } else if (LIST_TRANSFER_TEMPLATES_INTENT.equals(intentName)) {
             return tellTemplates(session, 0, 3);
@@ -108,7 +114,7 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 int templateId = Integer.parseInt(templateIdStr);
                 session.setAttribute("TransferTemplateService.delete", templateId);
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Möchtest du Vorlage Nummer " + templateId + " wirklich löschen?", "", true);
+                return getAskResponse(TRANSFER_TEMPLATES, "Möchtest du Vorlage Nummer " + templateId + " wirklich löschen?");
             }
         } else if (EDIT_TRANSFER_TEMPLATE_INTENT.equals(intentName)) {
             String templateIdStr = request.getIntent().getSlot("TemplateID").getValue();
@@ -119,10 +125,10 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
             } else {
                 int templateId = Integer.parseInt(templateIdStr);
 
-                TransferTemplate template = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, templateId, TransferTemplate.factory);
+                TransferTemplate template = (TransferTemplate) DynamoDbClient.instance.getItem(TransferTemplate.TABLE_NAME, templateId, TransferTemplate::new);
 
                 if (template == null) {
-                    return AmosAlexaSpeechlet.getSpeechletResponse("Ich kann Vorlage " + templateId + " nicht finden.", "", false);
+                    return getResponse(TRANSFER_TEMPLATES, "Ich kann Vorlage " + templateId + " nicht finden.");
                 }
 
                 double newAmount = 0;
@@ -135,53 +141,60 @@ public class TransferTemplateService extends AbstractSpeechService implements Sp
                 session.setAttribute("TransferTemplateService.editTemplateId", templateId);
                 session.setAttribute("TransferTemplateService.newAmount", newAmount);
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Möchtest du den Betrag von Vorlage " + templateId + " von " + template.getAmount() + " auf " + newAmount + " ändern?", "", true);
+                return getAskResponse(TRANSFER_TEMPLATES, "Möchtest du den Betrag von Vorlage " + templateId + " von " + template.getAmount() + " auf " + newAmount + " ändern?");
             }
         }
 
         return null;
     }
 
-    SpeechletResponse tellTemplates(Session session, int offset, int limit) {
-        List<TransferTemplate> templates = DynamoDbClient.instance.getItems("transfer_template", TransferTemplate.factory);
-        List<TransferTemplate> transferTemplates = new ArrayList<TransferTemplate>(templates);
+    private SpeechletResponse tellTemplates(Session session, int offset, int limit) {
+        List<TransferTemplate> templateList = DynamoDbClient.instance.getItems(TransferTemplate.TABLE_NAME, TransferTemplate::new);
+        List<TransferTemplate> templates = new ArrayList<>(templateList);
 
-
-        if (offset >= transferTemplates.size()) {
+        if (offset >= templates.size()) {
             session.setAttribute("TransferTemplateService.offset", null);
-            return AmosAlexaSpeechlet.getSpeechletResponse("Keine weiteren Vorlagen.", "", false);
+            return getResponse(TRANSFER_TEMPLATES, "Keine weiteren Vorlagen.");
         }
 
-        if (offset + limit >= transferTemplates.size()) {
-            limit = transferTemplates.size() - offset;
+        if (offset + limit >= templates.size()) {
+            limit = templates.size() - offset;
         }
 
-        Collections.sort(transferTemplates);
+        Collections.sort(templates);
 
         StringBuilder response = new StringBuilder();
 
         for (int i = offset; i < offset + limit; i++) {
-            TransferTemplate template = transferTemplates.get(i);
+            TransferTemplate template = templates.get(i);
 
             Calendar calendar = new GregorianCalendar();
             calendar.setTime(template.getCreatedAt());
             String dateFormatted = String.format("01.%02d.%d", calendar.get(Calendar.MONTH) + 2, calendar.get(Calendar.YEAR));
 
-            response.append("Vorlage " + template.getId() + " vom " + dateFormatted + ": ");
-            response.append("Überweise " + template.getAmount() + " Euro an " + template.getTarget() + ". ");
+            response.append("Vorlage ")
+                    .append(template.getId())
+                    .append(" vom ")
+                    .append(dateFormatted)
+                    .append(": ");
+            response.append("Überweise ")
+                    .append(template.getAmount())
+                    .append(" Euro an ")
+                    .append(template.getTarget())
+                    .append(". ");
         }
 
-        boolean isAskResponse = transferTemplates.size() > offset + limit;
+        boolean isAskResponse = templates.size() > offset + limit;
 
         if (isAskResponse) {
             response.append("Weitere Vorlagen vorlesen?");
             session.setAttribute("TransferTemplateService.offset", offset + limit);
+            return getAskResponse(TRANSFER_TEMPLATES, response.toString());
         } else {
             response.append("Keine weiteren Vorlagen.");
             session.setAttribute("TransferTemplateService.offset", null);
+            return getResponse(TRANSFER_TEMPLATES, response.toString());
         }
-
-        return AmosAlexaSpeechlet.getSpeechletResponse(response.toString(), "", isAskResponse);
     }
 
 }

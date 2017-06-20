@@ -4,7 +4,6 @@ import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
 import amosalexa.dialogsystem.dialogs.ReplacementCardDialog;
 import amosalexa.dialogsystem.dialogs.TestListDialog;
-import amosalexa.services.bankaccount.banktransfer.BankTransferDialog;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
@@ -20,14 +19,12 @@ public class DialogResponseManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
 
-
     private static DialogResponseManager instance;
 
     private DialogResponseManager() {
         // TODO: Registering new DialogHandlers should happen automatically, not in this class
         registerDialogHandler(new TestListDialog());
         registerDialogHandler(new ReplacementCardDialog());
-        registerDialogHandler(new BankTransferDialog());
 
         // TODO: Story16: Register PriceQuery Service
         //registerDialogHandler(new PriceQueryService(amosAlexaSpeechlet));

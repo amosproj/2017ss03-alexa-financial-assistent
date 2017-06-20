@@ -42,6 +42,11 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
         );
     }
 
+    /**
+     * Default value for cards
+     */
+    private static final String BLOCK_CARD = "Block card";
+
     private static final Logger log = LoggerFactory.getLogger(BlockCardService.class);
 
     /**
@@ -83,28 +88,21 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
 
                 // TODO: Lock card with number cardNumber
 
-                return AmosAlexaSpeechlet.getSpeechletResponse("Karte " + cardNumberObj + " wurde gesperrt.", "", false);
+                return getResponse(BLOCK_CARD, "Karte " + cardNumberObj + " wurde gesperrt.");
             }
 
             return null;
         } else if (request.getIntent().getName().equals(NO_INTENT)) {
             session.setAttribute("BlockCardService.CardNumber", null);
-            return AmosAlexaSpeechlet.getSpeechletResponse("Okay, tschüss.", "", false);
+            return getResponse(BLOCK_CARD, "Okay, tschüss.");
         } else if (request.getIntent().getName().equals(BLOCK_CARD_INTENT)) {
             String bankCardNumber = request.getIntent().getSlot("BankCardNumber").getValue();
 
             if (bankCardNumber == null) {
-                String speechText = "Wie lautet die Nummber der Karte?";
-                String repromptText = "Sagen Sie auch die Nummer der Karte. Zum Beispiel: Sperre Karte 12345.";
-
-                return AmosAlexaSpeechlet.getSpeechletResponse(speechText, repromptText, false);
+                return getAskResponse(BLOCK_CARD, "Wie lautet die Nummber der Karte?");
             } else {
                 session.setAttribute("BlockCardService.CardNumber", bankCardNumber);
-
-                String speechText = "Möchten Sie die Karte " + bankCardNumber + " wirklich sperren?";
-                String repromptText = "Bitte bestätigen Sie, indem Sie 'ja' sagen.";
-
-                return AmosAlexaSpeechlet.getSpeechletResponse(speechText, repromptText, true);
+                return getAskResponse(BLOCK_CARD, "Möchten Sie die Karte " + bankCardNumber + " wirklich sperren?");
             }
         }
 

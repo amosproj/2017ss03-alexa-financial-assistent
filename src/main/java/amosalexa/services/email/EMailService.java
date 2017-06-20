@@ -1,6 +1,5 @@
 package amosalexa.services.email;
 
-import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
@@ -15,51 +14,51 @@ import java.util.List;
 
 public class EMailService extends AbstractSpeechService implements SpeechService {
 
-	@Override
-	public String getDialogName() {
-		return this.getClass().getName();
-	}
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
 
-	@Override
-	public List<String> getStartIntents() {
-		return Arrays.asList(
-				TEST_EMAIL_INTENT
-		);
-	}
+    @Override
+    public List<String> getStartIntents() {
+        return Arrays.asList(
+                TEST_EMAIL_INTENT
+        );
+    }
 
-	@Override
-	public List<String> getHandledIntents() {
-		return Arrays.asList(
-				TEST_EMAIL_INTENT
-		);
-	}
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                TEST_EMAIL_INTENT
+        );
+    }
 
-	@Override
-	public void subscribe(SpeechletSubject speechletSubject) {
-		for(String intent : getHandledIntents()) {
-			speechletSubject.attachSpeechletObserver(this, intent);
-		}
-	}
+    @Override
+    public void subscribe(SpeechletSubject speechletSubject) {
+        for (String intent : getHandledIntents()) {
+            speechletSubject.attachSpeechletObserver(this, intent);
+        }
+    }
 
-	public EMailService(SpeechletSubject speechletSubject) {
-		subscribe(speechletSubject);
-	}
+    public EMailService(SpeechletSubject speechletSubject) {
+        subscribe(speechletSubject);
+    }
 
-	private static final String TEST_EMAIL_INTENT = "TestEMailIntent";
+    private static final String TEST_EMAIL_INTENT = "TestEMailIntent";
 
-	@Override
-	public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
-		IntentRequest request = requestEnvelope.getRequest();
+    @Override
+    public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
+        IntentRequest request = requestEnvelope.getRequest();
 
-		if (request.getIntent().getName().equals(TEST_EMAIL_INTENT)) {
-			String answer = "Okay, ich habe dir eine Test-E-Mail gesendet.";
-			if(!EMailClient.SendEMail("Test-Mail", "Hello, World! :)")) {
-				answer = "Leider konnte die E-Mail nicht gesendet werden.";
-			}
-			return AmosAlexaSpeechlet.getSpeechletResponse(answer, "", false);
-		}
+        if (request.getIntent().getName().equals(TEST_EMAIL_INTENT)) {
+            String answer = "Okay, ich habe dir eine Test-E-Mail gesendet.";
+            if (!EMailClient.SendEMail("Test-Mail", "Hello, World! :)")) {
+                answer = "Leider konnte die E-Mail nicht gesendet werden.";
+            }
+            return getResponse("E-Mail gesendet", answer);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
 }

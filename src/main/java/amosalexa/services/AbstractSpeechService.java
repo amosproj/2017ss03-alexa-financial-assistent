@@ -7,6 +7,10 @@ import com.amazon.speech.ui.*;
 
 public abstract class AbstractSpeechService {
 
+    /**
+     * To hold session dialog context
+     */
+    protected static final String CONTEXT = "DIALOG_CONTEXT";
 
     protected static final String YES_INTENT = "AMAZON.YesIntent";
     protected static final String NO_INTENT = "AMAZON.NoIntent";
@@ -110,11 +114,12 @@ public abstract class AbstractSpeechService {
     /**
      * response a ssml speech text (further information:
      * https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference)
+     *
      * @param cardTitle card title
-     * @param ssmlText string in ssml format
+     * @param ssmlText  string in ssml format
      * @return SpeechletResponse
      */
-    protected SpeechletResponse getSSMLResponse(String cardTitle, String ssmlText){
+    protected SpeechletResponse getSSMLResponse(String cardTitle, String ssmlText) {
         SimpleCard card = getSimpleCard(cardTitle, ssmlText);
         SsmlOutputSpeech ssmlOutputSpeech = getSSMLOutputSpeech(ssmlText);
         return SpeechletResponse.newTellResponse(ssmlOutputSpeech, card);
@@ -123,8 +128,8 @@ public abstract class AbstractSpeechService {
     /**
      * Helper method for retrieving an Ask response with a simple card and reprompt included.
      *
-     * @param cardTitle  Title of the card that you want displayed.
-     * @param speechText speech text that will be spoken to the user.
+     * @param cardTitle    Title of the card that you want displayed.
+     * @param speechText   speech text that will be spoken to the user.
      * @param repromptText
      * @return the resulting card and speech text.
      */

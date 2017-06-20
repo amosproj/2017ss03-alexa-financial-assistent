@@ -128,5 +128,11 @@ EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmoun
 
 BankTransferIntent Überweise {Amount} Euro an {Name}
 
+ContactListInfoIntent Was sind meine Kontakte
+ContactListInfoIntent Kontaktliste
+ContactAddIntent Speichere Details von Transaktion {TransactionNumber} als Kontakt
+ContactDeleteIntent Lösche Kontakt Nummer {ContactID}
+ContactDeleteIntent Lösche Kontakt {ContactID}
+
 TestEMailIntent Sende mir eine Test E-Mail
 TestEMailIntent Schicke mir eine TestE-Mail

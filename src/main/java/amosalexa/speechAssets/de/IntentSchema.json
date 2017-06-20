@@ -241,6 +241,27 @@
       ]
     },
     {
+      "intent": "ContactListInfoIntent"
+    },
+    {
+      "intent": "ContactAddIntent",
+      "slots": [
+        {
+          "name": "TransactionNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "slots": [
+        {
+          "name": "ContactID",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "ContactDeleteIntent"
+    },
+    {
       "intent": "AffordProduct",
       "slots": [
         {
