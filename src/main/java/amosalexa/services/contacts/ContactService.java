@@ -204,7 +204,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
 
         if (offset >= contacts.size()) {
             session.setAttribute(CONTACTS + ".offset", null);
-            return getResponse("Keine weiteren Kontakte.", "");
+            return getResponse(CONTACTS, "Keine weiteren Kontakte.");
         }
 
         if (offset + limit >= contacts.size()) {
@@ -233,11 +233,11 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         if (isAskResponse) {
             response.append("Weitere Kontakte vorlesen?");
             session.setAttribute(CONTACTS + ".offset", offset + limit);
-            return getAskResponse(CONTACTS, "");
+            return getAskResponse(CONTACTS, response.toString());
         } else {
             response.append("Keine weiteren Kontakte.");
             session.setAttribute(CONTACTS + ".offset", null);
-            return getResponse(CONTACTS, "");
+            return getResponse(CONTACTS, response.toString());
         }
     }
 }
