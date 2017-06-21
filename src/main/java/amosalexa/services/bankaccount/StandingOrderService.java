@@ -30,7 +30,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
      * Default value for cards
      */
     private static final String STANDING_ORDERS = "Daueraufträge";
-    
+
     @Override
     public String getDialogName() {
         return this.getClass().getName();
@@ -507,6 +507,129 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         SsmlOutputSpeech speech = new SsmlOutputSpeech();
         speech.setSsml(answer);
 
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartUpdateStandingOrderConfirmation(Intent intent, Session session) {
+        LOGGER.info("SmartStandingOrders called.");
+
+        Map<String, Slot> slots = intent.getSlots();
+
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
+
+        standingOrders = new ArrayList<>(standingOrdersCollection);
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Daueraufträge");
+
+        Slot payeeSlot = slots.get("Payee");
+        String payee = (payeeSlot == null ? null : payeeSlot.getValue());
+
+        Slot payeeSecondNameSlot = slots.get("PayeeSecondName");
+        String payeeSecondName = (payeeSecondNameSlot == null ? null : payeeSecondNameSlot.getValue());
+
+        Slot amountSlot = slots.get("orderAmount");
+        String amount = (amountSlot == null ? null : amountSlot.getValue());
+
+        for (int i = 0; i < standingOrders.size(); i++) {
+            if (standingOrders.get(i).getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
+                // Create the plain text output
+                PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " von " + amount + " euro " +
+                                "existiert schon. Willst du den aktualisieren");
+
+                session.setAttribute("StandingOrderToModify", standingOrders.get(i).getStandingOrderId());
+                session.setAttribute("NewAmount", amount);
+                session.setAttribute("Payee", payee);
+                session.setAttribute("PayeeSecondName", payeeSecondName);
+
+                // Create reprompt
+                Reprompt reprompt = new Reprompt();
+                reprompt.setOutputSpeech(speech);
+
+                return SpeechletResponse.newAskResponse(speech, reprompt);
+            }
+        }
+
+        //updating existing standing order
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Soll ich den Betrag von Dauerauftrag Nummer wirklich auf Euro aendern?");
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartUpdateStandingOrderResponse(Session session) {
+        LOGGER.info("SmartStandingOrders Confirmation called.");
+        int standingOrderToModify = (int) session.getAttribute("StandingOrderToModify");
+        String newAmount = (String) session.getAttribute("NewAmount");
+
+        StandingOrder standingOrder = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderToModify);
+
+        standingOrder.setAmount(Integer.parseInt(newAmount));
+
+        AccountAPI.updateStandingOrder(ACCOUNT_NUMBER, standingOrder);
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Der Dauerauftrag Nummer " + standingOrderToModify +  " wurde erfolgreich aktualisiert ");
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        //delete session attributes
+        session.removeAttribute("SmartCreateStandingOrderIntent");
+        session.removeAttribute("StandingOrderToModify");
+        session.removeAttribute("NewAmount");
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartCreateStandingOrderResponse(Session session) {
+        LOGGER.info("SmartStandingOrders create called.");
+        int standingOrderToModify = (int) session.getAttribute("StandingOrderToModify");
+        String newAmount = (String) session.getAttribute("NewAmount");
+
+        StandingOrder oldStandingOrder = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderToModify);
+
+        StandingOrder standingOrder = new StandingOrder();
+        standingOrder.setAmount(Integer.parseInt(newAmount));
+        standingOrder.setDescription("description");
+        standingOrder.setDestinationAccount(oldStandingOrder.getDestinationAccount());
+        standingOrder.setExecutionRate(oldStandingOrder.getExecutionRate());
+        standingOrder.setFirstExecution(oldStandingOrder.getFirstExecution());
+        standingOrder.setPayee(oldStandingOrder.getPayee());
+        standingOrder.setSourceAccount(oldStandingOrder.getSourceAccount());
+        standingOrder.setStatus(oldStandingOrder.getStatus());
+
+        AccountAPI.createStandingOrderForAccount(ACCOUNT_NUMBER, standingOrder);
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Der neue Dauerauftrag für " + " wurde erfolgreich erzeugt");
         // Create reprompt
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
