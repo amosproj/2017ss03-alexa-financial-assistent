@@ -245,7 +245,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             text.append(DESIRE_ASK);
             setDialogState("buy?");
 
-            return getAskResponse(CARD, text.toString());
+            return getSSMLAskResponse(CARD, text.toString(), SEARCH_ASK);
         }
 
         log.debug("Dialog State: no keyword");
