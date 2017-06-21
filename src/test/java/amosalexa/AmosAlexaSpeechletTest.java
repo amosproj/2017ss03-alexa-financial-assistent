@@ -326,6 +326,7 @@ public class AmosAlexaSpeechletTest {
 
         if (response.equals("Es wurden keine Kredit- oder EC-Karten gefunden.")) {
             //Fallback
+            //TODO This case is trivial. We usually shouldn´t come into this case. Maybe add cards before.
             return;
         }
 

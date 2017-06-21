@@ -30,7 +30,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
      * Default value for cards
      */
     private static final String STANDING_ORDERS = "Daueraufträge";
-    
+
     @Override
     public String getDialogName() {
         return this.getClass().getName();
@@ -42,7 +42,8 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
                 STANDING_ORDERS_INFO_INTENT,
                 STANDING_ORDERS_DELETE_INTENT,
                 STANDING_ORDERS_MODIFY_INTENT,
-                STANDING_ORDERS_KEYWORD_INTENT
+                STANDING_ORDERS_KEYWORD_INTENT,
+                STANDING_ORDERS_SMART_INTENT
         );
     }
 
@@ -53,6 +54,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
                 STANDING_ORDERS_DELETE_INTENT,
                 STANDING_ORDERS_MODIFY_INTENT,
                 STANDING_ORDERS_KEYWORD_INTENT,
+                STANDING_ORDERS_SMART_INTENT,
                 YES_INTENT,
                 NO_INTENT
         );
@@ -61,7 +63,8 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
     private static final String STANDING_ORDERS_INFO_INTENT = "StandingOrdersInfoIntent";
     private static final String STANDING_ORDERS_DELETE_INTENT = "StandingOrdersDeleteIntent";
     private static final String STANDING_ORDERS_MODIFY_INTENT = "StandingOrdersModifyIntent";
-    private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrdersKeywordIntent";
+    private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrderKeyword";
+    private static final String STANDING_ORDERS_SMART_INTENT = "StandingOrderSmartIntent";
 
     // FIXME: Get the current account number from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
@@ -114,6 +117,14 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "StandingOrderKeyword");
             return getStandingOrdersInfoForKeyword(intent, session);
+        } else if (STANDING_ORDERS_SMART_INTENT.equals(intentName) && session.getAttribute("StandingOrderToModify") == null) {
+            LOGGER.info(getClass().toString() + " Intent started: " + intentName);
+            session.setAttribute(CONTEXT, "StandingOrderSmartIntent");
+            return smartUpdateStandingOrderConfirmation(intent, session);
+        } else if (YES_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderSmartIntent"))) {
+            return smartUpdateStandingOrderResponse(session);
+        } else if (dialogContext != null && (dialogContext.equals("StandingOrderSmartIntent")) && session.getAttribute("StandingOrderToModify") != null) {
+            return  smartCreateStandingOrderResponse(session);
         } else if (YES_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
         } else if (YES_INTENT.equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
@@ -507,6 +518,133 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         SsmlOutputSpeech speech = new SsmlOutputSpeech();
         speech.setSsml(answer);
 
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartUpdateStandingOrderConfirmation(Intent intent, Session session) {
+        LOGGER.info("SmartStandingOrders called.");
+
+        Map<String, Slot> slots = intent.getSlots();
+
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
+
+        standingOrders = new ArrayList<>(standingOrdersCollection);
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Daueraufträge");
+
+        Slot payeeSlot = slots.get("Payee");
+        String payee = (payeeSlot == null ? null : payeeSlot.getValue());
+
+        Slot payeeSecondNameSlot = slots.get("PayeeSecondName");
+        String payeeSecondName = (payeeSecondNameSlot == null ? null : payeeSecondNameSlot.getValue());
+
+        Slot amountSlot = slots.get("orderAmount");
+        String amount = (amountSlot == null ? null : amountSlot.getValue());
+
+        session.setAttribute("NewAmount", amount);
+        session.setAttribute("Payee", payee);
+        session.setAttribute("PayeeSecondName", payeeSecondName);
+
+        for (int i = 0; i < standingOrders.size(); i++) {
+            if (standingOrders.get(i).getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
+                // Create the plain text output
+                PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " über " + standingOrders.get(i).getAmount() +
+                        " Euro existiert schon. Möchtest du diesen aktualisieren");
+
+                session.setAttribute("StandingOrderToModify", standingOrders.get(i).getStandingOrderId());
+
+                // Create reprompt
+                Reprompt reprompt = new Reprompt();
+                reprompt.setOutputSpeech(speech);
+
+                return SpeechletResponse.newAskResponse(speech, reprompt);
+            }
+        }
+
+        //updating existing standing order
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Soll ich den Dauerauftrag für " + payee + " " + payeeSecondName + " über " +
+                        amount + " Euro wirklich einrichten");
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartUpdateStandingOrderResponse(Session session) {
+        LOGGER.info("SmartStandingOrders Confirmation called.");
+        int standingOrderToModify = (int) session.getAttribute("StandingOrderToModify");
+        String newAmount = (String) session.getAttribute("NewAmount");
+
+        StandingOrder standingOrder = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderToModify);
+
+        standingOrder.setAmount(Integer.parseInt(newAmount));
+
+        AccountAPI.updateStandingOrder(ACCOUNT_NUMBER, standingOrder);
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Der Dauerauftrag Nummer " + standingOrderToModify +
+                "für " + standingOrder.getPayee() + " über " + newAmount + " wurde erfolgreich aktualisiert ");
+        // Create reprompt
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        //delete session attributes
+        session.removeAttribute("SmartCreateStandingOrderIntent");
+        session.removeAttribute("StandingOrderToModify");
+        session.removeAttribute("NewAmount");
+
+        return SpeechletResponse.newAskResponse(speech, reprompt);
+    }
+
+    /**
+     * Creates a {@code SpeechletResponse} for the standing orders intent.
+     *
+     * @return SpeechletResponse spoken and visual response for the given intent
+     */
+    private SpeechletResponse smartCreateStandingOrderResponse(Session session) {
+        LOGGER.info("SmartStandingOrders create called.");
+        int standingOrderToModify = (int) session.getAttribute("StandingOrderToModify");
+        String newAmount = (String) session.getAttribute("NewAmount");
+
+        StandingOrder oldStandingOrder = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderToModify);
+
+        StandingOrder standingOrder = new StandingOrder();
+        standingOrder.setAmount(Integer.parseInt(newAmount));
+        standingOrder.setDescription("description");
+        standingOrder.setDestinationAccount(oldStandingOrder.getDestinationAccount());
+        standingOrder.setExecutionRate(oldStandingOrder.getExecutionRate());
+        standingOrder.setFirstExecution(oldStandingOrder.getFirstExecution());
+        standingOrder.setPayee(oldStandingOrder.getPayee());
+        standingOrder.setSourceAccount(oldStandingOrder.getSourceAccount());
+        standingOrder.setStatus(oldStandingOrder.getStatus());
+
+        AccountAPI.createStandingOrderForAccount(ACCOUNT_NUMBER, standingOrder);
+
+        // Create the plain text output
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText("Der neue Dauerauftrag für " + oldStandingOrder.getPayee() + "über " + newAmount +
+                " wurde erfolgreich eingerichtet");
         // Create reprompt
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
