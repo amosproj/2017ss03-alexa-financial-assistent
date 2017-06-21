@@ -1,4 +1,4 @@
-package api;
+package api.aws;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 

@@ -1,5 +1,7 @@
-package amosalexa.dialogsystem.dialogs.banktransfer;
+package amosalexa.services.bankaccount;
 
+//TODO What is this class for? Is this a model class? Then move to {@code model.banking} package
+//TODO Seems to overlap with {@code Account} class
 public class BankAccount {
     private String namePerson;
     private String accountNumber;

@@ -1,7 +1,7 @@
-package amosalexa.services.transfertemplates;
+package model.banking;
 
-import api.DynamoDbClient;
-import api.DynamoDbStorable;
+import api.aws.DynamoDbClient;
+import api.aws.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
 import java.util.Date;
@@ -14,10 +14,9 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
     protected double amount;
     protected Date createdAt;
 
-    public static Factory factory = (Factory<TransferTemplate>) TransferTemplate::new;
     public static final String TABLE_NAME = "transfer_template";
 
-    private TransferTemplate() {
+    public TransferTemplate() {
     }
 
     private TransferTemplate(String target, double amount) {
@@ -79,13 +78,7 @@ public class TransferTemplate implements Comparable<TransferTemplate>, DynamoDbS
 
     @Override
     public int compareTo(TransferTemplate o) {
-        if (id > o.id) {
-            return 1;
-        }
-        if (id < o.id) {
-            return -1;
-        }
-        return 0;
+        return Integer.compare(id, o.id);
     }
 
     @Override

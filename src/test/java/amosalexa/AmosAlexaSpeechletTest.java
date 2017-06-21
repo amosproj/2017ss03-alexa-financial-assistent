@@ -1,7 +1,10 @@
 package amosalexa;
 
 import amosalexa.server.Launcher;
+import amosalexa.services.financing.AffordabilityService;
+import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
@@ -9,7 +12,9 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
+import model.banking.Contact;
 import model.banking.StandingOrder;
+import model.banking.Transaction;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.junit.BeforeClass;
@@ -22,6 +27,7 @@ import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,9 +36,8 @@ import static org.junit.Assert.*;
 public class AmosAlexaSpeechletTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
-    // FIXME: Get the current account number from the session
+    // FIXME: Get the current account AccountNumber from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
-    private static Integer savingsPlanTestStandingOrderId;
     private Session session;
     private String sessionId;
 
@@ -51,6 +56,7 @@ public class AmosAlexaSpeechletTest {
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
     }
 
+
     @Test
     public void bankContactTelephoneNumberTest() throws Exception {
         newSession();
@@ -59,9 +65,47 @@ public class AmosAlexaSpeechletTest {
         Launcher.server = new Server();
         Launcher.server.start();
 
-        testIntentMatches("BankTelephone","Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
+        testIntentMatches("BankTelephone", "Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
 
         Launcher.server.stop();
+    }
+
+    @Test
+    public void affordabilityTest() throws Exception {
+
+        // sometimes there is a amazon api problem - nothing we could handle -- comment out test if failing continues
+
+        ArrayList<String> buyAskAnswers = new ArrayList<String>() {{
+            add("Produkt a (.*) kostet (.*) Produkt b (.*) kostet (.*) Produkt c (.*) kostet (.*) Möchtest du ein Produkt kaufen");
+            add("Ein Fehler ist aufgetreten. " + AffordabilityService.NO_RESULTS);
+            add("Ein Fehler ist aufgetreten. " + AffordabilityService.TOO_FEW_RESULTS);
+        }};
+
+        ArrayList<String> productSelectionAskAnswers = new ArrayList<String>() {{
+            add(AffordabilityService.SELECTION_ASK);
+            add(AffordabilityService.ERROR);
+        }};
+
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:a", "Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
+        testIntent("AMAZON.YesIntent", AffordabilityService.CART_ACK);
+
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:a", "Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
+        testIntent("AMAZON.NoIntent", AffordabilityService.BYE);
+
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
+        testIntent("AMAZON.NoIntent", AffordabilityService.BYE);
+
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
     }
 
     @Test
@@ -73,7 +117,7 @@ public class AmosAlexaSpeechletTest {
 
         newSession();
 
-        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Allersberger Str. 64, 90461 Nürnberg, Germany");
+        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Lorenzer Pl. 12, 90402 Nürnberg, Germany");
         testIntentMatches("BankAddress", "BankNameSlots:Deutsche Bank", "Deutsche Bank Filiale hat die Adresse: Landgrabenstraße 144, 90459 Nürnberg, Germany");
 
         Launcher.server.stop();
@@ -147,14 +191,11 @@ public class AmosAlexaSpeechletTest {
     @Test
     public void bankTransferIntentTest() throws Throwable {
         newSession();
-
-        testIntentMatches("BankTransferIntent", "name:anne", "amount:2",
+        testIntentMatches("BankTransferIntent", "Name:anne", "Amount:2",
                 "Aktuell betraegt dein Kontostand (.*) Euro\\. Bist du sicher, dass du 2 Euro an anne ueberweisen willst\\?");
 
         testIntentMatches("AMAZON.YesIntent",
                 "Ok, (.*) Euro wurden an anne ueberwiesen\\. Dein neuer Kontostand betraegt (.*) Euro\\.");
-
-
     }
 
     @Test
@@ -175,6 +216,58 @@ public class AmosAlexaSpeechletTest {
                 "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
         testIntentMatches(
                 "AMAZON.NoIntent", "Okay, tschuess!");
+    }
+
+    @Test
+    public void contactTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        //Get today´s date in the right format
+        Date now = new Date();
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String todayDate = formatter.format(now);
+
+        //Create a transaction that we can use for ContactAddIntent (ingoing transaction)
+        Transaction transaction = TransactionAPI.createTransaction(1, "DE60100000000000000001",
+                "DE50100000000000000001", todayDate,
+                "Ueberweisung fuer Unit Test", null, "Sandra");
+        int transactionId = transaction.getTransactionId().intValue();
+        String transactionRemitter = transaction.getRemitter();
+
+        LOGGER.info("Latest transaction id: " + transactionId);
+        LOGGER.info("Latest transaction remitter: " + transactionRemitter);
+
+        //Test add contact
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId, "Moechtest du " + transactionRemitter + " als " +
+                        "Kontakt speichern?");
+        testIntent(
+                "AMAZON.YesIntent",
+                "Okay! Der Kontakt Sandra wurde angelegt.");
+
+        //Get the contact that we just created by searching for the contact with highest id
+        List<Contact> allContacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        final Comparator<Contact> comp2 = Comparator.comparingInt(c -> c.getId());
+        Contact latestContact = allContacts.stream().max(comp2).get();
+        LOGGER.info("Contact: " + latestContact.getName());
+        String latestContactId = String.valueOf(latestContact.getId());
+
+        //Test delete contact. Therefore delete the contact that we just created.
+        testIntent(
+                "ContactDeleteIntent",
+                "ContactID:" + latestContactId, "Moechtest du Kontakt Nummer " + latestContactId + " wirklich " +
+                        "loeschen?");
+        testIntent(
+                "AMAZON.YesIntent",
+                "Kontakt wurde geloescht.");
+
+        /*
+        TODO
+        testIntent(
+                "ContactListInfoIntent",
+                "TO DO..");
+        */
     }
 
     @Test
@@ -206,7 +299,6 @@ public class AmosAlexaSpeechletTest {
         final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
         int latestStandingOrderId = allStandingOrders.stream().max(comp).get().getStandingOrderId().intValue();
         LOGGER.info("Latest standing order ID: " + latestStandingOrderId);
-        savingsPlanTestStandingOrderId = latestStandingOrderId;
 
         // We need to start a new session here because the dialog ends after the YesIntent
         newSession();
@@ -234,6 +326,7 @@ public class AmosAlexaSpeechletTest {
 
         if (response.equals("Es wurden keine Kredit- oder EC-Karten gefunden.")) {
             //Fallback
+            //TODO This case is trivial. We usually shouldn´t come into this case. Maybe add cards before.
             return;
         }
 
@@ -301,15 +394,21 @@ public class AmosAlexaSpeechletTest {
 
     @Test
     public void setBalanceLimitTest() throws Exception {
-        newSession();
-
-        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
-        testIntent("AMAZON.YesIntent", "Okay, dein Kontolimit wurde auf 100 Euro gesetzt.");
+        int randomNum = ThreadLocalRandom.current().nextInt(100, 200);
 
         newSession();
 
-        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:" + randomNum, "Möchtest du dein Kontolimit wirklich auf " + randomNum + " Euro setzen?");
+        testIntent("AMAZON.YesIntent", "Okay, dein Kontolimit wurde auf " + randomNum + " Euro gesetzt.");
+
+        newSession();
+
+        testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:" + randomNum, "Möchtest du dein Kontolimit wirklich auf " + randomNum + " Euro setzen?");
         testIntent("AMAZON.NoIntent", "");
+
+        newSession();
+
+        testIntent("GetBalanceLimitIntent", "Dein aktuelles Kontolimit beträgt " + randomNum + " Euro.");
     }
 
     @Test
@@ -330,7 +429,7 @@ public class AmosAlexaSpeechletTest {
         // Switching to another Service works if a new session is started.
         testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
         newSession();
-        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Allersberger Str. 64, 90461 Nürnberg, Germany");
+        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Lorenzer Pl. 12, 90402 Nürnberg, Germany");
 
         Launcher.server.stop();
     }

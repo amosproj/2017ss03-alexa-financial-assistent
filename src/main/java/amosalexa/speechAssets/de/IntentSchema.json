@@ -92,6 +92,18 @@
       ]
     },
     {
+      "intent": "SavingsPlanChangeParameterIntent",
+      "slots": [
+        {
+          "name": "SavingsPlanParameter",
+          "type": "LIST_OF_SAVINGS_PLAN_PARAMETER"
+        }
+      ]
+    },
+    {
+      "intent": "SavingsPlanNewIntent"
+    },
+    {
       "intent": "StandingOrdersDeleteIntent",
       "slots": [
         {
@@ -100,6 +112,23 @@
         },
         {
           "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "StandingOrderSmartIntent",
+      "slots": [
+        {
+          "name": "Payee",
+          "type": "AMAZON.DE_FIRST_NAME"
+        },
+        {
+          "name": "PayeeSecondName",
+          "type": "PAYEE_SECOND_NAME"
+        },
+        {
+          "name": "orderAmount",
           "type": "AMAZON.NUMBER"
         }
       ]
@@ -191,6 +220,19 @@
       "intent": "AuthenticationPIN"
     },
     {
+      "intent": "BankTransferIntent",
+      "slots": [
+        {
+          "name": "Amount",
+          "type": "AMAZON.FOUR_DIGIT_NUMBER"
+        },
+        {
+          "name": "Name",
+          "type": "AMAZON.DE_FIRST_NAME"
+        }
+      ]
+    },
+    {
       "intent": "SetBalanceLimitIntent",
       "slots": [
         {
@@ -198,6 +240,9 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "intent": "GetBalanceLimitIntent"
     },
     {
       "intent": "ListTransferTemplatesIntent"
@@ -236,6 +281,46 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "intent": "ContactListInfoIntent"
+    },
+    {
+      "intent": "ContactAddIntent",
+      "slots": [
+        {
+          "name": "TransactionNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "slots": [
+        {
+          "name": "ContactID",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "ContactDeleteIntent"
+    },
+    {
+      "intent": "AffordProduct",
+      "slots": [
+        {
+          "name": "ProductKeyword",
+          "type": "LIST_OF_KEYWORDS"
+        },
+        {
+          "name": "ProductSelection",
+          "type": "LIST_OF_SELECTABLE_PRODUCTS"
+        }
+      ]
+    },
+    {
+      "intent": "TestEMailIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
     }
   ]
 }

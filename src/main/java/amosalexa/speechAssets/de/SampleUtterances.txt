@@ -1,17 +1,19 @@
 TestListIntent Teste Liste
 
-ProductRequestIntent Was kostet ein {ProductKeyword}
-ProductRequestIntent Was kostet eine {ProductKeyword}
-ProductRequestIntent Was kostet das {ProductKeyword}
-ProductRequestIntent Was kostet die {ProductKeyword}
-ProductRequestIntent Was kostet der {ProductKeyword}
-ProductRequestIntent Sag mir den Preis von {ProductKeyword}
-ProductRequestIntent Sag mir den Preis vom {ProductKeyword}
-ProductRequestIntent Wie viel kostet ein {ProductKeyword}
-ProductRequestIntent Wie viel kostet eine {ProductKeyword}
-ProductRequestIntent Wie viel kostet das {ProductKeyword}
-ProductRequestIntent Wie viel kostet der {ProductKeyword}
-ProductRequestIntent Wie viel kostet die {ProductKeyword}
+AffordProduct Ich suche {ProductKeyword}
+AffordProduct Was kostet ein {ProductKeyword}
+AffordProduct Was kostet eine {ProductKeyword}
+AffordProduct Was kostet das {ProductKeyword}
+AffordProduct Was kostet die {ProductKeyword}
+AffordProduct Was kostet der {ProductKeyword}
+AffordProduct Sag mir den Preis von {ProductKeyword}
+AffordProduct Sag mir den Preis vom {ProductKeyword}
+AffordProduct Wie viel kostet ein {ProductKeyword}
+AffordProduct Wie viel kostet eine {ProductKeyword}
+AffordProduct Wie viel kostet das {ProductKeyword}
+AffordProduct Wie viel kostet der {ProductKeyword}
+AffordProduct Wie viel kostet die {ProductKeyword}
+AffordProduct produkt {ProductSelection}
 
 AccountInformation Wie ist mein {AccountInformationSlots}
 AccountInformation Wie ist meine {AccountInformationSlots}
@@ -79,10 +81,19 @@ SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
 
+SavingsPlanAmountIntent {Betrag}
 SavingsPlanAmountIntent {Betrag} Euro
 
+SavingsPlanNumberOfYearsIntent {AnzahlJahre}
 SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahr
 SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahre
+
+SavingsPlanChangeParameterIntent {SavingsPlanParameter}
+SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}
+SavingsPlanChangeParameterIntent Ändere die {SavingsPlanParameter}
+
+SavingsPlanNewIntent Neu
+SavingsPlanNewIntent Neu beginnen
 
 StandingOrdersInfoIntent Daueraufträge
 StandingOrdersInfoIntent Wie lauten meine Daueraufträge
@@ -104,6 +115,11 @@ StandingOrdersKeywordIntent Welchen Betrag bezahle ich für {StandingOrderKeywor
 StandingOrdersKeywordIntent Welchen Betrag bezahle ich monatlich für {StandingOrderKeyword}
 StandingOrdersKeywordIntent Wie sind meine monatlichen {TransactionKeyword}
 
+StandingOrderSmartIntent Richte einen neuen Dauerauftrag für {Payee} {PayeeSecondName} in Höhe von {orderAmount} Euro ein
+StandingOrderSmartIntent Richte einen neuen Dauerauftrag ein
+StandingOrderSmartIntent Richte einen neuen
+StandingOrderSmartIntent Richte einfach einen neuen Dauerauftrag ein
+
 SecuritiesAccountInformationIntent Wie sind meine Aktien
 SecuritiesAccountInformationIntent Wie ist der Stand meiner Aktien
 SecuritiesAccountInformationIntent Nenne mir meine Aktien
@@ -115,6 +131,22 @@ SetBalanceLimitIntent Setze mein Limit auf {BalanceLimitAmount} Euro
 SetBalanceLimitIntent Ich möchte mein Limit auf {BalanceLimitAmount} Euro setzen
 SetBalanceLimitIntent Ich möchte mein Kontolimit auf {BalanceLimitAmount} Euro setzen
 
+GetBalanceLimitIntent Wie ist mein Kontolimit
+GetBalanceLimitIntent Wie ist das Limit für mein Konto
+GetBalanceLimitIntent Nach meinem Kontolimit
+GetBalanceLimitIntent Nach dem Limit für mein Konto
+
 ListTransferTemplatesIntent Überweisungsvorlagen
 DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
 EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmount}
+
+BankTransferIntent Überweise {Amount} Euro an {Name}
+
+ContactListInfoIntent Was sind meine Kontakte
+ContactListInfoIntent Kontaktliste
+ContactAddIntent Speichere Details von Transaktion {TransactionNumber} als Kontakt
+ContactDeleteIntent Lösche Kontakt Nummer {ContactID}
+ContactDeleteIntent Lösche Kontakt {ContactID}
+
+TestEMailIntent Sende mir eine Test E-Mail
+TestEMailIntent Schicke mir eine TestE-Mail

@@ -121,10 +121,10 @@ public class BankContactService extends AbstractSpeechService implements SpeechS
         log.info("Slot Value : " + slotDateValue + " ( " + SLOT_NAME_OPENING_HOURS_DATE + " ) ");
 
         // try to get device address - needs user permission and real device
-        Address address = DeviceAddressUtil.getDeviceAddress(requestEnvelope);
+        deviceAddress = DeviceAddressUtil.getDeviceAddress(requestEnvelope);
 
         // check permission for device address
-        if (address == null) {
+        if (deviceAddress == null) {
             if(Launcher.server == null){
                 log.warn("Running on Lambda: Consent token is null. Ask for permission!");
                 return getPermissionsResponse();
