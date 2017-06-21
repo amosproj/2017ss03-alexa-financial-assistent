@@ -253,6 +253,11 @@ public class AmosAlexaSpeechletTest {
         LOGGER.info("Contact: " + latestContact.getName());
         String latestContactId = String.valueOf(latestContact.getId());
 
+        //Test contact list
+        testIntentMatches(
+                "ContactListInfoIntent",
+                "Kontakt \\d+: Name: (.*), IBAN: (.*).(.*)");
+
         //Test delete contact. Therefore delete the contact that we just created.
         testIntent(
                 "ContactDeleteIntent",
