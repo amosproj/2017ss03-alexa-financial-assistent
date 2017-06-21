@@ -117,6 +117,23 @@
       ]
     },
     {
+      "intent": "StandingOrderSmartIntent",
+      "slots": [
+        {
+          "name": "Payee",
+          "type": "AMAZON.DE_FIRST_NAME"
+        },
+        {
+          "name": "PayeeSecondName",
+          "type": "PAYEE_SECOND_NAME"
+        },
+        {
+          "name": "orderAmount",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
       "intent": "StandingOrdersInfoIntent",
       "slots": [
         {

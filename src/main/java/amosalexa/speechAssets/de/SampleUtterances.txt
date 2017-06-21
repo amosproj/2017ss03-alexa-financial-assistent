@@ -115,6 +115,11 @@ StandingOrdersKeywordIntent Welchen Betrag bezahle ich für {StandingOrderKeywor
 StandingOrdersKeywordIntent Welchen Betrag bezahle ich monatlich für {StandingOrderKeyword}
 StandingOrdersKeywordIntent Wie sind meine monatlichen {TransactionKeyword}
 
+StandingOrderSmartIntent Richte einen neuen Dauerauftrag für {Payee} {PayeeSecondName} in Höhe von {orderAmount} Euro ein
+StandingOrderSmartIntent Richte einen neuen Dauerauftrag ein
+StandingOrderSmartIntent Richte einen neuen
+StandingOrderSmartIntent Richte einfach einen neuen Dauerauftrag ein
+
 SecuritiesAccountInformationIntent Wie sind meine Aktien
 SecuritiesAccountInformationIntent Wie ist der Stand meiner Aktien
 SecuritiesAccountInformationIntent Nenne mir meine Aktien
