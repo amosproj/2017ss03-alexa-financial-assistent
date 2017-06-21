@@ -42,7 +42,8 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
                 STANDING_ORDERS_INFO_INTENT,
                 STANDING_ORDERS_DELETE_INTENT,
                 STANDING_ORDERS_MODIFY_INTENT,
-                STANDING_ORDERS_KEYWORD_INTENT
+                STANDING_ORDERS_KEYWORD_INTENT,
+                STANDING_ORDERS_SMART_INTENT
         );
     }
 
@@ -53,6 +54,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
                 STANDING_ORDERS_DELETE_INTENT,
                 STANDING_ORDERS_MODIFY_INTENT,
                 STANDING_ORDERS_KEYWORD_INTENT,
+                STANDING_ORDERS_SMART_INTENT,
                 YES_INTENT,
                 NO_INTENT
         );
@@ -61,7 +63,8 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
     private static final String STANDING_ORDERS_INFO_INTENT = "StandingOrdersInfoIntent";
     private static final String STANDING_ORDERS_DELETE_INTENT = "StandingOrdersDeleteIntent";
     private static final String STANDING_ORDERS_MODIFY_INTENT = "StandingOrdersModifyIntent";
-    private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrdersKeywordIntent";
+    private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrderKeyword";
+    private static final String STANDING_ORDERS_SMART_INTENT = "StandingOrderSmartIntent";
 
     // FIXME: Get the current account number from the session
     private static final String ACCOUNT_NUMBER = "9999999999";
@@ -114,6 +117,12 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(CONTEXT, "StandingOrderKeyword");
             return getStandingOrdersInfoForKeyword(intent, session);
+        } else if (STANDING_ORDERS_SMART_INTENT.equals(intentName)) {
+            LOGGER.info(getClass().toString() + " Intent started: " + intentName);
+            session.setAttribute(CONTEXT, "StandingOrderSmartIntent");
+            return smartUpdateStandingOrderConfirmation(intent, session);
+        } else if (YES_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderSmartIntent"))) {
+            return smartUpdateStandingOrderResponse(session);
         } else if (YES_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
         } else if (YES_INTENT.equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
@@ -544,8 +553,8 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
             if (standingOrders.get(i).getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " von " + amount + " euro " +
-                                "existiert schon. Willst du den aktualisieren");
+                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " über " + standingOrders.get(i).getAmount() +
+                        " Euro existiert schon. Möchtest du diesen aktualisieren");
 
                 session.setAttribute("StandingOrderToModify", standingOrders.get(i).getStandingOrderId());
                 session.setAttribute("NewAmount", amount);
@@ -629,7 +638,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Der neue Dauerauftrag für " + " wurde erfolgreich erzeugt");
+        speech.setText("Der neue Dauerauftrag für " + " wurde erfolgreich eingerichtet");
         // Create reprompt
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
