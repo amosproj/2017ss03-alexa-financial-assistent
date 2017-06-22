@@ -32,7 +32,7 @@ public final class AmosAlexaSpeechletRequestStreamHandler extends SpeechletReque
         supportedApplicationIds.add("amzn1.ask.skill.38e33c69-1510-43cd-be1d-929f08a966b4"); // Julian
         supportedApplicationIds.add("amzn1.ask.skill.3eaf7014-b9fb-46b3-84dc-59c5b639451c"); // Paul
         supportedApplicationIds.add("amzn1.ask.skill.ea3217b7-23d5-4783-b686-c04d68abe1ca"); // Vladimir
-        supportedApplicationIds.add("amzn1.ask.skill.53321930-48a9-4ee7-bca5-ae0415e54a09"); // Lucas
+        supportedApplicationIds.add("amzn1.ask.skill.c0108bd4-5bd8-4d8a-9d44-11ce3db9dbdf"); // Lucas
 
         supportedApplicationIds.add("amzn1.ask.skill.d9eeac14-3884-47a5-b688-728639af92ee"); // developer account
 
