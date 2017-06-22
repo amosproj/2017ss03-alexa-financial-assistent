@@ -1,9 +1,9 @@
 package amosalexa.services.pricequery.aws.request;
 
+import amosalexa.services.pricequery.aws.util.XMLParser;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import amosalexa.services.pricequery.aws.util.XMLParser;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -53,14 +53,10 @@ public class AWSRequest {
     /**
      * @return String xmlString
      */
-    public String signedRequest() {
+    public String signedRequest() throws IOException, SAXException, ParserConfigurationException {
 
         Document response = null;
-        try {
-            response = getResponse(createSignedURL());
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            e.printStackTrace();
-        }
+        response = getResponse(createSignedURL());
         String xmlString = XMLParser.xmlToString(response);
 
         return XMLParser.getPrettyXML(xmlString);

@@ -79,11 +79,17 @@ public class AmosAlexaSpeechletTest {
             add("Produkt a (.*) kostet (.*) Produkt b (.*) kostet (.*) Produkt c (.*) kostet (.*) Möchtest du ein Produkt kaufen");
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.NO_RESULTS);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.TOO_FEW_RESULTS);
+            add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
         }};
 
         ArrayList<String> productSelectionAskAnswers = new ArrayList<String>() {{
             add(AffordabilityService.SELECTION_ASK);
-            add(AffordabilityService.ERROR);
+            add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
+        }};
+
+        ArrayList<String> byeAnswers = new ArrayList<String>() {{
+            add(AffordabilityService.BYE);
+            add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
         }};
 
         newSession();
@@ -96,11 +102,11 @@ public class AmosAlexaSpeechletTest {
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", "Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
-        testIntent("AMAZON.NoIntent", AffordabilityService.BYE);
+        testIntentMatches("AMAZON.NoIntent", StringUtils.join(byeAnswers, "|"));
 
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
-        testIntent("AMAZON.NoIntent", AffordabilityService.BYE);
+        testIntentMatches("AMAZON.NoIntent", StringUtils.join(byeAnswers, "|"));
 
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));

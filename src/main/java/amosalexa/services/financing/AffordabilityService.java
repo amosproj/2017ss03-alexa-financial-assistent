@@ -19,7 +19,10 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +48,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      */
     public static final String DESIRE_ASK = "Möchtest du ein Produkt kaufen";
     public static final String SELECTION_ASK = "Welches Produkt möchtest du kaufen Sag produkt a, b oder c";
-    public static final String ERROR = "Ich konnte deine Eingabe nicht verstehen. Sprich Lauter!";
+    public static final String ERROR = "Ich konnte deine Eingabe nicht verstehen. Sprich Lauter oder versuche es später noch einmal!";
     public static final String NO_RESULTS = "Die Suche ergab keine Ergebnisse";
     public static final String TOO_FEW_RESULTS = "Die Suche ergab zu wenig Ergebnisse";
     public static final String CANT_AFFORD = "Das Produkt kannst du dir nicht leisten!";
@@ -107,6 +110,12 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         session = requestEnvelope.getSession();
 
         getSlots();
+
+        // error occurs when trying to request data from amazon product api
+        Object errorRequest = getDialogState("error!");
+        if(errorRequest != null){
+            return getErrorResponse(ERROR);
+        }
 
         // user decides if he wants to buy a product
         Object stateBuyAsk = getDialogState("buy?");
@@ -207,15 +216,24 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
             log.debug("Dialog State: amazon query?");
 
-            List<Item> items = AWSLookup.itemSearch(keywordSlot, 1, null);
+            List<Item> items;
+            try {
+                items = AWSLookup.itemSearch(keywordSlot, 1, null);
+            } catch (ParserConfigurationException | SAXException | IOException e) {
+                log.error("Amazon Lookup Exception: " + e.getMessage());
+                setDialogState("error!");
+                return getErrorResponse(NO_RESULTS);
+            }
 
             if (items.isEmpty()) {
                 log.error("no results by keywordSlot: " + keywordSlot);
+                setDialogState("error!");
                 return getErrorResponse(NO_RESULTS);
             }
 
             if(items.size() < 3){
                 log.error("too few results by keywordSlot: " + keywordSlot);
+                setDialogState("error!");
                 return getErrorResponse(TOO_FEW_RESULTS);
             }
 
@@ -225,7 +243,15 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             for (int i = 0; i < 3; i++) {
 
                 // look up offer
-                Offer offer = AWSLookup.offerLookup(items.get(i).getASIN());
+                Offer offer;
+                try {
+                    offer = AWSLookup.offerLookup(items.get(i).getASIN());
+                } catch (ParserConfigurationException | SAXException | IOException e) {
+                    log.error("Amazon Lookup Exception: " + e.getMessage());
+                    setDialogState("error!");
+                    return getErrorResponse(ERROR);
+                }
+
                 items.get(i).setOffer(offer);
 
                 // save in session
@@ -244,7 +270,6 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
             text.append(DESIRE_ASK);
             setDialogState("buy?");
-
             return getSSMLAskResponse(CARD, text.toString(), SEARCH_ASK);
         }
 
