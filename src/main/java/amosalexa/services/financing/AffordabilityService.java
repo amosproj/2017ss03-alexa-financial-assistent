@@ -274,7 +274,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         }
 
         log.debug("Dialog State: no keyword");
-        return getResponse(CARD, ERROR);
+        return getErrorResponse(ERROR);
     }
 
 

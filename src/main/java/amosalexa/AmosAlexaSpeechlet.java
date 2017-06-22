@@ -24,16 +24,10 @@ import amosalexa.services.financing.SavingsPlanService;
 import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
-import api.banking.AccountAPI;
-import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
-import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
-import com.amazon.speech.ui.Reprompt;
-import com.amazon.speech.ui.SimpleCard;
-import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,7 +173,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     public SpeechletResponse onLaunch(SpeechletRequestEnvelope<LaunchRequest> requestEnvelope) {
         LOGGER.info("onLaunch requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
-        return getWelcomeResponse();
+        return null;
     }
 
     @Override
@@ -273,107 +267,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     @Override
     public void onSessionEnded(SpeechletRequestEnvelope<SessionEndedRequest> requestEnvelope) {
-        LOGGER.info("onSessionEnded requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
-                requestEnvelope.getSession().getSessionId());
-        // any cleanup logic goes here
-    }
-
-    /**
-     * Creates and returns a {@code SpeechletResponse} with a welcome message.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getWelcomeResponse() {
-        String speechText = "Welcome to the Alexa Skills Kit, you can say hello";
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("HelloWorld");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
-     * TODO Still needed???
-     * <p>
-     * Transfers money and returns response with
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse bankTransfer(Map<String, Slot> slots) {
-        Slot amountSlot = slots.get("amount");
-        Slot nameSlot = slots.get("name");
-
-        LOGGER.info("intent: Bank Transfer");
-
-
-        if (slots.get("confirmation").getValue() == "Ja" || slots.get("confirmation").getValue() != null) {
-
-            String amount = "2";
-            String name = "Paul";
-
-            //getting response regarding account balance
-            Account account = AccountAPI.getAccount("0000000001");
-            String balance = String.valueOf(account.getBalance());
-
-            // FIXME: Hardcoded IBAN and so on
-            Number amountNum = Integer.parseInt(amount);
-            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans", "Helga");
-
-            // confirmation question
-            String speechText = "Dein aktueller Kontostand beträgt " + balance + ". "
-                    + "Möchtest du " + amount + " Euro an " + name + " überweisen?";
-
-            // Create the Simple card content.
-            SimpleCard card = new SimpleCard();
-            card.setTitle("CreditLimit");
-            card.setContent(speechText);
-
-            // Create the plain text output.
-            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText(speechText);
-
-            // Create reprompt
-            Reprompt reprompt = new Reprompt();
-            reprompt.setOutputSpeech(speech);
-
-            return SpeechletResponse.newAskResponse(speech, reprompt, card);
-        }
-
-        String amount = "2";
-        String name = "Paul";
-
-
-        // FIXME: Hardcoded strings
-        Number amountNum = Integer.parseInt(amount);
-        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans", "Helga");
-
-        //reply message
-        String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("CreditLimit");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        LOGGER.info("onSessionEnded");
     }
 
     /**
@@ -443,5 +337,4 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         return json;
     }
-
 }
