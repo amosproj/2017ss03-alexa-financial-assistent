@@ -197,47 +197,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         String context = (String) session.getAttribute("DIALOG_CONTEXT");
 
         LOGGER.info("Intent: " + intentName);
-        LOGGER.info("Context: " + session.getAttribute("DIALOG_CONTEXT"));
-
-        if ((intentName.equals("FourDigitNumberIntent")) && context.equals("SavingsPlan")) {
-            /*
-            FIXME Extremely ugly workaround for SavingsPlan. The reason is that we have two utterances with only a Amazon.NUMBER
-            FIXME input that interfere badly.
-            FourDigitNumberIntent {FourDigits}
-            SavingsPlanAmountIntent {Betrag}
-            SavingsPlanNumberOfYearsIntent {AnzahlJahre}
-
-            For example if we say 'drei' for any of the other two intents, we end up in the FourDigitNumberIntent anyway.
-            By this code we look which intent we would expect instead of this intent and create it programmatically with getEnvelope method.
-            TODO TODO Any better solutions to avoid this problem???
-            */
-            String conflictingIntentName = null;
-            String slot = null;
-
-            if (intentName.equals("FourDigitNumberIntent") && !session.getAttributes().containsKey("Betrag")) {
-                conflictingIntentName = "SavingsPlanAmountIntent";
-                slot = "Betrag:" + intent.getSlots().get("FourDigits").getValue();
-            } else if (intentName.equals("FourDigitNumberIntent") && !session.getAttributes().containsKey("AnzahlJahre")) {
-                conflictingIntentName = "SavingsPlanNumberOfYearsIntent";
-                slot = "AnzahlJahre:" + intent.getSlots().get("FourDigits").getValue();
-            } else if (intentName.equals("FourDigitNumberIntent") && !session.getAttributes().containsKey("MonthlyPayment")) {
-                conflictingIntentName = "SavingsPlanAmountIntent";
-                slot = "Betrag:" + intent.getSlots().get("FourDigits").getValue();
-            }
-
-            try {
-                requestEnvelope = getEnvelope(conflictingIntentName, session, slot);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            intentName = requestEnvelope.getRequest().getIntent().getName();
-            LOGGER.info("Intent new Name: " + intentName);
-        }
+        LOGGER.info("Context: " + context);
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
