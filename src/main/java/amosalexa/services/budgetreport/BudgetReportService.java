@@ -9,6 +9,8 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import org.apache.commons.io.IOUtils;
+import org.jtwig.JtwigModel;
+import org.jtwig.JtwigTemplate;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -53,17 +55,15 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
         IntentRequest request = requestEnvelope.getRequest();
 
         if (request.getIntent().getName().equals(TEST_EMAIL_INTENT)) {
-            String body = "";
-            ClassLoader classLoader = getClass().getClassLoader();
+            // Load the mail template from resources
+            JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
-            try {
-                // TODO: Read budget data from database, create dynamic HTML mail (jtwig)
-                body = IOUtils.toString(classLoader.getResourceAsStream("html-templates/budget-report.html"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            JtwigModel model = JtwigModel.newModel().with("var", "World");
+
+            // Render mail template
+            String body = template.render(model);
+
             String answer = "Okay, ich habe dir eine Test-E-Mail gesendet.";
-
             if (!EMailClient.SendHTMLEMail("Test-Mail", body)) {
                 answer = "Leider konnte die E-Mail nicht gesendet werden.";
             }
