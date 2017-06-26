@@ -304,6 +304,19 @@
       ]
     },
     {
+      "intent": "CategoryLimitSetIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        },
+        {
+          "name": "CategoryLimit",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
       "intent": "TestEMailIntent"
     },
     {

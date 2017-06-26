@@ -150,3 +150,6 @@ ContactDeleteIntent Lösche Kontakt {ContactID}
 
 TestEMailIntent Sende mir eine Test E-Mail
 TestEMailIntent Schicke mir eine TestE-Mail
+
+CategoryLimitSetIntent Ändere Limit für {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Setze Limit für {Category} auf {CategoryLimit} Euro
