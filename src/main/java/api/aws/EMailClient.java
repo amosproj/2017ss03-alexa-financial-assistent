@@ -1,5 +1,7 @@
 package api.aws;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.simpleemail.*;
 import com.amazonaws.services.simpleemail.model.*;
@@ -37,6 +39,20 @@ public class EMailClient {
 				.withDestination(destination).withMessage(message);
 
 		try {
+			/*AmazonSimpleEmailService client = AmazonSimpleEmailServiceClientBuilder.standard()
+					.withCredentials(new AWSStaticCredentialsProvider(new AWSCredentials() {
+						@Override
+						public String getAWSAccessKeyId() {
+							return "...";
+						}
+
+						@Override
+						public String getAWSSecretKey() {
+							return "...";
+						}
+					}))
+					.withRegion(Regions.EU_WEST_1).build();*/
+
 			AmazonSimpleEmailService client = AmazonSimpleEmailServiceClientBuilder.standard()
 					.withCredentials(new CustomEnvironmentVariableCredentialsProvider("AWS_SES_ACCESS_KEY", "AWS_SES_SECRET_KEY"))
 					.withRegion(Regions.EU_WEST_1).build();
