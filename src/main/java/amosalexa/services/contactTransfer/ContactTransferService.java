@@ -45,6 +45,10 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
 
     //endregion
 
+    public ContactTransferService(SpeechletSubject speechletSubject) {
+        subscribe(speechletSubject);
+    }
+
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
         Intent intent = requestEnvelope.getRequest().getIntent();
