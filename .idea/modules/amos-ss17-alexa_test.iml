@@ -21,6 +21,7 @@
     <orderEntry type="library" name="Gradle: com.amazonaws:aws-java-sdk-ses:1.11.150" level="project" />
     <orderEntry type="library" name="Gradle: com.amazonaws:aws-java-sdk-code-generator:1.11.150" level="project" />
     <orderEntry type="library" name="Gradle: log4j:log4j:1.2.17" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.directory.studio:org.apache.commons.io:2.4" level="project" />
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-server:9.0.6.v20130930" level="project" />
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-servlet:9.0.6.v20130930" level="project" />
@@ -79,7 +80,6 @@
     <orderEntry type="library" name="Gradle: org.eclipse.core:org.eclipse.core.commands:3.6.0" level="project" />
     <orderEntry type="library" name="Gradle: org.ow2.asm:asm:5.0.3" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.6.7" level="project" />
-    <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Gradle: joda-time:joda-time:2.9.7" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" name="Gradle: org.json:json:20140107" level="project" />

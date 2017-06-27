@@ -305,6 +305,28 @@
     },
     {
       "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "ContactTransferIntent",
+      "slots": [
+        {
+          "name": "Amount",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Contact",
+          "type": "LIST_OF_EXAMPLE_CONTACTS"
+        }
+      ]
+    },
+    {
+      "intent": "ContactChoiceIntent",
+      "slots": [
+        {
+          "name": "ContactIndex",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
     }
   ]
 }

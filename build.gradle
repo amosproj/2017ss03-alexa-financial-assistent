@@ -33,7 +33,7 @@ dependencies {
 
     compile 'log4j:log4j:1.2.17'
     compile 'org.slf4j:slf4j-api:1.7.10'
-    compile 'org.apache.commons:commons-lang3:3.3.2'
+    compile 'org.apache.commons:commons-lang3:3.4'
     compile 'org.apache.directory.studio:org.apache.commons.io:2.4'
     compile 'org.eclipse.jetty:jetty-server:9.0.6.v20130930'
     compile 'org.eclipse.jetty:jetty-servlet:9.0.6.v20130930'
