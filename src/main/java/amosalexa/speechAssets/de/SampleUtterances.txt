@@ -154,7 +154,7 @@ BudgetReportEMailIntent Schicke mir den Ausgabenreport
 BudgetReportEMailIntent Sende mir meinen Budget Report
 BudgetReportEMailIntent Schicke mir den Budget Report
 
-ContactTransferIntent Überweise {Amount} Euro an {Person}
+ContactTransferIntent Überweise {Amount} Euro an {Contact}
 ContactChoiceIntent Kontakt Nummer {ContactIndex}
 
 CategoryLimitSetIntent Ändere Limit für {Category} auf {CategoryLimit} Euro
