@@ -32,8 +32,6 @@ ReplacementCardReasonIntent Meine alte Karte wurde {ReplacementReason}
 ReplacementCardReasonIntent Meine alte Karte ist {ReplacementReason}
 ReplacementCardReasonIntent {ReplacementReason}
 
-FourDigitNumberIntent {FourDigits}
-
 ReplacementCardIntent Bestelle eine Ersatzkarte
 ReplacementCardIntent Ich brauche eine Ersatzkarte
 
@@ -73,18 +71,16 @@ BankOpeningHours Öffnungszeiten der {BankNameSlots}
 BankOpeningHours wann hat {BankNameSlots} offen
 BankOpeningHours hat die {BankNameSlots} {OpeningHoursDate} geöffnet
 
+PlainNumberIntent {Number}
+PlainEuroIntent {Number} Euro
+PlainYearsIntent {Number} Jahre
+PlainYearsIntent {Number} Jahr
+
 SavingsPlanIntroIntent Erstelle einen Sparplan
 SavingsPlanIntroIntent Berechne mir einen Sparplan
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
-
-SavingsPlanAmountIntent {Betrag}
-SavingsPlanAmountIntent {Betrag} Euro
-
-SavingsPlanNumberOfYearsIntent {AnzahlJahre}
-SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahr
-SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahre
 
 SavingsPlanChangeParameterIntent {SavingsPlanParameter}
 SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}

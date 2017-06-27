@@ -26,6 +26,9 @@ public abstract class AbstractSpeechService {
     //Should be used for utterances that contain a number plus 'Jahre' or 'Jahr'
     protected static final String PLAIN_YEARS_INTENT = "PlainYearsIntent";
 
+    //Used as slot key for all plain intents (see above)
+    protected static final String NUMBER_SLOT_KEY = "Number";
+
     /**
      * Helper method that will get the intent name from a provided Intent object. If a name does not
      * exist then this method will return null.

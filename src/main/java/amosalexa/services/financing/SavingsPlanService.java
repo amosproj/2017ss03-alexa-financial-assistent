@@ -41,8 +41,9 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     public List<String> getHandledIntents() {
         return Arrays.asList(
                 SAVINGS_PLAN_INTRO_INTENT,
-                SAVINGS_PLAN_AMOUNT_INTENT,
-                SAVINGS_PLAN_NUMBER_OF_YEARS_INTENT,
+                PLAIN_NUMBER_INTENT,
+                PLAIN_EURO_INTENT,
+                PLAIN_YEARS_INTENT,
                 SAVINGS_PLAN_CHANGE_PARAMETER_INTENT,
                 SAVINGS_PLAN_NEW_INTENT,
                 YES_INTENT,
@@ -58,12 +59,10 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
      */
     private static final String SAVINGS_PLAN = "Sparplan";
 
-    private static final String CONTEXT = "DIALOG_CONTEXT";
+    private static final String WITHIN_DIALOG_CONTEXT = "WithinDialogContext";
 
     //Intent names
     private static final String SAVINGS_PLAN_INTRO_INTENT = "SavingsPlanIntroIntent";
-    private static final String SAVINGS_PLAN_AMOUNT_INTENT = "SavingsPlanAmountIntent";
-    private static final String SAVINGS_PLAN_NUMBER_OF_YEARS_INTENT = "SavingsPlanNumberOfYearsIntent";
     private static final String SAVINGS_PLAN_CHANGE_PARAMETER_INTENT = "SavingsPlanChangeParameterIntent";
     private static final String SAVINGS_PLAN_NEW_INTENT = "SavingsPlanNewIntent";
 
@@ -76,8 +75,8 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     private static final String DESCRIPTION_ONE_OFF_PAYMENT = "Sparplan Einmalzahlung";
 
     //Static keys for the three savings plan parameters (used as slot keys as well as session keys!)
-    private static final String AMOUNT_KEY = "Betrag";
-    private static final String NUMBER_OF_YEARS_KEY = "AnzahlJahre";
+    private static final String BASIC_AMOUNT_KEY = "BasicAmount";
+    private static final String DURATION_KEY = "Duration";
     private static final String MONTHLY_PAYMENT_KEY = "MonthlyPayment";
 
     //Slot key for SavingsPlanChangeParameterIntent
@@ -101,76 +100,100 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         Session session = requestEnvelope.getSession();
         LOGGER.info("Intent Name: " + intentName);
         String context = (String) session.getAttribute(CONTEXT);
+        String withinDialogContext = (String) session.getAttribute(WITHIN_DIALOG_CONTEXT);
+        LOGGER.info("Within context: " + withinDialogContext);
 
         if (SAVINGS_PLAN_INTRO_INTENT.equals(intentName)) {
             session.setAttribute(CONTEXT, "SavingsPlan");
-            return askForBasicAmount();
-        } else if (SAVINGS_PLAN_AMOUNT_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
-            return saveAmountAndContinue(intent, session);
-        } else if (SAVINGS_PLAN_NUMBER_OF_YEARS_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
-            return saveDurationAndContinue(intent, session);
-        } else if (YES_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
-            return createSavingsPlan(intent, session);
-        } else if (NO_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
-            return getAskResponse(SAVINGS_PLAN, "Nenne einen der Parameter, die du aendern willst " +
-                    "oder beginne neu, indem du \"Neu\" sagst.");
-        } else if (SAVINGS_PLAN_CHANGE_PARAMETER_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
-            return askAgainForParameter(intent, session);
-        } else if (SAVINGS_PLAN_NEW_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
-            session.getAttributes().clear();
-            session.setAttribute(CONTEXT, "SavingsPlan");
-            return askForBasicAmount();
-        } else if (STOP_INTENT.equals(intentName) && context != null && context.equals("SavingsPlan")) {
-            return getResponse("Stop", "");
+            return askForBasicAmount(session);
+        } else if (context != null && context.equals("SavingsPlan") && withinDialogContext != null) {
+            if ((PLAIN_NUMBER_INTENT.equals(intentName) || PLAIN_EURO_INTENT.equals(intentName)) && withinDialogContext.equals("BasicAmount")) {
+                return saveBasicAmountAndContinue(intent, session);
+            }
+            if ((PLAIN_NUMBER_INTENT.equals(intentName) || PLAIN_EURO_INTENT.equals(intentName)) && withinDialogContext.equals("MonthlyPayment")) {
+                return saveMonthlyPaymentAndContinue(intent, session);
+            }
+            if ((PLAIN_NUMBER_INTENT.equals(intentName) || PLAIN_YEARS_INTENT.equals(intentName)) && withinDialogContext.equals("Duration")) {
+                return saveDurationAndContinue(intent, session);
+            } else if (YES_INTENT.equals(intentName)) {
+                return createSavingsPlan(intent, session);
+            } else if (NO_INTENT.equals(intentName)) {
+                return getAskResponse(SAVINGS_PLAN, "Nenne einen der Parameter, die du aendern willst " +
+                        "oder beginne neu, indem du \"Neu\" sagst.");
+            } else if (SAVINGS_PLAN_CHANGE_PARAMETER_INTENT.equals(intentName)) {
+                return askAgainForParameter(intent, session);
+            } else if (SAVINGS_PLAN_NEW_INTENT.equals(intentName)) {
+                session.getAttributes().clear();
+                session.setAttribute(CONTEXT, "SavingsPlan");
+                return askForBasicAmount(session);
+            } else if (STOP_INTENT.equals(intentName)) {
+                return getResponse("Stop", "");
+            } else {
+                throw new SpeechletException("Unhandled intent: " + intentName);
+            }
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
     }
 
-    private SpeechletResponse askForBasicAmount() {
+    private SpeechletResponse askForBasicAmount(Session session) {
+        session.setAttribute(WITHIN_DIALOG_CONTEXT, "BasicAmount");
         return getAskResponse(SAVINGS_PLAN,
                 "Was moechtest du als Grundbetrag anlegen?");
     }
 
-    private SpeechletResponse askForDuration() {
-        //TODO better use duration?
+    private SpeechletResponse askForDuration(Session session) {
+        session.setAttribute(WITHIN_DIALOG_CONTEXT, "Duration");
+        //TODO better use duration slot type?
         return getAskResponse(SAVINGS_PLAN, "Wie viele Jahre moechtest du das Geld anlegen?");
     }
 
-    private SpeechletResponse askForMonthlyPaymentAmount() {
+    private SpeechletResponse askForMonthlyPaymentAmount(Session session) {
+        session.setAttribute(WITHIN_DIALOG_CONTEXT, "MonthlyPayment");
         return getAskResponse(SAVINGS_PLAN, "Welchen Geldbetrag moechtest du monatlich investieren?");
     }
 
-    private SpeechletResponse saveAmountAndContinue(Intent intent, Session session) {
+    private SpeechletResponse saveBasicAmountAndContinue(Intent intent, Session session) {
         //Amount may either be basic amount or monthly payment amount, so we
         //have to check first, if basic amount has already been set in the session.
         //(Whole process must be sequential)
         Map<String, Slot> slots = intent.getSlots();
-        Slot amountSlot = slots.get(AMOUNT_KEY);
-        if (!session.getAttributes().containsKey(AMOUNT_KEY)) {
-            //In this case amount slot contains basic amount
-            String basicAmount = amountSlot.getValue();
-            LOGGER.info("BasicAmount: " + basicAmount);
-            session.setAttribute(AMOUNT_KEY, basicAmount);
-            return askForDuration();
-        } else {
-            //In this case amount slot contains monthly payment amount
-            String monthlyPayment = amountSlot.getValue();
-            LOGGER.info("MonthlyPayment: " + monthlyPayment);
-            session.setAttribute(MONTHLY_PAYMENT_KEY, monthlyPayment);
+        Slot amountSlot = slots.get(NUMBER_SLOT_KEY);
+        //In this case amount slot contains basic amount
+        String basicAmount = amountSlot.getValue();
+        LOGGER.info("BasicAmount: " + basicAmount);
+        session.setAttribute(BASIC_AMOUNT_KEY, basicAmount);
+        if (session.getAttribute(DURATION_KEY) != null) {
             return getCalculatedSavingsPlanInfo(session);
+        } else {
+            return askForDuration(session);
         }
     }
 
+    private SpeechletResponse saveMonthlyPaymentAndContinue(Intent intent, Session session) {
+        //Amount may either be basic amount or monthly payment amount, so we
+        //have to check first, if basic amount has already been set in the session.
+        //(Whole process must be sequential)
+        Map<String, Slot> slots = intent.getSlots();
+        Slot amountSlot = slots.get(NUMBER_SLOT_KEY);
+        //In this case amount slot contains monthly payment amount
+        String monthlyPayment = amountSlot.getValue();
+        LOGGER.info("MonthlyPayment: " + monthlyPayment);
+        session.setAttribute(MONTHLY_PAYMENT_KEY, monthlyPayment);
+        return getCalculatedSavingsPlanInfo(session);
+    }
+
+
     private SpeechletResponse saveDurationAndContinue(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
-        String numberOfYears = slots.get(NUMBER_OF_YEARS_KEY).getValue();
+        String numberOfYears = slots.get(NUMBER_SLOT_KEY).getValue();
         LOGGER.info("NumberOfYears: " + numberOfYears);
-        session.setAttribute(NUMBER_OF_YEARS_KEY, numberOfYears);
+        session.setAttribute(DURATION_KEY, numberOfYears);
         if (session.getAttributes().containsKey(MONTHLY_PAYMENT_KEY)) {
             return getCalculatedSavingsPlanInfo(session);
+        } else {
+            return askForMonthlyPaymentAmount(session);
         }
-        return askForMonthlyPaymentAmount();
     }
 
     private SpeechletResponse askAgainForParameter(Intent intent, Session session) {
@@ -179,28 +202,32 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         LOGGER.info("Parameter to change: " + parameter);
         session.setAttribute(SAVINGS_PLAN_PARAMETER_KEY, parameter);
         if (parameter.equals("grundbetrag")) {
-            session.removeAttribute(AMOUNT_KEY);
-            return askForBasicAmount();
+            session.removeAttribute(BASIC_AMOUNT_KEY);
+            return askForBasicAmount(session);
         }
         if (parameter.equals("laufzeit")) {
-            session.removeAttribute(NUMBER_OF_YEARS_KEY);
-            return askForDuration();
+            session.removeAttribute(DURATION_KEY);
+            return askForDuration(session);
         }
         if (parameter.equals("monatliche Einzahlung")) {
             session.removeAttribute(MONTHLY_PAYMENT_KEY);
-            return askForMonthlyPaymentAmount();
-        } else return getAskResponse(SAVINGS_PLAN,
-                "Das habe ich leider nicht verstanden. Wiederhole deine Eingabe.");
+            return askForMonthlyPaymentAmount(session);
+        } else {
+            return getAskResponse(SAVINGS_PLAN,
+                    "Das habe ich leider nicht verstanden. Bitte wiederhole deine Eingabe.");
+        }
     }
 
     private SpeechletResponse getCalculatedSavingsPlanInfo(Session session) {
         //Assume we have all parameters now. Get them from the session attributes.
 
-        String grundbetragString = (String) session.getAttribute(AMOUNT_KEY);
+        String grundbetragString = (String) session.getAttribute(BASIC_AMOUNT_KEY);
         String einzahlungMonatString = (String) session.getAttribute(MONTHLY_PAYMENT_KEY);
-        String anzahlJahreString = (String) session.getAttribute(NUMBER_OF_YEARS_KEY);
+        String anzahlJahreString = (String) session.getAttribute(DURATION_KEY);
 
         String calculationString = calculateSavings(grundbetragString, einzahlungMonatString, anzahlJahreString);
+
+        //TODO Get interest rate from account info by API (new field)
 
         SsmlOutputSpeech speech = new SsmlOutputSpeech();
         speech.setSsml("<speak>Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende " +
@@ -216,7 +243,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
 
     private SpeechletResponse createSavingsPlan(Intent intent, Session session) {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        String grundbetrag = (String) session.getAttribute(AMOUNT_KEY);
+        String grundbetrag = (String) session.getAttribute(BASIC_AMOUNT_KEY);
         String monatlicheZahlung = (String) session.getAttribute(MONTHLY_PAYMENT_KEY);
         createSavingsPlanOneOffPayment(grundbetrag);
         StandingOrder so = createSavingsPlanStandingOrder(monatlicheZahlung);

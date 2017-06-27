@@ -47,7 +47,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
     public List<String> getHandledIntents() {
         return Arrays.asList(
                 REPLACEMENT_CARD_INTENT,
-                FOUR_DIGIT_NUMBER_INTENT,
+                PLAIN_NUMBER_INTENT,
                 REPLACEMENT_CARD_REASON_INTENT,
                 YES_INTENT,
                 NO_INTENT
@@ -68,7 +68,6 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacementCardService.class);
 
     public static final String REPLACEMENT_CARD_INTENT = "ReplacementCardIntent";
-    public static final String FOUR_DIGIT_NUMBER_INTENT = "FourDigitNumberIntent";
     public static final String REPLACEMENT_CARD_REASON_INTENT = "ReplacementCardReasonIntent";
 
     private static final String STORAGE_VALID_CARDS = "REPLACEMENT_VALID_CARDS";
@@ -87,7 +86,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
         if (REPLACEMENT_CARD_INTENT.equals(intentName)) {
             session.setAttribute(CONTEXT, REPLACEMENT_CARD_INTENT);
             return askForCardNumber(session, false);
-        } else if (FOUR_DIGIT_NUMBER_INTENT.equals(intentName) && context != null && context.equals(REPLACEMENT_CARD)) {
+        } else if (PLAIN_NUMBER_INTENT.equals(intentName) && context != null && context.equals(REPLACEMENT_CARD)) {
             return askIfBlockedOrDamaged(intent, session);
         } else if (REPLACEMENT_CARD_REASON_INTENT.equals(intentName) && context != null && context.equals(REPLACEMENT_CARD)) {
             return askForConfirmation(intent, session);

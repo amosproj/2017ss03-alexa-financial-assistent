@@ -62,28 +62,37 @@
       "intent": "AMAZON.HelpIntent"
     },
     {
+      "intent": "PlainNumberIntent",
+      "slots": [
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "PlainEuroIntent",
+      "slots": [
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "PlainYearsIntent",
+      "slots": [
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
       "intent": "SavingsPlanIntroIntent",
       "slots": [
         {
           "name": "Betrag",
-          "type": "AMAZON.NUMBER"
-        }
-      ]
-    },
-    {
-      "intent": "SavingsPlanAmountIntent",
-      "slots": [
-        {
-          "name": "Betrag",
-          "type": "AMAZON.NUMBER"
-        }
-      ]
-    },
-    {
-      "intent": "SavingsPlanNumberOfYearsIntent",
-      "slots": [
-        {
-          "name": "AnzahlJahre",
           "type": "AMAZON.NUMBER"
         }
       ]
@@ -176,15 +185,6 @@
         }
       ],
       "intent": "StandingOrdersKeywordIntent"
-    },
-    {
-      "intent": "FourDigitNumberIntent",
-      "slots": [
-        {
-          "name": "FourDigits",
-          "type": "AMAZON.NUMBER"
-        }
-      ]
     },
     {
       "intent": "ReplacementCardIntent"
