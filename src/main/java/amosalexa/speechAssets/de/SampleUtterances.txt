@@ -82,13 +82,6 @@ SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
 
-SavingsPlanAmountIntent {Betrag}
-SavingsPlanAmountIntent {Betrag} Euro
-
-SavingsPlanNumberOfYearsIntent {AnzahlJahre}
-SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahr
-SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahre
-
 SavingsPlanChangeParameterIntent {SavingsPlanParameter}
 SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}
 SavingsPlanChangeParameterIntent Ändere die {SavingsPlanParameter}
