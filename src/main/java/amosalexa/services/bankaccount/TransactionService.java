@@ -27,6 +27,10 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
      */
     private static final String TRANSACTION = "Überweisung";
 
+    //TODO When we use log in system this should be replaced by the account the user has connected with the Alexa skill
+    private static final String SOURCE_ACCOUNT_NUMBER = "0000000001";
+    private static final String SOURCE_ACCOUNT_IBAN = "DE50100000000000000001";
+
     @Override
     public String getDialogName() {
         return this.getClass().getName();
@@ -93,11 +97,12 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
      */
     private SpeechletResponse askForBankTransferConfirmation(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
-        LOGGER.info("Slots: " + slots);
 
         // get amount + name from slots.
         String amount = slots.get(AMOUNT_KEY) != null ? slots.get(AMOUNT_KEY).getValue() : null;
         String name = slots.get(NAME_KEY) != null ? slots.get(NAME_KEY).getValue() : null;
+        LOGGER.info("Amount: " + amount);
+        LOGGER.info("Name: " + name);
 
         // TODO: as soon as API also contains name this should be deleted / adjusted
         // create bank accounts
@@ -120,7 +125,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         }
 
         // there is not enough money on the account
-        if (enoughMoneyForTransaction("0000000001", Double.valueOf(amount)) == false) {
+        if (!enoughMoneyForTransaction(SOURCE_ACCOUNT_NUMBER, Double.valueOf(amount))) {
 
             String speechText = "Dein Kontostand reicht leider nicht aus, um " + amount + " Euro zu ueberweisen." +
                     " Ich habe die Transaktion daher nicht durchgefuehrt.";
@@ -133,7 +138,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         session.setAttribute(IBAN_KEY, iban);
 
         // get account balance
-        Account account = AccountAPI.getAccount("0000000001");
+        Account account = AccountAPI.getAccount(SOURCE_ACCOUNT_NUMBER);
         String balanceBeforeTransation = String.valueOf(account.getBalance());
         LOGGER.info("Der aktuelle Kontostand beträgt " + balanceBeforeTransation);
 
@@ -159,11 +164,11 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         // FIXME: Hardcoded strings
         // TODO replace payee with the name from account holder
         Number amountNum = Integer.parseInt(amount);
-        TransactionAPI.createTransaction(amountNum, "DE50100000000000000001", iban, "2017-05-16",
+        TransactionAPI.createTransaction(amountNum, SOURCE_ACCOUNT_IBAN, iban, "2017-05-16",
                 "Beschreibung", "Hans", null);
 
         // get account balance
-        Account account = AccountAPI.getAccount("0000000001");
+        Account account = AccountAPI.getAccount(SOURCE_ACCOUNT_NUMBER);
         String balanceAfterTransation = String.valueOf(account.getBalance());
 
         LOGGER.info("Der aktuelle Kontostand betraegt " + balanceAfterTransation);
@@ -176,7 +181,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
     }
 
     /**
-     * Checks if there is a enough money in the account to do the transaction.
+     * Checks if there is enough money in the account to do the transaction.
      *
      * @return boolean equals false if there is not enough money in the account.
      */
