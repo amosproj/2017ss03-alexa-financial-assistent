@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn't be necessary -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
     <meta name="x-apple-disable-message-reformatting">  <!-- Disable auto-scale in iOS 10 Mail entirely -->
-    <title></title> <!-- The title tag showsbudgetreportmail notifications, like Android 4.4. -->
+    <title></title> <!-- The title tag shows email notifications, like Android 4.4. -->
 
     <!-- Web Font / @font-face : BEGIN -->
     <!-- NOTE: If web fonts are not required, lines 10 - 27 can be safely removed. -->
@@ -29,7 +29,7 @@
     <!-- CSS Reset -->
     <style>
 
-        /* What it does: Remove spaces around the budgetreport design added by some budgetreport clients. */
+        /* What it does: Remove spaces around the email design added by some email clients. */
         /* Beware: It can remove the padding / margin and add a background color to the compose a reply window. */
         html,
         body {
@@ -39,13 +39,13 @@
             width: 100% !important;
         }
 
-        /* What it does: Stops budgetreport clients resizing small text. */
+        /* What it does: Stops email clients resizing small text. */
         * {
             -ms-text-size-adjust: 100%;
             -webkit-text-size-adjust: 100%;
         }
 
-        /* What it does: Centers budgetreport on Android 4.4 */
+        /* What it does: Centers email on Android 4.4 */
         div[style*="margin: 16px 0"] {
             margin:0 !important;
         }
@@ -73,7 +73,7 @@
             -ms-interpolation-mode:bicubic;
         }
 
-        /* What it does: A work-around for budgetreport clients meddling in triggered links. */
+        /* What it does: A work-around for email clients meddling in triggered links. */
         *[x-apple-data-detectors],	/* iOS */
         .x-gmail-data-detectors, 	/* Gmail */
         .x-gmail-data-detectors *,
@@ -161,8 +161,8 @@
     <!-- Visually Hidden Preheader Text : END -->
 
     <!--
-        Set budgetreportmail width. Defined in two places:
-        1. max-width for all clients except Desktop Windows Outlook, allowing budgetreportmail to squish on narrow but never go wider than 600px.
+        Set email width. Defined in two places:
+        1. max-width for all clients except Desktop Windows Outlook, allowing email to squish on narrow but never go wider than 600px.
         2. MSO tags for Desktop Windows Outlook enforce a 600px width.
     -->
     <div style="max-width: 600px; margin: auto;" class="email-container">
