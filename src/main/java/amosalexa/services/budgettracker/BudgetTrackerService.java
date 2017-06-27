@@ -128,7 +128,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             }
         }
         if (category != null) {
-            return getResponse(BUDGET_TRACKER, "Das Limit fuer die Kategorie " + categorySlot.getValue() + " liegt bei" +
+            return getResponse(BUDGET_TRACKER, "Das Limit fuer die Kategorie " + categorySlot.getValue() + " liegt bei " +
                     Double.valueOf(category.getLimit()) + " Euro.");
         } else {
             return getAskResponse(BUDGET_TRACKER, "Es gibt keine Kategorie mit diesem Namen. Waehle eine andere Kategorie oder" +

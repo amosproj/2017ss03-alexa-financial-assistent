@@ -16,7 +16,7 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
 
     private int id;
 
-    //TODO name should be uniqe?
+    //TODO name should be the primary key (and uniqe)
     private String name;
     private double limit;
 

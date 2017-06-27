@@ -15,6 +15,7 @@ import com.amazon.speech.ui.SsmlOutputSpeech;
 import model.banking.Contact;
 import model.banking.StandingOrder;
 import model.banking.Transaction;
+import model.db.Category;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.junit.BeforeClass;
@@ -28,6 +29,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -338,6 +340,55 @@ public class AmosAlexaSpeechletTest {
         testIntent(
                 "AMAZON.YesIntent",
                 "Dauerauftrag Nummer " + latestStandingOrderId + " wurde geloescht.");
+    }
+
+    @Test
+    public void categoryLimitTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
+        //does not affect our data
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        //We assume that 'lebensmittel' category exists!
+        for (Category cat : categories) {
+            if (cat.getName().equals("lebensmittel")) {
+                category = cat;
+            }
+        }
+
+        //Test limit info with unknown category name
+        testIntent("CategoryLimitInfoIntent", "Category:dsafoihdsfzzzzzssdf",
+                "Es gibt keine Kategorie mit diesem Namen. Waehle eine andere Kategorie oder" +
+                        " erhalte eine Info zu den verfuegbaren Kategorien.");
+
+        //Test plain category name input
+        testIntentMatches("PlainCategoryIntent", "Category:lebensmittel",
+                "Das Limit fuer die Kategorie lebensmittel liegt bei (.*) Euro.");
+
+        //Test limit setting
+        testIntent("CategoryLimitSetIntent", "Category:lebensmittel", "CategoryLimit:250",
+                "Moechtest du das Ausgabelimit fuer die Kategorie lebensmittel wirklich auf 250 Euro setzen?");
+
+        //Setting confirmation (yes)
+        testIntent("AMAZON.YesIntent", "Limit fuer lebensmittel wurde gesetzt.");
+
+        //Test limit info after setting
+        testIntent("CategoryLimitInfoIntent", "Category:lebensmittel",
+                "Das Limit fuer die Kategorie lebensmittel liegt bei 250.0 Euro.");
+
+        //Reset the category lebensmittel (as it was before)
+        List<Category> categories2 = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        for (Category c : categories2) {
+            DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, c);
+        }
+        Predicate<Category> categoryPredicate = c -> c.getName().equals("lebensmittel");
+        categories2.removeIf(categoryPredicate);
+        LOGGER.info("Categories2: " + categories2);
+        for (Category c : categories2) {
+            DynamoDbClient.instance.putItem(Category.TABLE_NAME, c);
+        }
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
     }
 
     @Test
