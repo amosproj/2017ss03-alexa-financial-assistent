@@ -149,8 +149,10 @@ ContactAddIntent Speichere Details von Transaktion {TransactionNumber} als Konta
 ContactDeleteIntent Lösche Kontakt Nummer {ContactID}
 ContactDeleteIntent Lösche Kontakt {ContactID}
 
-TestEMailIntent Sende mir eine Test E-Mail
-TestEMailIntent Schicke mir eine TestE-Mail
+BudgetReportEMailIntent Sende mir meinen Ausgabenreport
+BudgetReportEMailIntent Schicke mir den Ausgabenreport
+BudgetReportEMailIntent Sende mir meinen Budget Report
+BudgetReportEMailIntent Schicke mir den Budget Report
 
 ContactTransferIntent Überweise {Amount} Euro an {Person}
 ContactChoiceIntent Kontakt Nummer {ContactIndex}
