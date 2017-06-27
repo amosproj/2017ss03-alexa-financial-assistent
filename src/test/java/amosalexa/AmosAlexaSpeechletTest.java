@@ -291,13 +291,13 @@ public class AmosAlexaSpeechletTest {
         testIntent("SavingsPlanIntroIntent",
                 "Was moechtest du als Grundbetrag anlegen?"
         );
-        testIntent("SavingsPlanAmountIntent", "Betrag:1500",
+        testIntent("PlainNumberIntent", "Number:1500",
                 "Wie viele Jahre moechtest du das Geld anlegen?"
         );
-        testIntent("SavingsPlanNumberOfYearsIntent", "AnzahlJahre:2",
+        testIntent("PlainNumberIntent", "Number:2",
                 "Welchen Geldbetrag moechtest du monatlich investieren?"
         );
-        testIntentMatches("SavingsPlanAmountIntent", "Betrag:150",
+        testIntentMatches("PlainNumberIntent", "Number:150",
                 "Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende des Zeitraums insgesamt (.*) Euro\\. Soll ich diesen Sparplan fuer dich anlegen\\?"
         );
 
