@@ -80,11 +80,11 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
         String intentName = intent.getName();
         Session session = requestEnvelope.getSession();
         LOGGER.info("Intent Name: " + intentName);
-        String context = (String) session.getAttribute(CONTEXT);
+        String context = (String) session.getAttribute(DIALOG_CONTEXT);
         LOGGER.info("Context: " + context);
 
         if (REPLACEMENT_CARD_INTENT.equals(intentName)) {
-            session.setAttribute(CONTEXT, REPLACEMENT_CARD_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, REPLACEMENT_CARD_INTENT);
             return askForCardNumber(session, false);
         } else if (PLAIN_NUMBER_INTENT.equals(intentName) && context != null && context.equals(REPLACEMENT_CARD)) {
             return askIfBlockedOrDamaged(intent, session);

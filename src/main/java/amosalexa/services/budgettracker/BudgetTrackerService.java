@@ -74,11 +74,11 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
         Session session = requestEnvelope.getSession();
-        String context = (String) session.getAttribute(CONTEXT);
+        String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
         if (CATEGORY_LIMIT_SET_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, CATEGORY_LIMIT_SET_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, CATEGORY_LIMIT_SET_INTENT);
             return askForSetCategoryLimitConfirmation(intent, session);
         } else if (YES_INTENT.equals(intentName) && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
             return setCategoryLimit(intent, session);

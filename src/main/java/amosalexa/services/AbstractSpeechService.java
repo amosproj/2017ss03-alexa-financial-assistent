@@ -8,9 +8,14 @@ import com.amazon.speech.ui.*;
 public abstract class AbstractSpeechService {
 
     /**
-     * To hold session dialog context
+     * To hold session dialog context (which dialog is the current active dialog)
      */
-    protected static final String CONTEXT = "DIALOG_CONTEXT";
+    protected static final String DIALOG_CONTEXT = "DialogContext";
+
+    /**
+     * To hold information about the context within one dialog.
+     */
+    protected static final String WITHIN_DIALOG_CONTEXT = "WithinDialogContext";
 
     protected static final String YES_INTENT = "AMAZON.YesIntent";
     protected static final String NO_INTENT = "AMAZON.NoIntent";

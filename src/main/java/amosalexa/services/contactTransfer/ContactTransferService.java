@@ -16,7 +16,6 @@ import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import model.banking.Account;
 import model.banking.Contact;
-import model.banking.Transaction;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +75,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         Intent intent = requestEnvelope.getRequest().getIntent();
         Session session = requestEnvelope.getSession();
         String intentName = intent.getName();
-        String context = (String) session.getAttribute(CONTEXT);
+        String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
         switch (intentName) {
             case CONTACT_TRANSFER_INTENT:
@@ -89,7 +88,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
                 }
                 return null;
             case NO_INTENT:
-                session.setAttribute(CONTEXT, "");
+                session.setAttribute(DIALOG_CONTEXT, "");
                 return getResponse(CONTACT_TRANSFER_CARD, "Okay, verstanden. Dann bis zum nächsten Mal.");
             default:
                 return null;
@@ -177,7 +176,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             i++;
         }
 
-        session.setAttribute(CONTEXT, CONTACT_TRANSFER_INTENT);
+        session.setAttribute(DIALOG_CONTEXT, CONTACT_TRANSFER_INTENT);
 
         return getAskResponse(CONTACT_TRANSFER_CARD, contactListString.toString());
     }
@@ -210,7 +209,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             amount = (int) amountObj;
         }
 
-        session.setAttribute(CONTEXT, CONTACT_CHOICE_INTENT);
+        session.setAttribute(DIALOG_CONTEXT, CONTACT_CHOICE_INTENT);
 
         Account account = AccountAPI.getAccount(ACCOUNT_NUMBER);
         String balanceBeforeTransation = String.valueOf(account.getBalance());

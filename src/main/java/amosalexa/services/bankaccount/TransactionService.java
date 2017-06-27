@@ -75,10 +75,10 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
         Session session = requestEnvelope.getSession();
-        String context = (String) session.getAttribute(CONTEXT);
+        String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
         if (BANK_TRANSFER_INTENT.equals(intentName)) {
-            session.setAttribute(CONTEXT, BANK_TRANSFER_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, BANK_TRANSFER_INTENT);
             return saveSlotValuesAndAskForConfirmation(intent, session);
         } else if (context != null && context.equals(BANK_TRANSFER_INTENT) && YES_INTENT.equals(intentName)) {
             return proceedBankTransfer(session);

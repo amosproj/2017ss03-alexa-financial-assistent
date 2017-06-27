@@ -59,8 +59,6 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
      */
     private static final String SAVINGS_PLAN = "Sparplan";
 
-    private static final String WITHIN_DIALOG_CONTEXT = "WithinDialogContext";
-
     //Intent names
     private static final String SAVINGS_PLAN_INTRO_INTENT = "SavingsPlanIntroIntent";
     private static final String SAVINGS_PLAN_CHANGE_PARAMETER_INTENT = "SavingsPlanChangeParameterIntent";
@@ -99,12 +97,12 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         String intentName = intent.getName();
         Session session = requestEnvelope.getSession();
         LOGGER.info("Intent Name: " + intentName);
-        String context = (String) session.getAttribute(CONTEXT);
+        String context = (String) session.getAttribute(DIALOG_CONTEXT);
         String withinDialogContext = (String) session.getAttribute(WITHIN_DIALOG_CONTEXT);
         LOGGER.info("Within context: " + withinDialogContext);
 
         if (SAVINGS_PLAN_INTRO_INTENT.equals(intentName)) {
-            session.setAttribute(CONTEXT, "SavingsPlan");
+            session.setAttribute(DIALOG_CONTEXT, "SavingsPlan");
             return askForBasicAmount(session);
         } else if (context != null && context.equals("SavingsPlan") && withinDialogContext != null) {
             if ((PLAIN_NUMBER_INTENT.equals(intentName) || PLAIN_EURO_INTENT.equals(intentName)) && withinDialogContext.equals("BasicAmount")) {
@@ -124,7 +122,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
                 return askAgainForParameter(intent, session);
             } else if (SAVINGS_PLAN_NEW_INTENT.equals(intentName)) {
                 session.getAttributes().clear();
-                session.setAttribute(CONTEXT, "SavingsPlan");
+                session.setAttribute(DIALOG_CONTEXT, "SavingsPlan");
                 return askForBasicAmount(session);
             } else if (STOP_INTENT.equals(intentName)) {
                 return getResponse("Stop", "");
