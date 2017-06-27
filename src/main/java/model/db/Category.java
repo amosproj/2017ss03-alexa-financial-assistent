@@ -108,4 +108,13 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", limit=" + limit +
+                '}';
+    }
 }
