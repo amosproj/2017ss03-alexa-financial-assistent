@@ -556,6 +556,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         session.setAttribute("PayeeSecondName", payeeSecondName);
 
         for (int i = 0; i < standingOrders.size(); i++) {
+            LOGGER.info(standingOrders.get(i).getExecutionRate().toString());
             if (standingOrders.get(i).getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
@@ -595,6 +596,18 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         int standingOrderToModify = (int) session.getAttribute("StandingOrderToModify");
         String newAmount = (String) session.getAttribute("NewAmount");
 
+        //deleting old orders
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
+        standingOrders = new ArrayList<>(standingOrdersCollection);
+        String payeeFullName = AccountAPI.getStandingOrder(ACCOUNT_NUMBER,standingOrderToModify).getPayee().toLowerCase();
+
+        for (int i = 0; i < standingOrders.size(); i++) {
+            if (standingOrders.get(i).getStandingOrderId().intValue() != standingOrderToModify &&
+                    standingOrders.get(i).getPayee().toLowerCase().equals(payeeFullName)) {
+                AccountAPI.deleteStandingOrder(ACCOUNT_NUMBER, standingOrders.get(i).getStandingOrderId().intValue());
+            }
+        }
+
         StandingOrder standingOrder = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderToModify);
 
         standingOrder.setAmount(Integer.parseInt(newAmount));
@@ -604,7 +617,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText("Der Dauerauftrag Nummer " + standingOrderToModify +
-                "für " + standingOrder.getPayee() + " über " + newAmount + " wurde erfolgreich aktualisiert ");
+                " für " + standingOrder.getPayee() + " über " + newAmount + " euro wurde erfolgreich aktualisiert");
         // Create reprompt
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
@@ -643,7 +656,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Der neue Dauerauftrag für " + oldStandingOrder.getPayee() + "über " + newAmount +
+        speech.setText("Der neue Dauerauftrag für " + oldStandingOrder.getPayee() + " über " + newAmount +
                 " wurde erfolgreich eingerichtet");
         // Create reprompt
         Reprompt reprompt = new Reprompt();
