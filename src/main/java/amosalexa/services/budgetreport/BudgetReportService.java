@@ -27,14 +27,14 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
     @Override
     public List<String> getStartIntents() {
         return Arrays.asList(
-                TEST_EMAIL_INTENT
+                BUDGET_REPORT_EMAIL_INTENT
         );
     }
 
     @Override
     public List<String> getHandledIntents() {
         return Arrays.asList(
-                TEST_EMAIL_INTENT
+                BUDGET_REPORT_EMAIL_INTENT
         );
     }
 
@@ -49,13 +49,13 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
         subscribe(speechletSubject);
     }
 
-    private static final String TEST_EMAIL_INTENT = "TestEMailIntent";
+    private static final String BUDGET_REPORT_EMAIL_INTENT = "BudgetReportEMailIntent";
 
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
         IntentRequest request = requestEnvelope.getRequest();
 
-        if (request.getIntent().getName().equals(TEST_EMAIL_INTENT)) {
+        if (request.getIntent().getName().equals(BUDGET_REPORT_EMAIL_INTENT)) {
             // Load the mail template from resources
             JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
@@ -76,9 +76,9 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             // Render mail template
             String body = template.render(model);
 
-            String answer = "Okay, ich habe dir eine Test-E-Mail gesendet.";
+            String answer = "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.";
             if (!EMailClient.SendHTMLEMail("Test-Mail", body)) {
-                answer = "Leider konnte die E-Mail nicht gesendet werden.";
+                answer = "Leider konnte der Ausgabenreport nicht gesendet werden.";
             }
             return getResponse("E-Mail gesendet", answer);
         }
