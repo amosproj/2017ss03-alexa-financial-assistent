@@ -37,7 +37,7 @@ public class BudgetCategory {
     }
 
     public String getLimitCategory() {
-        return String.valueOf(limitCategory);
+        return String.valueOf(round(limitCategory, 2));
     }
 
     public static double round(double value, int places) {

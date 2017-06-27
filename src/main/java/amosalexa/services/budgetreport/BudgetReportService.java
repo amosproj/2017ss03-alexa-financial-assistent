@@ -59,6 +59,7 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             // Load the mail template from resources
             JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
+            // TODO: Dummy data
             List<BudgetCategory> categories = new ArrayList<>();
             categories.add(new BudgetCategory("Gesundheit", "black", 130., 10.));
             categories.add(new BudgetCategory("Bildung", "blue", 100., 0.));
@@ -68,8 +69,7 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             categories.add(new BudgetCategory("Wohltätigkeit", "pink", 100., 5.));
             categories.add(new BudgetCategory("Haushalt", "red", 85., 44.));
             categories.add(new BudgetCategory("Urlaub", "yellow", 100., 0.));
-
-
+            
             JtwigModel model = JtwigModel.newModel().with("var", "World")
                                                     .with("categories", categories);
 
