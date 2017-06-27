@@ -161,6 +161,20 @@ public abstract class AbstractSpeechService {
     }
 
     /**
+     * Helper method for retrieving an Ask response with a simple card and a speech text included.
+     *
+     * @param cardTitle  Title of the card that you want displayed.
+     * @param speechText speech text that will be spoken to the user (and also be used as reprompt)
+     * @return the resulting card and speech text.
+     */
+    protected SpeechletResponse getSSMLAskResponse(String cardTitle, String speechText) {
+        SimpleCard card = getSimpleCard(cardTitle, speechText);
+        SsmlOutputSpeech ssmlOutputSpeech = getSSMLOutputSpeech(speechText);
+        Reprompt reprompt = getReprompt(ssmlOutputSpeech);
+        return SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
+    }
+
+    /**
      * Gets error response.
      *
      * @param errorDetail error details

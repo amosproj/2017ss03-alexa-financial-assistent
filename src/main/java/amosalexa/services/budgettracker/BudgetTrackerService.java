@@ -43,6 +43,8 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
     public List<String> getHandledIntents() {
         return Arrays.asList(
                 CATEGORY_LIMIT_SET_INTENT,
+                PLAIN_NUMBER_INTENT,
+                PLAIN_EURO_INTENT,
                 YES_INTENT,
                 NO_INTENT,
                 STOP_INTENT
@@ -79,18 +81,29 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         if (CATEGORY_LIMIT_SET_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(DIALOG_CONTEXT, CATEGORY_LIMIT_SET_INTENT);
-            return askForSetCategoryLimitConfirmation(intent, session);
-        } else if (YES_INTENT.equals(intentName) && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
+            return saveSlotValuesAndAskForConfirmation(intent, session);
+        } else if ((PLAIN_NUMBER_INTENT.equals(intentName) || PLAIN_EURO_INTENT.equals(intentName)) && context != null
+                && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
+            Map<String, Slot> slots = intent.getSlots();
+            String newLimit = slots.get(NUMBER_SLOT_KEY) != null ? slots.get(NUMBER_SLOT_KEY).getValue() : null;
+            if (newLimit == null) {
+                return getAskResponse(BUDGET_TRACKER, "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.");
+            }
+            session.setAttribute(CATEGORY_LIMIT, newLimit);
+            String categoryName = (String) session.getAttribute(CATEGORY);
+            return askForConfirmation(categoryName, newLimit);
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
             return setCategoryLimit(intent, session);
-        } else if (NO_INTENT.equals(intentName)) {
-            //TODO handle No intent!
-            return getResponse(BUDGET_TRACKER, "OK, dann nicht. Auf Wiedersehen!");
+        } else if (NO_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
+            return askForCorrection(session);
+        } else if (STOP_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
+            return getResponse("Stop", null);
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
     }
 
-    private SpeechletResponse askForSetCategoryLimitConfirmation(Intent intent, Session session) {
+    private SpeechletResponse saveSlotValuesAndAskForConfirmation(Intent intent, Session session) {
         Map<String, Slot> slots = intent.getSlots();
         Slot categorySlot = slots.get(CATEGORY);
         Slot categoryLimitSlot = slots.get(CATEGORY_LIMIT);
@@ -104,10 +117,20 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         } else {
             session.setAttribute(CATEGORY, categorySlot.getValue());
             session.setAttribute(CATEGORY_LIMIT, categoryLimitSlot.getValue());
-            return getAskResponse(BUDGET_TRACKER, "Moechtest du das Ausgabelimit von Kategorie " + categorySlot.getValue()
-                    + " wirklich auf " + categoryLimitSlot.getValue() + " Euro aendern?");
-            //TODO
+            return askForConfirmation(categorySlot.getValue(), categoryLimitSlot.getValue());
         }
+    }
+
+    private SpeechletResponse askForConfirmation(String category, String categoryLimit) {
+        return getAskResponse(BUDGET_TRACKER, "Moechtest du das Ausgabelimit fuer die Kategorie " + category
+                + " wirklich auf " + categoryLimit + " Euro setzen?");
+    }
+
+    private SpeechletResponse askForCorrection(Session session) {
+        String categoryName = (String) session.getAttribute(CATEGORY);
+        String response = "<emphasis level=\"reduced\">Nenne den Betrag, auf den du das Limit fuer Kategorie " + categoryName +
+                " stattdessen setzen willst oder beginne mit einer neuen Eingabe.</emphasis>";
+        return getSSMLAskResponse(BUDGET_TRACKER, response);
     }
 
     private SpeechletResponse setCategoryLimit(Intent intent, Session session) {
@@ -135,7 +158,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             //TODO
         } else {
             LOGGER.info("Category does not exist yet. Create category...");
-            LOGGER.info("Set limit for category " + categoryName);
+            LOGGER.info("Set limit for category " + categoryName + "to value: " + categoryLimit);
             category = new Category(categoryName, Double.valueOf(categoryLimit));
             DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
         }

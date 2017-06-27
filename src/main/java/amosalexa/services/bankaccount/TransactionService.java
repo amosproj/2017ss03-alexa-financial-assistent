@@ -56,8 +56,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
-    private static final String BANK_TRANSFER_INTENT = "BankTransferIntent";
-    private static final String NUMBER_KEY = "Number";
+    private static final String BANK_TRANSFER_INTENT = "BankTransferIntent";;
     private static final String AMOUNT_KEY = "Amount";
     private static final String NAME_KEY = "Name";
     private static final String IBAN_KEY = "iban";
@@ -88,7 +87,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
             return getResponse("Stop", null);
         } else if (context != null && context.equals(BANK_TRANSFER_INTENT) && PLAIN_NUMBER_INTENT.equals(intentName)) {
             Map<String, Slot> slots = intent.getSlots();
-            String newAmount = slots.get(NUMBER_KEY) != null ? slots.get(NUMBER_KEY).getValue() : null;
+            String newAmount = slots.get(NUMBER_SLOT_KEY) != null ? slots.get(NUMBER_SLOT_KEY).getValue() : null;
             if (newAmount == null) {
                 return getAskResponse(TRANSACTION, "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.");
             }
