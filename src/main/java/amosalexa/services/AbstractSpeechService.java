@@ -17,6 +17,15 @@ public abstract class AbstractSpeechService {
     protected static final String STOP_INTENT = "AMAZON.StopIntent";
     protected static final String HELP_INTENT = "AMAZON.HelpIntent";
 
+    //Should be used for utterances that contain only a number
+    protected static final String PLAIN_NUMBER_INTENT = "PlainNumberIntent";
+
+    //Should be used for utterances that contain a number plus 'Euro'
+    protected static final String PLAIN_EURO_INTENT = "PlainEuroIntent";
+
+    //Should be used for utterances that contain a number plus 'Jahre' or 'Jahr'
+    protected static final String PLAIN_YEARS_INTENT = "PlainYearsIntent";
+
     /**
      * Helper method that will get the intent name from a provided Intent object. If a name does not
      * exist then this method will return null.
