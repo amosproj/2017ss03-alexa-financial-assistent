@@ -164,17 +164,6 @@ public class AccountAPI {
 	}
 
 	/**
-	 * Creates a transaction.
-	 *
-	 * @param accountNumber Account number
-	 * @param newTransaction Transaction to perform
-	 * @return the transaction
-	 */
-	public static Transaction createTransaction(String accountNumber, Transaction newTransaction) {
-		return (Transaction) bankingRESTClient.postBankingModelObject("/accounts/" + accountNumber + "/transactions", newTransaction, Transaction.class);
-	}
-
-	/**
 	 * Get all transactions for the given account.
 	 *
 	 * @param accountNumber Account number
