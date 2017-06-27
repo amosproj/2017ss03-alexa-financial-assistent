@@ -305,6 +305,19 @@ public class AmosAlexaSpeechletTest {
         Calendar calendar = Calendar.getInstance();
         String nextPayin = String.format("01.%02d.%d", calendar.get(Calendar.MONTH) + 2, calendar.get(Calendar.YEAR));
 
+        //Test NoIntent handling
+        testIntent(
+                "AMAZON.NoIntent",
+                "Nenne einen der Parameter, die du aendern willst " +
+                        "oder beginne neu, indem du \"Neu\" sagst.");
+        testIntent(
+                "SavingsPlanChangeParameterIntent", "SavingsPlanParameter:laufzeit",
+                "Wie viele Jahre moechtest du das Geld anlegen?");
+        testIntentMatches("PlainNumberIntent", "Number:6",
+                "Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende des Zeitraums insgesamt (.*) Euro\\. " +
+                        "Soll ich diesen Sparplan fuer dich anlegen\\?");
+
+        //Test with YesIntent, savings plan should be actually created
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + ".");
@@ -349,7 +362,7 @@ public class AmosAlexaSpeechletTest {
 
         if (m.find()) {
             String endDigits = m.group(1);
-            testIntent("FourDigitNumberIntent", "FourDigits:" + endDigits,
+            testIntent("PlainNumberIntent", "Number:" + endDigits,
                     "Wurde die Karte gesperrt oder wurde sie beschädigt?");
 
             testIntent("ReplacementCardReasonIntent", "ReplacementReason:beschaedigt",
