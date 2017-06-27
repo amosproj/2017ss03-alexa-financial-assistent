@@ -8,15 +8,13 @@ public class BudgetCategory {
     private String colorCode;
     private String nameCategory;
 
-    private Double totalAmountSpend;
     private Double limitCategory;
     private Double categoryAmountSpend;
 
-    public BudgetCategory(String nameCategory, String colorCode,
-                          Double totalAmountSpend, Double limitCategory, Double categoryAmountSpend) {
+    public BudgetCategory(String nameCategory, String colorCode
+            , Double limitCategory, Double categoryAmountSpend) {
         this.nameCategory = nameCategory;
         this.colorCode = colorCode;
-        this.totalAmountSpend = totalAmountSpend;
         this.limitCategory = limitCategory;
         this.categoryAmountSpend = categoryAmountSpend;
     }
@@ -27,7 +25,7 @@ public class BudgetCategory {
     }
 
     public String getAmountPercentage() {
-        Double per = categoryAmountSpend / totalAmountSpend;
+        Double per = categoryAmountSpend / limitCategory;
         return String.valueOf(round(per, 2));
     }
 
