@@ -161,7 +161,7 @@
         },
         {
           "name": "Amount",
-          "type": "AMAZON.FOUR_DIGIT_NUMBER"
+          "type": "AMAZON.NUMBER"
         },
         {
           "name": "ExecutionRate",
@@ -221,7 +221,7 @@
       "slots": [
         {
           "name": "Amount",
-          "type": "AMAZON.FOUR_DIGIT_NUMBER"
+          "type": "AMAZON.NUMBER"
         },
         {
           "name": "Name",
