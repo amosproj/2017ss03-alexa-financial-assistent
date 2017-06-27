@@ -314,7 +314,7 @@
       ]
     },
     {
-      "intent": "TestEMailIntent"
+      "intent": "BudgetReportEMailIntent"
     },
     {
       "intent": "AMAZON.StopIntent"
