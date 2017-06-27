@@ -19,9 +19,6 @@
       ]
     },
     {
-      "intent": "TestListIntent"
-    },
-    {
       "intent": "AccountInformation",
       "slots": [
         {

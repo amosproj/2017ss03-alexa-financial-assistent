@@ -1,5 +1,3 @@
-TestListIntent Teste Liste
-
 AffordProduct Ich suche {ProductKeyword}
 AffordProduct Was kostet ein {ProductKeyword}
 AffordProduct Was kostet eine {ProductKeyword}
