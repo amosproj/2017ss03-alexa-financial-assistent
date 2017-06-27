@@ -301,6 +301,24 @@
       ]
     },
     {
+      "intent": "PlainCategoryIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ]
+    },
+    {
+      "intent": "CategoryLimitInfoIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ]
+    },
+    {
       "intent": "CategoryLimitSetIntent",
       "slots": [
         {

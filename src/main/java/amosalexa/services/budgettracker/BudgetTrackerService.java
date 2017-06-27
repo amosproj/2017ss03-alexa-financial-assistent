@@ -30,11 +30,14 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         return this.getClass().getName();
     }
 
+    private static final String CATEGORY_LIMIT_INFO_INTENT = "CategoryLimitInfoIntent";
+    private static final String PLAIN_CATEGORY_INTENT = "PlainCategoryIntent";
     private static final String CATEGORY_LIMIT_SET_INTENT = "CategoryLimitSetIntent";
 
     @Override
     public List<String> getStartIntents() {
         return Arrays.asList(
+                CATEGORY_LIMIT_INFO_INTENT,
                 CATEGORY_LIMIT_SET_INTENT
         );
     }
@@ -42,6 +45,8 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
     @Override
     public List<String> getHandledIntents() {
         return Arrays.asList(
+                CATEGORY_LIMIT_INFO_INTENT,
+                PLAIN_CATEGORY_INTENT,
                 CATEGORY_LIMIT_SET_INTENT,
                 PLAIN_NUMBER_INTENT,
                 PLAIN_EURO_INTENT,
@@ -75,11 +80,16 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
         Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
+        LOGGER.info("Intent name: " + intentName);
         Session session = requestEnvelope.getSession();
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
-        if (CATEGORY_LIMIT_SET_INTENT.equals(intentName)) {
-            LOGGER.info(getClass().toString() + " Intent started: " + intentName);
+        if (CATEGORY_LIMIT_INFO_INTENT.equals(intentName)) {
+            session.setAttribute(DIALOG_CONTEXT, CATEGORY_LIMIT_INFO_INTENT);
+            return getCategoryLimitInfo(intent);
+        } else if (PLAIN_CATEGORY_INTENT.equals(intentName)) {
+            return getCategoryLimitInfo(intent);
+        } else if (CATEGORY_LIMIT_SET_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, CATEGORY_LIMIT_SET_INTENT);
             return saveSlotValuesAndAskForConfirmation(intent, session);
         } else if ((PLAIN_NUMBER_INTENT.equals(intentName) || PLAIN_EURO_INTENT.equals(intentName)) && context != null
@@ -100,6 +110,29 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             return getResponse("Stop", null);
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
+        }
+    }
+
+    private SpeechletResponse getCategoryLimitInfo(Intent intent) {
+        Map<String, Slot> slots = intent.getSlots();
+        Slot categorySlot = slots.get(CATEGORY);
+        LOGGER.info("Category: " + categorySlot.getValue());
+
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        LOGGER.info("All categories: " + categories);
+        Category category = null;
+
+        for (Category cat : categories) {
+            if (cat.getName().equals(categorySlot.getValue())) {
+                category = cat;
+            }
+        }
+        if (category != null) {
+            return getResponse(BUDGET_TRACKER, "Das Limit fuer die Kategorie " + categorySlot.getValue() + " liegt bei" +
+                    Double.valueOf(category.getLimit()) + " Euro.");
+        } else {
+            return getAskResponse(BUDGET_TRACKER, "Es gibt keine Kategorie mit diesem Namen. Waehle eine andere Kategorie oder" +
+                    " erhalte eine Info zu den verfuegbaren Kategorien.");
         }
     }
 
@@ -155,7 +188,6 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
                 DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
             }
             LOGGER.info("Category limit afterwards: " + category.getLimit());
-            //TODO
         } else {
             LOGGER.info("Category does not exist yet. Create category...");
             LOGGER.info("Set limit for category " + categoryName + "to value: " + categoryLimit);

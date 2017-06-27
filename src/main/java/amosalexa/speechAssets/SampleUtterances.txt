@@ -151,4 +151,12 @@ ContactTransferIntent Überweise {Amount} Euro an {Contact}
 ContactChoiceIntent Kontakt Nummer {ContactIndex}
 
 CategoryLimitSetIntent Ändere Limit für {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Ändere Limit für Kategorie {Category} auf {CategoryLimit} Euro
 CategoryLimitSetIntent Setze Limit für {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Setze Limit für Kategorie {Category} auf {CategoryLimit} Euro
+
+CategoryLimitInfoIntent Wie ist das Limit für {Category}
+CategoryLimitInfoIntent Wie ist das Limit für Kategorie {Category}
+
+PlainCategoryIntent {Category}
+PlainCategoryIntent Kategorie {Category}
