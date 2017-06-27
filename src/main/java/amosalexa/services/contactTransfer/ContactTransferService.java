@@ -1,19 +1,29 @@
 package amosalexa.services.contactTransfer;
 
+import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import amosalexa.services.bankcontact.BankContactService;
+import api.aws.DynamoDbClient;
+import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import model.banking.Account;
+import model.banking.Contact;
+import model.banking.Transaction;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -31,6 +41,11 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
      */
     private static final String CONTACT_TRANSFER_CARD = "Überweisung an Kontakt";
 
+    /**
+     * String used as a prefix for session variables.
+     */
+    private static final String SESSION_PREFIX = "ContactTransfer";
+
     //region Intent names
 
     /**
@@ -43,6 +58,13 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
      */
     private static final String CONTACT_CHOICE_INTENT = "ContactChoiceIntent";
 
+    /**
+     * Account number.
+     */
+    private static final String ACCOUNT_NUMBER = "0000000001";
+
+    private static final SessionStorage SESSION_STORAGE = SessionStorage.getInstance();
+
     //endregion
 
     public ContactTransferService(SpeechletSubject speechletSubject) {
@@ -52,16 +74,22 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
         Intent intent = requestEnvelope.getRequest().getIntent();
+        Session session = requestEnvelope.getSession();
         String intentName = intent.getName();
+        String context = (String) session.getAttribute(CONTEXT);
 
         switch (intentName) {
             case CONTACT_TRANSFER_INTENT:
-                return contactTransfer(intent);
+                return contactTransfer(intent, session);
             case CONTACT_CHOICE_INTENT:
-                return contactChoice(intent);
+                return contactChoice(intent, session);
             case YES_INTENT:
-                return performTransfer(intent);
+                if (context.equals(CONTACT_CHOICE_INTENT)) {
+                    return performTransfer(intent, session);
+                }
+                return null;
             case NO_INTENT:
+                session.setAttribute(CONTEXT, "");
                 return getResponse(CONTACT_TRANSFER_CARD, "Okay, verstanden. Dann bis zum nächsten Mal.");
             default:
                 return null;
@@ -71,22 +99,179 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
     /**
      * Lists possible contact or directly asks for confirmation.
      */
-    private SpeechletResponse contactTransfer(Intent intent) {
-        return null;
+    private SpeechletResponse contactTransfer(Intent intent, Session session) {
+        // Try to get the contact name
+        String contactName = intent.getSlot("Contact").getValue();
+        if (contactName == null || contactName.equals("")) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Ich konnte den Namen des Kontakts nicht verstehen. Versuche es noch einmal.");
+        }
+
+        contactName = contactName.toLowerCase();
+
+        // Try to get the amount
+        double amount;
+        try {
+            amount = Double.parseDouble(intent.getSlot("Amount").getValue());
+        } catch (NumberFormatException ignored) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Ich konnte den Betrag nicht verstehen. Versuche es noch einmal.");
+        }
+
+        session.setAttribute(SESSION_PREFIX + ".amount", amount);
+
+        // Query database
+        List<Contact> contacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+
+        List<Contact> contactsFound = new LinkedList<>();
+        for (Contact contact : contacts) {
+            String thisContactName = contact.getName().toLowerCase();
+
+            int dist = StringUtils.getLevenshteinDistance(thisContactName, contactName);
+            if (dist < contactName.length() / 2) {
+                contactsFound.add(contact);
+            } else {
+                if (thisContactName.startsWith(contactName)) {
+                    contactsFound.add(contact);
+                } else if (thisContactName.contains(contactName)) {
+                    contactsFound.add(contact);
+                } else {
+                    int middle = thisContactName.length() / 2;
+                    String firstHalf = thisContactName.substring(0, middle);
+                    String secondHalf = thisContactName.substring(middle);
+
+                    dist = Math.min(
+                            StringUtils.getLevenshteinDistance(firstHalf, contactName),
+                            StringUtils.getLevenshteinDistance(secondHalf, contactName));
+
+                    if (dist < middle / 1.5) {
+                        contactsFound.add(contact);
+                    }
+                }
+            }
+        }
+
+        if (contactsFound.size() == 0) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Ich konnte keinen Kontakt finden mit dem Namen: " + contactName);
+        }
+
+        SESSION_STORAGE.putObject(session.getSessionId(), SESSION_PREFIX + ".contactsFound", contactsFound);
+
+        if (contactsFound.size() == 1) {
+            session.setAttribute(SESSION_PREFIX + ".choice", 1);
+            return confirm(session);
+        }
+
+        StringBuilder contactListString = new StringBuilder();
+
+        contactListString
+                .append("Ich habe ")
+                .append(contactsFound.size())
+                .append(" passende Kontakte gefunden. Bitte wähle einen aus: ");
+
+        int i = 1;
+        for (Contact contact : contactsFound) {
+            contactListString
+                    .append("Kontakt Nummer ")
+                    .append(i).append(": ")
+                    .append(contact.getName())
+                    .append(". ");
+            i++;
+        }
+
+        session.setAttribute(CONTEXT, CONTACT_TRANSFER_INTENT);
+
+        return getAskResponse(CONTACT_TRANSFER_CARD, contactListString.toString());
+    }
+
+    private SpeechletResponse confirm(Session session) {
+        Object contactsFoundObj = SESSION_STORAGE.getObject(session.getSessionId(), SESSION_PREFIX + ".contactsFound");
+
+        if (contactsFoundObj == null || !(contactsFoundObj instanceof List)) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Da ist etwas schiefgegangen. Tut mir Leid.");
+        }
+
+        Object choiceObj = session.getAttribute(SESSION_PREFIX + ".choice");
+
+        if (choiceObj == null || !(choiceObj instanceof Integer)) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Da ist etwas schiefgegangen. Tut mir Leid.");
+        }
+
+        Object amountObj = session.getAttribute(SESSION_PREFIX + ".amount");
+
+        if (amountObj == null || !(amountObj instanceof Double || amountObj instanceof Integer)) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Da ist etwas schiefgegangen. Tut mir Leid.");
+        }
+
+        Contact contact = ((List<Contact>) contactsFoundObj).get((int) choiceObj - 1);
+
+        double amount;
+        if (amountObj instanceof Double) {
+            amount = (double) amountObj;
+        } else {
+            amount = (int) amountObj;
+        }
+
+        session.setAttribute(CONTEXT, CONTACT_CHOICE_INTENT);
+
+        Account account = AccountAPI.getAccount(ACCOUNT_NUMBER);
+        String balanceBeforeTransation = String.valueOf(account.getBalance());
+
+        return getAskResponse(CONTACT_TRANSFER_CARD, "Dein aktueller Kontostand beträgt " + balanceBeforeTransation + " Euro. Möchtest du " + amount + " Euro an " + contact.getName() + " überweisen?");
     }
 
     /**
      * Asks for confirmation.
      */
-    private SpeechletResponse contactChoice(Intent intent) {
-        return null;
+    private SpeechletResponse contactChoice(Intent intent, Session session) {
+        int choice;
+        try {
+            choice = Integer.parseInt(intent.getSlot("ContactIndex").getValue());
+        } catch (NumberFormatException ignored) {
+            return getAskResponse(CONTACT_TRANSFER_CARD, "Ich habe leider nicht verstanden welche Person du meinst. Bitte wiederhole.");
+        }
+
+        session.setAttribute(SESSION_PREFIX + ".choice", choice);
+
+        return confirm(session);
     }
 
     /**
      * Performs the transfer.
      */
-    private SpeechletResponse performTransfer(Intent intent) {
-        return null;
+    private SpeechletResponse performTransfer(Intent intent, Session session) {
+        Object contactsFoundObj = SESSION_STORAGE.getObject(session.getSessionId(), SESSION_PREFIX + ".contactsFound");
+
+        if (contactsFoundObj == null || !(contactsFoundObj instanceof List)) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Da ist etwas schiefgegangen. Tut mir Leid.");
+        }
+
+        Object choiceObj = session.getAttribute(SESSION_PREFIX + ".choice");
+
+        if (choiceObj == null || !(choiceObj instanceof Integer)) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Da ist etwas schiefgegangen. Tut mir Leid.");
+        }
+
+        Object amountObj = session.getAttribute(SESSION_PREFIX + ".amount");
+
+        if (amountObj == null || !(amountObj instanceof Double || amountObj instanceof Integer)) {
+            return getResponse(CONTACT_TRANSFER_CARD, "Da ist etwas schiefgegangen. Tut mir Leid.");
+        }
+
+        Contact contact = ((List<Contact>) contactsFoundObj).get((int) choiceObj - 1);
+
+        double amount;
+        if (amountObj instanceof Double) {
+            amount = (double) amountObj;
+        } else {
+            amount = (int) amountObj;
+        }
+
+        TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), "2017-05-16",
+                "Beschreibung", "Hans", null);
+
+        Account account = AccountAPI.getAccount("0000000001");
+        String balanceAfterTransation = String.valueOf(account.getBalance());
+
+        return getResponse(CONTACT_TRANSFER_CARD, "Erfolgreich. " + amount + " Euro wurden an " + contact.getName() + " überwiesen. Dein neuer Kontostand beträgt " + balanceAfterTransation + " Euro.");
     }
 
     @Override

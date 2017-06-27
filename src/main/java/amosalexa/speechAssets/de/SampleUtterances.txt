@@ -152,4 +152,4 @@ TestEMailIntent Sende mir eine Test E-Mail
 TestEMailIntent Schicke mir eine TestE-Mail
 
 ContactTransferIntent Überweise {Amount} Euro an {Person}
-ContactChoiceIntent Eintrag {ContactIndex}
+ContactChoiceIntent Kontakt Nummer {ContactIndex}
