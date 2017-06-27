@@ -1,7 +1,12 @@
 apply plugin: 'java'
+apply plugin: 'jacoco'
 
 group = "amosalexa"
 version = '1.0'
+
+def coverageSourceDirs = [
+        'src/main/java'
+]
 
 compileJava {
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -82,6 +87,27 @@ allprojects {
     tasks.withType(Test) {
         systemProperty "file.encoding", "UTF-8"
     }
+}
+
+jacoco {
+    toolVersion = "0.7.6.201602180812"
+}
+
+//Can be made dependent on successfull test task (if desired)
+//task testReport(type: JacocoReport, dependsOn: "test") {
+
+task testReport(type: JacocoReport) {
+    group = "Reporting"
+    description = "Generate Jacoco code coverage report after running tests."
+    reports {
+        xml.enabled = true
+        html.enabled = true
+        html.destination "build/reports/jacoco/testReport"
+    }
+
+    classDirectories = fileTree(dir: './build/classes/')
+    sourceDirectories = files(coverageSourceDirs)
+    executionData = files('build/jacoco/test.exec')
 }
 
 build.dependsOn fatJar
