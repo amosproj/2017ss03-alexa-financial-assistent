@@ -2,8 +2,6 @@ StandingOrdersIntent standing orders
 StandingOrdersIntent tell standing orders
 StandingOrdersIntent standing orders to {Recipient}
 
-TestListIntent test list
-
 ProductRequestIntent what costs {ProductKeyword}
 ProductRequestIntent give me the price of {ProductKeyword}
 ProductRequestIntent find {ProductKeyword}

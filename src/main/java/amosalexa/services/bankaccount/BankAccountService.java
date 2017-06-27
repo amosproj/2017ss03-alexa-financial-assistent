@@ -27,10 +27,11 @@ import java.util.List;
 public class BankAccountService extends AbstractSpeechService implements SpeechService {
 
     /**
-     * bank account AccountNumber
+     * Account number of the bank account to be used.
      */
-    public static final String AccountNumber = "0000000020";
-    private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
+    public static final String ACCOUNT_NUMBER = "0000000001";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountService.class);
     /**
      * amount of transaction responded at once
      */
@@ -43,10 +44,6 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      * cards
      */
     private static final String CARD_NAME = "Kontoinformation";
-    /**
-     * name for custom slot types
-     */
-    private static final String number = "0000000001";
     /**
      * Name for custom slot types
      */
@@ -79,7 +76,6 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      */
     private String CONTEXT_FURTHER_TRANSACTION_INDEX = "transaction_dialog_index";
 
-            ;
     public BankAccountService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
@@ -153,7 +149,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      * set up speech texts in account
      */
     private void setAccount() {
-        account = AccountAPI.getAccount(AccountNumber);
+        account = AccountAPI.getAccount(ACCOUNT_NUMBER);
         account.setSpeechTexts();
     }
 
@@ -166,7 +162,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
         List<Transaction> transactions = Transaction.getTransactions(account.getNumber());
 
         if (transactions == null || transactions.isEmpty()) {
-            log.warn("Account: " + account.getNumber() + " has no transactions");
+            LOGGER.warn("Account: " + account.getNumber() + " has no transactions");
             return getResponse(CARD_NAME, EMPTY_TRANSACTIONS_TEXT);
         }
 
