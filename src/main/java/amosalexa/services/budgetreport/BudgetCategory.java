@@ -25,8 +25,7 @@ public class BudgetCategory {
     }
 
     public String getAmountPercentage() {
-        Double per = categoryAmountSpend / limitCategory;
-        return String.valueOf(round(per, 2));
+        return String.valueOf((int)((categoryAmountSpend / limitCategory) * 100));
     }
 
     public String getColorCode() {

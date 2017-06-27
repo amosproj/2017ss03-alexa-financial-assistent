@@ -13,6 +13,7 @@ import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,7 +59,19 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             // Load the mail template from resources
             JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
-            JtwigModel model = JtwigModel.newModel().with("var", "World");
+            List<BudgetCategory> categories = new ArrayList<>();
+            categories.add(new BudgetCategory("Gesundheit", "black", 130., 10.));
+            categories.add(new BudgetCategory("Bildung", "blue", 100., 0.));
+            categories.add(new BudgetCategory("Lebensmittel", "green", 350., 280.));
+            categories.add(new BudgetCategory("Kleidung", "lightblue", 75., 25.));
+            categories.add(new BudgetCategory("Auto", "orange", 200., 62.));
+            categories.add(new BudgetCategory("Wohltätigkeit", "pink", 100., 5.));
+            categories.add(new BudgetCategory("Haushalt", "red", 85., 44.));
+            categories.add(new BudgetCategory("Urlaub", "yellow", 100., 0.));
+
+
+            JtwigModel model = JtwigModel.newModel().with("var", "World")
+                                                    .with("categories", categories);
 
             // Render mail template
             String body = template.render(model);
