@@ -1,22 +1,34 @@
 package amosalexa.services.budgetreport;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class BudgetCategory {
 
-    private String totalAmountSpend;
     private String colorCode;
     private String nameCategory;
-    private String limitCategory;
 
-    public BudgetCategory(String nameCategory, String colorCode, String totalAmountSpend, String limitCategory) {
+    private Double totalAmountSpend;
+    private Double limitCategory;
+    private Double categoryAmountSpend;
+
+    public BudgetCategory(String nameCategory, String colorCode,
+                          Double totalAmountSpend, Double limitCategory, Double categoryAmountSpend) {
         this.nameCategory = nameCategory;
         this.colorCode = colorCode;
         this.totalAmountSpend = totalAmountSpend;
         this.limitCategory = limitCategory;
+        this.categoryAmountSpend = categoryAmountSpend;
     }
 
 
-    public String getTotalAmountSpend() {
-        return totalAmountSpend;
+    public String getAmountTotal() {
+        return String.valueOf(round(categoryAmountSpend, 2));
+    }
+
+    public String getAmountPercentage() {
+        Double per = categoryAmountSpend / totalAmountSpend;
+        return String.valueOf(round(per, 2));
     }
 
     public String getColorCode() {
@@ -28,6 +40,14 @@ public class BudgetCategory {
     }
 
     public String getLimitCategory() {
-        return limitCategory;
+        return String.valueOf(limitCategory);
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }
