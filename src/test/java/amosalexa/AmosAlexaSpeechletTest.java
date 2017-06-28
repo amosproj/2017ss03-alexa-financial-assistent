@@ -15,6 +15,7 @@ import com.amazon.speech.ui.SsmlOutputSpeech;
 import model.banking.Contact;
 import model.banking.StandingOrder;
 import model.banking.Transaction;
+import model.db.Category;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.junit.BeforeClass;
@@ -28,6 +29,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -219,6 +221,15 @@ public class AmosAlexaSpeechletTest {
     }
 
     @Test
+    public void StandingOrderSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        testIntent(
+                "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:zehn",
+                "Der Dauerauftrag für max mustermann über 10.0 Euro existiert schon. Möchtest du diesen aktualisieren");
+    }
+
+    @Test
     public void contactTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
@@ -253,6 +264,11 @@ public class AmosAlexaSpeechletTest {
         LOGGER.info("Contact: " + latestContact.getName());
         String latestContactId = String.valueOf(latestContact.getId());
 
+        //Test contact list
+        testIntentMatches(
+                "ContactListInfoIntent",
+                "Kontakt \\d+: Name: (.*), IBAN: (.*).(.*)");
+
         //Test delete contact. Therefore delete the contact that we just created.
         testIntent(
                 "ContactDeleteIntent",
@@ -277,13 +293,13 @@ public class AmosAlexaSpeechletTest {
         testIntent("SavingsPlanIntroIntent",
                 "Was moechtest du als Grundbetrag anlegen?"
         );
-        testIntent("SavingsPlanAmountIntent", "Betrag:1500",
+        testIntent("PlainNumberIntent", "Number:1500",
                 "Wie viele Jahre moechtest du das Geld anlegen?"
         );
-        testIntent("SavingsPlanNumberOfYearsIntent", "AnzahlJahre:2",
+        testIntent("PlainNumberIntent", "Number:2",
                 "Welchen Geldbetrag moechtest du monatlich investieren?"
         );
-        testIntentMatches("SavingsPlanAmountIntent", "Betrag:150",
+        testIntentMatches("PlainNumberIntent", "Number:150",
                 "Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende des Zeitraums insgesamt (.*) Euro\\. Soll ich diesen Sparplan fuer dich anlegen\\?"
         );
 
@@ -291,6 +307,19 @@ public class AmosAlexaSpeechletTest {
         Calendar calendar = Calendar.getInstance();
         String nextPayin = String.format("01.%02d.%d", calendar.get(Calendar.MONTH) + 2, calendar.get(Calendar.YEAR));
 
+        //Test NoIntent handling
+        testIntent(
+                "AMAZON.NoIntent",
+                "Nenne einen der Parameter, die du aendern willst " +
+                        "oder beginne neu, indem du \"Neu\" sagst.");
+        testIntent(
+                "SavingsPlanChangeParameterIntent", "SavingsPlanParameter:laufzeit",
+                "Wie viele Jahre moechtest du das Geld anlegen?");
+        testIntentMatches("PlainNumberIntent", "Number:6",
+                "Bei einem Zinssatz von zwei Prozent waere der Gesamtsparbetrag am Ende des Zeitraums insgesamt (.*) Euro\\. " +
+                        "Soll ich diesen Sparplan fuer dich anlegen\\?");
+
+        //Test with YesIntent, savings plan should be actually created
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + ".");
@@ -311,6 +340,55 @@ public class AmosAlexaSpeechletTest {
         testIntent(
                 "AMAZON.YesIntent",
                 "Dauerauftrag Nummer " + latestStandingOrderId + " wurde geloescht.");
+    }
+
+    @Test
+    public void categoryLimitTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
+        //does not affect our data
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        //We assume that 'lebensmittel' category exists!
+        for (Category cat : categories) {
+            if (cat.getName().equals("lebensmittel")) {
+                category = cat;
+            }
+        }
+
+        //Test limit info with unknown category name
+        testIntent("CategoryLimitInfoIntent", "Category:dsafoihdsfzzzzzssdf",
+                "Es gibt keine Kategorie mit diesem Namen. Waehle eine andere Kategorie oder" +
+                        " erhalte eine Info zu den verfuegbaren Kategorien.");
+
+        //Test plain category name input
+        testIntentMatches("PlainCategoryIntent", "Category:lebensmittel",
+                "Das Limit fuer die Kategorie lebensmittel liegt bei (.*) Euro.");
+
+        //Test limit setting
+        testIntent("CategoryLimitSetIntent", "Category:lebensmittel", "CategoryLimit:250",
+                "Moechtest du das Ausgabelimit fuer die Kategorie lebensmittel wirklich auf 250 Euro setzen?");
+
+        //Setting confirmation (yes)
+        testIntent("AMAZON.YesIntent", "Limit fuer lebensmittel wurde gesetzt.");
+
+        //Test limit info after setting
+        testIntent("CategoryLimitInfoIntent", "Category:lebensmittel",
+                "Das Limit fuer die Kategorie lebensmittel liegt bei 250.0 Euro.");
+
+        //Reset the category lebensmittel (as it was before)
+        List<Category> categories2 = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        for (Category c : categories2) {
+            DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, c);
+        }
+        Predicate<Category> categoryPredicate = c -> c.getName().equals("lebensmittel");
+        categories2.removeIf(categoryPredicate);
+        LOGGER.info("Categories2: " + categories2);
+        for (Category c : categories2) {
+            DynamoDbClient.instance.putItem(Category.TABLE_NAME, c);
+        }
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
     }
 
     @Test
@@ -335,7 +413,7 @@ public class AmosAlexaSpeechletTest {
 
         if (m.find()) {
             String endDigits = m.group(1);
-            testIntent("FourDigitNumberIntent", "FourDigits:" + endDigits,
+            testIntent("PlainNumberIntent", "Number:" + endDigits,
                     "Wurde die Karte gesperrt oder wurde sie beschädigt?");
 
             testIntent("ReplacementCardReasonIntent", "ReplacementReason:beschaedigt",

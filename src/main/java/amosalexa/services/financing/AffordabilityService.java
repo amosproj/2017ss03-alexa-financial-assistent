@@ -179,7 +179,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         // save selection in session
         SessionStorage.getInstance().putObject(session.getSessionId(), "selection", selectedItem);
 
-        Account account = AccountAPI.getAccount(BankAccountService.AccountNumber);
+        Account account = AccountAPI.getAccount(BankAccountService.ACCOUNT_NUMBER);
         Number balance = account.getBalance();
 
         if(selectedItem.getOffer().getLowestNewPrice() > balance.doubleValue()){
@@ -245,7 +245,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             text.append(DESIRE_ASK);
             setDialogState("buy?");
 
-            return getAskResponse(CARD, text.toString());
+            return getSSMLAskResponse(CARD, text.toString(), SEARCH_ASK);
         }
 
         log.debug("Dialog State: no keyword");

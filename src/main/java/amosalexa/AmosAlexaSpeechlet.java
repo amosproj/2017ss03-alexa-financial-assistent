@@ -15,33 +15,30 @@ import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankaccount.TransactionService;
 import amosalexa.services.bankcontact.BankContactService;
+import amosalexa.services.budgettracker.BudgetTrackerService;
 import amosalexa.services.cards.BlockCardService;
 import amosalexa.services.cards.ReplacementCardService;
+import amosalexa.services.contactTransfer.ContactTransferService;
 import amosalexa.services.contacts.ContactService;
-import amosalexa.services.email.EMailService;
+import amosalexa.services.budgetreport.BudgetReportService;
 import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.SavingsPlanService;
 import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
-import api.banking.AccountAPI;
-import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
-import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
-import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This sample shows how to create a simple speechlet for handling speechlet requests.
@@ -66,8 +63,10 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new TransferTemplateService(amosAlexaSpeechlet);
         new SecuritiesAccountInformationService(amosAlexaSpeechlet);
         new BalanceLimitService(amosAlexaSpeechlet);
-        new EMailService(amosAlexaSpeechlet);
+        new BudgetReportService(amosAlexaSpeechlet);
         new ContactService(amosAlexaSpeechlet);
+        new ContactTransferService(amosAlexaSpeechlet);
+        new BudgetTrackerService(amosAlexaSpeechlet);
         //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
@@ -197,47 +196,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         String context = (String) session.getAttribute("DIALOG_CONTEXT");
 
         LOGGER.info("Intent: " + intentName);
-        LOGGER.info("Context: " + session.getAttribute("DIALOG_CONTEXT"));
-
-        if ((intentName.equals("FourDigitNumberIntent")) && context.equals("SavingsPlan")) {
-            /*
-            FIXME Extremely ugly workaround for SavingsPlan. The reason is that we have two utterances with only a Amazon.NUMBER
-            FIXME input that interfere badly.
-            FourDigitNumberIntent {FourDigits}
-            SavingsPlanAmountIntent {Betrag}
-            SavingsPlanNumberOfYearsIntent {AnzahlJahre}
-
-            For example if we say 'drei' for any of the other two intents, we end up in the FourDigitNumberIntent anyway.
-            By this code we look which intent we would expect instead of this intent and create it programmatically with getEnvelope method.
-            TODO TODO Any better solutions to avoid this problem???
-            */
-            String conflictingIntentName = null;
-            String slot = null;
-
-            if (intentName.equals("FourDigitNumberIntent") && !session.getAttributes().containsKey("Betrag")) {
-                conflictingIntentName = "SavingsPlanAmountIntent";
-                slot = "Betrag:" + intent.getSlots().get("FourDigits").getValue();
-            } else if (intentName.equals("FourDigitNumberIntent") && !session.getAttributes().containsKey("AnzahlJahre")) {
-                conflictingIntentName = "SavingsPlanNumberOfYearsIntent";
-                slot = "AnzahlJahre:" + intent.getSlots().get("FourDigits").getValue();
-            } else if (intentName.equals("FourDigitNumberIntent") && !session.getAttributes().containsKey("MonthlyPayment")) {
-                conflictingIntentName = "SavingsPlanAmountIntent";
-                slot = "Betrag:" + intent.getSlots().get("FourDigits").getValue();
-            }
-
-            try {
-                requestEnvelope = getEnvelope(conflictingIntentName, session, slot);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            intentName = requestEnvelope.getRequest().getIntent().getName();
-            LOGGER.info("Intent new Name: " + intentName);
-        }
+        LOGGER.info("Context: " + context);
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
@@ -245,19 +204,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         if ("PriceQueryService".equals(intentName) || "AffordIntent".equals(intentName)) {
             sessionStorage.put(SessionStorage.CURRENTDIALOG, "ProductSearch");
             return DialogResponseManager.getInstance().handle(intent, sessionStorage);
-        } else if ("TestListIntent".equals(intentName)) {
-            sessionStorage.put(SessionStorage.CURRENTDIALOG, "TestList"); // Set CURRENTDIALOG to start the TestList dialog
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-        } else if ("AMAZON.YesIntent".equals(intentName)) {
-            SpeechletResponse response = DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-            if (response != null) {
-                return response;
-            }
-        } else if ("AMAZON.NoIntent".equals(intentName)) {
-            SpeechletResponse response = DialogResponseManager.getInstance().handle(intent, sessionStorage); // Let the DialogHandler handle this intent
-            if (response != null) {
-                return response;
-            }
         }
 
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
@@ -300,148 +246,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         reprompt.setOutputSpeech(speech);
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
-     * TODO Still needed???
-     * <p>
-     * Transfers money and returns response with
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse bankTransfer(Map<String, Slot> slots) {
-        Slot amountSlot = slots.get("amount");
-        Slot nameSlot = slots.get("name");
-
-        LOGGER.info("intent: Bank Transfer");
-
-
-        if (slots.get("confirmation").getValue() == "Ja" || slots.get("confirmation").getValue() != null) {
-
-            String amount = "2";
-            String name = "Paul";
-
-            //getting response regarding account balance
-            Account account = AccountAPI.getAccount("0000000001");
-            String balance = String.valueOf(account.getBalance());
-
-            // FIXME: Hardcoded IBAN and so on
-            Number amountNum = Integer.parseInt(amount);
-            TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans", "Helga");
-
-            // confirmation question
-            String speechText = "Dein aktueller Kontostand beträgt " + balance + ". "
-                    + "Möchtest du " + amount + " Euro an " + name + " überweisen?";
-
-            // Create the Simple card content.
-            SimpleCard card = new SimpleCard();
-            card.setTitle("CreditLimit");
-            card.setContent(speechText);
-
-            // Create the plain text output.
-            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText(speechText);
-
-            // Create reprompt
-            Reprompt reprompt = new Reprompt();
-            reprompt.setOutputSpeech(speech);
-
-            return SpeechletResponse.newAskResponse(speech, reprompt, card);
-        }
-
-        String amount = "2";
-        String name = "Paul";
-
-
-        // FIXME: Hardcoded strings
-        Number amountNum = Integer.parseInt(amount);
-        TransactionAPI.createTransaction(amountNum, "DE23100000001234567890", "DE60643995205405578292", "2017-05-16", "Beschreibung", "Hans", "Helga");
-
-        //reply message
-        String speechText = "Die " + amount + " wurden zu " + name + " überwiesen";
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("CreditLimit");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    /**
-     * TODO Code copied from AmosAlexaSpeechletTest class
-     */
-    private SpeechletRequestEnvelope<IntentRequest> getEnvelope(String intent, Session session, String... slots) throws IOException, NoSuchFieldException, IllegalAccessException {
-        SpeechletRequestEnvelope<IntentRequest> envelope = (SpeechletRequestEnvelope<IntentRequest>) SpeechletRequestEnvelope.fromJson(buildJson(intent, session, slots));
-        // Set session via reflection
-        Field f1 = envelope.getClass().getDeclaredField("session");
-        f1.setAccessible(true);
-        f1.set(envelope, session);
-        return envelope;
-    }
-
-    /**
-     * TODO Code copied from AmosAlexaSpeechletTest class
-     */
-    private String buildJson(String intent, Session session, String... slots) {
-        Calendar cal = Calendar.getInstance();
-        Date time = cal.getTime();
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-        StringBuilder slotsJson = new StringBuilder();
-
-        boolean first = true;
-        for (String slot : slots) {
-            if (first) {
-                first = false;
-            } else {
-                slotsJson.append(',');
-            }
-
-            String[] slotParts = slot.split(":");
-            slotsJson.append("\"").append(slotParts[0]).append("\":");
-            slotsJson.append("{");
-            slotsJson.append("\"name\":\"").append(slotParts[0]).append("\",");
-            slotsJson.append("\"value\":\"").append(slotParts[1]).append("\"");
-            slotsJson.append("}");
-        }
-
-        String json = "{\n" +
-                "  \"session\": {\n" +
-                "    \"sessionId\": \"" + session.getSessionId() + "\",\n" +
-                "    \"application\": {\n" +
-                "      \"applicationId\": \"amzn1.ask.skill.38e33c69-1510-43cd-be1d-929f08a966b4\"\n" +
-                "    },\n" +
-                "    \"attributes\": {},\n" +
-                "    \"user\": {\n" +
-                "      \"userId\": \"amzn1.ask.account.AHCD37TFVGP2S3OHTPFQTU2CVLBJMIVD3IIU6OZRGBTITENQO7W76SR5TRJMS5NDYJ4HQJTX726C4KMYHYZCOV5ONNFWFGH434UF4GUZQXKX2MEK2QE2B275MDM6YITSPWB3PAAFA2JKLQAJJXRJ65F2LXGDKP524L4YVA53IAA3CA6TVZCTBCLPVHBDIC3SLZJPT7PDZN4YUQA\"\n" +
-                "    },\n" +
-                "    \"new\": true\n" +
-                "  },\n" +
-                "  \"request\": {\n" +
-                "    \"type\": \"IntentRequest\",\n" +
-                "    \"requestId\": \"EdwRequestId.09495460-038e-4394-9a83-12115fba09b7\",\n" +
-                "    \"locale\": \"de-DE\",\n" +
-                "    \"timestamp\": \"" + formatter.format(time) + "\",\n" +
-                "    \"intent\": {\n" +
-                "      \"name\": \"" + intent + "\",\n" +
-                "      \"slots\": {\n" +
-                slotsJson.toString() +
-                "      }\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"version\": \"1.0\"\n" +
-                "}";
-
-        return json;
     }
 
 }

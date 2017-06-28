@@ -11,6 +11,8 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import com.amazon.speech.ui.Reprompt;
+import com.amazon.speech.ui.SsmlOutputSpeech;
 import model.banking.Contact;
 import model.banking.Transaction;
 import org.apache.commons.lang3.StringUtils;
@@ -75,17 +77,17 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
         Session session = requestEnvelope.getSession();
-        String context = (String) session.getAttribute(CONTEXT);
+        String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
         if (CONTACT_LIST_INFO_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, CONTACT_LIST_INFO_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, CONTACT_LIST_INFO_INTENT);
             return readContacts(session, 0, 3);
         } else if (CONTACT_ADD_INTENT.equals(intentName)) {
-            session.setAttribute(CONTEXT, CONTACT_ADD_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, CONTACT_ADD_INTENT);
             return askForNewContactConfirmation(intent, session);
         } else if (CONTACT_DELETE_INTENT.equals(intentName)) {
-            session.setAttribute(CONTEXT, CONTACT_DELETE_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, CONTACT_DELETE_INTENT);
             return deleteContact(intent, session, false);
         } else if (YES_INTENT.equals(intentName) && context.equals(CONTACT_ADD_INTENT)) {
             return createNewContact(session);
@@ -153,10 +155,9 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
     }
 
     private SpeechletResponse createNewContact(Session session) {
-        //TODO test
         //Acutally create and save contact
         String contactName = (String) session.getAttribute("ContactName");
-        Contact contact = new Contact(contactName, " DE50100000000000000001");
+        Contact contact = new Contact(contactName, "DE50100000000000000001");
         DynamoDbClient.instance.putItem(Contact.TABLE_NAME, contact);
         return getResponse(CONTACTS, "Okay! Der Kontakt " + contactName + " wurde angelegt.");
     }
@@ -218,6 +219,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         Collections.sort(contacts);
 
         StringBuilder response = new StringBuilder();
+        response.append("<speak>");
 
         for (int i = offset; i < offset + limit; i++) {
             Contact contact = contacts.get(i);
@@ -228,7 +230,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             response.append("Name: ")
                     .append(contact.getName())
                     .append(", IBAN: ")
-                    .append(contact.getIban())
+                    .append(contact.getIbanSsmlOutput())
                     .append(". ");
         }
 
@@ -236,12 +238,22 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
 
         if (isAskResponse) {
             response.append("Weitere Kontakte vorlesen?");
+            response.append("</speak>");
             session.setAttribute(CONTACTS + ".offset", offset + limit);
-            return getAskResponse(CONTACTS, response.toString());
+
+            SsmlOutputSpeech speech = new SsmlOutputSpeech();
+            speech.setSsml(response.toString());
+            Reprompt reprompt = new Reprompt();
+            reprompt.setOutputSpeech(speech);
+            return SpeechletResponse.newAskResponse(speech, reprompt);
         } else {
             response.append("Keine weiteren Kontakte.");
+            response.append("</speak>");
             session.setAttribute(CONTACTS + ".offset", null);
-            return getResponse(CONTACTS, response.toString());
+
+            SsmlOutputSpeech speech = new SsmlOutputSpeech();
+            speech.setSsml(response.toString());
+            return SpeechletResponse.newTellResponse(speech);
         }
     }
 }
