@@ -189,9 +189,10 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         SessionStorage.getInstance().putObject(session.getSessionId(), "selection", selectedItem);
 
         Account account = AccountAPI.getAccount(BankAccountService.ACCOUNT_NUMBER);
+        account.setSpeechTexts();
         Number balance = account.getBalance();
 
-        if(selectedItem.getOffer().getLowestNewPrice() > balance.doubleValue()){
+        if(selectedItem.getOffer().getLowestNewPrice() / 100> balance.doubleValue()){
 
             // save state too expensive
             SessionStorage.getInstance().putObject(session.getSessionId(), AFFORDABILITY_ATTRIBUTE, false);

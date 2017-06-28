@@ -94,16 +94,31 @@ public class AmosAlexaSpeechletTest {
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
         }};
 
-        newSession();
-        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
-        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
-        testIntentMatches("AffordProduct", "ProductSelection:a", "Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
-        testIntent("AMAZON.YesIntent", AffordabilityService.CART_ACK);
+        ArrayList<String> balanceCheckAnswers = new ArrayList<String>() {{
+            add("Dein kontostand beträgt €(.*) kostet €(.*) Das Produkt kannst du dir nicht leisten! Möchtest du nach etwas anderem suchen");
+            add(AffordabilityService.BYE);
+            add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
+            add("Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
+        }};
+
+        ArrayList<String> cartAnswers = new ArrayList<String>() {{
+            add(AffordabilityService.BYE);
+            add(AffordabilityService.CART_ACK);
+            add(AffordabilityService.SEARCH_ASK);
+        }};
+
+
 
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
-        testIntentMatches("AffordProduct", "ProductSelection:a", "Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
+        testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(cartAnswers, "|"));
+
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:a",  StringUtils.join(balanceCheckAnswers, "|"));
         testIntentMatches("AMAZON.NoIntent", StringUtils.join(byeAnswers, "|"));
 
         newSession();
