@@ -16,8 +16,7 @@ public class Contact implements Comparable<Contact>, DynamoDbStorable {
     private String iban;
     private Date createdAt;
 
-    //TODO contact_test is only for test purpose
-    public static final String TABLE_NAME = "contact_test"; //"contact";
+    public static final String TABLE_NAME = "contact";
 
     public Contact() {
     }

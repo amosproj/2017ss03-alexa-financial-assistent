@@ -2,7 +2,6 @@ package amosalexa.dialogsystem;
 
 import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
-import amosalexa.dialogsystem.dialogs.TestListDialog;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
@@ -12,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 
 /**
+ * TODO still needed??
+ * <p>
  * This singleton class handles
  */
 public class DialogResponseManager {
@@ -22,7 +23,6 @@ public class DialogResponseManager {
 
     private DialogResponseManager() {
         // TODO: Registering new DialogHandlers should happen automatically, not in this class
-        registerDialogHandler(new TestListDialog());
 
         // TODO: Story16: Register PriceQuery Service
         //registerDialogHandler(new PriceQueryService(amosAlexaSpeechlet));

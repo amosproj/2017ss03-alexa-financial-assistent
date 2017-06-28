@@ -8,14 +8,31 @@ import com.amazon.speech.ui.*;
 public abstract class AbstractSpeechService {
 
     /**
-     * To hold session dialog context
+     * To hold session dialog context (which dialog is the current active dialog)
      */
-    protected static final String CONTEXT = "DIALOG_CONTEXT";
+    protected static final String DIALOG_CONTEXT = "DialogContext";
+
+    /**
+     * To hold information about the context within one dialog.
+     */
+    protected static final String WITHIN_DIALOG_CONTEXT = "WithinDialogContext";
 
     protected static final String YES_INTENT = "AMAZON.YesIntent";
     protected static final String NO_INTENT = "AMAZON.NoIntent";
     protected static final String STOP_INTENT = "AMAZON.StopIntent";
     protected static final String HELP_INTENT = "AMAZON.HelpIntent";
+
+    //Should be used for utterances that contain only a number
+    protected static final String PLAIN_NUMBER_INTENT = "PlainNumberIntent";
+
+    //Should be used for utterances that contain a number plus 'Euro'
+    protected static final String PLAIN_EURO_INTENT = "PlainEuroIntent";
+
+    //Should be used for utterances that contain a number plus 'Jahre' or 'Jahr'
+    protected static final String PLAIN_YEARS_INTENT = "PlainYearsIntent";
+
+    //Used as slot key for all plain intents (see above)
+    protected static final String NUMBER_SLOT_KEY = "Number";
 
     /**
      * Helper method that will get the intent name from a provided Intent object. If a name does not
@@ -140,6 +157,20 @@ public abstract class AbstractSpeechService {
         SsmlOutputSpeech repromptSpeech = getSSMLOutputSpeech(repromptText);
         Reprompt reprompt = getReprompt(repromptSpeech);
 
+        return SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
+    }
+
+    /**
+     * Helper method for retrieving an Ask response with a simple card and a speech text included.
+     *
+     * @param cardTitle  Title of the card that you want displayed.
+     * @param speechText speech text that will be spoken to the user (and also be used as reprompt)
+     * @return the resulting card and speech text.
+     */
+    protected SpeechletResponse getSSMLAskResponse(String cardTitle, String speechText) {
+        SimpleCard card = getSimpleCard(cardTitle, speechText);
+        SsmlOutputSpeech ssmlOutputSpeech = getSSMLOutputSpeech(speechText);
+        Reprompt reprompt = getReprompt(ssmlOutputSpeech);
         return SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
     }
 

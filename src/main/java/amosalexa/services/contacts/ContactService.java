@@ -77,17 +77,17 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
         Session session = requestEnvelope.getSession();
-        String context = (String) session.getAttribute(CONTEXT);
+        String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
         if (CONTACT_LIST_INFO_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, CONTACT_LIST_INFO_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, CONTACT_LIST_INFO_INTENT);
             return readContacts(session, 0, 3);
         } else if (CONTACT_ADD_INTENT.equals(intentName)) {
-            session.setAttribute(CONTEXT, CONTACT_ADD_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, CONTACT_ADD_INTENT);
             return askForNewContactConfirmation(intent, session);
         } else if (CONTACT_DELETE_INTENT.equals(intentName)) {
-            session.setAttribute(CONTEXT, CONTACT_DELETE_INTENT);
+            session.setAttribute(DIALOG_CONTEXT, CONTACT_DELETE_INTENT);
             return deleteContact(intent, session, false);
         } else if (YES_INTENT.equals(intentName) && context.equals(CONTACT_ADD_INTENT)) {
             return createNewContact(session);

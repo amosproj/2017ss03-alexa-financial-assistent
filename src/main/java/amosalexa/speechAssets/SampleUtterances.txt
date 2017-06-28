@@ -1,5 +1,3 @@
-TestListIntent Teste Liste
-
 AffordProduct Ich suche {ProductKeyword}
 AffordProduct Was kostet ein {ProductKeyword}
 AffordProduct Was kostet eine {ProductKeyword}
@@ -33,8 +31,6 @@ ReplacementCardReasonIntent Meine Karte ist {ReplacementReason}
 ReplacementCardReasonIntent Meine alte Karte wurde {ReplacementReason}
 ReplacementCardReasonIntent Meine alte Karte ist {ReplacementReason}
 ReplacementCardReasonIntent {ReplacementReason}
-
-FourDigitNumberIntent {FourDigits}
 
 ReplacementCardIntent Bestelle eine Ersatzkarte
 ReplacementCardIntent Ich brauche eine Ersatzkarte
@@ -75,18 +71,16 @@ BankOpeningHours Öffnungszeiten der {BankNameSlots}
 BankOpeningHours wann hat {BankNameSlots} offen
 BankOpeningHours hat die {BankNameSlots} {OpeningHoursDate} geöffnet
 
+PlainNumberIntent {Number}
+PlainEuroIntent {Number} Euro
+PlainYearsIntent {Number} Jahre
+PlainYearsIntent {Number} Jahr
+
 SavingsPlanIntroIntent Erstelle einen Sparplan
 SavingsPlanIntroIntent Berechne mir einen Sparplan
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
-
-SavingsPlanAmountIntent {Betrag}
-SavingsPlanAmountIntent {Betrag} Euro
-
-SavingsPlanNumberOfYearsIntent {AnzahlJahre}
-SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahr
-SavingsPlanNumberOfYearsIntent {AnzahlJahre} Jahre
 
 SavingsPlanChangeParameterIntent {SavingsPlanParameter}
 SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}
@@ -148,5 +142,21 @@ ContactAddIntent Speichere Details von Transaktion {TransactionNumber} als Konta
 ContactDeleteIntent Lösche Kontakt Nummer {ContactID}
 ContactDeleteIntent Lösche Kontakt {ContactID}
 
-TestEMailIntent Sende mir eine Test E-Mail
-TestEMailIntent Schicke mir eine TestE-Mail
+BudgetReportEMailIntent Sende mir meinen Ausgabenreport
+BudgetReportEMailIntent Schicke mir den Ausgabenreport
+BudgetReportEMailIntent Sende mir meinen Budget Report
+BudgetReportEMailIntent Schicke mir den Budget Report
+
+ContactTransferIntent Überweise {Amount} Euro an {Contact}
+ContactChoiceIntent Kontakt Nummer {ContactIndex}
+
+CategoryLimitSetIntent Ändere Limit für {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Ändere Limit für Kategorie {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Setze Limit für {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Setze Limit für Kategorie {Category} auf {CategoryLimit} Euro
+
+CategoryLimitInfoIntent Wie ist das Limit für {Category}
+CategoryLimitInfoIntent Wie ist das Limit für Kategorie {Category}
+
+PlainCategoryIntent {Category}
+PlainCategoryIntent Kategorie {Category}

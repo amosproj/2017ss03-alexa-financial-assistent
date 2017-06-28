@@ -10,9 +10,6 @@
       ]
     },
     {
-      "intent": "TestListIntent"
-    },
-    {
       "intent": "SecuritiesAccountInformationIntent"
     },
     {
@@ -65,28 +62,37 @@
       "intent": "AMAZON.HelpIntent"
     },
     {
+      "intent": "PlainNumberIntent",
+      "slots": [
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "PlainEuroIntent",
+      "slots": [
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "PlainYearsIntent",
+      "slots": [
+        {
+          "name": "Number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
       "intent": "SavingsPlanIntroIntent",
       "slots": [
         {
           "name": "Betrag",
-          "type": "AMAZON.NUMBER"
-        }
-      ]
-    },
-    {
-      "intent": "SavingsPlanAmountIntent",
-      "slots": [
-        {
-          "name": "Betrag",
-          "type": "AMAZON.NUMBER"
-        }
-      ]
-    },
-    {
-      "intent": "SavingsPlanNumberOfYearsIntent",
-      "slots": [
-        {
-          "name": "AnzahlJahre",
           "type": "AMAZON.NUMBER"
         }
       ]
@@ -155,7 +161,7 @@
         },
         {
           "name": "Amount",
-          "type": "AMAZON.FOUR_DIGIT_NUMBER"
+          "type": "AMAZON.NUMBER"
         },
         {
           "name": "ExecutionRate",
@@ -179,15 +185,6 @@
         }
       ],
       "intent": "StandingOrdersKeywordIntent"
-    },
-    {
-      "intent": "FourDigitNumberIntent",
-      "slots": [
-        {
-          "name": "FourDigits",
-          "type": "AMAZON.NUMBER"
-        }
-      ]
     },
     {
       "intent": "ReplacementCardIntent"
@@ -224,7 +221,7 @@
       "slots": [
         {
           "name": "Amount",
-          "type": "AMAZON.FOUR_DIGIT_NUMBER"
+          "type": "AMAZON.NUMBER"
         },
         {
           "name": "Name",
@@ -304,10 +301,63 @@
       ]
     },
     {
-      "intent": "TestEMailIntent"
+      "intent": "PlainCategoryIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ]
+    },
+    {
+      "intent": "CategoryLimitInfoIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ]
+    },
+    {
+      "intent": "CategoryLimitSetIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        },
+        {
+          "name": "CategoryLimit",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "BudgetReportEMailIntent"
     },
     {
       "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "ContactTransferIntent",
+      "slots": [
+        {
+          "name": "Amount",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Contact",
+          "type": "LIST_OF_EXAMPLE_CONTACTS"
+        }
+      ]
+    },
+    {
+      "intent": "ContactChoiceIntent",
+      "slots": [
+        {
+          "name": "ContactIndex",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
     }
   ]
 }
