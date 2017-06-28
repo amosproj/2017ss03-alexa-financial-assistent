@@ -151,9 +151,9 @@ public class AmosAlexaSpeechletTest {
 
         ArrayList<String> possibleAnswers = new ArrayList<String>() {{
             add("Du hast keine Transaktionen in deinem Konto");
-            add("Du hast (.*) Transaktionen. Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
-                    "Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
-                    "Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+            add("Du hast (.*) Transaktionen. Nummer (.*) Von (.*) in Höhe von €(.*)" +
+                    "Nummer (.*) Von (.*) in Höhe von €(.*)" +
+                    "Nummer (.*) Von (.*) in Höhe von €(.*)" +
                     " Möchtest du weitere Transaktionen hören");
             add("Möchtest du weitere Transaktionen hören");
         }};
@@ -162,7 +162,7 @@ public class AmosAlexaSpeechletTest {
 
         ArrayList<String> possibleAnswersYES = new ArrayList<String>() {{
             add("Du hast keine Überweisungen in deinem Konto");
-            add("Nummer (.*) Von deinem Konto auf das Konto (.*) in Höhe von €(.*)\n" +
+            add("Nummer (.*) Von (.*) in Höhe von €(.*)" +
                     " Möchtest du weitere Transaktionen hören");
         }};
 
