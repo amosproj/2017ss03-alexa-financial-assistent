@@ -9,7 +9,6 @@
  */
 package amosalexa;
 
-import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
@@ -191,18 +190,12 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
-        String context = (String) session.getAttribute("DIALOG_CONTEXT");
-
-        LOGGER.info("Intent: " + intentName);
-        LOGGER.info("Context: " + context);
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
+        String currentDialogContext = (String) sessionStorage.get(SessionStorage.CURRENTDIALOG);
 
-        //TODO: @all use the new dialog system to handle for intents
-        if ("PriceQueryService".equals(intentName) || "AffordIntent".equals(intentName)) {
-            sessionStorage.put(SessionStorage.CURRENTDIALOG, "ProductSearch");
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage);
-        }
+        LOGGER.info("Intent: " + intentName);
+        LOGGER.info("DialogContext: " + currentDialogContext);
 
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
