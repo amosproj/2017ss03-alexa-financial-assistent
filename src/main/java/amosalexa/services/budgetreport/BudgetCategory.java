@@ -21,7 +21,9 @@ public class BudgetCategory {
     }
 
     public String getAmountPercentage() {
-        return String.valueOf((int)((categoryAmountSpend / limitCategory) * 100));
+        int percentageSpend = (int)((categoryAmountSpend / limitCategory) * 100);
+        if (percentageSpend > 100) {percentageSpend = 100;}
+        return String.valueOf(percentageSpend);
     }
 
     public String getColorCode() {
@@ -40,6 +42,8 @@ public class BudgetCategory {
     public String getLimitCategory() {
         return String.valueOf(round(limitCategory, 2));
     }
+
+
 
     public static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
