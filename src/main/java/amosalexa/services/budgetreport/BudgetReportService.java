@@ -8,11 +8,9 @@ import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import org.apache.commons.io.IOUtils;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,14 +59,14 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
 
             // TODO: Dummy data
             List<BudgetCategory> categories = new ArrayList<>();
-            categories.add(new BudgetCategory("Gesundheit", "black", 130., 10.));
-            categories.add(new BudgetCategory("Bildung", "blue", 100., 0.));
-            categories.add(new BudgetCategory("Lebensmittel", "green", 350., 280.));
-            categories.add(new BudgetCategory("Kleidung", "lightblue", 75., 25.));
-            categories.add(new BudgetCategory("Auto", "orange", 200., 62.));
-            categories.add(new BudgetCategory("Wohltätigkeit", "pink", 100., 5.));
-            categories.add(new BudgetCategory("Haushalt", "red", 85., 44.));
-            categories.add(new BudgetCategory("Urlaub", "yellow", 100., 0.));
+            categories.add(new BudgetCategory("Gesundheit", 130., 10.));
+            categories.add(new BudgetCategory("Bildung", 100., 0.));
+            categories.add(new BudgetCategory("Lebensmittel", 350., 280.));
+            categories.add(new BudgetCategory("Kleidung", 75., 90.));
+            categories.add(new BudgetCategory("Auto",  200., 62.));
+            categories.add(new BudgetCategory("Wohltätigkeit", 100., 120.));
+            categories.add(new BudgetCategory("Haushalt", 85., 44.));
+            categories.add(new BudgetCategory("Urlaub",  100., 40.));
             
             JtwigModel model = JtwigModel.newModel().with("var", "World")
                                                     .with("categories", categories);

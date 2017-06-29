@@ -5,16 +5,12 @@ import java.math.RoundingMode;
 
 public class BudgetCategory {
 
-    private String colorCode;
     private String nameCategory;
-
     private Double limitCategory;
     private Double categoryAmountSpend;
 
-    public BudgetCategory(String nameCategory, String colorCode
-            , Double limitCategory, Double categoryAmountSpend) {
+    public BudgetCategory(String nameCategory, Double limitCategory, Double categoryAmountSpend) {
         this.nameCategory = nameCategory;
-        this.colorCode = colorCode;
         this.limitCategory = limitCategory;
         this.categoryAmountSpend = categoryAmountSpend;
     }
@@ -29,7 +25,12 @@ public class BudgetCategory {
     }
 
     public String getColorCode() {
-        return colorCode;
+        if (categoryAmountSpend / limitCategory > 1) {
+            return "red";
+        } else if (categoryAmountSpend / limitCategory > 0.7) {
+            return "yellow";
+        } else
+        return "green";
     }
 
     public String getNameCategory() {
