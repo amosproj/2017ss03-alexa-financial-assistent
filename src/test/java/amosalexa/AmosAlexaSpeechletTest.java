@@ -12,12 +12,14 @@ import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.SsmlOutputSpeech;
+import model.banking.Card;
 import model.banking.Contact;
 import model.banking.StandingOrder;
 import model.banking.Transaction;
 import model.db.Category;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
+import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -416,19 +418,23 @@ public class AmosAlexaSpeechletTest {
     public void replacementCardDialogTest() throws Exception {
         newSession();
 
+        final String accountNumber = "9999999999";
+
+        Collection<Card> cards = AccountAPI.getCardsForAccount(accountNumber);
+        for(Card card : cards) {
+            AccountAPI.deleteCard(accountNumber, card.getCardId());
+        }
+
+        AccountAPI.createCardForAccount(accountNumber, Card.CardType.DEBIT, accountNumber,
+                Card.Status.ACTIVE, new DateTime(2018, 5, 1, 12, 0).toLocalDate().toString());
+
         ArrayList<String> possibleAnswers = new ArrayList<String>() {{
             add("Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: (.*)");
             add("Es wurden keine Kredit- oder EC-Karten gefunden.");
         }};
 
         String response = testIntentMatches("ReplacementCardIntent", StringUtils.join(possibleAnswers, "|"));
-
-        if (response.equals("Es wurden keine Kredit- oder EC-Karten gefunden.")) {
-            //Fallback
-            //TODO This case is trivial. We usually shouldn´t come into this case. Maybe add cards before.
-            return;
-        }
-
+        
         Pattern p = Pattern.compile("karte mit den Endziffern ([0-9]+)\\.");
         Matcher m = p.matcher(response);
 

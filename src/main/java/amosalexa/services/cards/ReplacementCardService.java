@@ -24,8 +24,6 @@ import java.util.List;
 
 public class ReplacementCardService extends AbstractSpeechService implements SpeechService {
 
-    private static final String REPLACEMENT_CARD = "Ersatzkarte";
-
     private enum ReplacementReason {
         BLOCKED,
         DAMAGED
@@ -67,8 +65,10 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacementCardService.class);
 
-    public static final String REPLACEMENT_CARD_INTENT = "ReplacementCardIntent";
-    public static final String REPLACEMENT_CARD_REASON_INTENT = "ReplacementCardReasonIntent";
+    private static final String ACCOUNT_NUMBER = "9999999999";
+
+    private static final String REPLACEMENT_CARD_INTENT = "ReplacementCardIntent";
+    private static final String REPLACEMENT_CARD_REASON_INTENT = "ReplacementCardReasonIntent";
 
     private static final String STORAGE_VALID_CARDS = "REPLACEMENT_VALID_CARDS";
     private static final String STORAGE_SELECTED_CARD = "REPLACEMENT_SELECTED_CARD";
@@ -86,13 +86,13 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
         if (REPLACEMENT_CARD_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, REPLACEMENT_CARD_INTENT);
             return askForCardNumber(session, false);
-        } else if (PLAIN_NUMBER_INTENT.equals(intentName) && context != null && context.equals(REPLACEMENT_CARD)) {
+        } else if (PLAIN_NUMBER_INTENT.equals(intentName)) {
             return askIfBlockedOrDamaged(intent, session);
-        } else if (REPLACEMENT_CARD_REASON_INTENT.equals(intentName) && context != null && context.equals(REPLACEMENT_CARD)) {
+        } else if (REPLACEMENT_CARD_REASON_INTENT.equals(intentName)) {
             return askForConfirmation(intent, session);
-        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(REPLACEMENT_CARD)) {
+        } else if (YES_INTENT.equals(intentName)) {
             return orderReplacement(intent, session);
-        } else if (NO_INTENT.equals(intentName) && context != null && context.equals(REPLACEMENT_CARD)) {
+        } else if (NO_INTENT.equals(intentName)) {
             return cancelDialog();
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
@@ -100,7 +100,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
     }
 
     private SpeechletResponse askForCardNumber(Session session, boolean errored) {
-        Collection<Card> cards = AccountAPI.getCardsForAccount("0000000000"); // TODO: Load account from session
+        Collection<Card> cards = AccountAPI.getCardsForAccount(ACCOUNT_NUMBER); // TODO: Load account from session
 
         if (cards.size() == 0) {
             // This user does not have any cards, ordering a replacement card is impossible.
@@ -149,7 +149,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
     }
 
     private SpeechletResponse askIfBlockedOrDamaged(Intent intent, Session session) {
-        String fourDigits = intent.getSlot("FourDigits").getValue();
+        String fourDigits = intent.getSlot("Number").getValue();
 
         LOGGER.info("Digits: " + fourDigits);
         boolean validDigits = false;
