@@ -159,6 +159,9 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             }
 
             if (response != null) {
+                if(response.getShouldEndSession()) {
+                    SessionStorage.getInstance().removeStorage(sessionId);
+                }
                 return response;
             }
         }
