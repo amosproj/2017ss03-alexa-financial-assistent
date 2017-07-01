@@ -3,13 +3,16 @@ package amosalexa.services.budgetreport;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class BudgetCategory {
+/**
+ * BudgetReportCategory class. Container for budget category information, used to generate the budget report email.
+ */
+public class BudgetReportCategory {
 
     private String nameCategory;
     private Double limitCategory;
     private Double categoryAmountSpend;
 
-    public BudgetCategory(String nameCategory, Double limitCategory, Double categoryAmountSpend) {
+    public BudgetReportCategory(String nameCategory, Double limitCategory, Double categoryAmountSpend) {
         this.nameCategory = nameCategory;
         this.limitCategory = limitCategory;
         this.categoryAmountSpend = categoryAmountSpend;
@@ -22,17 +25,19 @@ public class BudgetCategory {
 
     public String getAmountPercentage() {
         int percentageSpend = (int)((categoryAmountSpend / limitCategory) * 100);
-        if (percentageSpend > 100) {percentageSpend = 100;}
+        if (percentageSpend > 100) {
+            percentageSpend = 100;
+        }
         return String.valueOf(percentageSpend);
     }
 
     public String getColorCode() {
-        if (categoryAmountSpend / limitCategory > 1) {
+        if (categoryAmountSpend / limitCategory >= 1) {
             return "red";
         } else if (categoryAmountSpend / limitCategory > 0.7) {
             return "yellow";
         } else
-        return "green";
+            return "green";
     }
 
     public String getNameCategory() {
@@ -42,8 +47,6 @@ public class BudgetCategory {
     public String getLimitCategory() {
         return String.valueOf(round(limitCategory, 2));
     }
-
-
 
     public static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();

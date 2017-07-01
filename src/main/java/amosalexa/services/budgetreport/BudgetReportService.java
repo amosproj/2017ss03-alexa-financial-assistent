@@ -58,15 +58,15 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
             // TODO: Dummy data
-            List<BudgetCategory> categories = new ArrayList<>();
-            categories.add(new BudgetCategory("Gesundheit", 130., 10.));
-            categories.add(new BudgetCategory("Bildung", 100., 0.));
-            categories.add(new BudgetCategory("Lebensmittel", 350., 280.));
-            categories.add(new BudgetCategory("Kleidung", 75., 90.));
-            categories.add(new BudgetCategory("Auto",  200., 62.));
-            categories.add(new BudgetCategory("Wohltätigkeit", 100., 120.));
-            categories.add(new BudgetCategory("Haushalt", 85., 44.));
-            categories.add(new BudgetCategory("Urlaub",  100., 40.));
+            List<BudgetReportCategory> categories = new ArrayList<>();
+            categories.add(new BudgetReportCategory("Gesundheit", 130., 10.));
+            categories.add(new BudgetReportCategory("Bildung", 100., 0.));
+            categories.add(new BudgetReportCategory("Lebensmittel", 350., 280.));
+            categories.add(new BudgetReportCategory("Kleidung", 75., 90.));
+            categories.add(new BudgetReportCategory("Auto",  200., 62.));
+            categories.add(new BudgetReportCategory("Wohltätigkeit", 100., 120.));
+            categories.add(new BudgetReportCategory("Haushalt", 85., 44.));
+            categories.add(new BudgetReportCategory("Urlaub",  100., 40.));
             
             JtwigModel model = JtwigModel.newModel().with("var", "World")
                                                     .with("categories", categories);
