@@ -1,6 +1,7 @@
 package amosalexa;
 
 import amosalexa.server.Launcher;
+import amosalexa.services.contactTransfer.ContactTransferService;
 import amosalexa.services.financing.AffordabilityService;
 import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
@@ -537,6 +538,38 @@ public class AmosAlexaSpeechletTest {
         testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Lorenzer Pl. 12, 90402 Nürnberg, Germany");
 
         Launcher.server.stop();
+    }
+
+    @Test
+    public void contactTransferTest() throws Exception {
+        ContactTransferService.contactTable = Contact.TABLE_NAME + "_test";
+
+        // Empty test contacts table
+        DynamoDbClient.instance.clearItems(ContactTransferService.contactTable, Contact::new);
+
+        DynamoDbClient.instance.putItem(ContactTransferService.contactTable, new Contact("Bob Marley", "UK1"));
+        DynamoDbClient.instance.putItem(ContactTransferService.contactTable, new Contact("Bob Ray Simmons", "UK2"));
+        DynamoDbClient.instance.putItem(ContactTransferService.contactTable, new Contact("Lucas", "DE1"));
+        DynamoDbClient.instance.putItem(ContactTransferService.contactTable, new Contact("Sandra", "DE2"));
+
+        newSession();
+
+        testIntentMatches("ContactTransferIntent", "Contact:sandra", "Amount:1",
+                "Dein aktueller Kontostand beträgt ([0-9\\.]+) Euro\\. Möchtest du 1\\.0 Euro an Sandra überweisen\\?");
+
+        testIntentMatches("AMAZON.YesIntent",
+                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\.");
+
+        newSession();
+
+        testIntentMatches("ContactTransferIntent", "Contact:bob", "Amount:1",
+                "Ich habe 2 passende Kontakte gefunden\\. Bitte wähle einen aus: Kontakt Nummer 1: Bob ([A-Za-z ]+)\\. Kontakt Nummer 2: Bob ([A-Za-z ]+)\\. ");
+
+        testIntentMatches("ContactChoiceIntent", "ContactIndex:1",
+                "Dein aktueller Kontostand beträgt ([0-9\\.]+) Euro\\. Möchtest du 1\\.0 Euro an Bob ([A-Za-z ]+) überweisen\\?");
+
+        testIntent("AMAZON.NoIntent",
+                "Okay, verstanden. Dann bis zum nächsten Mal.");
     }
 
     /************************************
