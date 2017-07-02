@@ -31,6 +31,11 @@ import java.util.List;
 public class ContactTransferService extends AbstractSpeechService implements SpeechService {
 
     /**
+     * Specifies if this intent is being tested or not by assigning the normal or the testing table name.
+     */
+    public static String contactTable = Contact.TABLE_NAME;
+
+    /**
      * Logger for debugging purposes.
      */
     private static final Logger log = LoggerFactory.getLogger(BankContactService.class);
@@ -118,7 +123,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         session.setAttribute(SESSION_PREFIX + ".amount", amount);
 
         // Query database
-        List<Contact> contacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        List<Contact> contacts = DynamoDbClient.instance.getItems(contactTable, Contact::new);
 
         List<Contact> contactsFound = new LinkedList<>();
         for (Contact contact : contacts) {
