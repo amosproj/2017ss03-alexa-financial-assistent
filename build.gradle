@@ -138,7 +138,7 @@ task testReport(type: JacocoReport) {
 
     classDirectories = fileTree(dir: './build/classes/')
     sourceDirectories = files(coverageSourceDirs)
-    executionData = files("${project.buildDir}/jacoco/test.exec")
+    executionData = files("${project.buildDir}/jacoco/simpleTests.exec")
 }
 
 build.dependsOn fatJar

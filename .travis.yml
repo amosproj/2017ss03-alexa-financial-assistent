@@ -4,7 +4,7 @@ jdk:
 
 script:
   - ./gradlew buildZip
-  - ./gradlew test
+  - ./gradlew simpleTests
   - ./gradlew testReport
 
 after_script:
