@@ -5,7 +5,7 @@ script:
   - ./gradlew buildZip
   - ./gradlew testReport
 
-after success:
+after_success:
   - echo $CODECOV_TOKEN
   - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
 
