@@ -528,15 +528,14 @@ public class AmosAlexaSpeechletTest {
         testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
 
         // Switching to another Service should fail because the BalanceLimit dialog is currently active.
-        testIntentMatches("BankAddress", "Ein Fehler ist aufgetreten.");
+        testIntentMatches("SavingsPlanIntroIntent", "Ein Fehler ist aufgetreten.");
 
         newSession();
 
         // Switching to another Service works if a new session is started.
         testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
         newSession();
-        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Lorenzer Pl. 12, 90402 Nürnberg, Germany");
-
+        testIntent("SavingsPlanIntroIntent", "Was moechtest du als Grundbetrag anlegen?");
         Launcher.server.stop();
     }
 
