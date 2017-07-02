@@ -101,8 +101,9 @@ task testReport(type: JacocoReport) {
     description = "Generate Jacoco code coverage report after running tests."
     reports {
         xml.enabled = true
-        html.enabled = true
-        html.destination "build/reports/jacoco/testReport"
+        html.enabled = false
+        csv.enabled = false
+        xml.destination "build/reports/jacoco/testReport.xml"
     }
 
     classDirectories = fileTree(dir: './build/classes/')
