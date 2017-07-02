@@ -82,8 +82,8 @@ public class AmosAlexaSpeechletTest {
 
         ArrayList<String> buyAskAnswers = new ArrayList<String>() {{
             add("Produkt a (.*) kostet (.*) Produkt b (.*) kostet (.*) Produkt c (.*) kostet (.*) Möchtest du ein Produkt kaufen");
-            add("Ein Fehler ist aufgetreten. " + AffordabilityService.NO_RESULTS);
-            add("Ein Fehler ist aufgetreten. " + AffordabilityService.TOO_FEW_RESULTS);
+            add(AffordabilityService.NO_RESULTS);
+            add(AffordabilityService.TOO_FEW_RESULTS);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
         }};
 

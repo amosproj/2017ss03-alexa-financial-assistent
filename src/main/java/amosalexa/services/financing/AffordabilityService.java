@@ -223,19 +223,19 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             } catch (ParserConfigurationException | SAXException | IOException e) {
                 log.error("Amazon Lookup Exception: " + e.getMessage());
                 setDialogState("error!");
-                return getErrorResponse(NO_RESULTS);
+                return getAskResponse(CARD, NO_RESULTS);
             }
 
             if (items.isEmpty()) {
                 log.error("no results by keywordSlot: " + keywordSlot);
                 setDialogState("error!");
-                return getErrorResponse(NO_RESULTS);
+                return getAskResponse(CARD, NO_RESULTS);
             }
 
             if(items.size() < 3){
                 log.error("too few results by keywordSlot: " + keywordSlot);
                 setDialogState("error!");
-                return getErrorResponse(TOO_FEW_RESULTS);
+                return getAskResponse(CARD, TOO_FEW_RESULTS);
             }
 
 
@@ -250,7 +250,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 } catch (ParserConfigurationException | SAXException | IOException e) {
                     log.error("Amazon Lookup Exception: " + e.getMessage());
                     setDialogState("error!");
-                    return getErrorResponse(ERROR);
+                    return getAskResponse(CARD, "Ein Fehler ist aufgetreten. " + ERROR);
                 }
 
                 items.get(i).setOffer(offer);
@@ -275,7 +275,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         }
 
         log.debug("Dialog State: no keyword");
-        return getErrorResponse(ERROR);
+        return getAskResponse(CARD, "Ein Fehler ist aufgetreten. " + ERROR);
     }
 
 
@@ -306,7 +306,8 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      * sets a dialog state
      * @param name of the state
      */
-    protected void setDialogState(String name){
+    private void setDialogState(String name){
+        log.info("DialogState: " + name);
         SessionStorage.getInstance().putObject(session.getSessionId(), name, new Object());
     }
 
@@ -315,7 +316,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      * @param name of the state
      * @return Object
      */
-    protected Object getDialogState(String name){
+    private Object getDialogState(String name){
 
         //get state
         Object object = SessionStorage.getInstance().getObject(session.getSessionId(), name);
