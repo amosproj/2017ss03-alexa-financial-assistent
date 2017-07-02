@@ -1,6 +1,10 @@
 language: java
 jdk:
 - oraclejdk8
+
+before_script:
+  - mkdir /home/travis/build/reports/jacoco
+
 script:
   - ./gradlew buildZip
   - ./gradlew testReport
