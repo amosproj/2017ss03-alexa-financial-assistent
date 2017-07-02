@@ -13,6 +13,19 @@ compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+    }
+}
+
 jar {
     manifest {
         attributes 'Main-Class': 'amosalexa.server.Launcher',
@@ -86,6 +99,20 @@ allprojects {
 
     tasks.withType(Test) {
         systemProperty "file.encoding", "UTF-8"
+    }
+}
+
+task simpleTests(type: Test) {
+    outputs.upToDateWhen { false }
+    useJUnit {
+        excludeCategories 'amosalexa.AmosAlexaExtendedTest'
+    }
+}
+
+task extendedTests(type: Test) {
+    outputs.upToDateWhen { false }
+    useJUnit {
+        excludeCategories 'amosalexa.AmosAlexaSimpleTest'
     }
 }
 
