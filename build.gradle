@@ -106,7 +106,7 @@ task testReport(type: JacocoReport) {
         xml.enabled true
         html.enabled false
         csv.enabled false
-        xml.destination "$buildDir/reports/jacoco/testReport.xml"
+        xml.destination "$buildDir/reports/jacoco/report.xml"
     }
 
     classDirectories = fileTree(dir: './build/classes/')
