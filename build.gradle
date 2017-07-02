@@ -100,20 +100,6 @@ task testReport(type: JacocoReport) {
     String s = "${buildDir}"
     System.out.println("buildDir: " + s)
 
-    File reportsDir = new File(s + "/reports/jacoco/")
-    ArrayList<File> fileList = new ArrayList<File>(Arrays.asList(reportsDir.listFiles()))
-    System.out.println("Files: " + fileList)
-
-    //    File reportsFile = new File(s + "/reports/jacoco/testReport.xml")
-    //    System.out.println("ReportsFile: "+reportsFile)
-    //    if (reportsFile != null) {
-    //        String content = new Scanner(reportsFile).useDelimiter("\\Z").next()
-    //        System.out.println("Content: " + content)
-    //    }
-    //    else {
-    //        System.out.println("Could not find reports file.")
-    //    }
-
     group = "Reporting"
     description = "Generate Jacoco code coverage report after running tests."
     reports {
@@ -125,7 +111,7 @@ task testReport(type: JacocoReport) {
 
     classDirectories = fileTree(dir: './build/classes/')
     sourceDirectories = files(coverageSourceDirs)
-    executionData = files('build/jacoco/test.exec')
+    executionData = files("${project.buildDir}/jacoco/test.exec")
 }
 
 build.dependsOn fatJar
