@@ -125,7 +125,7 @@ jacoco {
 
 task testReport(type: JacocoReport) {
     String s = "${buildDir}"
-    System.out.println("buildDir: " + s)
+    //System.out.println("buildDir: " + s)
 
     group = "Reporting"
     description = "Generate Jacoco code coverage report after running tests."
@@ -143,7 +143,7 @@ task testReport(type: JacocoReport) {
 
 task testReportAll(type: JacocoReport) {
     String s = "${buildDir}"
-    System.out.println("buildDir: " + s)
+    //System.out.println("buildDir: " + s)
 
     group = "Reporting"
     description = "Generate Jacoco code coverage report after running tests."
