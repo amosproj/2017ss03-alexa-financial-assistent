@@ -412,6 +412,28 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         } else {
             fail("Cannot find credit card.");
         }
+
+        newSession();
+
+        response = testIntentMatches("ReplacementCardIntent", StringUtils.join(possibleAnswers, "|"));
+
+        p = Pattern.compile("karte mit den Endziffern ([0-9]+)\\.");
+        m = p.matcher(response);
+
+        if (m.find()) {
+            String endDigits = m.group(1);
+            testIntent("PlainNumberIntent", "Number:" + endDigits,
+                    "Wurde die Karte gesperrt oder wurde sie beschädigt?");
+
+            testIntent("ReplacementCardReasonIntent", "ReplacementReason:gesperrt",
+                    "Soll ein Ersatz für die gesperrte Karte mit den Endziffern " + endDigits + " bestellt werden?");
+
+            testIntent(
+                    "AMAZON.NoIntent",
+                    "");
+        } else {
+            fail("Cannot find credit card.");
+        }
     }
 
     @Test
