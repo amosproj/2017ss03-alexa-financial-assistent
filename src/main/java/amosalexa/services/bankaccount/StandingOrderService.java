@@ -71,8 +71,6 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandingOrderService.class);
 
-    private static final String CONTEXT = "DIALOG_CONTEXT";
-
     private List<StandingOrder> standingOrders;
 
     public StandingOrderService(SpeechletSubject speechletSubject) {
@@ -96,48 +94,48 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
         Session session = requestEnvelope.getSession();
-        String dialogContext = (String) session.getAttribute(CONTEXT);
+        String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
         LOGGER.info("Intent Name: " + intentName);
-        LOGGER.info("Context: " + dialogContext);
+        LOGGER.info("Context: " + context);
 
         if (STANDING_ORDERS_INFO_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, "StandingOrderInfo");
+            session.setAttribute(DIALOG_CONTEXT, "StandingOrderInfo");
             return getStandingOrdersInfoResponse(intent, session);
         } else if (STANDING_ORDERS_DELETE_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, "StandingOrderDeletion");
+            session.setAttribute(DIALOG_CONTEXT, "StandingOrderDeletion");
             return askForDDeletionConfirmation(intent, session);
         } else if (STANDING_ORDERS_MODIFY_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, "StandingOrderModification");
+            session.setAttribute(DIALOG_CONTEXT, "StandingOrderModification");
             return askForModificationConfirmation(intent, session);
         } else if (STANDING_ORDERS_KEYWORD_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, "StandingOrderKeyword");
+            session.setAttribute(DIALOG_CONTEXT, "StandingOrderKeyword");
             return getStandingOrdersInfoForKeyword(intent, session);
         } else if (STANDING_ORDERS_SMART_INTENT.equals(intentName) && session.getAttribute("StandingOrderToModify") == null) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
-            session.setAttribute(CONTEXT, "StandingOrderSmartIntent");
+            session.setAttribute(DIALOG_CONTEXT, "StandingOrderSmartIntent");
             return smartUpdateStandingOrderConfirmation(intent, session);
-        } else if (YES_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderSmartIntent"))) {
+        } else if (YES_INTENT.equals(intentName) && context != null && (context.equals("StandingOrderSmartIntent"))) {
             return smartUpdateStandingOrderResponse(session);
-        } else if (dialogContext != null && (dialogContext.equals("StandingOrderSmartIntent")) && session.getAttribute("StandingOrderToModify") != null) {
+        } else if (context != null && (context.equals("StandingOrderSmartIntent")) && session.getAttribute("StandingOrderToModify") != null) {
             return  smartCreateStandingOrderResponse(session);
-        } else if (YES_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderInfo"))) {
+        } else if (YES_INTENT.equals(intentName) && context != null && (context.equals("StandingOrderInfo"))) {
             return getNextStandingOrderInfo(session);
-        } else if (YES_INTENT.equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderDeletion")) {
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals("StandingOrderDeletion")) {
             return getStandingOrdersDeleteResponse(intent, session);
-        } else if (YES_INTENT.equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderKeyword")) {
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals("StandingOrderKeyword")) {
             return getStandingOrderKeywordResultsInfo(session);
-        } else if (YES_INTENT.equals(intentName) && dialogContext != null && dialogContext.equals("StandingOrderModification")) {
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals("StandingOrderModification")) {
             return getStandingOrdersModifyResponse(intent, session);
-        } else if (NO_INTENT.equals(intentName) && dialogContext != null && !(dialogContext.equals("StandingOrderDeletion") || dialogContext.equals("StandingOrderModification"))) {
+        } else if (NO_INTENT.equals(intentName) && context != null && !(context.equals("StandingOrderDeletion") || context.equals("StandingOrderModification"))) {
             //General NoIntent for StandingOrderInfo (if asked 'Moechtest du einen weiteren Eintrag hoeren?')
             //Simply quit session with 'Tschuess'
             return getResponse(STANDING_ORDERS, "Okay, tschuess!");
-        } else if (NO_INTENT.equals(intentName) && dialogContext != null && (dialogContext.equals("StandingOrderDeletion") || dialogContext.equals("StandingOrderModification"))) {
+        } else if (NO_INTENT.equals(intentName) && context != null && (context.equals("StandingOrderDeletion") || context.equals("StandingOrderModification"))) {
             //Specific NoIntent for Modification or Deletion
             //Ask for a correction afterwards
             return getCorrectionResponse(intent, session);
@@ -327,7 +325,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
     }
 
     private SpeechletResponse getStandingOrderKeywordResultsInfo(Session session) {
-        session.setAttribute(CONTEXT, "StandingOrderInfo");
+        session.setAttribute(DIALOG_CONTEXT, "StandingOrderInfo");
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i <= 1; i++) {
             builder.append(standingOrders.get(i).getSpeechOutput());
@@ -495,7 +493,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse getCorrectionResponse(Intent intent, Session session) {
-        String dialogContext = (String) session.getAttribute(CONTEXT);
+        String dialogContext = (String) session.getAttribute(DIALOG_CONTEXT);
         LOGGER.info("Context: " + dialogContext);
         Map<String, Slot> slots = intent.getSlots();
         LOGGER.info("Slots: " + slots);

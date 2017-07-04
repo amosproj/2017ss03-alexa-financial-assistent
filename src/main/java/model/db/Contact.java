@@ -1,4 +1,4 @@
-package model.banking;
+package model.db;
 
 import api.aws.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
