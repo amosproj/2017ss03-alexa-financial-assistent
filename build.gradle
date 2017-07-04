@@ -141,5 +141,23 @@ task testReport(type: JacocoReport) {
     executionData = files("${project.buildDir}/jacoco/simpleTests.exec")
 }
 
+task testReportAll(type: JacocoReport) {
+    String s = "${buildDir}"
+    System.out.println("buildDir: " + s)
+
+    group = "Reporting"
+    description = "Generate Jacoco code coverage report after running tests."
+    reports {
+        xml.enabled true
+        html.enabled false
+        csv.enabled false
+        xml.destination "$buildDir/reports/jacoco/report.xml"
+    }
+
+    classDirectories = fileTree(dir: './build/classes/')
+    sourceDirectories = files(coverageSourceDirs)
+    executionData = files("${project.buildDir}/jacoco/test.exec")
+}
+
 build.dependsOn fatJar
 build.dependsOn buildZip

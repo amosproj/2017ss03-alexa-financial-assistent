@@ -4,8 +4,11 @@ jdk:
 
 script:
   - ./gradlew buildZip
-  - ./gradlew simpleTests
-  - ./gradlew testReport
+  - echo $TRAVIS_BRANCH
+  - if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew simpleTests
+  - if [ "$TRAVIS_BRANCH" = "test" ]; then ./gradlew test
+  - if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew testReport
+  - if [ "$TRAVIS_BRANCH" = "test" ]; then ./gradlew testReportAll
 
 after_script:
   - echo $CODECOV_TOKEN
