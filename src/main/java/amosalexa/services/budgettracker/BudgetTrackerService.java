@@ -33,12 +33,14 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
     private static final String CATEGORY_LIMIT_INFO_INTENT = "CategoryLimitInfoIntent";
     private static final String PLAIN_CATEGORY_INTENT = "PlainCategoryIntent";
     private static final String CATEGORY_LIMIT_SET_INTENT = "CategoryLimitSetIntent";
+    private static final String CATEGORY_STATUS_INTENT = "CategoryStatusIntent";
 
     @Override
     public List<String> getStartIntents() {
         return Arrays.asList(
                 CATEGORY_LIMIT_INFO_INTENT,
-                CATEGORY_LIMIT_SET_INTENT
+                CATEGORY_LIMIT_SET_INTENT,
+                CATEGORY_STATUS_INTENT
         );
     }
 
@@ -47,6 +49,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         return Arrays.asList(
                 CATEGORY_LIMIT_INFO_INTENT,
                 PLAIN_CATEGORY_INTENT,
+                CATEGORY_STATUS_INTENT,
                 CATEGORY_LIMIT_SET_INTENT,
                 PLAIN_NUMBER_INTENT,
                 PLAIN_EURO_INTENT,
@@ -108,6 +111,9 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             return askForCorrection(session);
         } else if (STOP_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
             return getResponse("Stop", null);
+        } else if (CATEGORY_STATUS_INTENT.equals(intentName)) {
+            session.setAttribute(DIALOG_CONTEXT, CATEGORY_STATUS_INTENT);
+            return getCategoryStatusInfo(intent);
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
@@ -195,5 +201,29 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
         }
         return getResponse(BUDGET_TRACKER, "Limit fuer " + categoryName + " wurde gesetzt.");
+    }
+
+    private SpeechletResponse getCategoryStatusInfo(Intent intent) {
+        Map<String, Slot> slots = intent.getSlots();
+        Slot categorySlot = slots.get(CATEGORY);
+        LOGGER.info("Category: " + categorySlot.getValue());
+
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        LOGGER.info("All categories: " + categories);
+        Category category = null;
+
+        for (Category cat : categories) {
+            if (cat.getName().equals(categorySlot.getValue())) {
+                category = cat;
+            }
+        }
+
+        if (category != null) {
+            return getResponse(BUDGET_TRACKER, "Du hast 70% vom " + Double.valueOf(category.getLimit()) + " Euro von Limit fuer die Kategorie " + categorySlot.getValue() + " verbracht. " +
+                    "Du kannst 50 Euro mehr verbringen.");
+        } else {
+            return getAskResponse(BUDGET_TRACKER, "Es gibt keine Kategorie mit diesem Namen. Waehle eine andere Kategorie oder" +
+                    " erhalte eine Info zu den verfuegbaren Kategorien.");
+        }
     }
 }
