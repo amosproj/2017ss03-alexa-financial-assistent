@@ -217,19 +217,6 @@
       "intent": "AuthenticationPIN"
     },
     {
-      "intent": "BankTransferIntent",
-      "slots": [
-        {
-          "name": "Amount",
-          "type": "AMAZON.NUMBER"
-        },
-        {
-          "name": "Name",
-          "type": "AMAZON.DE_FIRST_NAME"
-        }
-      ]
-    },
-    {
       "intent": "SetBalanceLimitIntent",
       "slots": [
         {
