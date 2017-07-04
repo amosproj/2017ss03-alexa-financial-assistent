@@ -134,8 +134,6 @@ ListTransferTemplatesIntent Überweisungsvorlagen
 DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
 EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmount}
 
-BankTransferIntent Überweise {Amount} Euro an {Name}
-
 ContactListInfoIntent Was sind meine Kontakte
 ContactListInfoIntent Kontaktliste
 ContactAddIntent Speichere Details von Transaktion {TransactionNumber} als Kontakt
