@@ -23,8 +23,10 @@ public abstract class AbstractAmosAlexaSpeechletTest {
 
     private Session session;
     private String sessionId;
+
     // FIXME: Get the current account AccountNumber from the session
-    protected static final String ACCOUNT_NUMBER = "9999999999";
+    protected static final String TEST_ACCOUNT_NUMBER = "9999999999";
+    protected static final String TEST_ACCOUNT_IBAN = "DE42100000009999999999";
 
     /************************************
      *          Helper methods          *
