@@ -332,6 +332,19 @@
       ]
     },
     {
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        },
+        {
+          "name": "Amount",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "CategorySpendingIntent"
+    },
+    {
       "intent": "BudgetReportEMailIntent"
     },
     {
