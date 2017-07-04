@@ -163,7 +163,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         if (spendingPercentage >= 0.9) {
             //TODO SSML
             speechResponse = speechResponse + " Warnung! Du hast in diesem Monat bereits "
-                    + spendingPercentage + " Euro fuer " + newCategory.getName() + " ausgegeben.";
+                    + newCategory.getSpending() + " Euro fuer " + newCategory.getName() + " ausgegeben.";
         }
 
         speechResponse = "Okay. Ich habe " + spendingSlot.getValue() + " Euro fuer "
@@ -240,11 +240,8 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         if (category != null) {
             LOGGER.info("Category limit before: " + category.getLimit());
             LOGGER.info("Set limit for category " + categoryName);
-            if (category.getLimit() != Double.valueOf(categoryLimit)) {
-                Category newCategory = new Category(categoryName, Double.valueOf(categoryLimit), category.getSpending());
-                DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, category);
-                DynamoDbClient.instance.putItem(Category.TABLE_NAME, newCategory);
-            }
+            category.setLimit(Double.valueOf(categoryLimit));
+            DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
             LOGGER.info("Category limit afterwards: " + category.getLimit());
         } else {
             LOGGER.info("Category does not exist yet. Create category...");

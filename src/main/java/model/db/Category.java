@@ -2,7 +2,6 @@ package model.db;
 
 import api.aws.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.PutItemResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +11,7 @@ import java.util.Map;
  * Every category has a (unique) name and a spending limit.
  * Categories are persisted in the Dynamo DB storage.
  */
-public class Category extends PutItemResult implements Comparable<Category>, DynamoDbStorable {
+public class Category implements Comparable<Category>, DynamoDbStorable {
 
     public static final String TABLE_NAME = "category";
 
@@ -89,6 +88,48 @@ public class Category extends PutItemResult implements Comparable<Category>, Dyn
     }
 
     @Override
+    public int compareTo(Category o) {
+        return Integer.compare(id, o.id);
+    }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", limit=" + limit +
+                ", spending=" + spending +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Category category = (Category) o;
+
+        if (id != category.id) return false;
+        if (Double.compare(category.limit, limit) != 0) return false;
+        if (Double.compare(category.spending, spending) != 0) return false;
+        return name != null ? name.equals(category.name) : category.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        long temp;
+        result = 31 * result + id;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        temp = Double.doubleToLongBits(limit);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(spending);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
     public void setId(int id) {
         this.id = id;
     }
@@ -98,53 +139,23 @@ public class Category extends PutItemResult implements Comparable<Category>, Dyn
         return id;
     }
 
-    @Override
-    public int compareTo(Category o) {
-        return Integer.compare(id, o.id);
-    }
-
     public String getName() {
         return name;
-    }
-
-    public double getLimit() {
-        return limit;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Category category = (Category) o;
-
-        if (id != category.id) return false;
-        if (Double.compare(category.limit, limit) != 0) return false;
-        return name != null ? name.equals(category.name) : category.name == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result;
-        long temp;
-        result = id;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        temp = Double.doubleToLongBits(limit);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Category{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", limit=" + limit +
-                '}';
     }
 
     public double getSpending() {
         return spending;
     }
 
+    public void setSpending(double spending) {
+        this.spending = spending;
+    }
+
+    public double getLimit() {
+        return limit;
+    }
+
+    public void setLimit(double limit) {
+        this.limit = limit;
+    }
 }
