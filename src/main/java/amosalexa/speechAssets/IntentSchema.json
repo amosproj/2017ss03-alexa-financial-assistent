@@ -247,19 +247,6 @@
     {
       "slots": [
         {
-          "name": "amount",
-          "type": "AMAZON.FOUR_DIGIT_NUMBER"
-        },
-        {
-          "name": "name",
-          "type": "AMAZON.DE_FIRST_NAME"
-        }
-      ],
-      "intent": "BankTransferIntent"
-    },
-    {
-      "slots": [
-        {
           "name": "TemplateID",
           "type": "AMAZON.NUMBER"
         }
