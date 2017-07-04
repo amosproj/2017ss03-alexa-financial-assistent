@@ -1,36 +1,38 @@
 package model.banking;
 
 
-import java.util.Date;
-
 public class SecuritiesAccount {
 
-	private Number securitiesAccountId;
-	private String clearingAccount;
-	private String openingDate;
+    private Number securitiesAccountId;
 
-	public Number getSecuritiesAccountId() {
-		return securitiesAccountId;
-	}
+    /**
+     * IBAN of the clearing account. Must be known to the system.
+     */
+    private String clearingAccount;
+    private String openingDate;
 
-	public void setSecuritiesAccountId(Number securitiesAccountId) {
-		this.securitiesAccountId = securitiesAccountId;
-	}
+    public Number getSecuritiesAccountId() {
+        return securitiesAccountId;
+    }
 
-	public String getClearingAccount() {
-		return clearingAccount;
-	}
+    public void setSecuritiesAccountId(Number securitiesAccountId) {
+        this.securitiesAccountId = securitiesAccountId;
+    }
 
-	public void setClearingAccount(String clearingAccount) {
-		this.clearingAccount = clearingAccount;
-	}
+    public String getClearingAccount() {
+        return clearingAccount;
+    }
 
-	public String getOpeningDate() {
-		return openingDate;
-	}
+    public void setClearingAccount(String clearingAccount) {
+        this.clearingAccount = clearingAccount;
+    }
 
-	public void setOpeningDate(String openingDate) {
-		this.openingDate = openingDate;
-	}
+    public String getOpeningDate() {
+        return openingDate;
+    }
+
+    public void setOpeningDate(String openingDate) {
+        this.openingDate = openingDate;
+    }
 
 }
