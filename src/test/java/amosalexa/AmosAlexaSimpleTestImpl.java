@@ -375,6 +375,47 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     }
 
     @Test
+    public void categorySpendingTestIntent() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        //Test assumes that category 'lebensmittel' already exists
+
+        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
+        //does not affect our data
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        Double originalLimit = null;
+        Double originialSpending = null;
+        //We assume that 'lebensmittel' category exists!
+        for (Category cat : categories) {
+            if (cat.getName().equals("lebensmittel")) {
+                category = cat;
+                originalLimit = cat.getLimit();
+                originialSpending = cat.getSpending();
+            }
+        }
+
+        //Simple spending test
+        testIntentMatches("CategorySpendingIntent", "Category:lebensmittel", "Amount:5",
+                "Okay. Ich habe 5 Euro fuer lebensmittel notiert.(.*)");
+
+        //Set spending to 0 and limit to 100 for test purpose
+        category.setSpending(0);
+        category.setLimit(100);
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:90",
+                "Okay. Ich habe 90 Euro fuer lebensmittel notiert. Warnung! Du hast in diesem Monat bereits 90.0 Euro" +
+                        " fuer lebensmittel ausgegeben.");
+
+        //Reset category lebensmittel
+        category.setSpending(originialSpending);
+        category.setLimit(originalLimit);
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+    }
+
+    @Test
     public void replacementCardDialogTest() throws Exception {
         newSession();
 

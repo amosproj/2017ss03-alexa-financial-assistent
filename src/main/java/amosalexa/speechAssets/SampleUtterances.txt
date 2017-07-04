@@ -158,5 +158,12 @@ CategoryLimitSetIntent Setze Limit für Kategorie {Category} auf {CategoryLimit}
 CategoryLimitInfoIntent Wie ist das Limit für {Category}
 CategoryLimitInfoIntent Wie ist das Limit für Kategorie {Category}
 
+CategorySpendingIntent Speichere {Amount} Euro
+CategorySpendingIntent Speichere {Amount} Euro für Kategorie {Category}
+CategorySpendingIntent Speichere {Amount} Euro für {Category}
+CategorySpendingIntent Notiere {Amount} Euro für Kategorie {Category}
+CategorySpendingIntent Notiere {Amount} Euro für {Category}
+CategorySpendingIntent Ich habe {Amount} Euro für {Category} ausgegeben
+
 PlainCategoryIntent {Category}
 PlainCategoryIntent Kategorie {Category}
