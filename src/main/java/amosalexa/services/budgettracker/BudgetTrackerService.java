@@ -3,6 +3,7 @@ package amosalexa.services.budgettracker;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.budgetreport.BudgetCategory;
 import api.aws.DynamoDbClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -218,9 +220,36 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             }
         }
 
+        //Dummy data
+        List<BudgetCategory> categoriesAmountSpent = new ArrayList<>();
+        categoriesAmountSpent.add(new BudgetCategory("gesundheit", "black", 130., 10.));
+        categoriesAmountSpent.add(new BudgetCategory("bildung", "blue", 100., 20.));
+        categoriesAmountSpent.add(new BudgetCategory("lebensmittel", "green", 350., 280.));
+        categoriesAmountSpent.add(new BudgetCategory("kleidung", "lightblue", 75., 25.));
+        categoriesAmountSpent.add(new BudgetCategory("auto", "orange", 200., 62.));
+        categoriesAmountSpent.add(new BudgetCategory("wohltätigkeit", "pink", 100., 5.));
+        categoriesAmountSpent.add(new BudgetCategory("haushalt", "red", 85., 44.));
+        categoriesAmountSpent.add(new BudgetCategory("urlaub", "yellow", 100., 10.));
+
+
+        String amountSpent = "";
+        for (int i = 0; i < categoriesAmountSpent.size(); i++) {
+            if (categoriesAmountSpent.get(i).getNameCategory().equals(category.getName())) {
+                LOGGER.info("Amount spent: " + categoriesAmountSpent.get(i).getNameCategory());
+                amountSpent = categoriesAmountSpent.get(i).getAmountTotal();
+            }
+        }
+
         if (category != null) {
-            return getResponse(BUDGET_TRACKER, "Du hast 70% vom " + Double.valueOf(category.getLimit()) + " Euro von Limit fuer die Kategorie " + categorySlot.getValue() + " verbracht. " +
-                    "Du kannst 50 Euro mehr verbringen.");
+            String responce = "";
+            if (Double.parseDouble(amountSpent) > Double.valueOf(category.getLimit())) {
+                responce = "Du hast " + (Double.parseDouble(amountSpent)/Double.valueOf(category.getLimit())*100) + "% vom " + Double.valueOf(category.getLimit()) + " Euro von Limit fuer die Kategorie " + categorySlot.getValue() + " verbracht. " +
+                        "Du darf das Geld für diese Kategorie nicht mehr verschvenden.";
+            } else {
+                responce = "Du hast " + (Double.parseDouble(amountSpent)/Double.valueOf(category.getLimit())*100) + "% vom " + Double.valueOf(category.getLimit()) + " Euro von Limit fuer die Kategorie " + categorySlot.getValue() + " verbracht. " +
+                        "Du kann " + (Double.valueOf(category.getLimit())-Double.parseDouble(amountSpent)) + " Euro mehr für diese Kategorie verbringen.";
+            }
+            return getResponse(BUDGET_TRACKER, responce);
         } else {
             return getAskResponse(BUDGET_TRACKER, "Es gibt keine Kategorie mit diesem Namen. Waehle eine andere Kategorie oder" +
                     " erhalte eine Info zu den verfuegbaren Kategorien.");
