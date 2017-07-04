@@ -2,6 +2,7 @@ package model.db;
 
 import api.aws.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.PutItemResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,8 +10,9 @@ import java.util.Map;
 /**
  * Represents a category for the budget tracker feature.
  * Every category has a (unique) name and a spending limit.
+ * Categories are persisted in the Dynamo DB storage.
  */
-public class Category implements Comparable<Category>, DynamoDbStorable {
+public class Category extends PutItemResult implements Comparable<Category>, DynamoDbStorable {
 
     public static final String TABLE_NAME = "category";
 
@@ -18,7 +20,16 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
 
     //TODO name should be the primary key (and uniqe)
     private String name;
+
+    /**
+     * Spending limit for this category
+     */
     private double limit;
+
+    /**
+     * The amount that has been spent for this category.
+     */
+    private double spending;
 
     public Category() {
     }
@@ -27,9 +38,10 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
         this.name = name;
     }
 
-    public Category(String name, double limit) {
+    public Category(String name, double limit, double spending) {
         this.name = name;
         this.limit = limit;
+        this.spending = spending;
     }
 
     @Override
@@ -38,6 +50,7 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
         map.put("id", new AttributeValue().withN(Integer.toString(id)));
         map.put("name", new AttributeValue(name));
         map.put("limit", new AttributeValue(String.valueOf(limit)));
+        map.put("spending", new AttributeValue(String.valueOf(spending)));
         return map;
     }
 
@@ -60,7 +73,19 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
             case "limit":
                 this.limit = Double.parseDouble(attributeValue.getS());
                 break;
+            case "spending":
+                this.spending = Double.parseDouble(attributeValue.getS());
+                break;
         }
+    }
+
+    public Double getSpendingPercentage() {
+        double percentageSpent = (spending / limit) * 100;
+        if (percentageSpent > 100) {
+            percentageSpent = 100;
+        }
+        //TODO round
+        return percentageSpent;
     }
 
     @Override
@@ -117,4 +142,9 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
                 ", limit=" + limit +
                 '}';
     }
+
+    public double getSpending() {
+        return spending;
+    }
+
 }
