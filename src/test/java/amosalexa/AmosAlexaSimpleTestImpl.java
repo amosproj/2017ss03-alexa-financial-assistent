@@ -593,4 +593,11 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Okay, verstanden. Dann bis zum nächsten Mal.");
     }
 
+    @Test
+    public void budgetReportTest() throws Exception {
+        newSession();
+        SessionStorage.getInstance().getStorage(sessionId).put("DEBUG", true);
+        testIntentMatches("BudgetReportEMailIntent", "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.");
+    }
+
 }

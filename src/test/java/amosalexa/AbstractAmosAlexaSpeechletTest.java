@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractAmosAlexaSpeechletTest {
 
     private Session session;
-    private String sessionId;
+    protected String sessionId;
 
     // FIXME: Get the current account AccountNumber from the session
     protected static final String TEST_ACCOUNT_NUMBER = "9999999999";
