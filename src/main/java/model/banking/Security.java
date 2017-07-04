@@ -5,82 +5,96 @@ import java.util.Date;
 
 public class Security {
 
-	private Number securityId;
-	private String isin;
-	private String wkn;
-	private String description;
-	private Number quantity;
-	private Number costPrice;
-	private Date purchasingDate;
-	private SecurityType securityType;
+    private Number securityId;
+    private String isin;
+    private String wkn;
+    private String description;
+    private Number quantity;
+    private Number costPrice;
+    private Date purchasingDate;
+    private SecurityType securityType;
 
-	public Number getSecurityId() {
-		return securityId;
-	}
+    public Security() {
+    }
 
-	public void setSecurityId(Number securityId) {
-		this.securityId = securityId;
-	}
+    public Security(String isin, String wkn, String description, Number quantity, Number costPrice, Date purchasingDate,
+                    SecurityType securityType) {
+        this.isin = isin;
+        this.wkn = wkn;
+        this.description = description;
+        this.quantity = quantity;
+        this.costPrice = costPrice;
+        this.purchasingDate = purchasingDate;
+        this.securityType = securityType;
+    }
 
-	public String getIsin() {
-		return isin;
-	}
+    public Number getSecurityId() {
+        return securityId;
+    }
 
-	public void setIsin(String isin) {
-		this.isin = isin;
-	}
+    public void setSecurityId(Number securityId) {
+        this.securityId = securityId;
+    }
 
-	public String getWkn() {
-		return wkn;
-	}
+    public String getIsin() {
+        return isin;
+    }
 
-	public void setWkn(String wkn) {
-		this.wkn = wkn;
-	}
+    public void setIsin(String isin) {
+        this.isin = isin;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getWkn() {
+        return wkn;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setWkn(String wkn) {
+        this.wkn = wkn;
+    }
 
-	public Number getQuantity() {
-		return quantity;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setQuantity(Number quantity) {
-		this.quantity = quantity;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public Number getCostPrice() {
-		return costPrice;
-	}
+    public Number getQuantity() {
+        return quantity;
+    }
 
-	public void setCostPrice(Number costPrice) {
-		this.costPrice = costPrice;
-	}
+    public void setQuantity(Number quantity) {
+        this.quantity = quantity;
+    }
 
-	public Date getPurchasingDate() {
-		return purchasingDate;
-	}
+    public Number getCostPrice() {
+        return costPrice;
+    }
 
-	public void setPurchasingDate(Date purchasingDate) {
-		this.purchasingDate = purchasingDate;
-	}
+    public void setCostPrice(Number costPrice) {
+        this.costPrice = costPrice;
+    }
 
-	public SecurityType getSecurityType() {
-		return securityType;
-	}
+    public Date getPurchasingDate() {
+        return purchasingDate;
+    }
 
-	public void setSecurityType(SecurityType securityType) {
-		this.securityType = securityType;
-	}
+    public void setPurchasingDate(Date purchasingDate) {
+        this.purchasingDate = purchasingDate;
+    }
 
-	public enum SecurityType {
-		STOCK,
-		BOND,
-		FUND
-	}
+    public SecurityType getSecurityType() {
+        return securityType;
+    }
+
+    public void setSecurityType(SecurityType securityType) {
+        this.securityType = securityType;
+    }
+
+    public enum SecurityType {
+        STOCK,
+        BOND,
+        FUND
+    }
 }

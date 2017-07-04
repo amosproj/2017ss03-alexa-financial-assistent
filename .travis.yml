@@ -1,7 +1,18 @@
 language: java
 jdk:
 - oraclejdk8
-script: ./gradlew buildZip
+
+script:
+  - ./gradlew buildZip
+  - echo $TRAVIS_BRANCH
+  - 'if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew simpleTests; fi;'
+  - 'if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew test; fi;'
+  - 'if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew testReport; fi;'
+  - 'if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew testReportAll; fi;'
+
+after_script:
+  - echo $CODECOV_TOKEN
+  - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
 
 before_install:
   - pip install --user awscli

@@ -6,13 +6,6 @@ import amosalexa.services.financing.AffordabilityService;
 import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
-import com.amazon.speech.json.SpeechletRequestEnvelope;
-import com.amazon.speech.speechlet.IntentRequest;
-import com.amazon.speech.speechlet.Session;
-import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.OutputSpeech;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
-import com.amazon.speech.ui.SsmlOutputSpeech;
 import model.banking.Card;
 import model.banking.Contact;
 import model.banking.StandingOrder;
@@ -27,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -36,15 +28,18 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-public class AmosAlexaSpeechletTest {
+/**
+ * Use simple tests for tests that only test speechlet input and output. Therefore use testIntent resp. testIntentMatches
+ * methods.
+ * (Call simple tests explicitly by executing 'gradle simpleTests')
+ */
+@org.junit.experimental.categories.Category(AmosAlexaSimpleTest.class)
+public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest implements AmosAlexaSimpleTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechletTest.class);
-    // FIXME: Get the current account AccountNumber from the session
-    private static final String ACCOUNT_NUMBER = "9999999999";
-    private Session session;
-    private String sessionId;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSimpleTestImpl.class);
 
     /*************************************
      *          Testing section          *
@@ -59,20 +54,6 @@ public class AmosAlexaSpeechletTest {
         String openingDate = formatter.format(time);
 
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
-    }
-
-
-    @Test
-    public void bankContactTelephoneNumberTest() throws Exception {
-        newSession();
-
-        // pretend local environment
-        Launcher.server = new Server();
-        Launcher.server.start();
-
-        testIntentMatches("BankTelephone", "Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
-
-        Launcher.server.stop();
     }
 
     @Test
@@ -111,7 +92,6 @@ public class AmosAlexaSpeechletTest {
         }};
 
 
-
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
@@ -121,7 +101,7 @@ public class AmosAlexaSpeechletTest {
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
-        testIntentMatches("AffordProduct", "ProductSelection:a",  StringUtils.join(balanceCheckAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
         testIntentMatches("AMAZON.NoIntent", StringUtils.join(byeAnswers, "|"));
 
         newSession();
@@ -132,35 +112,6 @@ public class AmosAlexaSpeechletTest {
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
-    }
-
-    @Test
-    public void bankContactAddressTest() throws Exception {
-
-        // pretend local environment
-        Launcher.server = new Server();
-        Launcher.server.start();
-
-        newSession();
-
-        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Lorenzer Pl. 12, 90402 Nürnberg, Germany");
-        testIntentMatches("BankAddress", "BankNameSlots:Deutsche Bank", "Deutsche Bank Filiale hat die Adresse: Landgrabenstraße 144, 90459 Nürnberg, Germany");
-
-        Launcher.server.stop();
-    }
-
-    @Test
-    public void bankContactOpeningHoursTest() throws Exception {
-
-        // pretend local environment
-        Launcher.server = new Server();
-        Launcher.server.start();
-
-        newSession();
-        testIntentMatches("BankOpeningHours", "Sparkasse Nürnberg - Geschäftsstelle hat am (.*)");
-        testIntentMatches("BankOpeningHours", "OpeningHoursDate:2017-06-13", "Sparkasse Nürnberg - Geschäftsstelle Geöffnet am Dienstag von (.*) bis (.*)");
-
-        Launcher.server.stop();
     }
 
     @Test
@@ -348,7 +299,7 @@ public class AmosAlexaSpeechletTest {
                 "AMAZON.YesIntent",
                 "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + ".");
 
-        Collection<StandingOrder> allStandingOrders = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
+        Collection<StandingOrder> allStandingOrders = AccountAPI.getStandingOrdersForAccount(TEST_ACCOUNT_NUMBER);
         final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
         int latestStandingOrderId = allStandingOrders.stream().max(comp).get().getStandingOrderId().intValue();
         LOGGER.info("Latest standing order ID: " + latestStandingOrderId);
@@ -422,7 +373,7 @@ public class AmosAlexaSpeechletTest {
         final String accountNumber = "9999999999";
 
         Collection<Card> cards = AccountAPI.getCardsForAccount(accountNumber);
-        for(Card card : cards) {
+        for (Card card : cards) {
             AccountAPI.deleteCard(accountNumber, card.getCardId());
         }
 
@@ -435,7 +386,7 @@ public class AmosAlexaSpeechletTest {
         }};
 
         String response = testIntentMatches("ReplacementCardIntent", StringUtils.join(possibleAnswers, "|"));
-        
+
         Pattern p = Pattern.compile("karte mit den Endziffern ([0-9]+)\\.");
         Matcher m = p.matcher(response);
 
@@ -528,15 +479,14 @@ public class AmosAlexaSpeechletTest {
         testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
 
         // Switching to another Service should fail because the BalanceLimit dialog is currently active.
-        testIntentMatches("BankAddress", "Ein Fehler ist aufgetreten.");
+        testIntentMatches("SavingsPlanIntroIntent", "Ein Fehler ist aufgetreten.");
 
         newSession();
 
         // Switching to another Service works if a new session is started.
         testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
         newSession();
-        testIntentMatches("BankAddress", "Sparkasse Nürnberg - Geschäftsstelle hat die Adresse: Lorenzer Pl. 12, 90402 Nürnberg, Germany");
-
+        testIntent("SavingsPlanIntroIntent", "Was moechtest du als Grundbetrag anlegen?");
         Launcher.server.stop();
     }
 
@@ -570,156 +520,6 @@ public class AmosAlexaSpeechletTest {
 
         testIntent("AMAZON.NoIntent",
                 "Okay, verstanden. Dann bis zum nächsten Mal.");
-    }
-
-    /************************************
-     *          Helper methods          *
-     ************************************/
-
-    private String testIntentMatches(String intent, String... params) throws IOException, NoSuchFieldException, IllegalAccessException {
-        String[] slots = new String[params.length - 1];
-        String expectedOutput = null;
-
-        int i = 0;
-        for (String param : params) {
-            if (i == params.length - 1) {
-                expectedOutput = param;
-            } else {
-                slots[i] = param;
-                i++;
-            }
-        }
-
-        String actual = performIntent(intent, slots);
-
-        boolean condition = actual.matches(expectedOutput);
-
-        assertTrue("[MATCHING]\nActual: " + actual + "\nExpected: " + expectedOutput, condition);
-
-        return actual;
-    }
-
-    private void testIntent(String intent, String... params) throws IOException, NoSuchFieldException, IllegalAccessException {
-        String[] slots = new String[params.length - 1];
-        String expectedOutput = null;
-
-        int i = 0;
-        for (String param : params) {
-            if (i == params.length - 1) {
-                expectedOutput = param;
-            } else {
-                slots[i] = param;
-                i++;
-            }
-        }
-
-        //AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
-        //SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
-        assertEquals(expectedOutput, performIntent(intent, slots));
-    }
-
-    private String performIntent(String intent, String... params) throws IOException, NoSuchFieldException, IllegalAccessException {
-        String[] slots = new String[params.length];
-
-        int i = 0;
-        for (String param : params) {
-            slots[i] = param;
-            i++;
-        }
-
-        AmosAlexaSpeechlet amosAlexaSpeechlet = AmosAlexaSpeechlet.getInstance();
-        SpeechletResponse response = amosAlexaSpeechlet.onIntent(getEnvelope(intent, slots));
-        return getOutputSpeechText(response.getOutputSpeech())
-                .replaceAll("\\<.*?>", ""); // Remove all markup since it is not really relevant for our tests
-    }
-
-    private String getOutputSpeechText(OutputSpeech outputSpeech) {
-        if (outputSpeech instanceof SsmlOutputSpeech) {
-            SsmlOutputSpeech ssmlOutputSpeech = (SsmlOutputSpeech) outputSpeech;
-            return ssmlOutputSpeech.getSsml();
-        }
-        if (outputSpeech instanceof PlainTextOutputSpeech) {
-            PlainTextOutputSpeech plainTextOutputSpeech = (PlainTextOutputSpeech) outputSpeech;
-            return plainTextOutputSpeech.getText();
-        }
-
-        return null;
-    }
-
-    private void newSession() {
-        Session.Builder builder = Session.builder();
-        sessionId = "SessionId." + UUID.randomUUID();
-        builder.withSessionId(sessionId);
-        session = builder.build();
-    }
-
-    private SpeechletRequestEnvelope<IntentRequest> getEnvelope(String intent, String... slots) throws IOException, NoSuchFieldException, IllegalAccessException {
-        SpeechletRequestEnvelope<IntentRequest> envelope = (SpeechletRequestEnvelope<IntentRequest>) SpeechletRequestEnvelope.fromJson(buildJson(intent, slots));
-
-        // Set session via reflection
-
-        Field f1 = envelope.getClass().getDeclaredField("session");
-        f1.setAccessible(true);
-        f1.set(envelope, session);
-
-        return envelope;
-    }
-
-    private boolean isExpected(SpeechletResponse response, String expected) {
-        return false;
-    }
-
-    private String buildJson(String intent, String... slots) {
-        Calendar cal = Calendar.getInstance();
-        Date time = cal.getTime();
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-        StringBuilder slotsJson = new StringBuilder();
-
-        boolean first = true;
-        for (String slot : slots) {
-            if (first) {
-                first = false;
-            } else {
-                slotsJson.append(',');
-            }
-
-            String[] slotParts = slot.split(":");
-            slotsJson.append("\"").append(slotParts[0]).append("\":");
-            slotsJson.append("{");
-            slotsJson.append("\"name\":\"").append(slotParts[0]).append("\",");
-            slotsJson.append("\"value\":\"").append(slotParts[1]).append("\"");
-            slotsJson.append("}");
-        }
-
-        String json = "{\n" +
-                "  \"session\": {\n" +
-                "    \"sessionId\": \"" + sessionId + "\",\n" +
-                "    \"application\": {\n" +
-                "      \"applicationId\": \"amzn1.ask.skill.38e33c69-1510-43cd-be1d-929f08a966b4\"\n" +
-                "    },\n" +
-                "    \"attributes\": {},\n" +
-                "    \"user\": {\n" +
-                "      \"userId\": \"amzn1.ask.account.AHCD37TFVGP2S3OHTPFQTU2CVLBJMIVD3IIU6OZRGBTITENQO7W76SR5TRJMS5NDYJ4HQJTX726C4KMYHYZCOV5ONNFWFGH434UF4GUZQXKX2MEK2QE2B275MDM6YITSPWB3PAAFA2JKLQAJJXRJ65F2LXGDKP524L4YVA53IAA3CA6TVZCTBCLPVHBDIC3SLZJPT7PDZN4YUQA\"\n" +
-                "    },\n" +
-                "    \"new\": true\n" +
-                "  },\n" +
-                "  \"request\": {\n" +
-                "    \"type\": \"IntentRequest\",\n" +
-                "    \"requestId\": \"EdwRequestId.09495460-038e-4394-9a83-12115fba09b7\",\n" +
-                "    \"locale\": \"de-DE\",\n" +
-                "    \"timestamp\": \"" + formatter.format(time) + "\",\n" +
-                "    \"intent\": {\n" +
-                "      \"name\": \"" + intent + "\",\n" +
-                "      \"slots\": {\n" +
-                slotsJson.toString() +
-                "      }\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"version\": \"1.0\"\n" +
-                "}";
-
-        return json;
     }
 
 }
