@@ -15,7 +15,7 @@ import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import model.banking.Account;
-import model.banking.Contact;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +26,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This dialog allows users to perform a transfer to a {@link model.banking.Contact contact} from the contact book.
+ * This dialog allows users to perform a transfer to a {@link Contact contact} from the contact book.
  */
 public class ContactTransferService extends AbstractSpeechService implements SpeechService {
+
+    /**
+     * Specifies if this intent is being tested or not by assigning the normal or the testing table name.
+     */
+    public static String contactTable = Contact.TABLE_NAME;
 
     /**
      * Logger for debugging purposes.
@@ -118,7 +123,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         session.setAttribute(SESSION_PREFIX + ".amount", amount);
 
         // Query database
-        List<Contact> contacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        List<Contact> contacts = DynamoDbClient.instance.getItems(contactTable, Contact::new);
 
         List<Contact> contactsFound = new LinkedList<>();
         for (Contact contact : contacts) {

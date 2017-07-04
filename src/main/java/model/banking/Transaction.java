@@ -32,12 +32,12 @@ public class Transaction extends ResourceSupport {
     private static String getTransactionFromAccountText(Transaction transaction) {
         return Transaction.getTransactionIdText(transaction) + "Von deinem Konto auf das Konto von " + transaction.getPayee() +
                 " in Höhe von <say-as interpret-as=\"unit\">€"
-                + Math.abs(transaction.getAmount().doubleValue()) + "</say-as>\n";
+                + Math.abs(transaction.getAmount().doubleValue()) + "</say-as>";
     }
 
     private static String getTransactionToAccountText(Transaction transaction) {
-        return "Von " + transaction.getRemitter() + " auf dein Konto in Höhe von <say-as interpret-as=\"unit\">€"
-                + Math.abs(transaction.getAmount().doubleValue()) + "</say-as>\n";
+        return Transaction.getTransactionIdText(transaction) + "Von " + transaction.getRemitter() + " auf dein Konto in Höhe von <say-as interpret-as=\"unit\">€"
+                + Math.abs(transaction.getAmount().doubleValue()) + "</say-as>";
     }
 
     public static String getTransactionSizeText(int size) {

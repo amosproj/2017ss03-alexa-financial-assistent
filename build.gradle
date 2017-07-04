@@ -13,6 +13,19 @@ compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+    }
+}
+
 jar {
     manifest {
         attributes 'Main-Class': 'amosalexa.server.Launcher',
@@ -89,6 +102,20 @@ allprojects {
     }
 }
 
+task simpleTests(type: Test) {
+    outputs.upToDateWhen { false }
+    useJUnit {
+        excludeCategories 'amosalexa.AmosAlexaExtendedTest'
+    }
+}
+
+task extendedTests(type: Test) {
+    outputs.upToDateWhen { false }
+    useJUnit {
+        excludeCategories 'amosalexa.AmosAlexaSimpleTest'
+    }
+}
+
 jacoco {
     toolVersion = "0.7.6.201602180812"
 }
@@ -97,17 +124,39 @@ jacoco {
 //task testReport(type: JacocoReport, dependsOn: "test") {
 
 task testReport(type: JacocoReport) {
+    String s = "${buildDir}"
+    //System.out.println("buildDir: " + s)
+
     group = "Reporting"
     description = "Generate Jacoco code coverage report after running tests."
     reports {
-        xml.enabled = true
-        html.enabled = true
-        html.destination "build/reports/jacoco/testReport"
+        xml.enabled true
+        html.enabled false
+        csv.enabled false
+        xml.destination "$buildDir/reports/jacoco/report.xml"
     }
 
     classDirectories = fileTree(dir: './build/classes/')
     sourceDirectories = files(coverageSourceDirs)
-    executionData = files('build/jacoco/test.exec')
+    executionData = files("${project.buildDir}/jacoco/simpleTests.exec")
+}
+
+task testReportAll(type: JacocoReport) {
+    String s = "${buildDir}"
+    //System.out.println("buildDir: " + s)
+
+    group = "Reporting"
+    description = "Generate Jacoco code coverage report after running tests."
+    reports {
+        xml.enabled true
+        html.enabled false
+        csv.enabled false
+        xml.destination "$buildDir/reports/jacoco/report.xml"
+    }
+
+    classDirectories = fileTree(dir: './build/classes/')
+    sourceDirectories = files(coverageSourceDirs)
+    executionData = files("${project.buildDir}/jacoco/test.exec")
 }
 
 build.dependsOn fatJar

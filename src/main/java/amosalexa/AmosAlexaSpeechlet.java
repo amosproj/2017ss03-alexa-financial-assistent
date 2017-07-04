@@ -9,18 +9,17 @@
  */
 package amosalexa;
 
-import amosalexa.dialogsystem.DialogResponseManager;
 import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
 import amosalexa.services.bankaccount.TransactionService;
 import amosalexa.services.bankcontact.BankContactService;
+import amosalexa.services.budgetreport.BudgetReportService;
 import amosalexa.services.budgettracker.BudgetTrackerService;
 import amosalexa.services.cards.BlockCardService;
 import amosalexa.services.cards.ReplacementCardService;
 import amosalexa.services.contactTransfer.ContactTransferService;
 import amosalexa.services.contacts.ContactService;
-import amosalexa.services.budgetreport.BudgetReportService;
 import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.SavingsPlanService;
 import amosalexa.services.pricequery.PriceQueryService;
@@ -30,8 +29,6 @@ import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
-import com.amazon.speech.ui.Reprompt;
-import com.amazon.speech.ui.SimpleCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,6 +159,9 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             }
 
             if (response != null) {
+                if(response.getShouldEndSession()) {
+                    SessionStorage.getInstance().removeStorage(sessionId);
+                }
                 return response;
             }
         }
@@ -178,7 +178,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     public SpeechletResponse onLaunch(SpeechletRequestEnvelope<LaunchRequest> requestEnvelope) {
         LOGGER.info("onLaunch requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
-        return getWelcomeResponse();
+        return null;
     }
 
     @Override
@@ -193,18 +193,12 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : "";
-        String context = (String) session.getAttribute("DIALOG_CONTEXT");
-
-        LOGGER.info("Intent: " + intentName);
-        LOGGER.info("Context: " + context);
 
         SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
+        String currentDialogContext = (String) sessionStorage.get(SessionStorage.CURRENTDIALOG);
 
-        //TODO: @all use the new dialog system to handle for intents
-        if ("PriceQueryService".equals(intentName) || "AffordIntent".equals(intentName)) {
-            sessionStorage.put(SessionStorage.CURRENTDIALOG, "ProductSearch");
-            return DialogResponseManager.getInstance().handle(intent, sessionStorage);
-        }
+        LOGGER.info("Intent: " + intentName);
+        LOGGER.info("DialogContext: " + currentDialogContext);
 
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
@@ -219,33 +213,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
     @Override
     public void onSessionEnded(SpeechletRequestEnvelope<SessionEndedRequest> requestEnvelope) {
-        LOGGER.info("onSessionEnded requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
-                requestEnvelope.getSession().getSessionId());
-        // any cleanup logic goes here
-    }
-
-    /**
-     * Creates and returns a {@code SpeechletResponse} with a welcome message.
-     *
-     * @return SpeechletResponse spoken and visual response for the given intent
-     */
-    private SpeechletResponse getWelcomeResponse() {
-        String speechText = "Welcome to the Alexa Skills Kit, you can say hello";
-
-        // Create the Simple card content.
-        SimpleCard card = new SimpleCard();
-        card.setTitle("HelloWorld");
-        card.setContent(speechText);
-
-        // Create the plain text output.
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        LOGGER.info("onSessionEnded");
     }
 
 }

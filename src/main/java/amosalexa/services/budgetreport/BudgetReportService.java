@@ -1,18 +1,19 @@
 package amosalexa.services.budgetreport;
 
+import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import api.aws.DynamoDbClient;
 import api.aws.EMailClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import org.apache.commons.io.IOUtils;
+import model.db.Category;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,15 +61,20 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
             // TODO: Dummy data
-            List<BudgetCategory> categories = new ArrayList<>();
-            categories.add(new BudgetCategory("Gesundheit", "black", 130., 10.));
-            categories.add(new BudgetCategory("Bildung", "blue", 100., 0.));
-            categories.add(new BudgetCategory("Lebensmittel", "green", 350., 280.));
-            categories.add(new BudgetCategory("Kleidung", "lightblue", 75., 25.));
-            categories.add(new BudgetCategory("Auto", "orange", 200., 62.));
-            categories.add(new BudgetCategory("Wohltätigkeit", "pink", 100., 5.));
-            categories.add(new BudgetCategory("Haushalt", "red", 85., 44.));
-            categories.add(new BudgetCategory("Urlaub", "yellow", 100., 0.));
+            List<BudgetReportCategory> categories = new ArrayList<>();
+            /*categories.add(new BudgetReportCategory("Gesundheit", 130., 10.));
+            categories.add(new BudgetReportCategory("Bildung", 100., 0.));
+            categories.add(new BudgetReportCategory("Lebensmittel", 350., 280.));
+            categories.add(new BudgetReportCategory("Kleidung", 75., 90.));
+            categories.add(new BudgetReportCategory("Auto",  200., 62.));
+            categories.add(new BudgetReportCategory("Wohltätigkeit", 100., 120.));
+            categories.add(new BudgetReportCategory("Haushalt", 85., 44.));
+            categories.add(new BudgetReportCategory("Urlaub",  100., 40.));*/
+
+            List<Category> dbCategories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+            for (Category cat : dbCategories) {
+                categories.add(new BudgetReportCategory(cat.getName(), cat.getSpending(), cat.getLimit()));
+            }
             
             JtwigModel model = JtwigModel.newModel().with("var", "World")
                                                     .with("categories", categories);
@@ -77,7 +83,8 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             String body = template.render(model);
 
             String answer = "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.";
-            if (!EMailClient.SendHTMLEMail("Test-Mail", body)) {
+            boolean isDebug = SessionStorage.getInstance().getStorage(requestEnvelope.getSession().getSessionId()).containsKey("DEBUG");
+            if (!isDebug && !EMailClient.SendHTMLEMail("Test-Mail", body)) {
                 answer = "Leider konnte der Ausgabenreport nicht gesendet werden.";
             }
             return getResponse("E-Mail gesendet", answer);

@@ -217,19 +217,6 @@
       "intent": "AuthenticationPIN"
     },
     {
-      "intent": "BankTransferIntent",
-      "slots": [
-        {
-          "name": "Amount",
-          "type": "AMAZON.NUMBER"
-        },
-        {
-          "name": "Name",
-          "type": "AMAZON.DE_FIRST_NAME"
-        }
-      ]
-    },
-    {
       "intent": "SetBalanceLimitIntent",
       "slots": [
         {
@@ -243,19 +230,6 @@
     },
     {
       "intent": "ListTransferTemplatesIntent"
-    },
-    {
-      "slots": [
-        {
-          "name": "amount",
-          "type": "AMAZON.FOUR_DIGIT_NUMBER"
-        },
-        {
-          "name": "name",
-          "type": "AMAZON.DE_FIRST_NAME"
-        }
-      ],
-      "intent": "BankTransferIntent"
     },
     {
       "slots": [
@@ -343,6 +317,19 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        },
+        {
+          "name": "Amount",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "CategorySpendingIntent"
     },
     {
       "intent": "BudgetReportEMailIntent"

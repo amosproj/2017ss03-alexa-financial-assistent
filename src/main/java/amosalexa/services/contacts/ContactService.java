@@ -13,7 +13,7 @@ import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SsmlOutputSpeech;
-import model.banking.Contact;
+import model.db.Contact;
 import model.banking.Transaction;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

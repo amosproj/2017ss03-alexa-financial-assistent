@@ -24,7 +24,10 @@ import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -91,7 +94,11 @@ public class PriceQueryService extends AbstractSpeechService implements SpeechSe
             if (keyword == null) {
                 return getErrorResponse("Ich konnte deine Suche nicht verstehen");
             }
-            return getProductInformation(keyword, session);
+            try {
+                return getProductInformation(keyword, session);
+            } catch (IOException | SAXException | ParserConfigurationException e) {
+                e.printStackTrace();
+            }
 
         } else if (intent.getName().equals("AffordIntent")) {
             log.info("AffordIntent. Preis des Produkts: " + session.getAttributes().get("PRICE_KEY"));
@@ -100,7 +107,7 @@ public class PriceQueryService extends AbstractSpeechService implements SpeechSe
         return getErrorResponse("Ich kann dir leider nicht weiterhelfen");
     }
 
-    private SpeechletResponse getProductInformation(String keyword, Session session) {
+    private SpeechletResponse getProductInformation(String keyword, Session session) throws IOException, SAXException, ParserConfigurationException {
         if (keyword != null) {
 
             List<Item> items = AWSLookup.itemSearch(keyword, 1, null);
