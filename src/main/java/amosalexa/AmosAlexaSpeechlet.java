@@ -22,6 +22,7 @@ import amosalexa.services.contactTransfer.ContactTransferService;
 import amosalexa.services.contacts.ContactService;
 import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.SavingsPlanService;
+import amosalexa.services.help.IntroductionService;
 import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
@@ -64,6 +65,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new ContactService(amosAlexaSpeechlet);
         new ContactTransferService(amosAlexaSpeechlet);
         new BudgetTrackerService(amosAlexaSpeechlet);
+        new IntroductionService(amosAlexaSpeechlet);
         //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
@@ -159,7 +161,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             }
 
             if (response != null) {
-                if(response.getShouldEndSession()) {
+                if (response.getShouldEndSession()) {
                     SessionStorage.getInstance().removeStorage(sessionId);
                 }
                 return response;

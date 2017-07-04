@@ -163,5 +163,9 @@ CategorySpendingIntent Notiere {Amount} Euro für Kategorie {Category}
 CategorySpendingIntent Notiere {Amount} Euro für {Category}
 CategorySpendingIntent Ich habe {Amount} Euro für {Category} ausgegeben
 
+IntroductionIntent Was kann AMOS
+IntroductionIntent Was kannst du eigentlich
+IntroductionIntent Was kann ich fragen
+
 PlainCategoryIntent {Category}
 PlainCategoryIntent Kategorie {Category}
