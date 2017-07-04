@@ -138,32 +138,28 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         Category category = null;
         for (Category cat : categories) {
-            //TODO duplicate. write find and update category method
+            //TODO duplicate. write find category by name method
             if (cat.getName().equals(categorySlot.getValue())) {
                 category = cat;
             }
         }
-        Category newCategory = null;
         if (category != null) {
             LOGGER.info("Category spending before: " + category.getSpending());
             LOGGER.info("Add spending for category " + spendingSlot.getValue());
-            double newSpending = category.getSpending() + Double.valueOf(spendingSlot.getValue());
-            newCategory = new Category(category.getName(), category.getLimit(), newSpending);
-            DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, category);
-            DynamoDbClient.instance.putItem(Category.TABLE_NAME, newCategory);
-            LOGGER.info("Category spending afterwards: " + newCategory.getSpending());
+            category.setSpending(Double.valueOf(spendingSlot.getValue()));
+            DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+            LOGGER.info("Category spending afterwards: " + category.getSpending());
         } else {
             //TODO ask for category creation?
-            newCategory = null;
         }
 
         String speechResponse = "";
-        Double spendingPercentage = newCategory.getSpendingPercentage();
-        LOGGER.info("SpendingsPercentage: " + spendingPercentage);
+        Double spendingPercentage = category.getSpendingPercentage();
+        LOGGER.info("SpendingPercentage: " + spendingPercentage);
         if (spendingPercentage >= 0.9) {
             //TODO SSML
             speechResponse = speechResponse + " Warnung! Du hast in diesem Monat bereits "
-                    + newCategory.getSpending() + " Euro fuer " + newCategory.getName() + " ausgegeben.";
+                    + category.getSpending() + " Euro fuer " + category.getName() + " ausgegeben.";
         }
 
         speechResponse = "Okay. Ich habe " + spendingSlot.getValue() + " Euro fuer "
