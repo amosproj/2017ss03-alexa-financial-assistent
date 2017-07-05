@@ -1,7 +1,7 @@
 package amosalexa.services.contacts;
 
 import api.aws.DynamoDbClient;
-import model.banking.Contact;
+import model.db.Contact;
 import org.junit.Test;
 
 import java.util.List;

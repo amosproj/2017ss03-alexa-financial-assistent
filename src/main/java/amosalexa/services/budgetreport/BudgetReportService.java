@@ -1,13 +1,16 @@
 package amosalexa.services.budgetreport;
 
+import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import api.aws.DynamoDbClient;
 import api.aws.EMailClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import model.db.Category;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
@@ -59,14 +62,19 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
 
             // TODO: Dummy data
             List<BudgetReportCategory> categories = new ArrayList<>();
-            categories.add(new BudgetReportCategory("Gesundheit", 130., 10.));
+            /*categories.add(new BudgetReportCategory("Gesundheit", 130., 10.));
             categories.add(new BudgetReportCategory("Bildung", 100., 0.));
             categories.add(new BudgetReportCategory("Lebensmittel", 350., 280.));
             categories.add(new BudgetReportCategory("Kleidung", 75., 90.));
             categories.add(new BudgetReportCategory("Auto",  200., 62.));
             categories.add(new BudgetReportCategory("Wohltätigkeit", 100., 120.));
             categories.add(new BudgetReportCategory("Haushalt", 85., 44.));
-            categories.add(new BudgetReportCategory("Urlaub",  100., 40.));
+            categories.add(new BudgetReportCategory("Urlaub",  100., 40.));*/
+
+            List<Category> dbCategories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+            for (Category cat : dbCategories) {
+                categories.add(new BudgetReportCategory(cat.getName(), cat.getSpending(), cat.getLimit()));
+            }
             
             JtwigModel model = JtwigModel.newModel().with("var", "World")
                                                     .with("categories", categories);
@@ -75,7 +83,8 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             String body = template.render(model);
 
             String answer = "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.";
-            if (!EMailClient.SendHTMLEMail("Test-Mail", body)) {
+            boolean isDebug = SessionStorage.getInstance().getStorage(requestEnvelope.getSession().getSessionId()).containsKey("DEBUG");
+            if (!isDebug && !EMailClient.SendHTMLEMail("Test-Mail", body)) {
                 answer = "Leider konnte der Ausgabenreport nicht gesendet werden.";
             }
             return getResponse("E-Mail gesendet", answer);

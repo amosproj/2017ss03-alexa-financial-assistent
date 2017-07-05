@@ -15,7 +15,7 @@ import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import model.banking.Account;
-import model.banking.Contact;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This dialog allows users to perform a transfer to a {@link model.banking.Contact contact} from the contact book.
+ * This dialog allows users to perform a transfer to a {@link Contact contact} from the contact book.
  */
 public class ContactTransferService extends AbstractSpeechService implements SpeechService {
 

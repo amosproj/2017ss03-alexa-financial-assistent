@@ -22,6 +22,7 @@ import amosalexa.services.contactTransfer.ContactTransferService;
 import amosalexa.services.contacts.ContactService;
 import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.SavingsPlanService;
+import amosalexa.services.help.IntroductionService;
 import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
@@ -38,10 +39,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This sample shows how to create a simple speechlet for handling speechlet requests.
+ * Base speechlet to register services that handle the intents.
  */
 public class AmosAlexaSpeechlet implements SpeechletSubject {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
     private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
@@ -64,6 +64,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new ContactService(amosAlexaSpeechlet);
         new ContactTransferService(amosAlexaSpeechlet);
         new BudgetTrackerService(amosAlexaSpeechlet);
+        new IntroductionService(amosAlexaSpeechlet);
         //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
@@ -159,7 +160,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             }
 
             if (response != null) {
-                if(response.getShouldEndSession()) {
+                if (response.getShouldEndSession()) {
                     SessionStorage.getInstance().removeStorage(sessionId);
                 }
                 return response;

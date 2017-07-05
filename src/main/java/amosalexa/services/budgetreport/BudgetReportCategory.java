@@ -12,10 +12,10 @@ public class BudgetReportCategory {
     private Double limitCategory;
     private Double categoryAmountSpend;
 
-    public BudgetReportCategory(String nameCategory, Double limitCategory, Double categoryAmountSpend) {
+    public BudgetReportCategory(String nameCategory, Double categoryAmountSpend, Double limitCategory) {
         this.nameCategory = nameCategory;
-        this.limitCategory = limitCategory;
         this.categoryAmountSpend = categoryAmountSpend;
+        this.limitCategory = limitCategory;
     }
 
 

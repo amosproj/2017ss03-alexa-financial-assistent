@@ -7,7 +7,7 @@ import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import model.banking.Card;
-import model.banking.Contact;
+import model.db.Contact;
 import model.banking.StandingOrder;
 import model.banking.Transaction;
 import model.db.Category;
@@ -55,6 +55,9 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
     }
+
+    /*
+    FIXME
 
     @Test
     public void affordabilityTest() throws Exception {
@@ -113,6 +116,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
     }
+    */
 
     @Test
     public void bankAccountTransactionIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
@@ -185,12 +189,16 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                     "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
             add("Du hast momentan (.*) Dauerauftraege. " +
                     "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+            add("Du hast momentan (.*) Dauerauftraege. " +
+                    "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro an (.*)");
         }};
+        //TODO this test expects to be at least 4 standing orders existent in the system
         testIntentMatches(
                 "StandingOrdersInfoIntent", StringUtils.join(possibleAnswers, "|"));
         testIntentMatches(
                 "AMAZON.YesIntent",
-                "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto.(.*)");
+                "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto." +
+                        "|Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro an (.*)");
         testIntentMatches(
                 "AMAZON.NoIntent", "Okay, tschuess!");
     }
@@ -367,6 +375,60 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     }
 
     @Test
+    public void categorySpendingTestIntent() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        //Test assumes that category 'lebensmittel' already exists
+
+        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
+        //does not affect our data
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        Double originalLimit = null;
+        Double originialSpending = null;
+        //We assume that 'lebensmittel' category exists!
+        for (Category cat : categories) {
+            if (cat.getName().equals("lebensmittel")) {
+                category = cat;
+                originalLimit = cat.getLimit();
+                originialSpending = cat.getSpending();
+            }
+        }
+
+        //Set spending to 0 and limit to 100 for test purpose
+        category.setSpending(0);
+        category.setLimit(100);
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+
+        //Simple spending test
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:5",
+                "Okay. Ich habe 5 Euro fuer lebensmittel notiert.");
+
+        //Spending 89 OK!
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:84",
+                "Okay. Ich habe 84 Euro fuer lebensmittel notiert.");
+
+        //Spending 90 Warning!
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:1",
+                "Okay. Ich habe 1 Euro fuer lebensmittel notiert. Warnung! Du hast in diesem Monat bereits 90 Euro" +
+                        " fuer lebensmittel ausgegeben. Das sind 90% des Limits fuer diese Kategorie.");
+
+        //Limit overrun warning
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:20",
+                "Warnung! Durch diese Aktion wirst du das Limit von 100 fuer die Kategorie lebensmittel ueberschreiten." +
+                        " Soll ich den Betrag trotzdem notieren?");
+
+        testIntent("AMAZON.YesIntent", "Okay. Ich habe 20 Euro fuer lebensmittel notiert. Warnung! Du hast" +
+                " in diesem Monat bereits 110 Euro fuer lebensmittel ausgegeben. Das sind 110% des Limits fuer diese Kategorie.");
+
+        //Reset category lebensmittel to previous state
+        category.setSpending(0);
+        category.setLimit(originalLimit);
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+    }
+
+    @Test
     public void replacementCardDialogTest() throws Exception {
         newSession();
 
@@ -401,6 +463,28 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
             testIntent(
                     "AMAZON.YesIntent",
                     "Okay, eine Ersatzkarte wurde bestellt.");
+        } else {
+            fail("Cannot find credit card.");
+        }
+
+        newSession();
+
+        response = testIntentMatches("ReplacementCardIntent", StringUtils.join(possibleAnswers, "|"));
+
+        p = Pattern.compile("karte mit den Endziffern ([0-9]+)\\.");
+        m = p.matcher(response);
+
+        if (m.find()) {
+            String endDigits = m.group(1);
+            testIntent("PlainNumberIntent", "Number:" + endDigits,
+                    "Wurde die Karte gesperrt oder wurde sie beschädigt?");
+
+            testIntent("ReplacementCardReasonIntent", "ReplacementReason:gesperrt",
+                    "Soll ein Ersatz für die gesperrte Karte mit den Endziffern " + endDigits + " bestellt werden?");
+
+            testIntent(
+                    "AMAZON.NoIntent",
+                    "");
         } else {
             fail("Cannot find credit card.");
         }
@@ -520,6 +604,13 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         testIntent("AMAZON.NoIntent",
                 "Okay, verstanden. Dann bis zum nächsten Mal.");
+    }
+
+    @Test
+    public void budgetReportTest() throws Exception {
+        newSession();
+        SessionStorage.getInstance().getStorage(sessionId).put("DEBUG", true);
+        testIntentMatches("BudgetReportEMailIntent", "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.");
     }
 
 }

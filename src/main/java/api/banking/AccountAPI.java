@@ -147,6 +147,23 @@ public class AccountAPI {
 	}
 
 	/**
+	 * Order a new card.
+	 *
+	 * @param accountNumber Account number
+	 * @param cardId Card id
+	 * @return True on success, False otherwise
+	 */
+	public static boolean orderReplacementCard(String accountNumber, Number cardId) {
+		try {
+			bankingRESTClient.postBankingModelObject("/accounts/" + accountNumber + "/cards/" + cardId + "/new", new Card(), Card.class);
+			return true;
+		} catch (RestClientException e) {
+			log.error("orderReplacementCard failed", e);
+			return false;
+		}
+	}
+
+	/**
 	 * Delete a card.
 	 *
 	 * @param accountNumber Account number

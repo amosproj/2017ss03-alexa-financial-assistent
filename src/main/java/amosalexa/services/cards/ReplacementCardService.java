@@ -1,5 +1,6 @@
 package amosalexa.services.cards;
 
+import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
@@ -71,7 +72,8 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
     private static final String REPLACEMENT_CARD_REASON_INTENT = "ReplacementCardReasonIntent";
 
     private static final String STORAGE_VALID_CARDS = "REPLACEMENT_VALID_CARDS";
-    private static final String STORAGE_SELECTED_CARD = "REPLACEMENT_SELECTED_CARD";
+    private static final String STORAGE_SELECTED_CARD_NUMBER = "REPLACEMENT_SELECTED_CARD_NUMBER";
+    private static final String STORAGE_SELECTED_CARD_ID = "REPLACEMENT_SELECTED_CARD_ID";
     private static final String STORAGE_REASON = "REPLACEMENT_REASON";
 
     @Override
@@ -118,7 +120,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
 
             stringBuilder.append("Bestellung einer Ersatzkarte. Es wurden folgende Karten gefunden: ");
 
-            List<String> userCards = new ArrayList<>();
+            List<Card> userCards = new ArrayList<>();
 
             for (Card card : cards) {
                 // Check if this card is active
@@ -126,7 +128,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
                     continue;
                 }
 
-                userCards.add(card.getCardNumber());
+                userCards.add(card);
 
                 String prefix = (card.getCardType() == Card.CardType.CREDIT ? "Kredit" : "EC-");
                 stringBuilder.append(prefix + "karte mit den Endziffern <say-as interpret-as=\"digits\">" +
@@ -134,7 +136,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
             }
 
             // Store all card numbers in the session
-            session.setAttribute(STORAGE_VALID_CARDS, userCards);
+            SessionStorage.getInstance().getStorage(session.getSessionId()).put(STORAGE_VALID_CARDS, userCards);
 
             stringBuilder.append("Bitte gib die Endziffern der Karte an, für die du Ersatz benötigst.");
             stringBuilder.append("</speak>");
@@ -155,11 +157,13 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
         boolean validDigits = false;
 
         // Check if these digits are valid
-        List<String> userCards = (List<String>) session.getAttribute(STORAGE_VALID_CARDS);
-        for (String cardNumber : userCards) {
+        List<Card> userCards = (List<Card>) SessionStorage.getInstance().getStorage(session.getSessionId()).get(STORAGE_VALID_CARDS);
+        for (Card card : userCards) {
+            String cardNumber = card.getCardNumber();
             if (cardNumber.substring(cardNumber.length() - 4).equals(fourDigits)) {
                 // Digits are valid
-                session.setAttribute(STORAGE_SELECTED_CARD, cardNumber);
+                session.setAttribute(STORAGE_SELECTED_CARD_NUMBER, cardNumber);
+                session.setAttribute(STORAGE_SELECTED_CARD_ID, card.getCardId());
                 validDigits = true;
                 break;
             }
@@ -181,7 +185,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
     }
 
     private SpeechletResponse askForConfirmation(Intent intent, Session session) {
-        if (!session.getAttributes().containsKey(STORAGE_SELECTED_CARD)) {
+        if (!session.getAttributes().containsKey(STORAGE_SELECTED_CARD_NUMBER)) {
             return askForCardNumber(session, true);
         }
 
@@ -201,7 +205,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
         SsmlOutputSpeech speech = new SsmlOutputSpeech();
 
         String reason = session.getAttribute(STORAGE_REASON) == ReplacementReason.DAMAGED ? "beschädigte" : "gesperrte";
-        String lastDigits = (String) session.getAttribute(STORAGE_SELECTED_CARD);
+        String lastDigits = (String) session.getAttribute(STORAGE_SELECTED_CARD_NUMBER);
         lastDigits = lastDigits.substring(lastDigits.length() - 4);
         speech.setSsml("<speak>Soll ein Ersatz für die " + reason + " Karte mit den Endziffern <say-as interpret-as=\"digits\">" +
                 lastDigits + "</say-as> bestellt werden?</speak>");
@@ -214,14 +218,15 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
     }
 
     private SpeechletResponse orderReplacement(Intent intent, Session session) {
-        if (!session.getAttributes().containsKey(STORAGE_SELECTED_CARD)) {
+        if (!session.getAttributes().containsKey(STORAGE_SELECTED_CARD_NUMBER)) {
             return askForCardNumber(session, true);
         }
         if (!session.getAttributes().containsKey(STORAGE_REASON)) {
             return askIfBlockedOrDamaged(intent, session);
         }
 
-        // TODO: Actually order a replacement card
+        Number cardId = (Number)session.getAttribute(STORAGE_SELECTED_CARD_ID);
+        AccountAPI.orderReplacementCard(ACCOUNT_NUMBER, cardId);
 
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText("Okay, eine Ersatzkarte wurde bestellt.");
