@@ -78,13 +78,8 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
         }
     }
 
-    public Double getSpendingPercentage() {
-        double percentageSpent = (spending / limit) * 100;
-        if (percentageSpent > 100) {
-            percentageSpent = 100;
-        }
-        //TODO round
-        return percentageSpent;
+    public Long getSpendingPercentage() {
+        return Math.round((spending / limit) * 100);
     }
 
     @Override
