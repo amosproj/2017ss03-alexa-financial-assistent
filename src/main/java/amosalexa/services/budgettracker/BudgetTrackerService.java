@@ -154,8 +154,15 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         }
         if (category != null) {
             LOGGER.info("Category spending before: " + category.getSpending());
-            LOGGER.info("Add spending for category " + spendingSlot.getValue());
-            category.setSpending(Double.valueOf(spendingSlot.getValue()));
+            LOGGER.info("Add spending for category " + spendingAmount);
+            double newSpending = category.getSpending() + Double.valueOf(spendingAmount);
+            if (!isConfirmation && newSpending > category.getLimit()) {
+                //Fallback if the user is about to exceed the limit
+                return getAskResponse(BUDGET_TRACKER, "Warnung! Durch diese Aktion wirst du das Limit von " +
+                        Math.round(category.getLimit()) + " fuer die Kategorie " + categoryName + " ueberschreiten. Soll ich den" +
+                        " Betrag trotzdem notieren?");
+            }
+            category.setSpending(newSpending);
             DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
             LOGGER.info("Category spending afterwards: " + category.getSpending());
         } else {
@@ -169,9 +176,8 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         if (spendingPercentage >= 90) {
             //TODO SSML
             speechResponse = speechResponse + " Warnung! Du hast in diesem Monat bereits "
-                    + newCategory.getSpending() + " Euro fuer " + newCategory.getName() + " ausgegeben. Das sind "
-                    + newCategory.getSpendingPercentage() + "% des Limits fuer diese Kategorie.";
-                    + category.getSpending() + " Euro fuer " + category.getName() + " ausgegeben.";
+                    + Math.round(category.getSpending()) + " Euro fuer " + category.getName() + " ausgegeben. Das sind "
+                    + spendingPercentage + "% des Limits fuer diese Kategorie.";
         }
 
         speechResponse = "Okay. Ich habe " + spendingAmount + " Euro fuer "
