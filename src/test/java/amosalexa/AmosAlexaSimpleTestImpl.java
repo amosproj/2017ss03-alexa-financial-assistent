@@ -394,10 +394,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
             }
         }
 
-        //Simple spending test
-        testIntentMatches("CategorySpendingIntent", "Category:lebensmittel", "Amount:5",
-                "Okay. Ich habe 5 Euro fuer lebensmittel notiert.(.*)");
-
         //Set spending to 0 and limit to 100 for test purpose
         category.setSpending(0);
         category.setLimit(100);
@@ -405,12 +401,29 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         LOGGER.info("getLimit: " + category.getLimit());
         DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
 
-        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:90",
-                "Okay. Ich habe 90 Euro fuer lebensmittel notiert. Warnung! Du hast in diesem Monat bereits 90.0 Euro" +
-                        " fuer lebensmittel ausgegeben.");
+        //Simple spending test
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:5",
+                "Okay. Ich habe 5 Euro fuer lebensmittel notiert.");
 
-        //Reset category lebensmittel
-        category.setSpending(originialSpending);
+        //Spending 89 OK!
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:84",
+                "Okay. Ich habe 84 Euro fuer lebensmittel notiert.");
+
+        //Spending 90 Warning!
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:1",
+                "Okay. Ich habe 1 Euro fuer lebensmittel notiert. Warnung! Du hast in diesem Monat bereits 90 Euro" +
+                        " fuer lebensmittel ausgegeben. Das sind 90% des Limits fuer diese Kategorie.");
+
+        //Limit overrun warning
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:20",
+                "Warnung! Durch diese Aktion wirst du das Limit von 100 fuer die Kategorie lebensmittel ueberschreiten." +
+                        " Soll ich den Betrag trotzdem notieren?");
+
+        testIntent("AMAZON.YesIntent", "Okay. Ich habe 20 Euro fuer lebensmittel notiert. Warnung! Du hast" +
+                " in diesem Monat bereits 110 Euro fuer lebensmittel ausgegeben. Das sind 110% des Limits fuer diese Kategorie.");
+
+        //Reset category lebensmittel to previous state
+        category.setSpending(0);
         category.setLimit(originalLimit);
         DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
     }
