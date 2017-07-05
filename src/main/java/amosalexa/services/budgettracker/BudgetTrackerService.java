@@ -11,6 +11,7 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import com.amazonaws.services.dynamodbv2.xspec.B;
 import model.db.Category;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -108,9 +109,11 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             return askForConfirmation(categoryName, newLimit);
         } else if (CATEGORY_SPENDING_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, intentName);
-            return saveSpendingAmountForCategory(intent);
+            return saveSpendingAmountForCategory(intent, session, false);
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_SPENDING_INTENT)) {
+            return saveSpendingAmountForCategory(intent, session, true);
         } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
-            return setCategoryLimit(intent, session);
+            return setCategoryLimit(session);
         } else if (NO_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
             return askForCorrection(session);
         } else if (STOP_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
@@ -120,26 +123,32 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         }
     }
 
-    private SpeechletResponse saveSpendingAmountForCategory(Intent intent) {
+    private SpeechletResponse saveSpendingAmountForCategory(Intent intent, Session session, boolean isConfirmation) {
         Map<String, Slot> slots = intent.getSlots();
         Slot spendingSlot = slots.get(AMOUNT);
         Slot categorySlot = slots.get(CATEGORY);
-        LOGGER.info("Category: " + categorySlot.getValue());
 
-        if (spendingSlot == null) {
-            //TODO cancel
+        if (!isConfirmation) {
+            if (spendingSlot == null) {
+                return getAskResponse(BUDGET_TRACKER, "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe");
+            }
+
+            if (categorySlot == null) {
+                return getAskResponse(BUDGET_TRACKER, "Fuer welche Kategorie soll ich diesen Betrag notieren?");
+            }
+
+            session.setAttribute(AMOUNT, spendingSlot.getValue());
+            session.setAttribute(CATEGORY, categorySlot.getValue());
         }
 
-        if (categorySlot == null) {
-            //TODO
-            return null;
-        }
+        String spendingAmount = isConfirmation ? (String) session.getAttribute(AMOUNT) : spendingSlot.getValue();
+        String categoryName = isConfirmation ? (String) session.getAttribute(CATEGORY) : categorySlot.getValue();
 
         List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         Category category = null;
         for (Category cat : categories) {
-            //TODO duplicate. write find category by name method
-            if (cat.getName().equals(categorySlot.getValue())) {
+            //TODO duplicate. write find and update category method
+            if (cat.getName().equals(categoryName)) {
                 category = cat;
             }
         }
@@ -154,16 +163,19 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         }
 
         String speechResponse = "";
-        Double spendingPercentage = category.getSpendingPercentage();
+        Long spendingPercentage = category.getSpendingPercentage();
         LOGGER.info("SpendingPercentage: " + spendingPercentage);
-        if (spendingPercentage >= 0.9) {
+
+        if (spendingPercentage >= 90) {
             //TODO SSML
             speechResponse = speechResponse + " Warnung! Du hast in diesem Monat bereits "
+                    + newCategory.getSpending() + " Euro fuer " + newCategory.getName() + " ausgegeben. Das sind "
+                    + newCategory.getSpendingPercentage() + "% des Limits fuer diese Kategorie.";
                     + category.getSpending() + " Euro fuer " + category.getName() + " ausgegeben.";
         }
 
-        speechResponse = "Okay. Ich habe " + spendingSlot.getValue() + " Euro fuer "
-                + categorySlot.getValue() + " notiert." + speechResponse;
+        speechResponse = "Okay. Ich habe " + spendingAmount + " Euro fuer "
+                + categoryName + " notiert." + speechResponse;
         return getResponse(BUDGET_TRACKER, speechResponse);
     }
 
@@ -220,7 +232,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         return getSSMLAskResponse(BUDGET_TRACKER, response);
     }
 
-    private SpeechletResponse setCategoryLimit(Intent intent, Session session) {
+    private SpeechletResponse setCategoryLimit(Session session) {
         String categoryName = (String) session.getAttribute(CATEGORY);
         String categoryLimit = (String) session.getAttribute(CATEGORY_LIMIT);
 
