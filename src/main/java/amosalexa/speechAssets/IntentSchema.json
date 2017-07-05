@@ -319,6 +319,15 @@
       ]
     },
     {
+      "intent": "CategoryStatusIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ]
+    },
+    {
       "slots": [
         {
           "name": "Category",
