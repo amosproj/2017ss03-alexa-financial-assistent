@@ -75,9 +75,10 @@ public class IntroductionService extends AbstractSpeechService implements Speech
     }
 
     private SpeechletResponse getIntroduction(Intent intent) {
-        //TODO improve speech by ssml
-        String introductionSsml = "Willkommen bei AMOS, der sprechenden Banking-App! Ich möchte dir kurz vorstellen, was ich alles kann." +
-                " Du kannst mich zum Beispiel fragen: \"Was ist mein Kontostand?\" oder \"Wie sind meine Daueraufträge?\" Cool oder?";
+        //TODO improve speech by ssml, continue
+        String introductionSsml = "Willkommen bei AMOS, der sprechenden Banking-App! Mit mir kannst du deine Bank-Geschaefte" +
+                " mit Sprachbefehlen erledigen. Ich möchte dir kurz vorstellen, was ich alles kann. Du kannst mich zum Beispiel" +
+                " fragen: \"Was ist mein Kontostand?\" oder \"Wie sind meine Daueraufträge?\" Cool oder?";
         return getSSMLResponse(INTRODUCTION, introductionSsml);
     }
 }

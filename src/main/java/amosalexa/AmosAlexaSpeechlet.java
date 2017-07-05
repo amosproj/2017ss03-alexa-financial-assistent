@@ -39,10 +39,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This sample shows how to create a simple speechlet for handling speechlet requests.
+ * Base speechlet to register services that handle the intents.
  */
 public class AmosAlexaSpeechlet implements SpeechletSubject {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
     private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
