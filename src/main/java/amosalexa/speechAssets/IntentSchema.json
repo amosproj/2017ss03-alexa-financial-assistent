@@ -139,6 +139,10 @@
         {
           "name": "orderAmount",
           "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Categories",
+          "type": "LIST_OF_CATEGORIES"
         }
       ]
     },
