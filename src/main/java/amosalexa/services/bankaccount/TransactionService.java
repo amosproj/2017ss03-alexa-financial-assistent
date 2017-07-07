@@ -2,13 +2,17 @@ package amosalexa.services.bankaccount;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
-import com.amazon.speech.speechlet.*;
+import com.amazon.speech.speechlet.IntentRequest;
+import com.amazon.speech.speechlet.Session;
+import com.amazon.speech.speechlet.SpeechletException;
+import com.amazon.speech.speechlet.SpeechletResponse;
 import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,8 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
     //TODO When we use log in system this should be replaced by the account the user has connected with the Alexa skill
     private static final String SOURCE_ACCOUNT_NUMBER = "0000000001";
     private static final String SOURCE_ACCOUNT_IBAN = "DE50100000000000000001";
+
+    private Session session;
 
     @Override
     public String getDialogName() {
@@ -73,8 +79,35 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
-        Session session = requestEnvelope.getSession();
+        session = requestEnvelope.getSession();
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
+        Map<String, Slot> slots = intent.getSlots();
+
+        if(DialogUtil.getDialogState("category?", session) != null){
+            String category = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue() : null;
+
+            // response is unclear
+            if(category == null){
+
+                // ok, lets try again
+                if(DialogUtil.getDialogState("categoryReprompt?", session) == null){
+
+                    // save state
+                    DialogUtil.setDialogState("category", session);
+                    DialogUtil.setDialogState("categoryReprompt?", session);
+
+                    getAskResponse(TRANSACTION, "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag" +
+                            " zum Beispiel Lebensmittel, Kleidung, Haushalt");
+                } else {
+                    // abort abort - instructions unclear
+                    getResponse(TRANSACTION, "Ich konnte dich nicht verstehen. Tschüss");
+                }
+            }
+
+            // addTransactionToCategory
+
+            return getResponse("Transaktionskategorie", "Zu Kategorie SLOT hinzugefügt");
+        }
 
         if (BANK_TRANSFER_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, BANK_TRANSFER_INTENT);
@@ -87,7 +120,6 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
             return getResponse("Stop", null);
         } else if (context != null && context.equals(BANK_TRANSFER_INTENT) && (PLAIN_NUMBER_INTENT.equals(intentName)
                 || PLAIN_EURO_INTENT.equals(intentName))) {
-            Map<String, Slot> slots = intent.getSlots();
             String newAmount = slots.get(NUMBER_SLOT_KEY) != null ? slots.get(NUMBER_SLOT_KEY).getValue() : null;
             if (newAmount == null) {
                 return getAskResponse(TRANSACTION, "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.");
@@ -160,6 +192,7 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         String speechText = "Aktuell betraegt dein Kontostand " + balanceBeforeTransation + " Euro. " +
                 "Bist du sicher, dass du " + amount + " Euro an " + name + " ueberweisen willst?";
 
+
         return getAskResponse(TRANSACTION, speechText);
     }
 
@@ -197,7 +230,12 @@ public class TransactionService extends AbstractSpeechService implements SpeechS
         String speechText = "Ok, " + amount + " Euro wurden an " + name + " ueberwiesen." +
                 " Dein neuer Kontostand betraegt " + balanceAfterTransation + " Euro.";
 
-        return getResponse(TRANSACTION, speechText);
+
+        //ask for category
+        DialogUtil.setDialogState("category?", session);
+        speechText = speechText + " Zu welcher Kategorie möchtest du die Transaktion hinzufügen";
+
+        return getAskResponse(TRANSACTION, speechText);
     }
 
     /**
