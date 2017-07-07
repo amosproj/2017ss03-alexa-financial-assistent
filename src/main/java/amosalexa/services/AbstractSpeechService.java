@@ -34,6 +34,8 @@ public abstract class AbstractSpeechService {
     //Used as slot key for all plain intents (see above)
     protected static final String NUMBER_SLOT_KEY = "Number";
 
+    protected static final String CATEGORY_SLOT = "LIST_OF_CATEGORIES";
+
     /**
      * Helper method that will get the intent name from a provided Intent object. If a name does not
      * exist then this method will return null.
