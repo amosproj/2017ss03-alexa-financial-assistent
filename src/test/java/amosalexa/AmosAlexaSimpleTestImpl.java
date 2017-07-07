@@ -7,10 +7,10 @@ import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import model.banking.Card;
-import model.db.Contact;
 import model.banking.StandingOrder;
 import model.banking.Transaction;
 import model.db.Category;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
@@ -56,8 +56,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
     }
 
-    /*
-    FIXME
 
     @Test
     public void affordabilityTest() throws Exception {
@@ -85,7 +83,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
             add("Dein kontostand beträgt €(.*) kostet €(.*) Das Produkt kannst du dir nicht leisten! Möchtest du nach etwas anderem suchen");
             add(AffordabilityService.BYE);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
-            add("Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
+            add("Produkt (.*) " + AffordabilityService.BUY_ASK);
         }};
 
         ArrayList<String> cartAnswers = new ArrayList<String>() {{
@@ -116,7 +114,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
     }
-    */
+
 
     @Test
     public void bankAccountTransactionIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
