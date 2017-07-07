@@ -1,8 +1,14 @@
 package api;
 
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
+import com.amazonaws.services.dynamodbv2.model.ResourceInUseException;
 import model.banking.TransferTemplate;
+import model.db.DynamoTestObject;
+import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
@@ -10,7 +16,58 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class DynamoDbClientTest {
+
+    private static final Logger log = LoggerFactory.getLogger(DynamoDbClientTest.class);
+
     private DynamoDbClient client = DynamoDbClient.instance;
+
+    private DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
+
+
+    @Before
+    public void setUp(){
+        try {
+            dynamoDbMapper.createTable(DynamoTestObject.class);
+        } catch (InterruptedException | ResourceInUseException e) {
+            log.info("Table already created");
+        }
+    }
+
+    @Test
+    public void CRUDTest() throws InterruptedException {
+        String val1 = "test-1";
+        String val2 = "test-2";
+
+        DynamoTestObject dynamoTestObject = new DynamoTestObject();
+        dynamoTestObject.setValue(val1);
+
+        // insert
+        dynamoDbMapper.insert(dynamoTestObject);
+        log.info("insert dummy object");
+
+        // load
+        DynamoTestObject loadedDynamoTestObject = (DynamoTestObject) dynamoDbMapper.load(DynamoTestObject.class, dynamoTestObject.getId());
+        log.info("load dummy object");
+        assertEquals(val1, loadedDynamoTestObject.getValue());
+
+        // update
+        loadedDynamoTestObject.setValue(val2);
+        dynamoDbMapper.insert(loadedDynamoTestObject);
+        log.info("update dummy object");
+
+        // load
+        DynamoTestObject updatedDynamoTestObject = (DynamoTestObject) dynamoDbMapper.load(DynamoTestObject.class, loadedDynamoTestObject.getId());
+        assertEquals(val2, updatedDynamoTestObject.getValue());
+        log.info("load dummy object");
+
+        // delete
+        //dynamoDbMapper.delete(updatedDynamoTestObject);
+        log.info("delete dummy object");
+
+        // drop
+        //dynamoDbMapper.dropTable(DynamoTestObject.class);
+        //log.info("drop dummy object");
+    }
 
     @Test
     public void getItemsTest() {
@@ -67,5 +124,4 @@ public class DynamoDbClientTest {
 
         assertFalse(transferTemplateList.contains(mockTemplate));
     }
-
 }
