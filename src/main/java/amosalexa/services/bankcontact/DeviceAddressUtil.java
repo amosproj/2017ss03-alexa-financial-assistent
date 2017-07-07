@@ -1,8 +1,6 @@
-package amosalexa.services;
+package amosalexa.services.bankcontact;
 
 
-import amosalexa.services.bankcontact.Address;
-import amosalexa.services.bankcontact.AlexaDeviceAddressClient;
 import amosalexa.services.bankcontact.exceptions.DeviceAddressClientException;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.Context;
