@@ -9,6 +9,7 @@ import amosalexa.services.pricequery.aws.model.Item;
 import amosalexa.services.pricequery.aws.model.Offer;
 import amosalexa.services.pricequery.aws.request.AWSLookup;
 import amosalexa.services.pricequery.aws.util.AWSUtil;
+import api.aws.EMailClient;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -30,19 +31,23 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
 
     private static final Logger log = LoggerFactory.getLogger(AffordabilityService.class);
+
     /**
      * intents
      */
     private final static String AFFORD_INTENT = "AffordProduct";
+
     /**
      * slot
      */
     private static final String KEYWORD_SLOT = "ProductKeyword";
     private static final String PRODUCT_SLOT = "ProductSelection";
+
     /**
      * cards
      */
     private static final String CARD = "BUY_CHECK";
+
     /**
      * speech texts
      */
@@ -53,24 +58,40 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
     public static final String TOO_FEW_RESULTS = "Die Suche ergab zu wenig Ergebnisse";
     public static final String CANT_AFFORD = "Das Produkt kannst du dir nicht leisten!";
     public static final String OTHER_SELECTION = "Möchtest du nach etwas anderem suchen";
-    public static final String BUY_ASK = "Willst du das Produkt in den Warenkorb legen";
-    public static final String CART_ACK = "Das Produkt wurde in deinen Warenkorb gelegt";
+    public static final String BUY_ASK = "Willst du das Produkt vormerken";
+    public static final String CART_ACK = "Eine E-mail mit einem Produkt-link zu Amazon wurde an dich geschickt";
     public static final String SEARCH_ASK = "Was suchst du. Frage mich zum Beispiel was ein Samsung Galaxy kostet";
     public static final String BYE = "Ok, Tschüss!";
+
     /**
      * attributes
      */
+
     private static final String AFFORDABILITY_ATTRIBUTE = "affordability_attribute";
     /**
      * slot values
      */
+
     private static String keywordSlot;
     private static String productSelectionSlot;
+
     /**
+     *
      * session / intent
      */
+
     private static Session session;
     private static Intent intent;
+
+    /**
+     *
+     */
+    private Item selectedItem;
+
+    /**
+     *
+     * @param speechletSubject
+     */
     public AffordabilityService(SpeechletSubject speechletSubject){
         subscribe(speechletSubject);
     }
@@ -154,7 +175,8 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         if(putInCartAsk != null){
             log.debug("Dialog State: cart?");
             if (intent.getName().equals(YES_INTENT)){
-                return getAskResponse(CARD, CART_ACK);
+                EMailClient.SendEMail("Amazon Produkt: " + selectedItem.getTitle(), selectedItem.getDetailPageURL());
+                return getResponse(CARD, CART_ACK);
             }
             return exitDialogRespond();
         }
@@ -176,9 +198,8 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      */
     private SpeechletResponse getAffordabilityResponse(){
 
-
-        log.info("Selection: " + "produkt " + productSelectionSlot.toLowerCase());
-        Item selectedItem = (Item) SessionStorage.getInstance().getObject(session.getSessionId(), "produkt " + productSelectionSlot.toLowerCase());
+        log.info("Product Selection: " + "produkt " + productSelectionSlot.toLowerCase());
+        selectedItem = (Item) SessionStorage.getInstance().getObject(session.getSessionId(), getItemSelectionKey());
 
         if(selectedItem == null){
             log.error("selected item is null");
@@ -206,6 +227,10 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
         setDialogState("cart?");
         return getAskResponse(CARD, confirmationText + BUY_ASK);
+    }
+
+    private String getItemSelectionKey(){
+        return "produkt " + productSelectionSlot.toLowerCase();
     }
 
     /**
@@ -265,7 +290,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 // build respond
                 text.append("Produkt ")
                         .append((char) ('a' + i))
-                        .append(" ")
+                        .append("<break time=\"1s\"/> ")
                         .append(getItemText(items.get(i)));
             }
 
@@ -277,7 +302,6 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         log.debug("Dialog State: no keyword");
         return getAskResponse(CARD, "Ein Fehler ist aufgetreten. " + ERROR);
     }
-
 
     /**
      * get all slot values
