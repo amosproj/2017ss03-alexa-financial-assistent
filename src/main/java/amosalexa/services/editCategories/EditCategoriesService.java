@@ -1,6 +1,5 @@
 package amosalexa.services.editCategories;
 
-
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
@@ -22,17 +21,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
-
 public class EditCategoriesService extends AbstractSpeechService implements SpeechService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(amosalexa.services.bankaccount.TransactionService.class);
-    private static final String SHOW_CATEGORIES_INTENT = "ShowCategoriesIntent";
 
+    private static final String SHOW_CATEGORIES_INTENT = "ShowCategoriesIntent";
     private static final String DELETE_CATEGORY_INTENT = "DeleteCategoryIntent";
     private static final String SERVICE_CARD_TITLE = "Kategorien verwalten";
-
-    private static final String ITEM_KEY = "item";
-    private static final String TRANSFER_LIMIT_KEY = "transferLimit";
 
     @Override
     public String getDialogName() {
@@ -60,7 +54,6 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         subscribe(speechletSubject);
     }
 
-
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
         for (String intent : getHandledIntents()) {
@@ -70,7 +63,6 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
 
     @Override
     public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) throws SpeechletException {
-
         Intent intent = requestEnvelope.getRequest().getIntent();
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
@@ -86,12 +78,16 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
                     return performDeletion(intent, session);
                 }
         }
+
         return null;
     }
 
-
-    private SpeechletResponse showAllCategories(Intent intent, Session session){
-
+    /**
+     * @param intent
+     * @param session
+     * @return
+     */
+    private SpeechletResponse showAllCategories(Intent intent, Session session) {
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
 
@@ -110,8 +106,12 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         return response;
     }
 
-    private SpeechletResponse addNewCategory(Intent intent, Session session){
-
+    /**
+     * @param intent
+     * @param session
+     * @return
+     */
+    private SpeechletResponse addNewCategory(Intent intent, Session session) {
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
         Slot categoryNameSlot = intent.getSlot("CategoryName");
@@ -129,7 +129,11 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         return response;
     }
 
-
+    /**
+     * @param intent
+     * @param session
+     * @return
+     */
     private SpeechletResponse deleteCategory(Intent intent, Session session) {
         String category = intent.getSlot("CategoryName").getValue();
 
@@ -165,6 +169,11 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
                 + " Euro wirklich löschen?");
     }
 
+    /**
+     * @param intent
+     * @param session
+     * @return
+     */
     private SpeechletResponse performDeletion(Intent intent, Session session) {
         Object closestCategoryObj = SessionStorage.getInstance().getObject(session.getSessionId(), SERVICE_CARD_TITLE + ".categoryId");
 
