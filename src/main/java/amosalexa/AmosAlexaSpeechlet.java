@@ -12,7 +12,6 @@ package amosalexa;
 import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.StandingOrderService;
-import amosalexa.services.bankaccount.TransactionService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.budgetreport.BudgetReportService;
 import amosalexa.services.budgettracker.BudgetTrackerService;
@@ -51,7 +50,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new BankAccountService(amosAlexaSpeechlet);
         new StandingOrderService(amosAlexaSpeechlet);
         new AffordabilityService(amosAlexaSpeechlet);
-        new TransactionService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
