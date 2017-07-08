@@ -82,6 +82,8 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
                     return performDeletion(intent, session);
                 }
                 return null;
+            case NO_INTENT:
+                return getResponse(SERVICE_CARD_TITLE, "OK, verstanden. Dann bis bald.");
             case ADD_CATEGORY_INTENT:
                 return addNewCategory(intent, session);
             case SHOW_CATEGORIES_INTENT:
