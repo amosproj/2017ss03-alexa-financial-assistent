@@ -47,7 +47,7 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         return Arrays.asList(
                 SHOW_CATEGORIES_INTENT,
                 ADD_CATEGORY_INTENT,
-                DELETE_CATEGORY_INTENT
+                DELETE_CATEGORY_INTENT,
                 YES_INTENT,
                 NO_INTENT,
                 STOP_INTENT
