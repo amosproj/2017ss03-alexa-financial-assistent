@@ -36,7 +36,8 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
     @Override
     public List<String> getStartIntents() {
         return Arrays.asList(
-                SHOW_CATEGORIES_INTENT
+                SHOW_CATEGORIES_INTENT,
+                DELETE_CATEGORY_INTENT
         );
     }
 
@@ -77,6 +78,9 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
                 if (context.equals(DELETE_CATEGORY_INTENT)) {
                     return performDeletion(intent, session);
                 }
+                return null;
+            case NO_INTENT:
+                return getResponse(SERVICE_CARD_TITLE, "OK, verstanden. Dann bis bald.");
         }
 
         return null;
