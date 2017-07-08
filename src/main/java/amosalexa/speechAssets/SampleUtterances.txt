@@ -1,3 +1,110 @@
+SecuritiesAccountInformationIntent Wie sind meine Aktien
+SecuritiesAccountInformationIntent Wie ist der Stand meiner Aktien
+SecuritiesAccountInformationIntent Nenne mir meine Aktien
+SecuritiesAccountInformationIntent Wie ist mein Depotstatus
+AccountInformation Wie ist mein {AccountInformationSlots}
+AccountInformation Wie ist meine {AccountInformationSlots}
+AccountInformation Was ist mein {AccountInformationSlots}
+AccountInformation Was ist meine {AccountInformationSlots}
+AccountInformation Wie hoch ist mein {AccountInformationSlots}
+AccountInformation Wie hoch ist meine {AccountInformationSlots}
+AccountInformation Was sind meine {AccountInformationSlots}
+AccountInformation Was sind mein {AccountInformationSlots}
+BankOpeningHours Öffnungszeiten
+BankOpeningHours Öffnungszeiten meiner Bank
+BankOpeningHours Wann hat die {BankNameSlots} am {OpeningHoursDate} geöffnet
+BankOpeningHours Wann hat die {BankNameSlots} geöffnet
+BankOpeningHours Öffnungszeiten meiner Bank
+BankOpeningHours Wann hat die {BankNameSlots} geöffnet
+BankOpeningHours {BankNameSlots} Öffnungszeiten
+BankOpeningHours Öffnungszeiten der {BankNameSlots}
+BankOpeningHours wann hat {BankNameSlots} offen
+BankOpeningHours hat die {BankNameSlots} {OpeningHoursDate} geöffnet
+BankAddress Bankadresse
+BankAddress Wo finde ich meine Bank
+BankAddress Wo ist meine Bank
+BankAddress Wie ist die Adresse von {BankNameSlots}
+BankAddress Wo ist die {BankNameSlots}
+BankAddress gib mir die Adresse von {BankNameSlots}
+BankAddress suche die {BankNameSlots} in der nähe
+BankAddress wo ist die nächste {BankNameSlots}
+BankAddress finde die nächste {BankNameSlots}
+BankTelephone wie ist die telefonnummer meiner bank
+BankTelephone wie lautet die telephonnummer meiner bank
+BankTelephone gib mir die telephonnummer meiner bank
+BankTelephone wie ist die nummer meiner bank
+BankTelephone finde die nummer meiner bank
+BankTelephone was ist die telefonnummer meiner bank
+BankTelephone wie ist die telefonnummer {BankNameSlots}
+BankTelephone wie lautet die telephonnummer {BankNameSlots}
+BankTelephone gib mir die telephonnummer {BankNameSlots}
+BankTelephone wie ist die nummer {BankNameSlots}
+BankTelephone finde die nummer {BankNameSlots}
+BankTelephone was ist die telefonnummer {BankNameSlots}
+PlainNumberIntent {Number}
+PlainEuroIntent {Number} Euro
+PlainYearsIntent {Number} Jahre
+PlainYearsIntent {Number} Jahr
+SavingsPlanIntroIntent Erstelle einen Sparplan
+SavingsPlanIntroIntent Berechne mir einen Sparplan
+SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von {Betrag} Euro
+SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
+SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
+SavingsPlanChangeParameterIntent {SavingsPlanParameter}
+SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}
+SavingsPlanChangeParameterIntent Ändere die {SavingsPlanParameter}
+SavingsPlanNewIntent Neu
+SavingsPlanNewIntent Neu beginnen
+StandingOrdersDeleteIntent Lösche Dauerauftrag Nummer {Number}
+StandingOrderSmartIntent Richte einen neuen Dauerauftrag für {Payee} {PayeeSecondName} in Höhe von {orderAmount} Euro ein
+StandingOrderSmartIntent Richte einen neuen Dauerauftrag ein
+StandingOrderSmartIntent Richte einen neuen
+StandingOrderSmartIntent Richte einfach einen neuen Dauerauftrag ein
+StandingOrdersInfoIntent Daueraufträge
+StandingOrdersInfoIntent Wie lauten meine Daueraufträge
+StandingOrdersInfoIntent Wie sind meine Daueraufträge
+StandingOrdersInfoIntent Was sind meine Daueraufträge
+StandingOrdersInfoIntent Nenne mir meine Daueraufträge
+StandingOrdersInfoIntent Sende Daueraufträge per {Channel}
+StandingOrdersInfoIntent Daueraufträge an {Payee}
+StandingOrdersModifyIntent Ändere den Betrag von Dauerauftrag Nummer {Number} auf {Amount} Euro
+StandingOrdersModifyIntent {Amount} Euro
+StandingOrdersModifyIntent Ändere den Ausführungsrhythmus von Dauerauftrag Nummer {Number} auf {ExecutionRate} beginnend am {FirstExecution}
+StandingOrdersKeywordIntent Wie viel bezahle ich für {StandingOrderKeyword}
+StandingOrdersKeywordIntent Wie viel bezahle ich monatlich für {StandingOrderKeyword}
+StandingOrdersKeywordIntent Welchen Betrag bezahle ich für {StandingOrderKeyword}
+StandingOrdersKeywordIntent Welchen Betrag bezahle ich monatlich für {StandingOrderKeyword}
+StandingOrdersKeywordIntent Wie sind meine monatlichen {TransactionKeyword}
+ReplacementCardIntent Bestelle eine Ersatzkarte
+ReplacementCardIntent Ich brauche eine Ersatzkarte
+ReplacementCardReasonIntent Die Karte wurde {ReplacementReason}
+ReplacementCardReasonIntent Die Karte ist {ReplacementReason}
+ReplacementCardReasonIntent Die alte Karte wurde {ReplacementReason}
+ReplacementCardReasonIntent Die alte Karte ist {ReplacementReason}
+ReplacementCardReasonIntent Meine Karte wurde {ReplacementReason}
+ReplacementCardReasonIntent Meine Karte ist {ReplacementReason}
+ReplacementCardReasonIntent Meine alte Karte wurde {ReplacementReason}
+ReplacementCardReasonIntent Meine alte Karte ist {ReplacementReason}
+ReplacementCardReasonIntent {ReplacementReason}
+BlockCardIntent Sperre Karte {BankCardNumber}
+BankTransferIntent Überweise {Amount} Euro an {Name}
+SetBalanceLimitIntent Setze mein Kontolimit auf {BalanceLimitAmount} Euro
+SetBalanceLimitIntent Setze das Limit für mein Konto auf {BalanceLimitAmount} Euro
+SetBalanceLimitIntent Setze mein Limit auf {BalanceLimitAmount} Euro
+SetBalanceLimitIntent Ich möchte mein Limit auf {BalanceLimitAmount} Euro setzen
+SetBalanceLimitIntent Ich möchte mein Kontolimit auf {BalanceLimitAmount} Euro setzen
+GetBalanceLimitIntent Wie ist mein Kontolimit
+GetBalanceLimitIntent Wie ist das Limit für mein Konto
+GetBalanceLimitIntent Nach meinem Kontolimit
+GetBalanceLimitIntent Nach dem Limit für mein Konto
+ListTransferTemplatesIntent Überweisungsvorlagen
+DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
+EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmount}
+ContactListInfoIntent Was sind meine Kontakte
+ContactListInfoIntent Kontaktliste
+ContactAddIntent Speichere Details von Transaktion {TransactionNumber} als Kontakt
+ContactDeleteIntent Lösche Kontakt Nummer {ContactID}
+ContactDeleteIntent Lösche Kontakt {ContactID}
 AffordProduct Ich suche {ProductKeyword}
 AffordProduct Was kostet ein {ProductKeyword}
 AffordProduct Was kostet eine {ProductKeyword}
@@ -12,160 +119,21 @@ AffordProduct Wie viel kostet das {ProductKeyword}
 AffordProduct Wie viel kostet der {ProductKeyword}
 AffordProduct Wie viel kostet die {ProductKeyword}
 AffordProduct produkt {ProductSelection}
-
-AccountInformation Wie ist mein {AccountInformationSlots}
-AccountInformation Wie ist meine {AccountInformationSlots}
-AccountInformation Was ist mein {AccountInformationSlots}
-AccountInformation Was ist meine {AccountInformationSlots}
-AccountInformation Wie hoch ist mein {AccountInformationSlots}
-AccountInformation Wie hoch ist meine {AccountInformationSlots}
-AccountInformation Was sind meine {AccountInformationSlots}
-AccountInformation Was sind mein {AccountInformationSlots}
-
-ReplacementCardReasonIntent Die Karte wurde {ReplacementReason}
-ReplacementCardReasonIntent Die Karte ist {ReplacementReason}
-ReplacementCardReasonIntent Die alte Karte wurde {ReplacementReason}
-ReplacementCardReasonIntent Die alte Karte ist {ReplacementReason}
-ReplacementCardReasonIntent Meine Karte wurde {ReplacementReason}
-ReplacementCardReasonIntent Meine Karte ist {ReplacementReason}
-ReplacementCardReasonIntent Meine alte Karte wurde {ReplacementReason}
-ReplacementCardReasonIntent Meine alte Karte ist {ReplacementReason}
-ReplacementCardReasonIntent {ReplacementReason}
-
-ReplacementCardIntent Bestelle eine Ersatzkarte
-ReplacementCardIntent Ich brauche eine Ersatzkarte
-
-BlockCardIntent Sperre Karte {BankCardNumber}
-
-BankAddress Bankadresse
-BankAddress Wo finde ich meine Bank
-BankAddress Wo ist meine Bank
-BankAddress Wie ist die Adresse von {BankNameSlots}
-BankAddress Wo ist die {BankNameSlots}
-BankAddress gib mir die Adresse von {BankNameSlots}
-BankAddress suche die {BankNameSlots} in der nähe
-BankAddress wo ist die nächste {BankNameSlots}
-BankAddress finde die nächste {BankNameSlots}
-
-BankTelephone wie ist die telefonnummer meiner bank
-BankTelephone wie lautet die telephonnummer meiner bank
-BankTelephone gib mir die telephonnummer meiner bank
-BankTelephone wie ist die nummer meiner bank
-BankTelephone finde die nummer meiner bank
-BankTelephone was ist die telefonnummer meiner bank
-BankTelephone wie ist die telefonnummer {BankNameSlots}
-BankTelephone wie lautet die telephonnummer {BankNameSlots}
-BankTelephone gib mir die telephonnummer {BankNameSlots}
-BankTelephone wie ist die nummer {BankNameSlots}
-BankTelephone finde die nummer {BankNameSlots}
-BankTelephone was ist die telefonnummer {BankNameSlots}
-
-BankOpeningHours Öffnungszeiten
-BankOpeningHours Öffnungszeiten meiner Bank
-BankOpeningHours Wann hat die {BankNameSlots} am {OpeningHoursDate} geöffnet
-BankOpeningHours Wann hat die {BankNameSlots} geöffnet
-BankOpeningHours Öffnungszeiten meiner Bank
-BankOpeningHours Wann hat die {BankNameSlots} geöffnet
-BankOpeningHours {BankNameSlots} Öffnungszeiten
-BankOpeningHours Öffnungszeiten der {BankNameSlots}
-BankOpeningHours wann hat {BankNameSlots} offen
-BankOpeningHours hat die {BankNameSlots} {OpeningHoursDate} geöffnet
-
-PlainNumberIntent {Number}
-PlainEuroIntent {Number} Euro
-PlainYearsIntent {Number} Jahre
-PlainYearsIntent {Number} Jahr
-
-SavingsPlanIntroIntent Erstelle einen Sparplan
-SavingsPlanIntroIntent Berechne mir einen Sparplan
-SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von {Betrag} Euro
-SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
-SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
-
-SavingsPlanChangeParameterIntent {SavingsPlanParameter}
-SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}
-SavingsPlanChangeParameterIntent Ändere die {SavingsPlanParameter}
-
-SavingsPlanNewIntent Neu
-SavingsPlanNewIntent Neu beginnen
-
-StandingOrdersInfoIntent Daueraufträge
-StandingOrdersInfoIntent Wie lauten meine Daueraufträge
-StandingOrdersInfoIntent Wie sind meine Daueraufträge
-StandingOrdersInfoIntent Was sind meine Daueraufträge
-StandingOrdersInfoIntent Nenne mir meine Daueraufträge
-StandingOrdersInfoIntent Sende Daueraufträge per {Channel}
-StandingOrdersInfoIntent Daueraufträge an {Payee}
-
-StandingOrdersDeleteIntent Lösche Dauerauftrag Nummer {Number}
-
-StandingOrdersModifyIntent Ändere den Betrag von Dauerauftrag Nummer {Number} auf {Amount} Euro
-StandingOrdersModifyIntent {Amount} Euro
-StandingOrdersModifyIntent Ändere den Ausführungsrhythmus von Dauerauftrag Nummer {Number} auf {ExecutionRate} beginnend am {FirstExecution}
-
-StandingOrdersKeywordIntent Wie viel bezahle ich für {StandingOrderKeyword}
-StandingOrdersKeywordIntent Wie viel bezahle ich monatlich für {StandingOrderKeyword}
-StandingOrdersKeywordIntent Welchen Betrag bezahle ich für {StandingOrderKeyword}
-StandingOrdersKeywordIntent Welchen Betrag bezahle ich monatlich für {StandingOrderKeyword}
-StandingOrdersKeywordIntent Wie sind meine monatlichen {TransactionKeyword}
-
-StandingOrderSmartIntent Richte einen neuen Dauerauftrag für {Payee} {PayeeSecondName} in Höhe von {orderAmount} Euro ein
-StandingOrderSmartIntent Richte einen neuen Dauerauftrag ein
-StandingOrderSmartIntent Richte einen neuen
-StandingOrderSmartIntent Richte einfach einen neuen Dauerauftrag ein
-
-SecuritiesAccountInformationIntent Wie sind meine Aktien
-SecuritiesAccountInformationIntent Wie ist der Stand meiner Aktien
-SecuritiesAccountInformationIntent Nenne mir meine Aktien
-SecuritiesAccountInformationIntent Wie ist mein Depotstatus
-
-SetBalanceLimitIntent Setze mein Kontolimit auf {BalanceLimitAmount} Euro
-SetBalanceLimitIntent Setze das Limit für mein Konto auf {BalanceLimitAmount} Euro
-SetBalanceLimitIntent Setze mein Limit auf {BalanceLimitAmount} Euro
-SetBalanceLimitIntent Ich möchte mein Limit auf {BalanceLimitAmount} Euro setzen
-SetBalanceLimitIntent Ich möchte mein Kontolimit auf {BalanceLimitAmount} Euro setzen
-
-GetBalanceLimitIntent Wie ist mein Kontolimit
-GetBalanceLimitIntent Wie ist das Limit für mein Konto
-GetBalanceLimitIntent Nach meinem Kontolimit
-GetBalanceLimitIntent Nach dem Limit für mein Konto
-
-ListTransferTemplatesIntent Überweisungsvorlagen
-DeleteTransferTemplatesIntent Lösche Vorlage {TemplateID}
-EditTransferTemplateIntent Ändere Betrag von Vorlage {TemplateID} auf {NewAmount}
-
-ContactListInfoIntent Was sind meine Kontakte
-ContactListInfoIntent Kontaktliste
-ContactAddIntent Speichere Details von Transaktion {TransactionNumber} als Kontakt
-ContactDeleteIntent Lösche Kontakt Nummer {ContactID}
-ContactDeleteIntent Lösche Kontakt {ContactID}
-
-BudgetReportEMailIntent Sende mir meinen Ausgabenreport
-BudgetReportEMailIntent Schicke mir den Ausgabenreport
-BudgetReportEMailIntent Sende mir meinen Budget Report
-BudgetReportEMailIntent Schicke mir den Budget Report
-
-ContactTransferIntent Überweise {Amount} Euro an {Contact}
-ContactChoiceIntent Kontakt Nummer {ContactIndex}
-
+PlainCategoryIntent {Category}
+PlainCategoryIntent Kategorie {Category}
+CategoryLimitInfoIntent Wie ist das Limit für {Category}
+CategoryLimitInfoIntent Wie ist das Limit für Kategorie {Category}
 CategoryLimitSetIntent Ändere Limit für {Category} auf {CategoryLimit} Euro
 CategoryLimitSetIntent Ändere Limit für Kategorie {Category} auf {CategoryLimit} Euro
 CategoryLimitSetIntent Setze Limit für {Category} auf {CategoryLimit} Euro
 CategoryLimitSetIntent Setze Limit für Kategorie {Category} auf {CategoryLimit} Euro
-
-CategoryLimitInfoIntent Wie ist das Limit für {Category}
-CategoryLimitInfoIntent Wie ist das Limit für Kategorie {Category}
-
-CategorySpendingIntent Speichere {Amount} Euro
-CategorySpendingIntent Speichere {Amount} Euro für Kategorie {Category}
-CategorySpendingIntent Speichere {Amount} Euro für {Category}
-CategorySpendingIntent Notiere {Amount} Euro für Kategorie {Category}
-CategorySpendingIntent Notiere {Amount} Euro für {Category}
-CategorySpendingIntent Ich habe {Amount} Euro für {Category} ausgegeben
-
-IntroductionIntent Was kann AMOS
-IntroductionIntent Was kannst du eigentlich
-IntroductionIntent Was kann ich fragen
-
-PlainCategoryIntent {Category}
-PlainCategoryIntent Kategorie {Category}
+BudgetReportEMailIntent Sende mir meinen Ausgabenreport
+BudgetReportEMailIntent Schicke mir den Ausgabenreport
+BudgetReportEMailIntent Sende mir meinen Budget Report
+BudgetReportEMailIntent Schicke mir den Budget Report
+ContactTransferIntent Überweise {Amount} Euro an {Contact}
+ContactChoiceIntent Kontakt Nummer {ContactIndex}
+ShowCategoriesIntent zeig mir meine Kategorien
+DeleteCategoryIntent loesche die Kategorie {CategoryName}
+AddCategoryIntent erstelle die Kategorie {CategoryName}
+AddCategoryIntent fuege die Kategorie {CategoryName} hinzu
