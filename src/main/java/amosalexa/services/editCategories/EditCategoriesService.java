@@ -23,7 +23,7 @@ import java.util.List;
 
 public class EditCategoriesService extends AbstractSpeechService implements SpeechService {
     private static final Logger LOGGER = LoggerFactory.getLogger(amosalexa.services.bankaccount.TransactionService.class);
-
+    private static final String ADD_CATEGORY_INTENT = "AddCategoryIntent";
     private static final String SHOW_CATEGORIES_INTENT = "ShowCategoriesIntent";
     private static final String DELETE_CATEGORY_INTENT = "DeleteCategoryIntent";
     private static final String SERVICE_CARD_TITLE = "Kategorien verwalten";
@@ -37,6 +37,7 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
     public List<String> getStartIntents() {
         return Arrays.asList(
                 SHOW_CATEGORIES_INTENT,
+                ADD_CATEGORY_INTENT,
                 DELETE_CATEGORY_INTENT
         );
     }
@@ -45,6 +46,8 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
     public List<String> getHandledIntents() {
         return Arrays.asList(
                 SHOW_CATEGORIES_INTENT,
+                ADD_CATEGORY_INTENT,
+                DELETE_CATEGORY_INTENT,
                 YES_INTENT,
                 NO_INTENT,
                 STOP_INTENT
@@ -81,6 +84,10 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
                 return null;
             case NO_INTENT:
                 return getResponse(SERVICE_CARD_TITLE, "OK, verstanden. Dann bis bald.");
+            case ADD_CATEGORY_INTENT:
+                return addNewCategory(intent, session);
+            case SHOW_CATEGORIES_INTENT:
+                return showAllCategories(intent, session);
         }
 
         return null;
