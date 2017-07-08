@@ -27,6 +27,7 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
 
     private static final Logger LOGGER = LoggerFactory.getLogger(amosalexa.services.bankaccount.TransactionService.class);
     private static final String SHOW_CATEGORIES_INTENT = "ShowCategoriesIntent";
+    private static final String ADD_CATEGORY_INTENT = "AddCategoryIntent";
 
     private static final String DELETE_CATEGORY_INTENT = "DeleteCategoryIntent";
     private static final String SERVICE_CARD_TITLE = "Kategorien verwalten";
@@ -42,7 +43,9 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
     @Override
     public List<String> getStartIntents() {
         return Arrays.asList(
-                SHOW_CATEGORIES_INTENT
+                SHOW_CATEGORIES_INTENT,
+                ADD_CATEGORY_INTENT,
+                DELETE_CATEGORY_INTENT
         );
     }
 
@@ -50,6 +53,8 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
     public List<String> getHandledIntents() {
         return Arrays.asList(
                 SHOW_CATEGORIES_INTENT,
+                ADD_CATEGORY_INTENT,
+                DELETE_CATEGORY_INTENT
                 YES_INTENT,
                 NO_INTENT,
                 STOP_INTENT
