@@ -2,10 +2,8 @@ package api;
 
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
-import com.amazonaws.services.dynamodbv2.model.ResourceInUseException;
 import model.banking.TransferTemplate;
 import model.db.DynamoTestObject;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +20,6 @@ public class DynamoDbClientTest {
     private DynamoDbClient client = DynamoDbClient.instance;
 
     private DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
-
-
-    @Before
-    public void setUp(){
-        try {
-            dynamoDbMapper.createTable(DynamoTestObject.class);
-        } catch (InterruptedException | ResourceInUseException e) {
-            log.info("Table already created");
-        }
-    }
 
     @Test
     public void CRUDTest() throws InterruptedException {
@@ -61,7 +49,7 @@ public class DynamoDbClientTest {
         log.info("load dummy object");
 
         // delete
-        //dynamoDbMapper.delete(updatedDynamoTestObject);
+        dynamoDbMapper.delete(updatedDynamoTestObject);
         log.info("delete dummy object");
 
         // drop
