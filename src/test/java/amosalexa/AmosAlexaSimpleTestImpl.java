@@ -1,16 +1,16 @@
 package amosalexa;
 
 import amosalexa.server.Launcher;
-import amosalexa.services.contactTransfer.ContactTransferService;
+import amosalexa.services.bankaccount.ContactTransferService;
 import amosalexa.services.financing.AffordabilityService;
 import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import model.banking.Card;
-import model.db.Contact;
 import model.banking.StandingOrder;
 import model.banking.Transaction;
 import model.db.Category;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
@@ -56,8 +56,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
     }
 
-    /*
-    FIXME
 
     @Test
     public void affordabilityTest() throws Exception {
@@ -85,7 +83,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
             add("Dein kontostand beträgt €(.*) kostet €(.*) Das Produkt kannst du dir nicht leisten! Möchtest du nach etwas anderem suchen");
             add(AffordabilityService.BYE);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
-            add("Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
+            add("Produkt (.*) " + AffordabilityService.BUY_ASK);
         }};
 
         ArrayList<String> cartAnswers = new ArrayList<String>() {{
@@ -116,7 +114,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
     }
-    */
+
 
     @Test
     public void bankAccountTransactionIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
@@ -167,16 +165,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent(
                 "AMAZON.YesIntent",
                 "Karte 123 wurde gesperrt.");
-    }
-
-    @Test
-    public void bankTransferIntentTest() throws Throwable {
-        newSession();
-        testIntentMatches("BankTransferIntent", "Name:anne", "Amount:2",
-                "Aktuell betraegt dein Kontostand (.*) Euro\\. Bist du sicher, dass du 2 Euro an anne ueberweisen willst\\?");
-
-        testIntentMatches("AMAZON.YesIntent",
-                "Ok, (.*) Euro wurden an anne ueberwiesen\\. Dein neuer Kontostand betraegt (.*) Euro\\.");
     }
 
     @Test
@@ -592,7 +580,8 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Dein aktueller Kontostand beträgt ([0-9\\.]+) Euro\\. Möchtest du 1\\.0 Euro an Sandra überweisen\\?");
 
         testIntentMatches("AMAZON.YesIntent",
-                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\.");
+                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
+        "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
 
         newSession();
 

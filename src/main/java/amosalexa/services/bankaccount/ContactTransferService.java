@@ -1,11 +1,13 @@
-package amosalexa.services.contactTransfer;
+package amosalexa.services.bankaccount;
 
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import amosalexa.services.bankcontact.BankContactService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -15,7 +17,10 @@ import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import model.banking.Account;
+import model.banking.Transaction;
+import model.db.Category;
 import model.db.Contact;
+import model.db.TransactionDB;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +55,6 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
      */
     private static final String SESSION_PREFIX = "ContactTransfer";
 
-    //region Intent names
-
     /**
      * Entry intent for this service.
      */
@@ -69,7 +72,11 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
 
     private static final SessionStorage SESSION_STORAGE = SessionStorage.getInstance();
 
-    //endregion
+    private static final String CATEGORY_SLOT = "Category";
+
+    private DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
+
+    private static final String TRANSACTION_ID_ATTRIBUTE = "transaction";
 
     public ContactTransferService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
@@ -81,6 +88,10 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         Session session = requestEnvelope.getSession();
         String intentName = intent.getName();
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
+
+        if(DialogUtil.getDialogState("category?", session) != null){
+           return transactionCategoryResponse(intent, session);
+        }
 
         switch (intentName) {
             case CONTACT_TRANSFER_INTENT:
@@ -98,6 +109,19 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             default:
                 return null;
         }
+    }
+
+    private SpeechletResponse transactionCategoryResponse(Intent intent, Session session){
+        String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        for (Category category : categories) {
+            if (category.getName().equals(categoryName)){
+                String transactionId = (String) session.getAttribute(TRANSACTION_ID_ATTRIBUTE);
+                dynamoDbMapper.insert(new TransactionDB(transactionId, "" + category.getId()));
+                return getResponse(CONTACT_TRANSFER_CARD, "Verstanden. Die Transaktion wurde zur Kategorie " + categoryName + " hinzugefügt");
+            }
+        }
+        return getResponse(CONTACT_TRANSFER_CARD, "Ich konnte die Kategorie nicht finden. Tschüss");
     }
 
     /**
@@ -269,13 +293,23 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             amount = (int) amountObj;
         }
 
-        TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), "2017-05-16",
+        Transaction transaction = TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), "2017-05-16",
                 "Beschreibung", "Hans", null);
 
-        Account account = AccountAPI.getAccount("0000000001");
-        String balanceAfterTransation = String.valueOf(account.getBalance());
 
-        return getResponse(CONTACT_TRANSFER_CARD, "Erfolgreich. " + amount + " Euro wurden an " + contact.getName() + " überwiesen. Dein neuer Kontostand beträgt " + balanceAfterTransation + " Euro.");
+        Account account = AccountAPI.getAccount("0000000001");
+        String balanceAfterTransaction = String.valueOf(account.getBalance());
+
+        //save state
+        DialogUtil.setDialogState("category?", session);
+
+        //save transaction id to save in db
+        session.setAttribute(TRANSACTION_ID_ATTRIBUTE, transaction.getTransactionId().toString());
+
+        //add category ask to success response
+        String categoryAsk = "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.";
+
+        return getAskResponse(CONTACT_TRANSFER_CARD, "Erfolgreich. " + amount + " Euro wurden an " + contact.getName() + " überwiesen. Dein neuer Kontostand beträgt " + balanceAfterTransaction + " Euro. " + categoryAsk);
     }
 
     @Override

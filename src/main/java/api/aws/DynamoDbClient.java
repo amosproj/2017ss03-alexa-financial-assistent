@@ -11,7 +11,7 @@ import java.util.TreeMap;
 
 public class DynamoDbClient {
 
-    private AmazonDynamoDBClient dynamoDB;
+    private static AmazonDynamoDBClient dynamoDB;
     public final static DynamoDbClient instance = new DynamoDbClient();
 
     /**
@@ -20,9 +20,14 @@ public class DynamoDbClient {
     private DynamoDbClient() {
         // TODO: Use credentials of common AMOS ALEXA account
         // Currently we are using the credentials of Julian's private AWS account
+        dynamoDB = getAmazonDynamoDBClient();
+    }
+
+    public static AmazonDynamoDBClient getAmazonDynamoDBClient(){
         BasicAWSCredentials credentials = new BasicAWSCredentials("AKIAIUOLL3674W3T67IQ", "X4KiAVCPab5aiW0c/93y7PnABVsPlj6YYqmfSkng");
         dynamoDB = new AmazonDynamoDBClient(credentials);
         dynamoDB.setEndpoint("http://dynamodb.us-east-1.amazonaws.com");
+        return dynamoDB;
     }
 
     /**

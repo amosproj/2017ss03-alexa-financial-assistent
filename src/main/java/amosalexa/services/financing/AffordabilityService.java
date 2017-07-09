@@ -3,12 +3,14 @@ package amosalexa.services.financing;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.pricequery.aws.model.Item;
 import amosalexa.services.pricequery.aws.model.Offer;
 import amosalexa.services.pricequery.aws.request.AWSLookup;
 import amosalexa.services.pricequery.aws.util.AWSUtil;
+import api.aws.EMailClient;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -30,19 +32,23 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
 
     private static final Logger log = LoggerFactory.getLogger(AffordabilityService.class);
+
     /**
      * intents
      */
     private final static String AFFORD_INTENT = "AffordProduct";
+
     /**
      * slot
      */
     private static final String KEYWORD_SLOT = "ProductKeyword";
     private static final String PRODUCT_SLOT = "ProductSelection";
+
     /**
      * cards
      */
     private static final String CARD = "BUY_CHECK";
+
     /**
      * speech texts
      */
@@ -53,24 +59,40 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
     public static final String TOO_FEW_RESULTS = "Die Suche ergab zu wenig Ergebnisse";
     public static final String CANT_AFFORD = "Das Produkt kannst du dir nicht leisten!";
     public static final String OTHER_SELECTION = "Möchtest du nach etwas anderem suchen";
-    public static final String BUY_ASK = "Willst du das Produkt in den Warenkorb legen";
-    public static final String CART_ACK = "Das Produkt wurde in deinen Warenkorb gelegt";
+    public static final String BUY_ASK = "Willst du das Produkt vormerken";
+    public static final String CART_ACK = "Eine E-mail mit einem Produkt-link zu Amazon wurde an dich geschickt";
     public static final String SEARCH_ASK = "Was suchst du. Frage mich zum Beispiel was ein Samsung Galaxy kostet";
     public static final String BYE = "Ok, Tschüss!";
+
     /**
      * attributes
      */
+
     private static final String AFFORDABILITY_ATTRIBUTE = "affordability_attribute";
     /**
      * slot values
      */
+
     private static String keywordSlot;
     private static String productSelectionSlot;
+
     /**
+     *
      * session / intent
      */
+
     private static Session session;
     private static Intent intent;
+
+    /**
+     *
+     */
+    private Item selectedItem;
+
+    /**
+     *
+     * @param speechletSubject
+     */
     public AffordabilityService(SpeechletSubject speechletSubject){
         subscribe(speechletSubject);
     }
@@ -112,36 +134,33 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         getSlots();
 
         // error occurs when trying to request data from amazon product api
-        Object errorRequest = getDialogState("error!");
+        Object errorRequest = DialogUtil.getDialogState("error!", session);
         if(errorRequest != null){
             return getErrorResponse(ERROR);
         }
 
         // user decides if he wants to buy a product
-        Object stateBuyAsk = getDialogState("buy?");
-        if(stateBuyAsk != null){
+        if(DialogUtil.getDialogState("buy?", session) != null){
             log.debug("Dialog State: buy?");
             if(intent.getName().equals(YES_INTENT)){
-                setDialogState("which?");
+                DialogUtil.setDialogState("which?", session);
                 return getAskResponse(CARD, SELECTION_ASK);
             }
             return exitDialogRespond();
         }
 
         // user decides which product he wants to buy
-        Object whichProState = getDialogState("which?");
-        if(whichProState != null){
+        if(DialogUtil.getDialogState("which?", session) != null){
             log.debug("Dialog State: which?");
             if(productSelectionSlot != null){
                 return getAffordabilityResponse();
             }
-            setDialogState("which?");
+            DialogUtil.setDialogState("which?", session);
             return getAskResponse(CARD, SELECTION_ASK);
         }
 
         // user decides if he want to look for other products
-        Object lookForCheaperAsk = getDialogState("other?");
-        if(lookForCheaperAsk != null){
+        if(DialogUtil.getDialogState("other?", session) != null){
             log.debug("Dialog State: other?");
             if(intent.getName().equals(YES_INTENT)){
                 return getAskResponse(CARD, SEARCH_ASK);
@@ -150,11 +169,11 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         }
 
         // user decides if he want to put the item in the cart
-        Object putInCartAsk = getDialogState("cart?");
-        if(putInCartAsk != null){
+        if(DialogUtil.getDialogState("cart?", session) != null){
             log.debug("Dialog State: cart?");
             if (intent.getName().equals(YES_INTENT)){
-                return getAskResponse(CARD, CART_ACK);
+                EMailClient.SendEMail("Amazon Produkt: " + selectedItem.getTitle(), selectedItem.getDetailPageURL());
+                return getResponse(CARD, CART_ACK);
             }
             return exitDialogRespond();
         }
@@ -176,9 +195,8 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      */
     private SpeechletResponse getAffordabilityResponse(){
 
-
-        log.info("Selection: " + "produkt " + productSelectionSlot.toLowerCase());
-        Item selectedItem = (Item) SessionStorage.getInstance().getObject(session.getSessionId(), "produkt " + productSelectionSlot.toLowerCase());
+        log.info("Product Selection: " + "produkt " + productSelectionSlot.toLowerCase());
+        selectedItem = (Item) SessionStorage.getInstance().getObject(session.getSessionId(), getItemSelectionKey());
 
         if(selectedItem == null){
             log.error("selected item is null");
@@ -197,15 +215,19 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             // save state too expensive
             SessionStorage.getInstance().putObject(session.getSessionId(), AFFORDABILITY_ATTRIBUTE, false);
 
-            setDialogState("other?");
+            DialogUtil.setDialogState("other?", session);
             return getAskResponse(CARD, account.getBalanceText() + " " +  getItemText(selectedItem)
                     + " " + CANT_AFFORD + " " + OTHER_SELECTION);
         }
 
         String confirmationText = "Produkt " + productSelectionSlot + " " +  selectedItem.getTitleShort() + " ";
 
-        setDialogState("cart?");
+        DialogUtil.setDialogState("cart?", session);
         return getAskResponse(CARD, confirmationText + BUY_ASK);
+    }
+
+    private String getItemSelectionKey(){
+        return "produkt " + productSelectionSlot.toLowerCase();
     }
 
     /**
@@ -222,19 +244,19 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 items = AWSLookup.itemSearch(keywordSlot, 1, null);
             } catch (ParserConfigurationException | SAXException | IOException e) {
                 log.error("Amazon Lookup Exception: " + e.getMessage());
-                setDialogState("error!");
+                DialogUtil.setDialogState("error!", session);
                 return getAskResponse(CARD, NO_RESULTS);
             }
 
             if (items.isEmpty()) {
                 log.error("no results by keywordSlot: " + keywordSlot);
-                setDialogState("error!");
+                DialogUtil.setDialogState("error!", session);
                 return getAskResponse(CARD, NO_RESULTS);
             }
 
             if(items.size() < 3){
                 log.error("too few results by keywordSlot: " + keywordSlot);
-                setDialogState("error!");
+                DialogUtil.setDialogState("error!", session);
                 return getAskResponse(CARD, TOO_FEW_RESULTS);
             }
 
@@ -249,7 +271,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                     offer = AWSLookup.offerLookup(items.get(i).getASIN());
                 } catch (ParserConfigurationException | SAXException | IOException e) {
                     log.error("Amazon Lookup Exception: " + e.getMessage());
-                    setDialogState("error!");
+                    DialogUtil.setDialogState("error!", session);
                     return getAskResponse(CARD, "Ein Fehler ist aufgetreten. " + ERROR);
                 }
 
@@ -265,12 +287,12 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 // build respond
                 text.append("Produkt ")
                         .append((char) ('a' + i))
-                        .append(" ")
+                        .append("<break time=\"1s\"/> ")
                         .append(getItemText(items.get(i)));
             }
 
             text.append(DESIRE_ASK);
-            setDialogState("buy?");
+            DialogUtil.setDialogState("buy?", session);
             return getSSMLAskResponse(CARD, text.toString(), SEARCH_ASK);
         }
 
@@ -278,17 +300,13 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         return getAskResponse(CARD, "Ein Fehler ist aufgetreten. " + ERROR);
     }
 
-
     /**
      * get all slot values
      */
     private void getSlots(){
         keywordSlot = intent.getSlot(KEYWORD_SLOT) != null ? intent.getSlot(KEYWORD_SLOT).getValue() : null;
-
-        log.info("Search Keyword: " + keywordSlot);
-
         productSelectionSlot = intent.getSlot(PRODUCT_SLOT) != null ? intent.getSlot(PRODUCT_SLOT).getValue() : null;
-
+        log.info("Search Keyword: " + keywordSlot);
         log.info("Product Selection: " + productSelectionSlot);
     }
 
@@ -302,28 +320,5 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 "</say-as> <break time=\"1s\"/>";
     }
 
-    /**
-     * sets a dialog state
-     * @param name of the state
-     */
-    private void setDialogState(String name){
-        log.info("DialogState: " + name);
-        SessionStorage.getInstance().putObject(session.getSessionId(), name, new Object());
-    }
 
-    /**
-     * get dialog state
-     * @param name of the state
-     * @return Object
-     */
-    private Object getDialogState(String name){
-
-        //get state
-        Object object = SessionStorage.getInstance().getObject(session.getSessionId(), name);
-
-        //revoke old state
-        SessionStorage.getInstance().putObject(session.getSessionId(), name, null);
-
-        return object;
-    }
 }

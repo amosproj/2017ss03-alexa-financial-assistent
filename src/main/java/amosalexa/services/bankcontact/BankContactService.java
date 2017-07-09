@@ -4,7 +4,6 @@ package amosalexa.services.bankcontact;
 import amosalexa.SpeechletSubject;
 import amosalexa.server.Launcher;
 import amosalexa.services.AbstractSpeechService;
-import amosalexa.services.DeviceAddressUtil;
 import amosalexa.services.SpeechService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;

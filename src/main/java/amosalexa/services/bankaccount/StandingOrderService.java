@@ -2,6 +2,7 @@ package amosalexa.services.bankaccount;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import api.aws.EMailClient;
 import api.banking.AccountAPI;
@@ -60,7 +61,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         );
     }
 
-    private static final String STANDING_ORDERS_INFO_INTENT = "StandingOrdersInfoIntent";
+    private static final String STANDING_ORDERS_INFO_INTENT = "STANDING_ORDERS_KEYWORD_INTENT";
     private static final String STANDING_ORDERS_DELETE_INTENT = "StandingOrdersDeleteIntent";
     private static final String STANDING_ORDERS_MODIFY_INTENT = "StandingOrdersModifyIntent";
     private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrderKeyword";
@@ -98,6 +99,12 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         LOGGER.info("Intent Name: " + intentName);
         LOGGER.info("Context: " + context);
+
+        if(DialogUtil.getDialogState("category?", session) != null){
+
+
+            return getResponse("Transaktionskategorie", "Zu Kategorie SLOT hinzugefügt");
+        }
 
         if (STANDING_ORDERS_INFO_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
@@ -612,20 +619,19 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         AccountAPI.updateStandingOrder(ACCOUNT_NUMBER, standingOrder);
 
-        // Create the plain text output
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Der Dauerauftrag Nummer " + standingOrderToModify +
-                " für " + standingOrder.getPayee() + " über " + newAmount + " euro wurde erfolgreich aktualisiert");
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
+        String speechText = "Der Dauerauftrag Nummer " + standingOrderToModify +
+                " für " + standingOrder.getPayee() + " über " + newAmount + " euro wurde erfolgreich aktualisiert";
 
         //delete session attributes
         session.removeAttribute("SmartCreateStandingOrderIntent");
         session.removeAttribute("StandingOrderToModify");
         session.removeAttribute("NewAmount");
 
-        return SpeechletResponse.newAskResponse(speech, reprompt);
+        //ask for category
+        DialogUtil.setDialogState("category?", session);
+        speechText = speechText+ " Zu welcher Kategorie möchtest du den Dauerauftrag hinzufügen";
+
+        return getAskResponse(STANDING_ORDERS, speechText);
     }
 
     /**

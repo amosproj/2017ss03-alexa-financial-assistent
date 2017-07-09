@@ -97,7 +97,12 @@
         {
           "name": "Betrag",
           "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
         }
+
       ]
     },
     {
@@ -139,6 +144,10 @@
         {
           "name": "orderAmount",
           "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
         }
       ]
     },
@@ -350,6 +359,10 @@
         {
           "name": "Contact",
           "type": "LIST_OF_EXAMPLE_CONTACTS"
+        },
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
         }
       ]
     },

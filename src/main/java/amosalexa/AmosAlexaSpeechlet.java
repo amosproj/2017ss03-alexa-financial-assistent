@@ -11,14 +11,13 @@ package amosalexa;
 
 import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.bankaccount.ContactTransferService;
 import amosalexa.services.bankaccount.StandingOrderService;
-import amosalexa.services.bankaccount.TransactionService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.budgetreport.BudgetReportService;
 import amosalexa.services.budgettracker.BudgetTrackerService;
 import amosalexa.services.cards.BlockCardService;
 import amosalexa.services.cards.ReplacementCardService;
-import amosalexa.services.contactTransfer.ContactTransferService;
 import amosalexa.services.contacts.ContactService;
 import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.SavingsPlanService;
@@ -51,7 +50,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new BankAccountService(amosAlexaSpeechlet);
         new StandingOrderService(amosAlexaSpeechlet);
         new AffordabilityService(amosAlexaSpeechlet);
-        new TransactionService(amosAlexaSpeechlet);
         new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
