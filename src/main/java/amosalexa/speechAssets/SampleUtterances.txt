@@ -37,7 +37,7 @@ ReplacementCardIntent Ich brauche eine Ersatzkarte
 
 BlockCardIntent Sperre Karte {BankCardNumber}
 
-BankAddress Bankadresse
+
 BankAddress Wo finde ich meine Bank
 BankAddress Wo ist meine Bank
 BankAddress Wie ist die Adresse von {BankNameSlots}
@@ -146,6 +146,7 @@ BudgetReportEMailIntent Sende mir meinen Budget Report
 BudgetReportEMailIntent Schicke mir den Budget Report
 
 ContactTransferIntent Überweise {Amount} Euro an {Contact}
+ContactTransferIntent Kategorie {Category}
 ContactChoiceIntent Kontakt Nummer {ContactIndex}
 
 CategoryLimitSetIntent Ändere Limit für {Category} auf {CategoryLimit} Euro

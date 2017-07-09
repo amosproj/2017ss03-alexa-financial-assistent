@@ -590,7 +590,8 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Dein aktueller Kontostand beträgt ([0-9\\.]+) Euro\\. Möchtest du 1\\.0 Euro an Sandra überweisen\\?");
 
         testIntentMatches("AMAZON.YesIntent",
-                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\.");
+                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
+        "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
 
         newSession();
 
