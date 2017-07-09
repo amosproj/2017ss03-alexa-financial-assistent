@@ -26,6 +26,7 @@ import amosalexa.services.help.IntroductionService;
 import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
+import api.banking.AuthenticationAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
@@ -177,6 +178,8 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
         LOGGER.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
+        // Refresh the user's access token if necessary
+        AuthenticationAPI.updateAccessToken(USER_ID);
     }
 
     @Override

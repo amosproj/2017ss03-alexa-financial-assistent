@@ -60,9 +60,6 @@ public class BankingRESTClient {
      * @return BankingRESTClient
      */
     public static BankingRESTClient getInstance() {
-        // Refresh the user's access token if necessary
-        AuthenticationAPI.updateAccessToken(USER_ID);
-
         return bankingRESTClient;
     }
 
