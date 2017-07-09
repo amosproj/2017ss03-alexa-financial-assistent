@@ -42,6 +42,10 @@ import java.util.Map;
  * Base speechlet to register services that handle the intents.
  */
 public class AmosAlexaSpeechlet implements SpeechletSubject {
+
+    // TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
+    public static final int USER_ID = 4711;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
     private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();

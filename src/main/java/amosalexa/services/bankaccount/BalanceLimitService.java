@@ -70,14 +70,7 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 
 		SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-		// TODO: Creating the user should not be necessary here once there is a working login / account creation system.
-		User user = (User) DynamoDbClient.instance.getItem(User.TABLE_NAME, USER_ID, User.factory);
-		if(user == null) {
-			user = new User();
-			user.setBalanceLimit(0);
-			user.setId(USER_ID);
-			DynamoDbClient.instance.putItem(User.TABLE_NAME, user);
-		}
+		model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, USER_ID, model.db.User.factory);
 
 		if(intent.getName().equals(SET_BALANCE_LIMIT_INTENT)) {
 			Map<String, Slot> slots = intent.getSlots();

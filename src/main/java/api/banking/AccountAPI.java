@@ -125,7 +125,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<Card>> typeRefDevices = new ParameterizedTypeReference<Resources<Card>>() {};
-		Resources<Card> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		Resources<Card> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
 		return resResponses.getContent();
 	}
 
@@ -201,7 +201,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<Transaction>> typeRefDevices = new ParameterizedTypeReference<Resources<Transaction>>() {};
-		Resources<Transaction> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		Resources<Transaction> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
 		return resResponses.getContent();
 	}
 
@@ -224,7 +224,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<StandingOrder>> typeRefDevices = new ParameterizedTypeReference<Resources<StandingOrder>>() {};
-		Resources<StandingOrder> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		Resources<StandingOrder> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
 		return resResponses.getContent();
 	}
 
