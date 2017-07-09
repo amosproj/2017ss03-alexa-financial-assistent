@@ -1,4 +1,4 @@
-package amosalexa.services.contactTransfer;
+package amosalexa.services.bankaccount;
 
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
@@ -295,13 +295,18 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
 
         Transaction transaction = TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), "2017-05-16",
                 "Beschreibung", "Hans", null);
-        session.setAttribute(TRANSACTION_ID_ATTRIBUTE, transaction.getTransactionId().toString());
+
 
         Account account = AccountAPI.getAccount("0000000001");
         String balanceAfterTransaction = String.valueOf(account.getBalance());
 
-        //ask for category
+        //save state
         DialogUtil.setDialogState("category?", session);
+
+        //save transaction id to save in db
+        session.setAttribute(TRANSACTION_ID_ATTRIBUTE, transaction.getTransactionId().toString());
+
+        //add category ask to success response
         String categoryAsk = "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.";
 
         return getAskResponse(CONTACT_TRANSFER_CARD, "Erfolgreich. " + amount + " Euro wurden an " + contact.getName() + " überwiesen. Dein neuer Kontostand beträgt " + balanceAfterTransaction + " Euro. " + categoryAsk);

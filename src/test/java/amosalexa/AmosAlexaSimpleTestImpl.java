@@ -1,7 +1,7 @@
 package amosalexa;
 
 import amosalexa.server.Launcher;
-import amosalexa.services.contactTransfer.ContactTransferService;
+import amosalexa.services.bankaccount.ContactTransferService;
 import amosalexa.services.financing.AffordabilityService;
 import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;

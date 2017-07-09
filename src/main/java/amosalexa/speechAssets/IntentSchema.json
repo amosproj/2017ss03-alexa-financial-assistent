@@ -97,7 +97,12 @@
         {
           "name": "Betrag",
           "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
         }
+
       ]
     },
     {
@@ -141,7 +146,7 @@
           "type": "AMAZON.NUMBER"
         },
         {
-          "name": "Categories",
+          "name": "Category",
           "type": "LIST_OF_CATEGORIES"
         }
       ]
