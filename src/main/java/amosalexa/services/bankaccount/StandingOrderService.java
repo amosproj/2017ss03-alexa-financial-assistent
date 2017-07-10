@@ -560,15 +560,19 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         session.setAttribute("Payee", payee);
         session.setAttribute("PayeeSecondName", payeeSecondName);
 
-        for (int i = 0; i < standingOrders.size(); i++) {
-            LOGGER.info(standingOrders.get(i).getExecutionRate().toString());
-            if (standingOrders.get(i).getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
+        for (StandingOrder standingOrder : standingOrders) {
+            LOGGER.info(standingOrder.getExecutionRate().toString());
+
+            String amountString = Integer.toString(standingOrder.getAmount().intValue());
+
+            if (standingOrder.getPayee().toLowerCase().equals(payee + " " + payeeSecondName)
+                    && (amount != null && amount.equals(amountString))) {
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " über " + standingOrders.get(i).getAmount() +
+                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " über " + standingOrder.getAmount() +
                         " Euro existiert schon. Möchtest du diesen aktualisieren");
 
-                session.setAttribute("StandingOrderToModify", standingOrders.get(i).getStandingOrderId());
+                session.setAttribute("StandingOrderToModify", standingOrder.getStandingOrderId());
 
                 // Create reprompt
                 Reprompt reprompt = new Reprompt();

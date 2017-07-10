@@ -197,7 +197,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         newSession();
 
         testIntent(
-                "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:zehn",
+                "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:10",
                 "Der Dauerauftrag für max mustermann über 10.0 Euro existiert schon. Möchtest du diesen aktualisieren");
     }
 
