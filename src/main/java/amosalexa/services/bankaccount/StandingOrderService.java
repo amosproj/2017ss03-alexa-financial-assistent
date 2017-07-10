@@ -61,7 +61,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         );
     }
 
-    private static final String STANDING_ORDERS_INFO_INTENT = "STANDING_ORDERS_KEYWORD_INTENT";
+    private static final String STANDING_ORDERS_INFO_INTENT = "StandingOrdersInfoIntent";
     private static final String STANDING_ORDERS_DELETE_INTENT = "StandingOrdersDeleteIntent";
     private static final String STANDING_ORDERS_MODIFY_INTENT = "StandingOrdersModifyIntent";
     private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrderKeyword";
