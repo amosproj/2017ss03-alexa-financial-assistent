@@ -116,7 +116,7 @@ public class AuthenticationAPI {
 
 			DateTime now = DateTime.now();
 
-			if(validUntil.isBefore(now.minusMinutes(10))) {
+			if(validUntil.minusMinutes(10).isBefore(now)) {
 				return true;
 			}
 		} catch(Exception e) {
