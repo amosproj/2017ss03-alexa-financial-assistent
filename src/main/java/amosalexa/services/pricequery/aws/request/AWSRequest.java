@@ -1,7 +1,7 @@
 package amosalexa.services.pricequery.aws.request;
 
 import amosalexa.services.pricequery.aws.util.XMLParser;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class AWSRequest {
 
-    final static Logger log = Logger.getLogger(AWSRequest.class);
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(AWSRequest.class);
 
     private static final String AWS_SECRET_KEY = "vVafGHDBSi5ma78QwwcEmLWVMsDUEmd13XaNcjDh";
     private static final String AWS_KEY = "AKIAJD4O7BRHWN5W3JIA";
@@ -55,8 +55,9 @@ public class AWSRequest {
      */
     public String signedRequest() throws IOException, SAXException, ParserConfigurationException {
 
-        Document response = null;
-        response = getResponse(createSignedURL());
+        log.info(createSignedURL());
+
+        Document response = getResponse(createSignedURL());
         String xmlString = XMLParser.xmlToString(response);
 
         return XMLParser.getPrettyXML(xmlString);
@@ -66,6 +67,9 @@ public class AWSRequest {
     private Document getResponse(String url) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = builder.parse(url);
+
+        log.info("Amazon response is ready");
+
         return doc;
     }
 

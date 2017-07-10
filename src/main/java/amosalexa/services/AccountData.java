@@ -7,6 +7,9 @@ package amosalexa.services;
 public class AccountData {
 
     //** maybe later from session storage
-    public static String ACCOUNT_NUMBER = "9999999999";
+    public static String ACCOUNT_DEFAULT = "9999999999";
+
+    //** account with no money
+    public static String ACCOUNT_NO_MONEY = "0000000333";
 
 }
