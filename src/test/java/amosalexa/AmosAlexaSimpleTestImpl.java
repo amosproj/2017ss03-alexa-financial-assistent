@@ -585,6 +585,9 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
         "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
 
+        testIntentMatches("ContactTransferIntent", "Category:urlaub",
+                "Verstanden. Die Transaktion wurde zur Kategorie urlaub hinzugefügt");
+
         newSession();
 
         testIntentMatches("ContactTransferIntent", "Contact:bob", "Amount:1",
