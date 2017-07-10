@@ -1,7 +1,5 @@
 package api.banking;
 
-
-import amosalexa.AmosAlexaSpeechlet;
 import api.aws.DynamoDbClient;
 import model.db.User;
 import org.joda.time.DateTime;
@@ -13,8 +11,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Instant;
-import java.util.Date;
 
 public class AuthenticationAPI {
 
@@ -41,6 +37,8 @@ public class AuthenticationAPI {
 		}
 	}
 
+	private static DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
 	/**
 	 * Logger
 	 */
@@ -48,11 +46,22 @@ public class AuthenticationAPI {
 
 	private static final String AUTH_URL = "http://amos-keycloak-1926957976.eu-central-1.elb.amazonaws.com:8081/auth/realms/amos/protocol/openid-connect/token";
 
+	/**
+	 * Returns the access token for the given user id.
+	 *
+	 * @param userId the user id
+	 * @return the access token
+	 */
 	public static String getAccessToken(int userId) {
 		model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
 		return user.getAccessToken();
 	}
 
+	/**
+	 * Updates the access token if necessary.
+	 *
+	 * @param userId the user id
+	 */
 	public static void updateAccessToken(int userId) {
 		model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
 		if(user == null) {
@@ -83,21 +92,26 @@ public class AuthenticationAPI {
 			// Add expiry time (seconds) to current time, store this value as a String in the User object
 			int expiresInSeconds = Integer.valueOf(authResponse.getExpires_in());
 			DateTime expiryDateTime = DateTime.now().plusSeconds(expiresInSeconds);
-			DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 			String dtStr = fmt.print(expiryDateTime);
-
 			user.setAccessTokenExpiryTime(dtStr);
+
+			// Update the user object in the db
 			DynamoDbClient.instance.putItem(model.db.User.TABLE_NAME, user);
 		}
 	}
 
+	/**
+	 * Checks if this user's access token must be refreshed. A token must be refreshed if it is null or has expired.
+	 *
+	 * @param user the user
+     * @return true if the token must be refreshed, false otherwise
+	 */
 	private static boolean shouldRefresh(User user) {
 		if(user.getAccessToken() == null) {
 			return true;
 		}
 
 		try {
-			DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 			DateTime validUntil = fmt.parseDateTime(user.getAccessTokenExpiryTime());
 
 			DateTime now = DateTime.now();

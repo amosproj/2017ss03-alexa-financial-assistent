@@ -63,6 +63,11 @@ public class BankingRESTClient {
         return bankingRESTClient;
     }
 
+    /**
+     * Generate http headers that include the authorization token.
+     *
+     * @return the http headers
+     */
     public static HttpHeaders generateHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
