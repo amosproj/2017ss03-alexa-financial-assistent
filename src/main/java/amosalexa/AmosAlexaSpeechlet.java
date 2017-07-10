@@ -176,8 +176,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
         LOGGER.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
-        // Refresh the user's access token if necessary
-        AuthenticationAPI.updateAccessToken(USER_ID);
     }
 
     @Override

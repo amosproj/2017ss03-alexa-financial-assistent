@@ -69,6 +69,9 @@ public class BankingRESTClient {
      * @return the http headers
      */
     public static HttpHeaders generateHttpHeaders() {
+        // Refresh the user's access token if necessary
+        AuthenticationAPI.updateAccessToken(USER_ID);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + AuthenticationAPI.getAccessToken(AmosAlexaSpeechlet.USER_ID));
