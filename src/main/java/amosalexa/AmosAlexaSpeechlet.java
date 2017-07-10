@@ -25,6 +25,7 @@ import amosalexa.services.help.IntroductionService;
 import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
+import api.banking.AuthenticationAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
@@ -41,6 +42,10 @@ import java.util.Map;
  * Base speechlet to register services that handle the intents.
  */
 public class AmosAlexaSpeechlet implements SpeechletSubject {
+
+    // TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
+    public static final int USER_ID = 4711;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
     private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();
@@ -171,6 +176,8 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
     public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
         LOGGER.info("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
                 requestEnvelope.getSession().getSessionId());
+        // Refresh the user's access token if necessary
+        AuthenticationAPI.updateAccessToken(USER_ID);
     }
 
     @Override

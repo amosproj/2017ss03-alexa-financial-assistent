@@ -71,7 +71,7 @@ public class SecuritiesAccountAPI {
 
         ParameterizedTypeReference<Resources<Security>> typeRefDevices = new ParameterizedTypeReference<Resources<Security>>() {
         };
-        Resources<Security> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+        Resources<Security> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
         return resResponses.getContent();
     }
 
