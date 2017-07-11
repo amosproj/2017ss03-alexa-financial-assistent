@@ -3,7 +3,6 @@ package amosalexa.services.bankaccount;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
-import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import amosalexa.services.bankcontact.BankContactService;
 import api.aws.DynamoDbClient;
@@ -34,6 +33,29 @@ import java.util.List;
  * This dialog allows users to perform a transfer to a {@link Contact contact} from the contact book.
  */
 public class ContactTransferService extends AbstractSpeechService implements SpeechService {
+
+    @Override
+    public String getDialogName() {
+        return this.getClass().getName();
+    }
+
+    @Override
+    public List<String> getStartIntents() {
+        return Collections.singletonList(
+                CONTACT_TRANSFER_INTENT
+        );
+    }
+
+    @Override
+    public List<String> getHandledIntents() {
+        return Arrays.asList(
+                CONTACT_TRANSFER_INTENT,
+                CONTACT_CHOICE_INTENT,
+                PLAIN_CATEGORY_INTENT,
+                YES_INTENT,
+                NO_INTENT
+        );
+    }
 
     /**
      * Specifies if this intent is being tested or not by assigning the normal or the testing table name.
@@ -66,6 +88,11 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
     private static final String CONTACT_CHOICE_INTENT = "ContactChoiceIntent";
 
     /**
+     *
+     */
+    private static final String PLAIN_CATEGORY_INTENT = "PlainCategoryIntent";
+
+    /**
      * Account number.
      */
     private static final String ACCOUNT_NUMBER = "0000000001";
@@ -89,10 +116,6 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         String intentName = intent.getName();
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
-        if(DialogUtil.getDialogState("category?", session) != null){
-           return transactionCategoryResponse(intent, session);
-        }
-
         switch (intentName) {
             case CONTACT_TRANSFER_INTENT:
                 return contactTransfer(intent, session);
@@ -106,6 +129,9 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             case NO_INTENT:
                 session.setAttribute(DIALOG_CONTEXT, "");
                 return getResponse(CONTACT_TRANSFER_CARD, "Okay, verstanden. Dann bis zum nächsten Mal.");
+            // adds standing order to category
+            case PLAIN_CATEGORY_INTENT:
+               return transactionCategoryResponse(intent, session);
             default:
                 return null;
         }
@@ -133,6 +159,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         if (contactName == null || contactName.equals("")) {
             return getResponse(CONTACT_TRANSFER_CARD, "Ich konnte den Namen des Kontakts nicht verstehen. Versuche es noch einmal.");
         }
+        log.info("ContactName: " + contactName);
 
         contactName = contactName.toLowerCase();
 
@@ -152,6 +179,8 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         List<Contact> contactsFound = new LinkedList<>();
         for (Contact contact : contacts) {
             String thisContactName = contact.getName().toLowerCase();
+
+            log.info("Contacts in DB: " + thisContactName);
 
             int dist = StringUtils.getLevenshteinDistance(thisContactName, contactName);
             if (dist < contactName.length() / 2) {
@@ -205,6 +234,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             i++;
         }
 
+        log.info("Several contacts found: " + contactListString.toString());
         session.setAttribute(DIALOG_CONTEXT, CONTACT_TRANSFER_INTENT);
 
         return getAskResponse(CONTACT_TRANSFER_CARD, contactListString.toString());
@@ -300,14 +330,12 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         Account account = AccountAPI.getAccount("0000000001");
         String balanceAfterTransaction = String.valueOf(account.getBalance());
 
-        //save state
-        DialogUtil.setDialogState("category?", session);
 
         //save transaction id to save in db
         session.setAttribute(TRANSACTION_ID_ATTRIBUTE, transaction.getTransactionId().toString());
 
         //add category ask to success response
-        String categoryAsk = "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.";
+        String categoryAsk = "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText();
 
         return getAskResponse(CONTACT_TRANSFER_CARD, "Erfolgreich. " + amount + " Euro wurden an " + contact.getName() + " überwiesen. Dein neuer Kontostand beträgt " + balanceAfterTransaction + " Euro. " + categoryAsk);
     }
@@ -318,27 +346,4 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             speechletSubject.attachSpeechletObserver(this, intent);
         }
     }
-
-    @Override
-    public String getDialogName() {
-        return this.getClass().getName();
-    }
-
-    @Override
-    public List<String> getStartIntents() {
-        return Collections.singletonList(
-                CONTACT_TRANSFER_INTENT
-        );
-    }
-
-    @Override
-    public List<String> getHandledIntents() {
-        return Arrays.asList(
-                CONTACT_TRANSFER_INTENT,
-                CONTACT_CHOICE_INTENT,
-                YES_INTENT,
-                NO_INTENT
-        );
-    }
-
 }

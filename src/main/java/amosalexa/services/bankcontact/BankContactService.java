@@ -11,6 +11,7 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.AskForPermissionsConsentCard;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
+import model.location.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.walkercrou.places.Place;

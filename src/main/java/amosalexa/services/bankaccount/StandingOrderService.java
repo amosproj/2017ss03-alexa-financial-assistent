@@ -2,7 +2,6 @@ package amosalexa.services.bankaccount;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
-import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import api.aws.EMailClient;
 import api.banking.AccountAPI;
@@ -99,12 +98,6 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         LOGGER.info("Intent Name: " + intentName);
         LOGGER.info("Context: " + context);
-
-        if(DialogUtil.getDialogState("category?", session) != null){
-
-
-            return getResponse("Transaktionskategorie", "Zu Kategorie SLOT hinzugefügt");
-        }
 
         if (STANDING_ORDERS_INFO_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
@@ -630,10 +623,6 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         session.removeAttribute("SmartCreateStandingOrderIntent");
         session.removeAttribute("StandingOrderToModify");
         session.removeAttribute("NewAmount");
-
-        //ask for category
-        DialogUtil.setDialogState("category?", session);
-        speechText = speechText+ " Zu welcher Kategorie möchtest du den Dauerauftrag hinzufügen";
 
         return getAskResponse(STANDING_ORDERS, speechText);
     }

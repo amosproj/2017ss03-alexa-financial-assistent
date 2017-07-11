@@ -363,10 +363,6 @@
         {
           "name": "Contact",
           "type": "LIST_OF_EXAMPLE_CONTACTS"
-        },
-        {
-          "name": "Category",
-          "type": "LIST_OF_CATEGORIES"
         }
       ],
       "intent": "ContactTransferIntent"
@@ -375,7 +371,7 @@
       "slots": [
         {
           "name": "ContactIndex",
-          "type": "AMAZON.NUMBER"
+          "type": "NUMBER"
         }
       ],
       "intent": "ContactChoiceIntent"

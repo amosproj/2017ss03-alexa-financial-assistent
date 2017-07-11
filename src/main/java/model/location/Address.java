@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package amosalexa.services.bankcontact;
+package model.location;
 
 /**
  * This is a wrapper class that mimics the JSON structure returned from the Alexa Device Address API.
@@ -26,9 +26,6 @@ public class Address {
     private String countryCode = null;
     private String postalCode = "90459";
     private String addressLine1 = "Wölkernstraße 11";
-    private String addressLine2;
-    private String addressLine3;
-    private String districtOrCounty;
 
     public Address() {
     }
@@ -39,14 +36,6 @@ public class Address {
 
     public String getAddressLine1() {
         return addressLine1;
-    }
-
-    public String getAddressLine2() {
-        return addressLine2;
-    }
-
-    public String getAddressLine3() {
-        return addressLine3;
     }
 
     public String getCity() {
@@ -61,7 +50,4 @@ public class Address {
         return postalCode;
     }
 
-    public String getDistrictOrCounty() {
-        return districtOrCounty;
-    }
 }

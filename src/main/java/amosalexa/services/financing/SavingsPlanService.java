@@ -2,7 +2,6 @@ package amosalexa.services.financing;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
-import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
@@ -51,11 +50,16 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
                 PLAIN_YEARS_INTENT,
                 SAVINGS_PLAN_CHANGE_PARAMETER_INTENT,
                 SAVINGS_PLAN_NEW_INTENT,
+                PLAIN_CATEGORY_INTENT,
                 YES_INTENT,
-                NO_INTENT,
-                STOP_INTENT
+                NO_INTENT
         );
     }
+
+    /**
+     *
+     */
+    private static final String PLAIN_CATEGORY_INTENT = "PlainCategoryIntent";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanService.class);
 
@@ -112,7 +116,8 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         String withinDialogContext = (String) session.getAttribute(WITHIN_DIALOG_CONTEXT);
         LOGGER.info("Within context: " + withinDialogContext);
 
-        if(DialogUtil.getDialogState("category?", session) != null){
+        // adds standing order to category
+        if(PLAIN_CATEGORY_INTENT.equals(intentName)){
             return standingOrderCategoryResponse(intent, session);
         }
 
@@ -151,6 +156,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
 
     private SpeechletResponse standingOrderCategoryResponse(Intent intent, Session session){
         String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
+        LOGGER.info("Category: " + categoryName);
         List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
@@ -278,14 +284,11 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
                 "gutgeschrieben. Die erste regelmaeßige Einzahlung von " + monatlicheZahlung + " Euro erfolgt am "
                 + standingOrder.getFirstExecutionSpeechString() + ".";
 
-        //save state
-        DialogUtil.setDialogState("category?", session);
-
         //save transaction id to save in db
         session.setAttribute(STANDING_ORDER_ID_ATTRIBUTE, standingOrder.getStandingOrderId().toString());
 
         //add category ask to success response
-        String categoryAsk = " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.";
+        String categoryAsk = " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText();
 
         return getAskResponse(SAVINGS_PLAN, speechtext + categoryAsk);
     }

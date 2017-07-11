@@ -1,6 +1,6 @@
-package amosalexa.services.pricequery.aws.request;
+package amosalexa.services.financing.aws.request;
 
-import amosalexa.services.pricequery.aws.util.XMLParser;
+import amosalexa.services.financing.aws.util.XMLParser;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
