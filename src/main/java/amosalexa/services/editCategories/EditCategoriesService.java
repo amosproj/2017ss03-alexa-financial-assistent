@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class EditCategoriesService extends AbstractSpeechService implements SpeechService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(amosalexa.services.bankaccount.TransactionService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditCategoriesService.class);
     private static final String ADD_CATEGORY_INTENT = "AddCategoryIntent";
     private static final String SHOW_CATEGORIES_INTENT = "ShowCategoriesIntent";
     private static final String DELETE_CATEGORY_INTENT = "DeleteCategoryIntent";
