@@ -1,8 +1,11 @@
 package amosalexa.services.bankaccount;
 
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import api.aws.DynamoDbClient;
 import api.aws.EMailClient;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -18,6 +21,7 @@ import com.amazon.speech.ui.SimpleCard;
 import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.banking.StandingOrder;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -554,12 +558,20 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         session.setAttribute("PayeeSecondName", payeeSecondName);
 
         for (StandingOrder standingOrder : standingOrders) {
-            LOGGER.info(standingOrder.getExecutionRate().toString());
 
             String amountString = Integer.toString(standingOrder.getAmount().intValue());
 
-            if (standingOrder.getPayee().toLowerCase().equals(payee + " " + payeeSecondName)
-                    && (amount != null && amount.equals(amountString))) {
+            if (standingOrder.getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
+                //getting data object
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+                Date executionDate;
+                try {
+                    executionDate = dateFormat.parse(standingOrder.getFirstExecution());
+                } catch (java.text.ParseException e) {
+                    e.printStackTrace();
+                }
+
+
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
                 speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " über " + standingOrder.getAmount() +
@@ -575,17 +587,42 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
             }
         }
 
-        //updating existing standing order
+        //creating a new stating order if its in contact list
+        List<Contact> contactList = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        List<Contact> contacts = new ArrayList<>(contactList);
+        String payeeFullName = payee + " " + payeeSecondName;
+        for (int i = 0; i < contacts.size(); i++) {
+            if (contacts.get(i).getName().toString().toLowerCase().equals(payeeFullName.toLowerCase())) {
+                StandingOrder standingOrder = new StandingOrder();
+                standingOrder.setPayee(payee + " " + payeeSecondName);
+                standingOrder.setAmount(Integer.parseInt(amount));
+                standingOrder.setDestinationAccount(contacts.get(i).getIban());
+                AccountAPI.createStandingOrderForAccount(ACCOUNT_NUMBER, standingOrder);
 
-        // Create the plain text output
+                PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+                speech.setText("Ich habe den neuen Dauerauftrag für" +
+                        payee + " " + payeeSecondName + " über " + amount + " Euro erfolgreich eingerichtet");
+
+                //deleting attributes
+                session.removeAttribute("NewAmount");
+                session.removeAttribute("Payee");
+                session.removeAttribute("PayeeSecondName");
+
+                return SpeechletResponse.newTellResponse(speech, card);
+            }
+        }
+
+        // Contact not found
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Soll ich den Dauerauftrag für " + payee + " " + payeeSecondName + " über " +
-                        amount + " Euro wirklich einrichten");
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
+        speech.setText("Ich habe " + payee + " " + payeeSecondName + " in deiner Kontaktliste nicht gefunden. " +
+                "Du musst ihm erst in der Kontaktliste hinzufügen");
 
-        return SpeechletResponse.newAskResponse(speech, reprompt);
+        //deleting attributes
+        session.removeAttribute("NewAmount");
+        session.removeAttribute("Payee");
+        session.removeAttribute("PayeeSecondName");
+
+        return SpeechletResponse.newTellResponse(speech, card);
     }
 
     /**
@@ -597,27 +634,31 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         LOGGER.info("SmartStandingOrders Confirmation called.");
         int standingOrderToModify = (int) session.getAttribute("StandingOrderToModify");
         String newAmount = (String) session.getAttribute("NewAmount");
+        int orderAmount = Integer.parseInt(newAmount);
 
         //deleting old orders
         Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount(ACCOUNT_NUMBER);
         standingOrders = new ArrayList<>(standingOrdersCollection);
         String payeeFullName = AccountAPI.getStandingOrder(ACCOUNT_NUMBER,standingOrderToModify).getPayee().toLowerCase();
+        String firstExecution = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderToModify).getFirstExecution().toString();
 
         for (int i = 0; i < standingOrders.size(); i++) {
             if (standingOrders.get(i).getStandingOrderId().intValue() != standingOrderToModify &&
-                    standingOrders.get(i).getPayee().toLowerCase().equals(payeeFullName)) {
+                    standingOrders.get(i).getPayee().toLowerCase().equals(payeeFullName) &&
+                    standingOrders.get(i).getFirstExecution().toString().equals(firstExecution)) {
+                orderAmount +=  standingOrders.get(i).getAmount().intValue();
                 AccountAPI.deleteStandingOrder(ACCOUNT_NUMBER, standingOrders.get(i).getStandingOrderId().intValue());
             }
         }
 
         StandingOrder standingOrder = AccountAPI.getStandingOrder(ACCOUNT_NUMBER, standingOrderToModify);
 
-        standingOrder.setAmount(Integer.parseInt(newAmount));
+        standingOrder.setAmount(orderAmount);
 
         AccountAPI.updateStandingOrder(ACCOUNT_NUMBER, standingOrder);
 
         String speechText = "Der Dauerauftrag Nummer " + standingOrderToModify +
-                " für " + standingOrder.getPayee() + " über " + newAmount + " euro wurde erfolgreich aktualisiert";
+                " für " + standingOrder.getPayee() + " über " + orderAmount + " euro wurde erfolgreich aktualisiert";
 
         //delete session attributes
         session.removeAttribute("SmartCreateStandingOrderIntent");
@@ -633,6 +674,9 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
      * @return SpeechletResponse spoken and visual response for the given intent
      */
     private SpeechletResponse smartCreateStandingOrderResponse(Session session) {
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Daueraufträge");
+
         LOGGER.info("SmartStandingOrders create called.");
         int standingOrderToModify = (int) session.getAttribute("StandingOrderToModify");
         String newAmount = (String) session.getAttribute("NewAmount");
@@ -654,11 +698,18 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText("Der neue Dauerauftrag für " + oldStandingOrder.getPayee() + " über " + newAmount +
-                " wurde erfolgreich eingerichtet");
+                " Euro wurde erfolgreich eingerichtet");
+
+        //delete session attributes
+        session.removeAttribute("SmartCreateStandingOrderIntent");
+        session.removeAttribute("StandingOrderToModify");
+        session.removeAttribute("NewAmount");
+
+
         // Create reprompt
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
 
-        return SpeechletResponse.newAskResponse(speech, reprompt);
+        return SpeechletResponse.newTellResponse(speech, card);
     }
 }
