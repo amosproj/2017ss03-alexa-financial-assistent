@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,7 +167,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Karte 123 wurde gesperrt.");
     }
 
-    @Ignore
+    @Test
     public void standingOrdersInfoTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
@@ -184,16 +183,22 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         //TODO this test expects to be at least 4 standing orders existent in the system
         testIntentMatches(
                 "StandingOrdersInfoIntent", StringUtils.join(possibleAnswers, "|"));
-        testIntentMatches(
-                "AMAZON.YesIntent",
-                "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto." +
-                        "|Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro an (.*)");
+        //Test speech answer with some securities in the depot
+        String response = performIntent("AMAZON.YesIntent");
+        Pattern p = Pattern.compile("Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto." +
+                " Moechtest du einen weiteren Eintrag hoeren?" +
+                "|Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro an (.*)");
+        Matcher m = p.matcher(response);
+        if (!m.find()) {
+            fail("Unexpected speech output.\nExcpected: " + p.pattern() + "\nAcutual: " + response);
+        }
+
         testIntentMatches(
                 "AMAZON.NoIntent", "Okay, tschuess!");
     }
 
     @Test
-    public void StandingOrderSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+    public void standingOrderSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
         testIntent(
@@ -249,13 +254,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent(
                 "AMAZON.YesIntent",
                 "Kontakt wurde geloescht.");
-
-        /*
-        TODO
-        testIntent(
-                "ContactListInfoIntent",
-                "TO DO..");
-        */
     }
 
     @Test
@@ -295,7 +293,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + "."
-        + " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
+                        + " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
 
         testIntentMatches("SavingsPlanIntroIntent", "Category:urlaub",
                 "Verstanden. Der Dauerauftrag wurde zur Kategorie urlaub hinzugefügt");
@@ -586,7 +584,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         testIntentMatches("AMAZON.YesIntent",
                 "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
-        "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
+                        "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
 
         testIntentMatches("ContactTransferIntent", "Category:urlaub",
                 "Verstanden. Die Transaktion wurde zur Kategorie urlaub hinzugefügt");
