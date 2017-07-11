@@ -11,6 +11,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 public class AuthenticationAPI {
 
@@ -46,6 +49,8 @@ public class AuthenticationAPI {
 
 	private static final String AUTH_URL = "http://amos-keycloak-1926957976.eu-central-1.elb.amazonaws.com:8081/auth/realms/amos/protocol/openid-connect/token";
 
+	private static ConcurrentHashMap<Integer, User> accessTokenUsers = new ConcurrentHashMap<>();
+
 	/**
 	 * Returns the access token for the given user id.
 	 *
@@ -53,8 +58,11 @@ public class AuthenticationAPI {
 	 * @return the access token
 	 */
 	public static String getAccessToken(int userId) {
-		model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
-		return user.getAccessToken();
+		if(!accessTokenUsers.containsKey(userId)) {
+			model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
+			accessTokenUsers.put(user.getId(), user);
+		}
+		return accessTokenUsers.get(userId).getAccessToken();
 	}
 
 	/**
@@ -63,11 +71,19 @@ public class AuthenticationAPI {
 	 * @param userId the user id
 	 */
 	public static void updateAccessToken(int userId) {
-		model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
+		if(!accessTokenUsers.containsKey(userId)) {
+			model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
+			accessTokenUsers.put(user.getId(), user);
+		}
+
+		model.db.User user = accessTokenUsers.get(userId);
+
 		if(user == null) {
 			user = new model.db.User();
 			user.setBalanceLimit(0);
 			user.setId(userId);
+
+			// Update the user object in the db
 			DynamoDbClient.instance.putItem(model.db.User.TABLE_NAME, user);
 		}
 
@@ -94,6 +110,9 @@ public class AuthenticationAPI {
 			DateTime expiryDateTime = DateTime.now().plusSeconds(expiresInSeconds);
 			String dtStr = fmt.print(expiryDateTime);
 			user.setAccessTokenExpiryTime(dtStr);
+
+			// Store this token in our HashMap
+			accessTokenUsers.put(user.getId(), user);
 
 			// Update the user object in the db
 			DynamoDbClient.instance.putItem(model.db.User.TABLE_NAME, user);
