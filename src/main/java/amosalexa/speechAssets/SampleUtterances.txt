@@ -147,7 +147,32 @@ BudgetReportEMailIntent Schicke mir den Budget Report
 ContactTransferIntent Überweise {Amount} Euro an {Contact}
 ContactTransferIntent Kategorie {Category}
 ContactChoiceIntent Kontakt Nummer {ContactIndex}
+
 ShowCategoriesIntent zeig mir meine Kategorien
 DeleteCategoryIntent loesche die Kategorie {CategoryName}
 AddCategoryIntent erstelle die Kategorie {CategoryName}
 AddCategoryIntent fuege die Kategorie {CategoryName} hinzu
+
+CategoryLimitSetIntent Ändere Limit für {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Ändere Limit für Kategorie {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Setze Limit für {Category} auf {CategoryLimit} Euro
+CategoryLimitSetIntent Setze Limit für Kategorie {Category} auf {CategoryLimit} Euro
+
+CategoryLimitInfoIntent Wie ist das Limit für {Category}
+CategoryLimitInfoIntent Wie ist das Limit für Kategorie {Category}
+CategoryStatusInfoIntent Wie ist das Status für Kategorie {Category}
+CategoryStatusInfoIntent Wie ist das Status für {Category}
+
+CategorySpendingIntent Speichere {Amount} Euro
+CategorySpendingIntent Speichere {Amount} Euro für Kategorie {Category}
+CategorySpendingIntent Speichere {Amount} Euro für {Category}
+CategorySpendingIntent Notiere {Amount} Euro für Kategorie {Category}
+CategorySpendingIntent Notiere {Amount} Euro für {Category}
+CategorySpendingIntent Ich habe {Amount} Euro für {Category} ausgegeben
+
+IntroductionIntent Was kann AMOS
+IntroductionIntent Was kannst du eigentlich
+IntroductionIntent Was kann ich fragen
+
+PlainCategoryIntent {Category}
+PlainCategoryIntent Kategorie {Category}

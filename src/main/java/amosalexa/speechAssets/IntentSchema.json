@@ -318,13 +318,22 @@
       "intent": "PlainCategoryIntent"
     },
     {
+      "intent": "CategoryStatusInfoIntent",
       "slots": [
         {
           "name": "Category",
           "type": "LIST_OF_CATEGORIES"
         }
-      ],
-      "intent": "CategoryLimitInfoIntent"
+      ]
+    },
+    {
+      "intent": "CategoryLimitInfoIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ]
     },
     {
       "slots": [
