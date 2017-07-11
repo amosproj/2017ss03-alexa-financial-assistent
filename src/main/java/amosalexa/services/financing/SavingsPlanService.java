@@ -2,7 +2,6 @@ package amosalexa.services.financing;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
-import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
@@ -284,9 +283,6 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         String speechtext = "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von " + grundbetrag + " Euro wird deinem Sparkonto " +
                 "gutgeschrieben. Die erste regelmaeßige Einzahlung von " + monatlicheZahlung + " Euro erfolgt am "
                 + standingOrder.getFirstExecutionSpeechString() + ".";
-
-        //save state
-        DialogUtil.setDialogState("category?", session);
 
         //save transaction id to save in db
         session.setAttribute(STANDING_ORDER_ID_ATTRIBUTE, standingOrder.getStandingOrderId().toString());
