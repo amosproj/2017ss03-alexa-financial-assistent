@@ -338,6 +338,40 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     }
 
     @Test
+    public void categoryStatusInfoIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        //Test assumes that category 'lebensmittel' already exists
+
+        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
+        //does not affect our data
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        Double originalLimit = null;
+        Double originialSpending = null;
+        //We assume that 'lebensmittel' category exists!
+        for (Category cat : categories) {
+            if (cat.getName().equals("lebensmittel")) {
+                category = cat;
+                originalLimit = cat.getLimit();
+                originialSpending = cat.getSpending();
+            }
+        }
+
+        //Set spending to 0 and limit to 100 for test purpose
+        category.setSpending(0);
+        category.setLimit(100);
+        category.setSpending(5);
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+
+        //Simple status test
+        testIntent("CategoryStatusInfoIntent", "Category:lebensmittel",
+                "Du hast 5.0% von 100.0 Euro deines Limits fuer die Kategorie lebensmittel ausgegeben. Du kannst noch 95.0 Euro für diese Kategorie ausgeben.");
+
+    }
+
+    @Test
     public void categoryLimitTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
