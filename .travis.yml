@@ -5,11 +5,10 @@ jdk:
 script:
   - ./gradlew buildZip
   - echo $TRAVIS_BRANCH
-  - 'if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew simpleTests; fi;'
   - 'if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew test; fi;'
-  - 'if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew testReport; fi;'
+  - 'else ./gradlew simpleTests; fi;'
   - 'if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew testReportAll; fi;'
-  - 'else ./gradlew simpleTests; ./gradlew testReport; fi;'
+  - 'else ./gradlew testReport; fi;'
 
 after_script:
   - echo $CODECOV_TOKEN
