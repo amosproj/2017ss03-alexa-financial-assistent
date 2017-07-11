@@ -160,8 +160,8 @@ CategoryLimitSetIntent Setze Limit für Kategorie {Category} auf {CategoryLimit}
 
 CategoryLimitInfoIntent Wie ist das Limit für {Category}
 CategoryLimitInfoIntent Wie ist das Limit für Kategorie {Category}
-CategoryStatusInfoIntent Wie ist das Status für Kategorie {Category}
-CategoryStatusInfoIntent Wie ist das Status für {Category}
+CategoryStatusInfoIntent Wie ist der Status für Kategorie {Category}
+CategoryStatusInfoIntent Wie ist der Status für {Category}
 
 CategorySpendingIntent Speichere {Amount} Euro
 CategorySpendingIntent Speichere {Amount} Euro für Kategorie {Category}
