@@ -151,6 +151,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
 
     private SpeechletResponse standingOrderCategoryResponse(Intent intent, Session session){
         String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
+        LOGGER.info("Category: " + categoryName);
         List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
@@ -284,8 +285,16 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         //save transaction id to save in db
         session.setAttribute(STANDING_ORDER_ID_ATTRIBUTE, standingOrder.getStandingOrderId().toString());
 
+        // build category names string
+        StringBuilder categoryNames = new StringBuilder();
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        for(int i = 0; i < categories.size() - 1; i++){
+            categoryNames.append(categories.get(i).getName()).append(", ");
+        }
+        categoryNames.append("oder ").append(categories.get(categories.size() - 1).getName());
+
         //add category ask to success response
-        String categoryAsk = " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.";
+        String categoryAsk = " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie " + categoryNames.toString();
 
         return getAskResponse(SAVINGS_PLAN, speechtext + categoryAsk);
     }
