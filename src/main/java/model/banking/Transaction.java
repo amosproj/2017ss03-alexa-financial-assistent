@@ -163,4 +163,19 @@ public class Transaction extends ResourceSupport {
     public boolean isOutgoing() {
         return getPayee() != null && getRemitter() == null;
     }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "transactionId=" + transactionId +
+                ", amount=" + amount +
+                ", value=" + value +
+                ", destinationAccount='" + destinationAccount + '\'' +
+                ", sourceAccount='" + sourceAccount + '\'' +
+                ", valueDate='" + valueDate + '\'' +
+                ", description='" + description + '\'' +
+                ", payee='" + payee + '\'' +
+                ", remitter='" + remitter + '\'' +
+                '}';
+    }
 }

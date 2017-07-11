@@ -60,17 +60,7 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             // Load the mail template from resources
             JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
-            // TODO: Dummy data
             List<BudgetReportCategory> categories = new ArrayList<>();
-            /*categories.add(new BudgetReportCategory("Gesundheit", 130., 10.));
-            categories.add(new BudgetReportCategory("Bildung", 100., 0.));
-            categories.add(new BudgetReportCategory("Lebensmittel", 350., 280.));
-            categories.add(new BudgetReportCategory("Kleidung", 75., 90.));
-            categories.add(new BudgetReportCategory("Auto",  200., 62.));
-            categories.add(new BudgetReportCategory("Wohltätigkeit", 100., 120.));
-            categories.add(new BudgetReportCategory("Haushalt", 85., 44.));
-            categories.add(new BudgetReportCategory("Urlaub",  100., 40.));*/
-
             List<Category> dbCategories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
             for (Category cat : dbCategories) {
                 categories.add(new BudgetReportCategory(cat.getName(), cat.getSpending(), cat.getLimit()));
@@ -87,7 +77,7 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             if (!isDebug && !EMailClient.SendHTMLEMail("Test-Mail", body)) {
                 answer = "Leider konnte der Ausgabenreport nicht gesendet werden.";
             }
-            return getResponse("E-Mail gesendet", answer);
+            return getResponse("Ausgabenreport", answer);
         }
 
         return null;

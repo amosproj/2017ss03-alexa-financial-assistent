@@ -1,9 +1,11 @@
 package model.db;
 
+import api.aws.DynamoDbClient;
 import api.aws.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,7 +15,7 @@ import java.util.Map;
  */
 public class Category implements Comparable<Category>, DynamoDbStorable {
 
-    public static final String TABLE_NAME = "category";
+    public static String TABLE_NAME = "category";
 
     private int id;
 
@@ -78,13 +80,8 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
         }
     }
 
-    public Double getSpendingPercentage() {
-        double percentageSpent = (spending / limit) * 100;
-        if (percentageSpent > 100) {
-            percentageSpent = 100;
-        }
-        //TODO round
-        return percentageSpent;
+    public Long getSpendingPercentage() {
+        return Math.round((spending / limit) * 100);
     }
 
     @Override
@@ -157,5 +154,15 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
 
     public void setLimit(double limit) {
         this.limit = limit;
+    }
+
+    public static String categoryListText(){
+        StringBuilder categoryNames = new StringBuilder();
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        for(int i = 0; i < categories.size() - 1; i++){
+            categoryNames.append(categories.get(i).getName()).append(", ");
+        }
+        categoryNames.append("oder ").append(categories.get(categories.size() - 1).getName());
+        return categoryNames.toString();
     }
 }

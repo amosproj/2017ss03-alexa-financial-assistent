@@ -1,14 +1,13 @@
-package amosalexa.services;
+package amosalexa.services.bankcontact;
 
 
-import amosalexa.services.bankcontact.Address;
-import amosalexa.services.bankcontact.AlexaDeviceAddressClient;
 import amosalexa.services.bankcontact.exceptions.DeviceAddressClientException;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.Context;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.interfaces.system.SystemInterface;
 import com.amazon.speech.speechlet.interfaces.system.SystemState;
+import model.location.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

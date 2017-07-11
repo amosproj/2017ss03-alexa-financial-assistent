@@ -1,22 +1,13 @@
 package api.banking;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import model.banking.Card;
-import okhttp3.*;
+import amosalexa.AmosAlexaSpeechlet;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.client.Traverson;
+import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-
-import static org.springframework.hateoas.client.Hop.rel;
+import static amosalexa.AmosAlexaSpeechlet.USER_ID;
 
 /**
  * Banking Rest Client
@@ -32,9 +23,9 @@ public class BankingRESTClient {
     public static final String BANKING_API_ENDPOINT = "http://amos-bank-lb-723794096.eu-central-1.elb.amazonaws.com";
 
     /**
-     * Banking API base URL v1.0
+     * Banking API base URL v2.0
      */
-    public static final String BANKING_API_BASEURL_V1 = "/api/v1_0";
+    public static final String BANKING_API_BASEURL_V2 = "/api/v2_0";
 
     /**
      * Logger
@@ -59,6 +50,21 @@ public class BankingRESTClient {
     }
 
     /**
+     * Generate http headers that include the authorization token.
+     *
+     * @return the http headers
+     */
+    public static HttpHeaders generateHttpHeaders() {
+        // Refresh the user's access token if necessary
+        AuthenticationAPI.updateAccessToken(USER_ID);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + AuthenticationAPI.getAccessToken(AmosAlexaSpeechlet.USER_ID));
+        return headers;
+    }
+
+    /**
      * GET HTTP request to the banking endpoint.
      *
      * @param objectPath object path of the API interface
@@ -66,9 +72,13 @@ public class BankingRESTClient {
      * @return banking object
      */
     public Object getBankingModelObject(String objectPath, Class cl) throws RestClientException {
-        String url = BANKING_API_ENDPOINT + BANKING_API_BASEURL_V1 + objectPath;
+        String url = BANKING_API_ENDPOINT + BANKING_API_BASEURL_V2 + objectPath;
         log.info("GET from API: " + objectPath + " - Mapping to: " + cl);
-        return restTemplate.getForObject(url, cl);
+
+        //return restTemplate.getForObject(url, cl);
+
+        HttpEntity entity = new HttpEntity(null, generateHttpHeaders());
+        return restTemplate.exchange(url, HttpMethod.GET, entity, cl).getBody();
     }
 
     /**
@@ -80,9 +90,13 @@ public class BankingRESTClient {
      * @return banking object
      */
     public Object postBankingModelObject(String objectPath, Object request, Class cl) throws RestClientException {
-        String url = BANKING_API_ENDPOINT + BANKING_API_BASEURL_V1 + objectPath;
+        String url = BANKING_API_ENDPOINT + BANKING_API_BASEURL_V2 + objectPath;
         log.info("POST to API: " + objectPath + " - Mapping to: " + cl);
-        return restTemplate.postForObject(url, request, cl);
+
+        //return restTemplate.postForObject(url, request, cl);
+
+        HttpEntity entity = new HttpEntity(request, generateHttpHeaders());
+        return restTemplate.exchange(url, HttpMethod.POST, entity, cl).getBody();
     }
 
     /**
@@ -92,9 +106,13 @@ public class BankingRESTClient {
      * @param request    post object
      */
     public void putBankingModelObject(String objectPath, Object request) throws RestClientException {
-        String url = BANKING_API_ENDPOINT + BANKING_API_BASEURL_V1 + objectPath;
+        String url = BANKING_API_ENDPOINT + BANKING_API_BASEURL_V2 + objectPath;
         log.info("PUT to API: " + objectPath);
-        restTemplate.put(url, request);
+
+        //restTemplate.put(url, request);
+
+        HttpEntity entity = new HttpEntity(request, generateHttpHeaders());
+        restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
     }
 
     /**
@@ -103,8 +121,12 @@ public class BankingRESTClient {
      * @param objectPath endpoint object
      */
     public void deleteBankingModelObject(String objectPath) throws RestClientException {
-        String url = BANKING_API_ENDPOINT + BANKING_API_BASEURL_V1 + objectPath;
+        String url = BANKING_API_ENDPOINT + BANKING_API_BASEURL_V2 + objectPath;
         log.info("DELETE to API: " + objectPath);
-        restTemplate.delete(url);
+
+        //restTemplate.delete(url);
+
+        HttpEntity entity = new HttpEntity(null, generateHttpHeaders());
+        restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
     }
 }

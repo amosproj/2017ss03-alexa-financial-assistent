@@ -84,16 +84,17 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             session.setAttribute(DIALOG_CONTEXT, CONTACT_LIST_INFO_INTENT);
             return readContacts(session, 0, 3);
         } else if (CONTACT_ADD_INTENT.equals(intentName)) {
+            session.getAttributes().clear();
             session.setAttribute(DIALOG_CONTEXT, CONTACT_ADD_INTENT);
             return askForNewContactConfirmation(intent, session);
         } else if (CONTACT_DELETE_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, CONTACT_DELETE_INTENT);
             return deleteContact(intent, session, false);
-        } else if (YES_INTENT.equals(intentName) && context.equals(CONTACT_ADD_INTENT)) {
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CONTACT_ADD_INTENT)) {
             return createNewContact(session);
-        } else if (YES_INTENT.equals(intentName) && context.equals(CONTACT_DELETE_INTENT)) {
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CONTACT_DELETE_INTENT)) {
             return deleteContact(intent, session, true);
-        } else if (YES_INTENT.equals(intentName) && context.equals(CONTACT_LIST_INFO_INTENT)) {
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CONTACT_LIST_INFO_INTENT)) {
             return continueReadingContacts(intent, session);
         } else if (NO_INTENT.equals(intentName)) {
             return getResponse(CONTACTS, "OK, dann nicht. Auf wiedersehen!");
@@ -109,6 +110,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
 
         if (transactionNumberSlot.getValue() == null || StringUtils.isBlank(transactionNumberSlot.getValue())) {
             String speechText = "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.";
+            session.getAttributes().clear();
             return getAskResponse(CONTACTS, speechText);
         }
 
@@ -129,6 +131,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
 
         if (transaction == null) {
             speechText = "Ich habe keine Transaktion mit dieser Nummer gefunden. Bitte wiederhole deine Eingabe.";
+            session.getAttributes().clear();
             return getAskResponse(CONTACTS, speechText);
         }
 
@@ -142,6 +145,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             speechText = "Ich kann fuer diese Transaktion keine Kontaktdaten speichern, weil der Name des";
             speechText = speechText.concat(transaction.isOutgoing() ? " Zahlungsempfaengers" : " Auftraggebers");
             speechText = speechText.concat(" nicht bekannt ist. Bitte wiederhole deine Eingabe oder breche ab, indem du \"Alexa, Stop!\" sagst.");
+            session.getAttributes().clear();
             return getAskResponse(CONTACTS, speechText);
         } else {
             //TODO improve

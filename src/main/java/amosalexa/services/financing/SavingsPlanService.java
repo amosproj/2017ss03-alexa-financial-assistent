@@ -3,6 +3,8 @@ package amosalexa.services.financing;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -16,6 +18,8 @@ import com.amazon.speech.ui.PlainTextOutputSpeech;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SsmlOutputSpeech;
 import model.banking.StandingOrder;
+import model.db.Category;
+import model.db.StandingOrderDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,11 +50,16 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
                 PLAIN_YEARS_INTENT,
                 SAVINGS_PLAN_CHANGE_PARAMETER_INTENT,
                 SAVINGS_PLAN_NEW_INTENT,
+                PLAIN_CATEGORY_INTENT,
                 YES_INTENT,
-                NO_INTENT,
-                STOP_INTENT
+                NO_INTENT
         );
     }
+
+    /**
+     *
+     */
+    private static final String PLAIN_CATEGORY_INTENT = "PlainCategoryIntent";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanService.class);
 
@@ -80,6 +89,12 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     //Slot key for SavingsPlanChangeParameterIntent
     private static final String SAVINGS_PLAN_PARAMETER_KEY = "SavingsPlanParameter";
 
+    private static final String STANDING_ORDER_ID_ATTRIBUTE = "standing_order";
+
+    private static final String CATEGORY_SLOT = "Category";
+
+    private DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
+
     public SavingsPlanService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
@@ -100,6 +115,11 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
         String withinDialogContext = (String) session.getAttribute(WITHIN_DIALOG_CONTEXT);
         LOGGER.info("Within context: " + withinDialogContext);
+
+        // adds standing order to category
+        if(PLAIN_CATEGORY_INTENT.equals(intentName)){
+            return standingOrderCategoryResponse(intent, session);
+        }
 
         if (SAVINGS_PLAN_INTRO_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, "SavingsPlan");
@@ -132,6 +152,20 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
+    }
+
+    private SpeechletResponse standingOrderCategoryResponse(Intent intent, Session session){
+        String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
+        LOGGER.info("Category: " + categoryName);
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        for (Category category : categories) {
+            if (category.getName().equals(categoryName)){
+                String standingOrderId = (String) session.getAttribute(STANDING_ORDER_ID_ATTRIBUTE);
+                dynamoDbMapper.save(new StandingOrderDB(standingOrderId, "" + category.getId()));
+                return getResponse(SAVINGS_PLAN, "Verstanden. Der Dauerauftrag wurde zur Kategorie " + categoryName + " hinzugefügt");
+            }
+        }
+        return getResponse(SAVINGS_PLAN, "Ich konnte die Kategorie nicht finden. Tschüss");
     }
 
     private SpeechletResponse askForBasicAmount(Session session) {
@@ -240,15 +274,23 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     }
 
     private SpeechletResponse createSavingsPlan(Intent intent, Session session) {
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         String grundbetrag = (String) session.getAttribute(BASIC_AMOUNT_KEY);
         String monatlicheZahlung = (String) session.getAttribute(MONTHLY_PAYMENT_KEY);
         createSavingsPlanOneOffPayment(grundbetrag);
-        StandingOrder so = createSavingsPlanStandingOrder(monatlicheZahlung);
-        speech.setText("Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von " + grundbetrag + " Euro wird deinem Sparkonto " +
+        StandingOrder standingOrder = createSavingsPlanStandingOrder(monatlicheZahlung);
+
+
+        String speechtext = "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von " + grundbetrag + " Euro wird deinem Sparkonto " +
                 "gutgeschrieben. Die erste regelmaeßige Einzahlung von " + monatlicheZahlung + " Euro erfolgt am "
-                + so.getFirstExecutionSpeechString() + ".");
-        return SpeechletResponse.newTellResponse(speech);
+                + standingOrder.getFirstExecutionSpeechString() + ".";
+
+        //save transaction id to save in db
+        session.setAttribute(STANDING_ORDER_ID_ATTRIBUTE, standingOrder.getStandingOrderId().toString());
+
+        //add category ask to success response
+        String categoryAsk = " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText();
+
+        return getAskResponse(SAVINGS_PLAN, speechtext + categoryAsk);
     }
 
     private void createSavingsPlanOneOffPayment(String betrag) {

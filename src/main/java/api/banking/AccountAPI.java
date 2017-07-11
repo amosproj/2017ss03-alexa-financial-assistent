@@ -117,7 +117,7 @@ public class AccountAPI {
 		// TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
 		Traverson traverson = null;
 		try {
-			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/cards"),
+			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V2 + "/accounts/" + accountNumber + "/cards"),
 						MediaTypes.HAL_JSON);
 		} catch (URISyntaxException e) {
 			log.error("getCardsForAccount failed", e);
@@ -125,7 +125,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<Card>> typeRefDevices = new ParameterizedTypeReference<Resources<Card>>() {};
-		Resources<Card> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		Resources<Card> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
 		return resResponses.getContent();
 	}
 
@@ -190,7 +190,7 @@ public class AccountAPI {
 	public static Collection<Transaction> getTransactionsForAccount(String accountNumber) throws HttpClientErrorException {
 		// TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
 		Traverson traverson = null;
-		String uri = BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/transactions";
+		String uri = BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V2 + "/accounts/" + accountNumber + "/transactions";
 		log.info("URI: " + uri);
 		try {
 			traverson = new Traverson(new URI(uri),
@@ -201,7 +201,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<Transaction>> typeRefDevices = new ParameterizedTypeReference<Resources<Transaction>>() {};
-		Resources<Transaction> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		Resources<Transaction> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
 		return resResponses.getContent();
 	}
 
@@ -216,7 +216,7 @@ public class AccountAPI {
 		// TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
 		Traverson traverson = null;
 		try {
-			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/standingorders"),
+			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V2 + "/accounts/" + accountNumber + "/standingorders"),
 					MediaTypes.HAL_JSON);
 		} catch (URISyntaxException e) {
 			log.error("getStandingOrdersForAccount failed", e);
@@ -224,7 +224,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<StandingOrder>> typeRefDevices = new ParameterizedTypeReference<Resources<StandingOrder>>() {};
-		Resources<StandingOrder> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		Resources<StandingOrder> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
 		return resResponses.getContent();
 	}
 
