@@ -9,6 +9,7 @@ script:
   - 'if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew test; fi;'
   - 'if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew testReport; fi;'
   - 'if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew testReportAll; fi;'
+  - 'else ./gradlew simpleTests; ./gradlew testReport; fi;'
 
 after_script:
   - echo $CODECOV_TOKEN
