@@ -102,7 +102,6 @@
           "name": "Category",
           "type": "LIST_OF_CATEGORIES"
         }
-
       ]
     },
     {
@@ -371,6 +370,15 @@
       "slots": [
         {
           "name": "ContactIndex",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "PeriodicTransactionIntent",
+      "slots": [
+        {
+          "name": "TransactionNumber",
           "type": "AMAZON.NUMBER"
         }
       ]

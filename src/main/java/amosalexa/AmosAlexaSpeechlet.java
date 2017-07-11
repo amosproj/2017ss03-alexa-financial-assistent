@@ -20,6 +20,7 @@ import amosalexa.services.cards.BlockCardService;
 import amosalexa.services.cards.ReplacementCardService;
 import amosalexa.services.contacts.ContactService;
 import amosalexa.services.financing.AffordabilityService;
+import amosalexa.services.financing.PeriodicTransactionService;
 import amosalexa.services.financing.SavingsPlanService;
 import amosalexa.services.help.IntroductionService;
 import amosalexa.services.pricequery.PriceQueryService;
@@ -68,6 +69,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new ContactTransferService(amosAlexaSpeechlet);
         new BudgetTrackerService(amosAlexaSpeechlet);
         new IntroductionService(amosAlexaSpeechlet);
+        new PeriodicTransactionService(amosAlexaSpeechlet);
         //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
