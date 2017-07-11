@@ -18,6 +18,7 @@ package amosalexa.services.bankcontact;
 import amosalexa.services.bankcontact.exceptions.DeviceAddressClientException;
 import amosalexa.services.bankcontact.exceptions.UnauthorizedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import model.location.Address;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

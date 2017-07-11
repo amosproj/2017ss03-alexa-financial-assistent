@@ -6,6 +6,7 @@ import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
+import model.location.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

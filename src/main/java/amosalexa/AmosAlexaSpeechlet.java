@@ -22,10 +22,8 @@ import amosalexa.services.contacts.ContactService;
 import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.SavingsPlanService;
 import amosalexa.services.help.IntroductionService;
-import amosalexa.services.pricequery.PriceQueryService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
-import api.banking.AuthenticationAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
@@ -55,7 +53,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new BankAccountService(amosAlexaSpeechlet);
         new StandingOrderService(amosAlexaSpeechlet);
         new AffordabilityService(amosAlexaSpeechlet);
-        new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
