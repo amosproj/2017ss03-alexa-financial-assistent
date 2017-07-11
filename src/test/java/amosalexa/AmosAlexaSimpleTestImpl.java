@@ -216,23 +216,44 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         String todayDate = formatter.format(now);
 
         //Create a transaction that we can use for ContactAddIntent (ingoing transaction)
+        /*
         Transaction transaction = TransactionAPI.createTransaction(1, "DE60100000000000000001",
                 "DE50100000000000000001", todayDate,
                 "Ueberweisung fuer Unit Test", null, "Sandra");
-        int transactionId = transaction.getTransactionId().intValue();
-        String transactionRemitter = transaction.getRemitter();
+        */
 
-        LOGGER.info("Latest transaction id: " + transactionId);
-        LOGGER.info("Latest transaction remitter: " + transactionRemitter);
+        int transactionId1 = 18877; //transaction.getTransactionId().intValue();
+        int transactionId2 = 6328; //transaction without remitter or payee
+        int transactionId3 = 23432423; //transaction not existent
 
-        //Test add contact
+        String transactionRemitter = "Sandra";//for transactionId1 //transaction.getRemitter();
+
+        //Test add contact no transaction number given
         testIntent(
                 "ContactAddIntent",
-                "TransactionNumber:" + transactionId, "Moechtest du " + transactionRemitter + " als " +
+                "TransactionNumber: ", "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.");
+
+        //Test add contact successful
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId1, "Moechtest du " + transactionRemitter + " als " +
                         "Kontakt speichern?");
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Der Kontakt Sandra wurde angelegt.");
+
+        //Test add contact unknown payee/remitter
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId2, "Ich kann fuer diese Transaktion keine Kontaktdaten speichern, weil der Name des Auftraggebers" +
+                        " nicht bekannt ist. Bitte wiederhole deine Eingabe oder breche ab, indem du \"Alexa, Stop!\" sagst.");
+
+        //Test add contact transaction not existent
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId3, "Ich habe keine Transaktion mit dieser Nummer gefunden." +
+                        " Bitte wiederhole deine Eingabe.");
+
 
         //Get the contact that we just created by searching for the contact with highest id
         List<Contact> allContacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
