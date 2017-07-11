@@ -62,7 +62,7 @@ public class SecuritiesAccountAPI {
         // TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
         Traverson traverson = null;
         try {
-            traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/securitiesAccounts/" + securitiesAccountNumber),
+            traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V2 + "/securitiesAccounts/" + securitiesAccountNumber),
                     MediaTypes.HAL_JSON);
         } catch (URISyntaxException e) {
             LOGGER.error("getSecuritiesForAccount failed", e);
