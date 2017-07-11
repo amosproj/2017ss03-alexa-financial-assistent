@@ -89,7 +89,11 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
         LOGGER.info("Intent Name: " + intentName);
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
 
-        if (PERIODIC_TRANSACTION_ADD_INTENT.equals(intentName)) {
+        if (PERIODIC_TRANSACTION_LIST_INTENT.equals(intentName)) {
+            session.setAttribute(DIALOG_CONTEXT, intentName);
+            markPeriodicTransactions();
+            return getResponse(PERIODIC_TRANSACTION, "Liste");
+        } else if (PERIODIC_TRANSACTION_ADD_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, intentName);
             return savePeriodicTransaction(intent, session, false);
         } else if (context != null && context.equals(PERIODIC_TRANSACTION_ADD_INTENT) && YES_INTENT.equals(intentName)) {
@@ -108,37 +112,6 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
         }
     }
 
-    private SpeechletResponse deletePeriodicTransaction(Intent intent, Session session, boolean confirmed) {
-        if (!confirmed) {
-            if (intent.getSlot(TRANSACTION_NUMBER_KEY) == null || StringUtils.isBlank(intent.getSlot(TRANSACTION_NUMBER_KEY).getValue())) {
-                session.getAttributes().clear();
-                return getAskResponse(PERIODIC_TRANSACTION, "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
-            } else {
-                String transactionId = intent.getSlot(TRANSACTION_NUMBER_KEY).getValue();
-                session.setAttribute(TRANSACTION_NUMBER_KEY, transactionId);
-                return getAskResponse(PERIODIC_TRANSACTION, "Moechtest du die Markierung als periodisch fuer die" +
-                        " Transaktion mit der Nummer " + transactionId + " wirklich entfernen?");
-            }
-        } else {
-            String transactionId = (String) session.getAttribute(TRANSACTION_NUMBER_KEY);
-            if (transactionId != null) {
-                TransactionDB transactionDb = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, transactionId);
-                LOGGER.info("TransactionDb: " + transactionDb);
-
-                if (transactionDb == null) {
-                    transactionDb = new TransactionDB(transactionId);
-                    transactionDb.setPeriodic(true);
-                }
-
-                dynamoDbMapper.delete(transactionDb);
-                List<TransactionDB> allDbts = dynamoDbMapper.loadAll(TransactionDB.class);
-                LOGGER.info("AllDBTransactions: " + allDbts);
-                return getResponse(PERIODIC_TRANSACTION, "Transaktion Nummer " + transactionId + " ist nun nicht mehr als periodisch markiert.");
-            }
-        }
-        return null;
-    }
-
     private SpeechletResponse savePeriodicTransaction(Intent intent, Session session, boolean confirmed) {
         if (!confirmed) {
             if (intent.getSlot(TRANSACTION_NUMBER_KEY) == null || StringUtils.isBlank(intent.getSlot(TRANSACTION_NUMBER_KEY).getValue())) {
@@ -146,14 +119,9 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
                 return getAskResponse(PERIODIC_TRANSACTION, "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
             } else {
                 String transactionId = intent.getSlot(TRANSACTION_NUMBER_KEY).getValue();
-                session.setAttribute(TRANSACTION_NUMBER_KEY, transactionId);
-                return getAskResponse(PERIODIC_TRANSACTION, "Moechtest du die Transaktion mit der Nummer " + transactionId
-                        + " wirklich als periodisch markieren?");
-            }
-        } else {
-            String transactionId = (String) session.getAttribute(TRANSACTION_NUMBER_KEY);
-            if (transactionId != null) {
 
+                //Search for transaction
+                //TODO wait for API extension to get transaction detail request call
                 List<Transaction> allTransactions = Transaction.getTransactions("8888888888");
                 Number transactionNumber = Integer.valueOf(transactionId);
                 Transaction transaction = null;
@@ -163,13 +131,19 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
                     }
                 }
                 LOGGER.info("Found transaction: " + transaction);
-
                 if (transaction == null) {
                     session.getAttributes().clear();
                     return getAskResponse(PERIODIC_TRANSACTION, "Ich kann Transaktion Nummer " + transactionId + " nicht finden." +
                             " Bitte aendere deine Eingabe.");
                 }
 
+                session.setAttribute(TRANSACTION_NUMBER_KEY, transactionId);
+                return getAskResponse(PERIODIC_TRANSACTION, "Moechtest du die Transaktion mit der Nummer " + transactionId
+                        + " wirklich als periodisch markieren?");
+            }
+        } else {
+            String transactionId = (String) session.getAttribute(TRANSACTION_NUMBER_KEY);
+            if (transactionId != null) {
                 TransactionDB transactionDb = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, transactionId);
                 LOGGER.info("TransactionDb: " + transactionDb);
 
@@ -215,5 +189,37 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
 
         LOGGER.info("Candidates: " + candidates);
         return candidates.size();
+    }
+
+    private SpeechletResponse deletePeriodicTransaction(Intent intent, Session session, boolean confirmed) {
+        if (!confirmed) {
+            if (intent.getSlot(TRANSACTION_NUMBER_KEY) == null || StringUtils.isBlank(intent.getSlot(TRANSACTION_NUMBER_KEY).getValue())) {
+                session.getAttributes().clear();
+                return getAskResponse(PERIODIC_TRANSACTION, "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
+            } else {
+                String transactionId = intent.getSlot(TRANSACTION_NUMBER_KEY).getValue();
+                TransactionDB transactionDb = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, transactionId);
+                LOGGER.info("TransactionDb: " + transactionDb);
+
+                if (transactionDb == null) {
+                    return getAskResponse(PERIODIC_TRANSACTION, "Ich kann Transaktion Nummer " + transactionId + " nicht finden." +
+                            " Bitte aendere deine Eingabe.");
+                }
+
+                session.setAttribute(TRANSACTION_NUMBER_KEY, transactionId);
+                return getAskResponse(PERIODIC_TRANSACTION, "Moechtest du die Markierung als periodisch fuer die" +
+                        " Transaktion mit der Nummer " + transactionId + " wirklich entfernen?");
+            }
+        } else {
+            String transactionId = (String) session.getAttribute(TRANSACTION_NUMBER_KEY);
+            if (transactionId != null) {
+                TransactionDB transactionDb = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, transactionId);
+                dynamoDbMapper.delete(transactionDb);
+                List<TransactionDB> allDbts = dynamoDbMapper.loadAll(TransactionDB.class);
+                LOGGER.info("AllDBTransactions: " + allDbts);
+                return getResponse(PERIODIC_TRANSACTION, "Transaktion Nummer " + transactionId + " ist nun nicht mehr als periodisch markiert.");
+            }
+        }
+        return null;
     }
 }

@@ -714,6 +714,8 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     @Test
     public void periodicTransactionTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber:999999",
+                "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
         testIntent("PeriodicTransactionAddIntent", "TransactionNumber: ",
                 "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
         testIntent("PeriodicTransactionAddIntent", "TransactionNumber:31",
@@ -724,6 +726,11 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Moechtest du die Markierung als periodisch fuer die Transaktion mit der Nummer 31 wirklich entfernen?");
         testIntent("AMAZON.YesIntent",
                 "Transaktion Nummer 31 ist nun nicht mehr als periodisch markiert.");
+        testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:999999",
+                "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
+        testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:999999",
+                "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
+        testIntent("PeriodicTransactionListIntent", "Liste");
     }
 
 }
