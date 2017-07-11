@@ -155,7 +155,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
                 String standingOrderId = (String) session.getAttribute(STANDING_ORDER_ID_ATTRIBUTE);
-                dynamoDbMapper.insert(new StandingOrderDB(standingOrderId, "" + category.getId()));
+                dynamoDbMapper.save(new StandingOrderDB(standingOrderId, "" + category.getId()));
                 return getResponse(SAVINGS_PLAN, "Verstanden. Der Dauerauftrag wurde zur Kategorie " + categoryName + " hinzugefügt");
             }
         }

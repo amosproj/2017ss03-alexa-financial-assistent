@@ -29,9 +29,9 @@ public class DynamoDbClientTest {
         DynamoTestObject dynamoTestObject = new DynamoTestObject();
         dynamoTestObject.setValue(val1);
 
-        // insert
-        dynamoDbMapper.insert(dynamoTestObject);
-        log.info("insert dummy object");
+        // save
+        dynamoDbMapper.save(dynamoTestObject);
+        log.info("save dummy object");
 
         // load
         DynamoTestObject loadedDynamoTestObject = (DynamoTestObject) dynamoDbMapper.load(DynamoTestObject.class, dynamoTestObject.getId());
@@ -40,7 +40,7 @@ public class DynamoDbClientTest {
 
         // update
         loadedDynamoTestObject.setValue(val2);
-        dynamoDbMapper.insert(loadedDynamoTestObject);
+        dynamoDbMapper.save(loadedDynamoTestObject);
         log.info("update dummy object");
 
         // load
