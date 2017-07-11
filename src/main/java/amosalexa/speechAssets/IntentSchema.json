@@ -400,6 +400,27 @@
         }
       ],
       "intent": "AddCategoryIntent"
+    },
+    {
+      "intent": "PeriodicTransactionListIntent"
+    },
+    {
+      "intent": "PeriodicTransactionAddIntent",
+      "slots": [
+        {
+          "name": "TransactionNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "PeriodicTransactionDeleteIntent",
+      "slots": [
+        {
+          "name": "TransactionNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
     }
   ]
 }
