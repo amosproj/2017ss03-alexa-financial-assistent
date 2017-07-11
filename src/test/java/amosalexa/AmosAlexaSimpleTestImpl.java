@@ -71,7 +71,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         ArrayList<String> productSelectionAskAnswers = new ArrayList<String>() {{
             add(AffordabilityService.SELECTION_ASK);
-            add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
+            add(AffordabilityService.ERROR + " " + AffordabilityService.SELECTION_ASK);
         }};
 
         ArrayList<String> byeAnswers = new ArrayList<String>() {{
@@ -260,6 +260,9 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     public void savingsPlanTest() throws Exception {
         newSession();
 
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = categories.get(0);
+
         testIntent("SavingsPlanIntroIntent",
                 "Was moechtest du als Grundbetrag anlegen?"
         );
@@ -293,10 +296,10 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + "."
-                        + " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
+                        + " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText());
 
-        testIntentMatches("SavingsPlanIntroIntent", "Category:urlaub",
-                "Verstanden. Der Dauerauftrag wurde zur Kategorie urlaub hinzugefügt");
+        testIntentMatches("PlainCategoryIntent", "Category:" + category.getName(),
+                "Verstanden. Der Dauerauftrag wurde zur Kategorie " + category.getName() + " hinzugefügt");
 
         Collection<StandingOrder> allStandingOrders = AccountAPI.getStandingOrdersForAccount(TEST_ACCOUNT_NUMBER);
         final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
@@ -569,6 +572,11 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     public void contactTransferTest() throws Exception {
         ContactTransferService.contactTable = Contact.TABLE_NAME + "_test";
 
+
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = categories.get(0);
+
+
         // Empty test contacts table
         DynamoDbClient.instance.clearItems(ContactTransferService.contactTable, Contact::new);
 
@@ -584,10 +592,10 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         testIntentMatches("AMAZON.YesIntent",
                 "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
-                        "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
+                        "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText());
 
-        testIntentMatches("ContactTransferIntent", "Category:urlaub",
-                "Verstanden. Die Transaktion wurde zur Kategorie urlaub hinzugefügt");
+        testIntentMatches("PlainCategoryIntent", "Category:" + category.getName(),
+                "Verstanden. Die Transaktion wurde zur Kategorie " +  category.getName() + " hinzugefügt");
 
         newSession();
 
