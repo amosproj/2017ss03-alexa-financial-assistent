@@ -650,7 +650,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                         "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText());
 
         testIntentMatches("PlainCategoryIntent", "Category:" + category.getName(),
-                "Verstanden. Die Transaktion wurde zur Kategorie " +  category.getName() + " hinzugefügt");
+                "Verstanden. Die Transaktion wurde zur Kategorie " + category.getName() + " hinzugefügt");
 
         newSession();
 
@@ -709,6 +709,21 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Aktuell hast du keine Kategorien.");
 
         Category.TABLE_NAME = "category";
+    }
+
+    @Test
+    public void periodicTransactionTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber: ",
+                "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber:31",
+                "Moechtest du die Transaktion mit der Nummer 31 wirklich als periodisch markieren?");
+        testIntent("AMAZON.YesIntent",
+                "Transaktion Nummer 31 wurde als periodisch markiert.");
+        testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:31",
+                "Moechtest du die Markierung als periodisch fuer die Transaktion mit der Nummer 31 wirklich entfernen?");
+        testIntent("AMAZON.YesIntent",
+                "Transaktion Nummer 31 ist nun nicht mehr als periodisch markiert.");
     }
 
 }
