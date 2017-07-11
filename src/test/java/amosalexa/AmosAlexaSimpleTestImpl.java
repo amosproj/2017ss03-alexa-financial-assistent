@@ -81,15 +81,15 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         }};
 
         ArrayList<String> balanceCheckAnswers = new ArrayList<String>() {{
-            add("Dein kontostand beträgt €(.*) kostet €(.*) Das Produkt kannst du dir nicht leisten! Möchtest du nach etwas anderem suchen");
+            add("(.*) Das Produkt kannst du dir nicht leisten! Dein kontostand beträgt €(.*) Möchtest du nach etwas anderem suchen");
             add(AffordabilityService.BYE);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
-            add("Produkt (.*) " + AffordabilityService.BUY_ASK);
+            add("Produkt (.*) " + AffordabilityService.NOTE_ASK);
         }};
 
-        ArrayList<String> cartAnswers = new ArrayList<String>() {{
+        ArrayList<String> emailAnswers = new ArrayList<String>() {{
             add(AffordabilityService.BYE);
-            add(AffordabilityService.CART_ACK);
+            add(AffordabilityService.EMAIL_ACK);
             add(AffordabilityService.SEARCH_ASK);
         }};
 
@@ -98,7 +98,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
-        testIntentMatches("AMAZON.YesIntent", StringUtils.join(cartAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(emailAnswers, "|"));
 
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
@@ -296,6 +296,9 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "AMAZON.YesIntent",
                 "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + "."
         + " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
+
+        testIntentMatches("SavingsPlanIntroIntent", "Category:urlaub",
+                "Verstanden. Der Dauerauftrag wurde zur Kategorie urlaub hinzugefügt");
 
         Collection<StandingOrder> allStandingOrders = AccountAPI.getStandingOrdersForAccount(TEST_ACCOUNT_NUMBER);
         final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
@@ -584,6 +587,9 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("AMAZON.YesIntent",
                 "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
         "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
+
+        testIntentMatches("ContactTransferIntent", "Category:urlaub",
+                "Verstanden. Die Transaktion wurde zur Kategorie urlaub hinzugefügt");
 
         newSession();
 

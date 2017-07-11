@@ -3,11 +3,10 @@ package amosalexa.services.financing;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.AccountData;
 import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
-import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.pricequery.aws.model.Item;
-import amosalexa.services.pricequery.aws.model.Offer;
 import amosalexa.services.pricequery.aws.request.AWSLookup;
 import amosalexa.services.pricequery.aws.util.AWSUtil;
 import api.aws.EMailClient;
@@ -59,8 +58,8 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
     public static final String TOO_FEW_RESULTS = "Die Suche ergab zu wenig Ergebnisse";
     public static final String CANT_AFFORD = "Das Produkt kannst du dir nicht leisten!";
     public static final String OTHER_SELECTION = "Möchtest du nach etwas anderem suchen";
-    public static final String BUY_ASK = "Willst du das Produkt vormerken";
-    public static final String CART_ACK = "Eine E-mail mit einem Produkt-link zu Amazon wurde an dich geschickt";
+    public static final String NOTE_ASK = "Willst du das Produkt vormerken";
+    public static final String EMAIL_ACK = "Eine E-mail mit einem Produkt-link zu Amazon wurde an dich geschickt";
     public static final String SEARCH_ASK = "Was suchst du. Frage mich zum Beispiel was ein Samsung Galaxy kostet";
     public static final String BYE = "Ok, Tschüss!";
 
@@ -114,7 +113,8 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         return Arrays.asList(
                 AFFORD_INTENT,
                 YES_INTENT,
-                NO_INTENT
+                NO_INTENT,
+                STOP_INTENT
         );
     }
 
@@ -132,6 +132,10 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         session = requestEnvelope.getSession();
 
         getSlots();
+
+        if(intent.getName().equals(STOP_INTENT)){
+            return getResponse(CARD, "");
+        }
 
         // error occurs when trying to request data from amazon product api
         Object errorRequest = DialogUtil.getDialogState("error!", session);
@@ -168,12 +172,12 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             return exitDialogRespond();
         }
 
-        // user decides if he want to put the item in the cart
-        if(DialogUtil.getDialogState("cart?", session) != null){
-            log.debug("Dialog State: cart?");
+        // user decides if he wants a email with a product link
+        if(DialogUtil.getDialogState("email?", session) != null){
+            log.debug("Dialog State: email?");
             if (intent.getName().equals(YES_INTENT)){
                 EMailClient.SendEMail("Amazon Produkt: " + selectedItem.getTitle(), selectedItem.getDetailPageURL());
-                return getResponse(CARD, CART_ACK);
+                return getResponse(CARD, EMAIL_ACK);
             }
             return exitDialogRespond();
         }
@@ -194,36 +198,33 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      * @return SpeechletResponse
      */
     private SpeechletResponse getAffordabilityResponse(){
-
-        log.info("Product Selection: " + "produkt " + productSelectionSlot.toLowerCase());
         selectedItem = (Item) SessionStorage.getInstance().getObject(session.getSessionId(), getItemSelectionKey());
 
         if(selectedItem == null){
             log.error("selected item is null");
+            DialogUtil.setDialogState("which?", session);
             return getAskResponse(CARD, SELECTION_ASK);
         }
 
         // save selection in session
         SessionStorage.getInstance().putObject(session.getSessionId(), "selection", selectedItem);
 
-        Account account = AccountAPI.getAccount(BankAccountService.ACCOUNT_NUMBER);
+        // get account data
+        Account account = AccountAPI.getAccount(AccountData.ACCOUNT_NO_MONEY);
         account.setSpeechTexts();
         Number balance = account.getBalance();
 
-        if(selectedItem.getOffer().getLowestNewPrice() / 100> balance.doubleValue()){
-
-            // save state too expensive
-            SessionStorage.getInstance().putObject(session.getSessionId(), AFFORDABILITY_ATTRIBUTE, false);
-
+        if(selectedItem.getLowestNewPrice() / 100 > balance.doubleValue()){
+            log.info("Product Price: can not afford");
             DialogUtil.setDialogState("other?", session);
-            return getAskResponse(CARD, account.getBalanceText() + " " +  getItemText(selectedItem)
-                    + " " + CANT_AFFORD + " " + OTHER_SELECTION);
+            return getSSMLAskResponse(CARD, getItemText(selectedItem)
+                    + " " + CANT_AFFORD + " " + account.getBalanceText() + " " + OTHER_SELECTION);
         }
 
-        String confirmationText = "Produkt " + productSelectionSlot + " " +  selectedItem.getTitleShort() + " ";
+        log.info("Product Price: can afford");
+        DialogUtil.setDialogState("email?", session);
 
-        DialogUtil.setDialogState("cart?", session);
-        return getAskResponse(CARD, confirmationText + BUY_ASK);
+        return getAskResponse(CARD, "Produkt " + productSelectionSlot + " " +  selectedItem.getTitleShort() + " " + NOTE_ASK);
     }
 
     private String getItemSelectionKey(){
@@ -237,13 +238,13 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
     private SpeechletResponse getProductInformation() {
         if (keywordSlot != null) {
 
-            log.debug("Dialog State: amazon query?");
+            log.info("Dialog State: amazon query?");
 
             List<Item> items;
             try {
                 items = AWSLookup.itemSearch(keywordSlot, 1, null);
             } catch (ParserConfigurationException | SAXException | IOException e) {
-                log.error("Amazon Lookup Exception: " + e.getMessage());
+                log.error("Amazon ItemSearch Lookup Exception: " + e.getMessage());
                 DialogUtil.setDialogState("error!", session);
                 return getAskResponse(CARD, NO_RESULTS);
             }
@@ -260,25 +261,12 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 return getAskResponse(CARD, TOO_FEW_RESULTS);
             }
 
-
             StringBuilder text = new StringBuilder();
 
             for (int i = 0; i < 3; i++) {
 
-                // look up offer
-                Offer offer;
-                try {
-                    offer = AWSLookup.offerLookup(items.get(i).getASIN());
-                } catch (ParserConfigurationException | SAXException | IOException e) {
-                    log.error("Amazon Lookup Exception: " + e.getMessage());
-                    DialogUtil.setDialogState("error!", session);
-                    return getAskResponse(CARD, "Ein Fehler ist aufgetreten. " + ERROR);
-                }
-
-                items.get(i).setOffer(offer);
-
                 // save in session
-                SessionStorage.getInstance().putObject(session.getSessionId(), "produkt " + (char) ('a' + i) , items.get(0));
+                SessionStorage.getInstance().putObject(session.getSessionId(), "produkt " + (char) ('a' + i) , items.get(i));
 
                 // shorten title
                 String productTitle = AWSUtil.shortTitle(items.get(i).getTitle());
@@ -296,7 +284,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             return getSSMLAskResponse(CARD, text.toString(), SEARCH_ASK);
         }
 
-        log.debug("Dialog State: no keyword");
+        log.info("Dialog State: no keyword");
         return getAskResponse(CARD, "Ein Fehler ist aufgetreten. " + ERROR);
     }
 
@@ -316,7 +304,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
      * @return text
      */
     private String getItemText(Item item){
-        return item.getTitleShort() + "kostet <say-as interpret-as=\"unit\">€" + item.getOffer().getLowestNewPrice() / 100 +
+        return item.getTitleShort() + "kostet <say-as interpret-as=\"unit\">€" + item.getLowestNewPrice() / 100 +
                 "</say-as> <break time=\"1s\"/>";
     }
 
