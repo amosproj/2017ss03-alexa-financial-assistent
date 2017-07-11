@@ -216,23 +216,44 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         String todayDate = formatter.format(now);
 
         //Create a transaction that we can use for ContactAddIntent (ingoing transaction)
+        /*
         Transaction transaction = TransactionAPI.createTransaction(1, "DE60100000000000000001",
                 "DE50100000000000000001", todayDate,
                 "Ueberweisung fuer Unit Test", null, "Sandra");
-        int transactionId = transaction.getTransactionId().intValue();
-        String transactionRemitter = transaction.getRemitter();
+        */
 
-        LOGGER.info("Latest transaction id: " + transactionId);
-        LOGGER.info("Latest transaction remitter: " + transactionRemitter);
+        int transactionId1 = 18877; //transaction.getTransactionId().intValue();
+        int transactionId2 = 6328; //transaction without remitter or payee
+        int transactionId3 = 23432423; //transaction not existent
 
-        //Test add contact
+        String transactionRemitter = "Sandra";//for transactionId1 //transaction.getRemitter();
+
+        //Test add contact no transaction number given
         testIntent(
                 "ContactAddIntent",
-                "TransactionNumber:" + transactionId, "Moechtest du " + transactionRemitter + " als " +
+                "TransactionNumber: ", "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.");
+
+        //Test add contact successful
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId1, "Moechtest du " + transactionRemitter + " als " +
                         "Kontakt speichern?");
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Der Kontakt Sandra wurde angelegt.");
+
+        //Test add contact unknown payee/remitter
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId2, "Ich kann fuer diese Transaktion keine Kontaktdaten speichern, weil der Name des Auftraggebers" +
+                        " nicht bekannt ist. Bitte wiederhole deine Eingabe oder breche ab, indem du \"Alexa, Stop!\" sagst.");
+
+        //Test add contact transaction not existent
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId3, "Ich habe keine Transaktion mit dieser Nummer gefunden." +
+                        " Bitte wiederhole deine Eingabe.");
+
 
         //Get the contact that we just created by searching for the contact with highest id
         List<Contact> allContacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
@@ -317,6 +338,40 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent(
                 "AMAZON.YesIntent",
                 "Dauerauftrag Nummer " + latestStandingOrderId + " wurde geloescht.");
+    }
+
+    @Test
+    public void categoryStatusInfoIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        //Test assumes that category 'lebensmittel' already exists
+
+        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
+        //does not affect our data
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        Double originalLimit = null;
+        Double originialSpending = null;
+        //We assume that 'lebensmittel' category exists!
+        for (Category cat : categories) {
+            if (cat.getName().equals("lebensmittel")) {
+                category = cat;
+                originalLimit = cat.getLimit();
+                originialSpending = cat.getSpending();
+            }
+        }
+
+        //Set spending to 0 and limit to 100 for test purpose
+        category.setSpending(0);
+        category.setLimit(100);
+        category.setSpending(5);
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+
+        //Simple status test
+        testIntent("CategoryStatusInfoIntent", "Category:lebensmittel",
+                "Du hast 5.0% von 100.0 Euro deines Limits fuer die Kategorie lebensmittel ausgegeben. Du kannst noch 95.0 Euro für diese Kategorie ausgeben.");
+
     }
 
     @Test
@@ -614,6 +669,46 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         newSession();
         SessionStorage.getInstance().getStorage(sessionId).put("DEBUG", true);
         testIntentMatches("BudgetReportEMailIntent", "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.");
+    }
+
+    @Test
+    public void categoryTest() throws Exception {
+        newSession();
+
+        Category.TABLE_NAME = "category_test";
+        DynamoDbClient.instance.clearItems(Category.TABLE_NAME, Category::new);
+
+        testIntent("AddCategoryIntent",
+                "CategoryName:Auto",
+                "Moechtest du die Kategorie Auto wirklich erstellen?");
+
+        testIntent("AMAZON.YesIntent",
+                "Verstanden. Die Kategorie Auto wurde erstellt.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du folgende Kategorien: Auto, ");
+
+        testIntent("AddCategoryIntent",
+                "CategoryName:Lebensmittel",
+                "Moechtest du die Kategorie Lebensmittel wirklich erstellen?");
+
+        testIntent("AMAZON.NoIntent",
+                "OK, verstanden. Dann bis bald.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du folgende Kategorien: Auto, ");
+
+        testIntent("DeleteCategoryIntent",
+                "CategoryName:Auto",
+                "Möchtest du die Kategorie mit dem Namen 'Auto' und dem Limit von 0.0 Euro wirklich löschen?");
+
+        testIntent("AMAZON.YesIntent",
+                "OK, wie du willst. Ich habe die Kategorie mit dem Namen 'Auto' gelöscht. Hoffentlich bereust du es nicht.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du keine Kategorien.");
+
+        Category.TABLE_NAME = "category";
     }
 
 }

@@ -119,13 +119,13 @@ public class AmosAlexaExtendedTestImpl extends AbstractAmosAlexaSpeechletTest im
 
         testIntent("AMAZON.NoIntent", "Okay, tschuess!");
 
-        //SecuritiesAccountAPI.deleteSecurity(2, testSecurity1.getSecurityId());
-        //SecuritiesAccountAPI.deleteSecurity(2, testSecurity2.getSecurityId());
-        //SecuritiesAccountAPI.deleteSecurity(2, testSecurity3.getSecurityId());
+        SecuritiesAccountAPI.deleteSecurity(2, testSecurity1.getSecurityId());
+        SecuritiesAccountAPI.deleteSecurity(2, testSecurity2.getSecurityId());
+        SecuritiesAccountAPI.deleteSecurity(2, testSecurity3.getSecurityId());
 
-        //Restore securities as before test
-        //for (Security s : securitiesBefore) {
-        //    SecuritiesAccountAPI.addSecurityToAccount(2, s);
-        //}
+//        Restore securities as before test
+        for (Security s : securitiesBefore) {
+            SecuritiesAccountAPI.addSecurityToAccount(2, s);
+        }
     }
 }

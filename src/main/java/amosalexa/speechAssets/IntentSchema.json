@@ -1,28 +1,27 @@
 {
   "intents": [
     {
-      "intent": "ProductRequestIntent",
       "slots": [
         {
           "name": "ProductKeyword",
           "type": "LIST_OF_KEYWORDS"
         }
-      ]
+      ],
+      "intent": "ProductRequestIntent"
     },
     {
       "intent": "SecuritiesAccountInformationIntent"
     },
     {
-      "intent": "AccountInformation",
       "slots": [
         {
           "name": "AccountInformationSlots",
           "type": "LIST_OF_ACCOUNT_INFORMATION"
         }
-      ]
+      ],
+      "intent": "AccountInformation"
     },
     {
-      "intent": "BankOpeningHours",
       "slots": [
         {
           "name": "OpeningHoursDate",
@@ -32,25 +31,26 @@
           "name": "BankNameSlots",
           "type": "LIST_OF_BANKS"
         }
-      ]
+      ],
+      "intent": "BankOpeningHours"
     },
     {
-      "intent": "BankAddress",
       "slots": [
         {
           "name": "BankNameSlots",
           "type": "LIST_OF_BANKS"
         }
-      ]
+      ],
+      "intent": "BankAddress"
     },
     {
-      "intent": "BankTelephone",
       "slots": [
         {
           "name": "BankNameSlots",
           "type": "LIST_OF_BANKS"
         }
-      ]
+      ],
+      "intent": "BankTelephone"
     },
     {
       "intent": "AMAZON.YesIntent"
@@ -62,47 +62,33 @@
       "intent": "AMAZON.HelpIntent"
     },
     {
-      "intent": "IntroductionIntent"
-    },
-    {
-      "intent": "PlainNumberIntent",
       "slots": [
         {
           "name": "Number",
           "type": "AMAZON.NUMBER"
         }
-      ]
+      ],
+      "intent": "PlainNumberIntent"
     },
     {
-      "intent": "PlainEuroIntent",
       "slots": [
         {
           "name": "Number",
           "type": "AMAZON.NUMBER"
         }
-      ]
+      ],
+      "intent": "PlainEuroIntent"
     },
     {
-      "intent": "PlainYearsIntent",
       "slots": [
         {
           "name": "Number",
           "type": "AMAZON.NUMBER"
         }
-      ]
+      ],
+      "intent": "PlainYearsIntent"
     },
     {
-      "intent": "TransactionCategory",
-      "slots": [
-        {
-          "name": "Category",
-          "type": "LIST_OF_CATEGORIES"
-        }
-
-      ]
-    },
-    {
-      "intent": "SavingsPlanIntroIntent",
       "slots": [
         {
           "name": "Betrag",
@@ -112,23 +98,22 @@
           "name": "Category",
           "type": "LIST_OF_CATEGORIES"
         }
-
-      ]
+      ],
+      "intent": "SavingsPlanIntroIntent"
     },
     {
-      "intent": "SavingsPlanChangeParameterIntent",
       "slots": [
         {
           "name": "SavingsPlanParameter",
           "type": "LIST_OF_SAVINGS_PLAN_PARAMETER"
         }
-      ]
+      ],
+      "intent": "SavingsPlanChangeParameterIntent"
     },
     {
       "intent": "SavingsPlanNewIntent"
     },
     {
-      "intent": "StandingOrdersDeleteIntent",
       "slots": [
         {
           "name": "Payee",
@@ -138,10 +123,10 @@
           "name": "Number",
           "type": "AMAZON.NUMBER"
         }
-      ]
+      ],
+      "intent": "StandingOrdersDeleteIntent"
     },
     {
-      "intent": "StandingOrderSmartIntent",
       "slots": [
         {
           "name": "Payee",
@@ -159,10 +144,10 @@
           "name": "Category",
           "type": "LIST_OF_CATEGORIES"
         }
-      ]
+      ],
+      "intent": "StandingOrderSmartIntent"
     },
     {
-      "intent": "StandingOrdersInfoIntent",
       "slots": [
         {
           "name": "Channel",
@@ -172,10 +157,10 @@
           "name": "Payee",
           "type": "AMAZON.DE_FIRST_NAME"
         }
-      ]
+      ],
+      "intent": "StandingOrdersInfoIntent"
     },
     {
-      "intent": "StandingOrdersModifyIntent",
       "slots": [
         {
           "name": "Number",
@@ -193,7 +178,8 @@
           "name": "FirstExecution",
           "type": "AMAZON.DATE"
         }
-      ]
+      ],
+      "intent": "StandingOrdersModifyIntent"
     },
     {
       "slots": [
@@ -212,22 +198,22 @@
       "intent": "ReplacementCardIntent"
     },
     {
-      "intent": "ReplacementCardReasonIntent",
       "slots": [
         {
           "name": "ReplacementReason",
           "type": "LIST_OF_REPLACEMENT_REASONS"
         }
-      ]
+      ],
+      "intent": "ReplacementCardReasonIntent"
     },
     {
-      "intent": "BlockCardIntent",
       "slots": [
         {
           "name": "BankCardNumber",
           "type": "AMAZON.NUMBER"
         }
-      ]
+      ],
+      "intent": "BlockCardIntent"
     },
     {
       "slots": [
@@ -239,13 +225,26 @@
       "intent": "AuthenticationPIN"
     },
     {
-      "intent": "SetBalanceLimitIntent",
+      "slots": [
+        {
+          "name": "Amount",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Name",
+          "type": "AMAZON.DE_FIRST_NAME"
+        }
+      ],
+      "intent": "BankTransferIntent"
+    },
+    {
       "slots": [
         {
           "name": "BalanceLimitAmount",
           "type": "AMAZON.NUMBER"
         }
-      ]
+      ],
+      "intent": "SetBalanceLimitIntent"
     },
     {
       "intent": "GetBalanceLimitIntent"
@@ -263,7 +262,6 @@
       "intent": "DeleteTransferTemplatesIntent"
     },
     {
-      "intent": "EditTransferTemplateIntent",
       "slots": [
         {
           "name": "TemplateID",
@@ -273,19 +271,20 @@
           "name": "NewAmount",
           "type": "AMAZON.NUMBER"
         }
-      ]
+      ],
+      "intent": "EditTransferTemplateIntent"
     },
     {
       "intent": "ContactListInfoIntent"
     },
     {
-      "intent": "ContactAddIntent",
       "slots": [
         {
           "name": "TransactionNumber",
           "type": "AMAZON.NUMBER"
         }
-      ]
+      ],
+      "intent": "ContactAddIntent"
     },
     {
       "slots": [
@@ -297,7 +296,6 @@
       "intent": "ContactDeleteIntent"
     },
     {
-      "intent": "AffordProduct",
       "slots": [
         {
           "name": "ProductKeyword",
@@ -307,10 +305,20 @@
           "name": "ProductSelection",
           "type": "LIST_OF_SELECTABLE_PRODUCTS"
         }
-      ]
+      ],
+      "intent": "AffordProduct"
     },
     {
-      "intent": "PlainCategoryIntent",
+      "slots": [
+        {
+          "name": "Category",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ],
+      "intent": "PlainCategoryIntent"
+    },
+    {
+      "intent": "CategoryStatusInfoIntent",
       "slots": [
         {
           "name": "Category",
@@ -328,7 +336,6 @@
       ]
     },
     {
-      "intent": "CategoryLimitSetIntent",
       "slots": [
         {
           "name": "Category",
@@ -338,20 +345,8 @@
           "name": "CategoryLimit",
           "type": "AMAZON.NUMBER"
         }
-      ]
-    },
-    {
-      "slots": [
-        {
-          "name": "Category",
-          "type": "LIST_OF_CATEGORIES"
-        },
-        {
-          "name": "Amount",
-          "type": "AMAZON.NUMBER"
-        }
       ],
-      "intent": "CategorySpendingIntent"
+      "intent": "CategoryLimitSetIntent"
     },
     {
       "intent": "BudgetReportEMailIntent"
@@ -360,7 +355,6 @@
       "intent": "AMAZON.StopIntent"
     },
     {
-      "intent": "ContactTransferIntent",
       "slots": [
         {
           "name": "Amount",
@@ -370,14 +364,57 @@
           "name": "Contact",
           "type": "LIST_OF_EXAMPLE_CONTACTS"
         }
-      ]
+      ],
+      "intent": "ContactTransferIntent"
     },
     {
-      "intent": "ContactChoiceIntent",
       "slots": [
         {
           "name": "ContactIndex",
           "type": "NUMBER"
+        }
+      ],
+      "intent": "ContactChoiceIntent"
+    },
+    {
+      "intent": "ShowCategoriesIntent"
+    },
+    {
+      "slots": [
+        {
+          "name": "CategoryName",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ],
+      "intent": "DeleteCategoryIntent"
+    },
+    {
+      "slots": [
+        {
+          "name": "CategoryName",
+          "type": "LIST_OF_CATEGORIES"
+        }
+      ],
+      "intent": "AddCategoryIntent"
+    },
+    {
+      "intent": "PeriodicTransactionListIntent"
+    },
+    {
+      "intent": "PeriodicTransactionAddIntent",
+      "slots": [
+        {
+          "name": "TransactionNumber",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "PeriodicTransactionDeleteIntent",
+      "slots": [
+        {
+          "name": "TransactionNumber",
+          "type": "AMAZON.NUMBER"
         }
       ]
     }

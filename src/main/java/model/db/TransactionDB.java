@@ -12,6 +12,18 @@ public class TransactionDB {
     private String transactionId;
     private String categoryId;
 
+    /**
+     * Marks if this transaction has been marked as periodic transaction.
+     */
+    private boolean periodic;
+
+    public TransactionDB() {
+    }
+
+    public TransactionDB(String transactionId) {
+        this.transactionId = transactionId;
+        this.categoryId = null;
+    }
 
     public TransactionDB(String transactionId, String categoryId) {
         this.transactionId = transactionId;
@@ -47,5 +59,14 @@ public class TransactionDB {
     public TransactionDB setTransactionId(String transactionId) {
         this.transactionId = transactionId;
         return this;
+    }
+
+    @DynamoDBAttribute
+    public boolean isPeriodic() {
+        return periodic;
+    }
+
+    public void setPeriodic(boolean periodic) {
+        this.periodic = periodic;
     }
 }
