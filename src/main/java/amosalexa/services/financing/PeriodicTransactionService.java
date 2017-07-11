@@ -13,6 +13,8 @@ import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import model.banking.Transaction;
+import model.db.TransactionDB;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +30,18 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
     @Override
     public List<String> getStartIntents() {
         return Arrays.asList(
-                PERIODIC_TRANSACTION_INTENT
+                PERIODIC_TRANSACTION_LIST_INTENT,
+                PERIODIC_TRANSACTION_ADD_INTENT,
+                PERIODIC_TRANSACTION_DELETE_INTENT
         );
     }
 
     @Override
     public List<String> getHandledIntents() {
         return Arrays.asList(
-                PERIODIC_TRANSACTION_INTENT,
+                PERIODIC_TRANSACTION_LIST_INTENT,
+                PERIODIC_TRANSACTION_ADD_INTENT,
+                PERIODIC_TRANSACTION_DELETE_INTENT,
                 YES_INTENT,
                 NO_INTENT,
                 STOP_INTENT
@@ -47,10 +53,14 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
     /**
      * Default value for cards
      */
-    private static final String PERIODIC_TRANSACTION = "Periodische Transaktion";
+    private static final String PERIODIC_TRANSACTION = "Periodische Transaktionen";
 
-    //Intent names
-    private static final String PERIODIC_TRANSACTION_INTENT = "PeriodicTransactionIntent";
+    /**
+     * Intent names
+     */
+    private static final String PERIODIC_TRANSACTION_LIST_INTENT = "PeriodicTransactionListIntent";
+    private static final String PERIODIC_TRANSACTION_ADD_INTENT = "PeriodicTransactionAddIntent";
+    private static final String PERIODIC_TRANSACTION_DELETE_INTENT = "PeriodicTransactionDeleteIntent";
 
     // FIXME: Hardcoded Strings for account
     private static final String ACCOUNT_NUMBER = "8888888888";
@@ -78,21 +88,50 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
         Session session = requestEnvelope.getSession();
         LOGGER.info("Intent Name: " + intentName);
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
-        String withinDialogContext = (String) session.getAttribute(WITHIN_DIALOG_CONTEXT);
-        LOGGER.info("Within context: " + withinDialogContext);
 
-        if (PERIODIC_TRANSACTION_INTENT.equals(intentName)) {
+        if (PERIODIC_TRANSACTION_ADD_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, intentName);
-            return listPeriodicTransactionSuggestions(session);
-        } else if (context != null && context.equals(PERIODIC_TRANSACTION_INTENT)) {
-            return null;
+            return savePeriodicTransaction(intent, session, false);
+        } else if (context != null && context.equals(PERIODIC_TRANSACTION_ADD_INTENT) && YES_INTENT.equals(intentName)) {
+            return savePeriodicTransaction(intent, session, true);
+        } else if (context != null && context.equals(PERIODIC_TRANSACTION_ADD_INTENT) && NO_INTENT.equals(intentName)) {
+            return getResponse(PERIODIC_TRANSACTION, "Okay, tschuess!");
         } else {
             throw new SpeechletException("Unhandled intent: " + intentName);
         }
     }
 
-    private SpeechletResponse listPeriodicTransactionSuggestions(Session session) {
+    private SpeechletResponse savePeriodicTransaction(Intent intent, Session session, boolean confirmed) {
+        if (!confirmed) {
+            if (intent.getSlot(TRANSACTION_NUMBER_KEY) == null || StringUtils.isBlank(intent.getSlot(TRANSACTION_NUMBER_KEY).getValue())) {
+                session.getAttributes().clear();
+                return getAskResponse(PERIODIC_TRANSACTION, "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
+            } else {
+                String transactionId = intent.getSlot(TRANSACTION_NUMBER_KEY).getValue();
+                session.setAttribute(TRANSACTION_NUMBER_KEY + ".delete", transactionId);
+                return getAskResponse(PERIODIC_TRANSACTION, "Moechtest du die Transaktion mit der Nummer " + transactionId
+                        + " wirklich als periodisch markieren?");
+            }
+        } else {
+            String transactionId = (String) session.getAttribute(TRANSACTION_NUMBER_KEY + ".delete");
+            if (transactionId != null) {
+                TransactionDB transaction = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, transactionId);
+                LOGGER.info("Transaction: " + transaction);
+                if (transaction == null) {
+                    session.getAttributes().clear();
+                    return getAskResponse(PERIODIC_TRANSACTION, "Ich kann Transaktion Nummer " + transactionId + " nicht finden." +
+                            " Bitte aendere deine Eingabe.");
+                }
+                transaction = new TransactionDB(transactionId);
+                transaction.setPeriodic(true);
+                dynamoDbMapper.insert(transaction);
+                return getResponse(PERIODIC_TRANSACTION, "Transaktion Nummer " + transactionId + " wurde als periodisch markiert.");
+            }
+        }
+        return null;
+    }
 
+    private int markPeriodicTransactions() {
         List<Transaction> transactions = new ArrayList(AccountAPI.getTransactionsForAccount(ACCOUNT_NUMBER));
         LOGGER.info("Size: " + transactions.size());
 
@@ -119,7 +158,6 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
         }
 
         LOGGER.info("Candidates: " + candidates);
-
-        return getResponse(PERIODIC_TRANSACTION, "Es wurden " + candidates.size() + " moegliche periodische Transaktionen gefunden.");
+        return candidates.size();
     }
 }

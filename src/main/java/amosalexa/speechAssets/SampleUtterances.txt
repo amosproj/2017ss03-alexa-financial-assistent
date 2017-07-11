@@ -172,7 +172,8 @@ IntroductionIntent Was kann ich fragen
 PlainCategoryIntent {Category}
 PlainCategoryIntent Kategorie {Category}
 
-PeriodicTransactionIntent Wie sind meine periodischen Transaktionen
-PeriodicTransactionIntent Liste mir meine periodischen Transaktionen auf
-PeriodicTransactionIntent Markiere Transaktion {TransactionNumber} als periodisch
-PeriodicTransactionIntent Lösche Kennzeichnung periodisch für Transaktion {TransactionNumber}
+PeriodicTransactionListIntent Wie sind meine periodischen Transaktionen
+PeriodicTransactionListIntent Liste mir meine periodischen Transaktionen auf
+PeriodicTransactionListIntent Periodische Transaktionen
+PeriodicTransactionAddIntent Markiere Transaktion {TransactionNumber} als periodisch
+PeriodicTransactionDeleteIntent Lösche Kennzeichnung periodisch für Transaktion {TransactionNumber}
