@@ -9,6 +9,7 @@
  */
 package amosalexa;
 
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
 import amosalexa.services.bankaccount.ContactTransferService;
@@ -39,7 +40,7 @@ import java.util.Map;
 /**
  * Base speechlet to register services that handle the intents.
  */
-public class AmosAlexaSpeechlet implements SpeechletSubject {
+public class AmosAlexaSpeechlet extends AbstractSpeechService implements SpeechletSubject {
 
     // TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
     public static final int USER_ID = 4711;
@@ -65,7 +66,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new ContactTransferService(amosAlexaSpeechlet);
         new BudgetTrackerService(amosAlexaSpeechlet);
         new IntroductionService(amosAlexaSpeechlet);
-        //new AuthenticationManager(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
@@ -187,8 +187,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
-        //LOGGER.info("Authenticated: " + AuthenticationManager.isAuthenticated());
-
         LOGGER.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
 
@@ -200,6 +198,10 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         LOGGER.info("Intent: " + intentName);
         LOGGER.info("DialogContext: " + currentDialogContext);
+
+        if(intentName.equals(STOP_INTENT)){
+            return getResponse("Stop", "");
+        }
 
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
