@@ -697,7 +697,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         // Create the plain text output
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Der neue Dauerauftrag für " + oldStandingOrder.getPayee() + " über " + newAmount +
+        speech.setText("Der neue Dauerauftrag für " + oldStandingOrder.getPayee().toLowerCase() + " über " + newAmount +
                 " Euro wurde erfolgreich eingerichtet");
 
         //delete session attributes
