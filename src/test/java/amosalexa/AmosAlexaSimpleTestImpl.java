@@ -1,16 +1,16 @@
 package amosalexa;
 
 import amosalexa.server.Launcher;
-import amosalexa.services.contactTransfer.ContactTransferService;
+import amosalexa.services.bankaccount.ContactTransferService;
 import amosalexa.services.financing.AffordabilityService;
 import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import model.banking.Card;
-import model.db.Contact;
 import model.banking.StandingOrder;
 import model.banking.Transaction;
 import model.db.Category;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
@@ -56,8 +56,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
     }
 
-    /*
-    FIXME
 
     @Test
     public void affordabilityTest() throws Exception {
@@ -82,15 +80,15 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         }};
 
         ArrayList<String> balanceCheckAnswers = new ArrayList<String>() {{
-            add("Dein kontostand beträgt €(.*) kostet €(.*) Das Produkt kannst du dir nicht leisten! Möchtest du nach etwas anderem suchen");
+            add("(.*) Das Produkt kannst du dir nicht leisten! Dein kontostand beträgt €(.*) Möchtest du nach etwas anderem suchen");
             add(AffordabilityService.BYE);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
-            add("Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
+            add("Produkt (.*) " + AffordabilityService.NOTE_ASK);
         }};
 
-        ArrayList<String> cartAnswers = new ArrayList<String>() {{
+        ArrayList<String> emailAnswers = new ArrayList<String>() {{
             add(AffordabilityService.BYE);
-            add(AffordabilityService.CART_ACK);
+            add(AffordabilityService.EMAIL_ACK);
             add(AffordabilityService.SEARCH_ASK);
         }};
 
@@ -99,7 +97,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
-        testIntentMatches("AMAZON.YesIntent", StringUtils.join(cartAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(emailAnswers, "|"));
 
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
@@ -116,7 +114,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
     }
-    */
+
 
     @Test
     public void bankAccountTransactionIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
@@ -170,16 +168,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     }
 
     @Test
-    public void bankTransferIntentTest() throws Throwable {
-        newSession();
-        testIntentMatches("BankTransferIntent", "Name:anne", "Amount:2",
-                "Aktuell betraegt dein Kontostand (.*) Euro\\. Bist du sicher, dass du 2 Euro an anne ueberweisen willst\\?");
-
-        testIntentMatches("AMAZON.YesIntent",
-                "Ok, (.*) Euro wurden an anne ueberwiesen\\. Dein neuer Kontostand betraegt (.*) Euro\\.");
-    }
-
-    @Test
     public void standingOrdersInfoTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
@@ -195,20 +183,26 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         //TODO this test expects to be at least 4 standing orders existent in the system
         testIntentMatches(
                 "StandingOrdersInfoIntent", StringUtils.join(possibleAnswers, "|"));
-        testIntentMatches(
-                "AMAZON.YesIntent",
-                "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto." +
-                        "|Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro an (.*)");
+        //Test speech answer with some securities in the depot
+        String response = performIntent("AMAZON.YesIntent");
+        Pattern p = Pattern.compile("Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto." +
+                " Moechtest du einen weiteren Eintrag hoeren?" +
+                "|Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro an (.*)");
+        Matcher m = p.matcher(response);
+        if (!m.find()) {
+            fail("Unexpected speech output.\nExcpected: " + p.pattern() + "\nAcutual: " + response);
+        }
+
         testIntentMatches(
                 "AMAZON.NoIntent", "Okay, tschuess!");
     }
 
     @Test
-    public void StandingOrderSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+    public void standingOrderSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
         testIntent(
-                "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:zehn",
+                "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:10",
                 "Der Dauerauftrag für max mustermann über 10.0 Euro existiert schon. Möchtest du diesen aktualisieren");
     }
 
@@ -260,13 +254,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent(
                 "AMAZON.YesIntent",
                 "Kontakt wurde geloescht.");
-
-        /*
-        TODO
-        testIntent(
-                "ContactListInfoIntent",
-                "TO DO..");
-        */
     }
 
     @Test
@@ -305,7 +292,11 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         //Test with YesIntent, savings plan should be actually created
         testIntent(
                 "AMAZON.YesIntent",
-                "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + ".");
+                "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + "."
+                        + " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
+
+        testIntentMatches("SavingsPlanIntroIntent", "Category:urlaub",
+                "Verstanden. Der Dauerauftrag wurde zur Kategorie urlaub hinzugefügt");
 
         Collection<StandingOrder> allStandingOrders = AccountAPI.getStandingOrdersForAccount(TEST_ACCOUNT_NUMBER);
         final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
@@ -592,7 +583,11 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Dein aktueller Kontostand beträgt ([0-9\\.]+) Euro\\. Möchtest du 1\\.0 Euro an Sandra überweisen\\?");
 
         testIntentMatches("AMAZON.YesIntent",
-                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\.");
+                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
+                        "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie Urlaub, Kategorie Lebensmittel, Kategorie Kleidung.");
+
+        testIntentMatches("ContactTransferIntent", "Category:urlaub",
+                "Verstanden. Die Transaktion wurde zur Kategorie urlaub hinzugefügt");
 
         newSession();
 

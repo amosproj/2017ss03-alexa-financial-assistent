@@ -2,6 +2,7 @@ package amosalexa.services.bankaccount;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import api.aws.EMailClient;
 import api.banking.AccountAPI;
@@ -98,6 +99,12 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         LOGGER.info("Intent Name: " + intentName);
         LOGGER.info("Context: " + context);
+
+        if(DialogUtil.getDialogState("category?", session) != null){
+
+
+            return getResponse("Transaktionskategorie", "Zu Kategorie SLOT hinzugefügt");
+        }
 
         if (STANDING_ORDERS_INFO_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
@@ -553,15 +560,19 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         session.setAttribute("Payee", payee);
         session.setAttribute("PayeeSecondName", payeeSecondName);
 
-        for (int i = 0; i < standingOrders.size(); i++) {
-            LOGGER.info(standingOrders.get(i).getExecutionRate().toString());
-            if (standingOrders.get(i).getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
+        for (StandingOrder standingOrder : standingOrders) {
+            LOGGER.info(standingOrder.getExecutionRate().toString());
+
+            String amountString = Integer.toString(standingOrder.getAmount().intValue());
+
+            if (standingOrder.getPayee().toLowerCase().equals(payee + " " + payeeSecondName)
+                    && (amount != null && amount.equals(amountString))) {
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " über " + standingOrders.get(i).getAmount() +
+                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " über " + standingOrder.getAmount() +
                         " Euro existiert schon. Möchtest du diesen aktualisieren");
 
-                session.setAttribute("StandingOrderToModify", standingOrders.get(i).getStandingOrderId());
+                session.setAttribute("StandingOrderToModify", standingOrder.getStandingOrderId());
 
                 // Create reprompt
                 Reprompt reprompt = new Reprompt();
@@ -612,20 +623,19 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         AccountAPI.updateStandingOrder(ACCOUNT_NUMBER, standingOrder);
 
-        // Create the plain text output
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Der Dauerauftrag Nummer " + standingOrderToModify +
-                " für " + standingOrder.getPayee() + " über " + newAmount + " euro wurde erfolgreich aktualisiert");
-        // Create reprompt
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
+        String speechText = "Der Dauerauftrag Nummer " + standingOrderToModify +
+                " für " + standingOrder.getPayee() + " über " + newAmount + " euro wurde erfolgreich aktualisiert";
 
         //delete session attributes
         session.removeAttribute("SmartCreateStandingOrderIntent");
         session.removeAttribute("StandingOrderToModify");
         session.removeAttribute("NewAmount");
 
-        return SpeechletResponse.newAskResponse(speech, reprompt);
+        //ask for category
+        DialogUtil.setDialogState("category?", session);
+        speechText = speechText+ " Zu welcher Kategorie möchtest du den Dauerauftrag hinzufügen";
+
+        return getAskResponse(STANDING_ORDERS, speechText);
     }
 
     /**

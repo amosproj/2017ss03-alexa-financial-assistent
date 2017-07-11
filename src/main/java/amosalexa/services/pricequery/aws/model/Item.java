@@ -34,6 +34,8 @@ public class Item {
 
     private String titleShort;
 
+    private Integer lowestNewPrice;
+
     public Item(){
         this.locale = "de";
     }
@@ -158,6 +160,15 @@ public class Item {
 
     public Item setTitleShort(String titleShort) {
         this.titleShort = titleShort;
+        return this;
+    }
+
+    public Integer getLowestNewPrice() {
+        return lowestNewPrice;
+    }
+
+    public Item setLowestNewPrice(Integer lowestNewPrice) {
+        this.lowestNewPrice = lowestNewPrice;
         return this;
     }
 }
