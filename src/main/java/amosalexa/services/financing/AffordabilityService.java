@@ -217,7 +217,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         if(selectedItem.getLowestNewPrice() / 100 > balance.doubleValue()){
             log.info("Product Price: can not afford");
             DialogUtil.setDialogState("other?", session);
-            return getSSMLAskResponse(CARD, "Das Produkt:  " +  getItemText(selectedItem)
+            return getSSMLAskResponse(CARD, getItemText(selectedItem)
                     + " " + CANT_AFFORD + " " + account.getBalanceText() + " " + OTHER_SELECTION);
         }
 
@@ -265,8 +265,6 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
             for (int i = 0; i < 3; i++) {
 
-                log.info("Products stored in session.");
-
                 // save in session
                 SessionStorage.getInstance().putObject(session.getSessionId(), "produkt " + (char) ('a' + i) , items.get(i));
 
@@ -277,8 +275,8 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 // build respond
                 text.append("Produkt ")
                         .append((char) ('a' + i))
-                        .append("<break time=\"1s\"/> ");
-                        //.append(getItemText(items.get(i)));
+                        .append("<break time=\"1s\"/> ")
+                        .append(getItemText(items.get(i)));
             }
 
             text.append(DESIRE_ASK);
