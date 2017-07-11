@@ -51,11 +51,16 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
                 PLAIN_YEARS_INTENT,
                 SAVINGS_PLAN_CHANGE_PARAMETER_INTENT,
                 SAVINGS_PLAN_NEW_INTENT,
+                PLAIN_CATEGORY_INTENT,
                 YES_INTENT,
-                NO_INTENT,
-                STOP_INTENT
+                NO_INTENT
         );
     }
+
+    /**
+     *
+     */
+    private static final String PLAIN_CATEGORY_INTENT = "PlainCategoryIntent";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavingsPlanService.class);
 
@@ -112,7 +117,8 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         String withinDialogContext = (String) session.getAttribute(WITHIN_DIALOG_CONTEXT);
         LOGGER.info("Within context: " + withinDialogContext);
 
-        if(DialogUtil.getDialogState("category?", session) != null){
+        // adds standing order to category
+        if(PLAIN_CATEGORY_INTENT.equals(intentName)){
             return standingOrderCategoryResponse(intent, session);
         }
 
@@ -285,16 +291,8 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
         //save transaction id to save in db
         session.setAttribute(STANDING_ORDER_ID_ATTRIBUTE, standingOrder.getStandingOrderId().toString());
 
-        // build category names string
-        StringBuilder categoryNames = new StringBuilder();
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
-        for(int i = 0; i < categories.size() - 1; i++){
-            categoryNames.append(categories.get(i).getName()).append(", ");
-        }
-        categoryNames.append("oder ").append(categories.get(categories.size() - 1).getName());
-
         //add category ask to success response
-        String categoryAsk = " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie " + categoryNames.toString();
+        String categoryAsk = " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText();
 
         return getAskResponse(SAVINGS_PLAN, speechtext + categoryAsk);
     }
