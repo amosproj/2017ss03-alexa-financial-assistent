@@ -108,23 +108,41 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
                 return getAskResponse(PERIODIC_TRANSACTION, "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
             } else {
                 String transactionId = intent.getSlot(TRANSACTION_NUMBER_KEY).getValue();
-                session.setAttribute(TRANSACTION_NUMBER_KEY + ".delete", transactionId);
+                session.setAttribute(TRANSACTION_NUMBER_KEY, transactionId);
                 return getAskResponse(PERIODIC_TRANSACTION, "Moechtest du die Transaktion mit der Nummer " + transactionId
                         + " wirklich als periodisch markieren?");
             }
         } else {
-            String transactionId = (String) session.getAttribute(TRANSACTION_NUMBER_KEY + ".delete");
+            String transactionId = (String) session.getAttribute(TRANSACTION_NUMBER_KEY);
             if (transactionId != null) {
-                TransactionDB transaction = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, transactionId);
-                LOGGER.info("Transaction: " + transaction);
+
+                List<Transaction> allTransactions = Transaction.getTransactions("8888888888");
+                Number transactionNumber = Integer.valueOf(transactionId);
+                Transaction transaction = null;
+                for (Transaction t : allTransactions) {
+                    if (transactionNumber.equals(t.getTransactionId())) {
+                        transaction = t;
+                    }
+                }
+                LOGGER.info("Found transaction: " + transaction);
+
                 if (transaction == null) {
                     session.getAttributes().clear();
                     return getAskResponse(PERIODIC_TRANSACTION, "Ich kann Transaktion Nummer " + transactionId + " nicht finden." +
                             " Bitte aendere deine Eingabe.");
                 }
-                transaction = new TransactionDB(transactionId);
-                transaction.setPeriodic(true);
-                dynamoDbMapper.insert(transaction);
+
+                TransactionDB transactionDb = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, transactionId);
+                LOGGER.info("TransactionDb: " + transactionDb);
+
+                if (transactionDb == null) {
+                    transactionDb = new TransactionDB(transactionId);
+                    transactionDb.setPeriodic(true);
+                }
+
+                dynamoDbMapper.save(transactionDb);
+                List<TransactionDB> allDbts = dynamoDbMapper.loadAll(TransactionDB.class);
+                LOGGER.info("AllDBTransactions: " + allDbts);
                 return getResponse(PERIODIC_TRANSACTION, "Transaktion Nummer " + transactionId + " wurde als periodisch markiert.");
             }
         }
