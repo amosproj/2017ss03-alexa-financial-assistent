@@ -181,4 +181,6 @@ PeriodicTransactionListIntent Wie sind meine periodischen Transaktionen
 PeriodicTransactionListIntent Liste mir meine periodischen Transaktionen auf
 PeriodicTransactionListIntent Periodische Transaktionen
 PeriodicTransactionAddIntent Markiere Transaktion {TransactionNumber} als periodisch
+PeriodicTransactionAddIntent Markiere Transaktion Nummer {TransactionNumber} als periodisch
 PeriodicTransactionDeleteIntent Lösche Kennzeichnung periodisch für Transaktion {TransactionNumber}
+PeriodicTransactionDeleteIntent Lösche Markierung periodisch für Transaktion {TransactionNumber}
