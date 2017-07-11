@@ -81,7 +81,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         }};
 
         ArrayList<String> balanceCheckAnswers = new ArrayList<String>() {{
-            add("Dein kontostand beträgt €(.*) kostet €(.*) Das Produkt kannst du dir nicht leisten! Möchtest du nach etwas anderem suchen");
+            add("(.*) Das Produkt kannst du dir nicht leisten! Dein kontostand beträgt €(.*) Möchtest du nach etwas anderem suchen");
             add(AffordabilityService.BYE);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
             add("Produkt (.*) " + AffordabilityService.NOTE_ASK);
