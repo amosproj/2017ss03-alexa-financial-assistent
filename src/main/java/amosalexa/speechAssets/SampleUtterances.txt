@@ -81,8 +81,6 @@ SavingsPlanIntroIntent Berechne mir einen Sparplan
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
-SavingsPlanIntroIntent Kategorie {Category}
-SavingsPlanIntroIntent {Category}
 
 SavingsPlanChangeParameterIntent {SavingsPlanParameter}
 SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}
@@ -148,9 +146,8 @@ BudgetReportEMailIntent Sende mir meinen Budget Report
 BudgetReportEMailIntent Schicke mir den Budget Report
 
 ContactTransferIntent Überweise {Amount} Euro an {Contact}
-ContactTransferIntent Kategorie {Category}
-ContactTransferIntent {Category}
 ContactChoiceIntent Kontakt Nummer {ContactIndex}
+ContactChoiceIntent {ContactIndex}
 
 CategoryLimitSetIntent Ändere Limit für {Category} auf {CategoryLimit} Euro
 CategoryLimitSetIntent Ändere Limit für Kategorie {Category} auf {CategoryLimit} Euro
