@@ -699,6 +699,8 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         testIntent("ShowCategoriesIntent",
                 "Aktuell hast du keine Kategorien.");
+
+        Category.TABLE_NAME = "category";
     }
 
 }
