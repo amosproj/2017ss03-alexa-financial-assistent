@@ -613,4 +613,42 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("BudgetReportEMailIntent", "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.");
     }
 
+    @Test
+    public void categoryTest() throws Exception {
+        newSession();
+
+        Category.TABLE_NAME = "category_test";
+        DynamoDbClient.instance.clearItems(Category.TABLE_NAME, Category::new);
+
+        testIntent("AddCategoryIntent",
+                "CategoryName:Auto",
+                "Moechtest du die Kategorie Auto wirklich erstellen?");
+
+        testIntent("AMAZON.YesIntent",
+                "Verstanden. Die Kategorie Auto wurde erstellt.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du folgende Kategorien: Auto, ");
+
+        testIntent("AddCategoryIntent",
+                "CategoryName:Lebensmittel",
+                "Moechtest du die Kategorie Lebensmittel wirklich erstellen?");
+
+        testIntent("AMAZON.NoIntent",
+                "OK, verstanden. Dann bis bald.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du folgende Kategorien: Auto, ");
+
+        testIntent("DeleteCategoryIntent",
+                "CategoryName:Auto",
+                "Möchtest du die Kategorie mit dem Namen 'Auto' und dem Limit von 0.0 Euro wirklich löschen?");
+
+        testIntent("AMAZON.YesIntent",
+                "OK, wie du willst. Ich habe die Kategorie mit dem Namen 'Auto' gelöscht. Hoffentlich bereust du es nicht.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du keine Kategorien.");
+    }
+
 }

@@ -81,11 +81,14 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
                 if (context.equals(DELETE_CATEGORY_INTENT)) {
                     return performDeletion(intent, session);
                 }
+                if (context.equals(ADD_CATEGORY_INTENT)) {
+                    return addNewCategory(intent, session, true);
+                }
                 return null;
             case NO_INTENT:
                 return getResponse(SERVICE_CARD_TITLE, "OK, verstanden. Dann bis bald.");
             case ADD_CATEGORY_INTENT:
-                return addNewCategory(intent, session);
+                return addNewCategory(intent, session, false);
             case SHOW_CATEGORIES_INTENT:
                 return showAllCategories(intent, session);
         }
@@ -105,16 +108,15 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         List<Category> items = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         String namesOfCategories = "";
 
+        if (items.size() == 0) {
+            return getResponse(SERVICE_CARD_TITLE, "Aktuell hast du keine Kategorien.");
+        }
+
         for (Category item : items) {
             namesOfCategories += item.getName() + ", ";
         }
 
-        PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
-        outputSpeech.setText("Aktuell hast du folgende Kategorien: " + namesOfCategories);
-
-        SpeechletResponse response = SpeechletResponse.newTellResponse(outputSpeech);
-
-        return response;
+        return getResponse(SERVICE_CARD_TITLE, "Aktuell hast du folgende Kategorien: " + namesOfCategories);
     }
 
     /**
@@ -122,22 +124,24 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
      * @param session
      * @return
      */
-    private SpeechletResponse addNewCategory(Intent intent, Session session) {
+    private SpeechletResponse addNewCategory(Intent intent, Session session, boolean confirmed) {
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
-        Slot categoryNameSlot = intent.getSlot("CategoryName");
 
-        //List<Category> items = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        if (!confirmed) {
+            Slot categoryNameSlot = intent.getSlot("CategoryName");
+            session.setAttribute(DIALOG_CONTEXT, ADD_CATEGORY_INTENT);
+            SessionStorage.getInstance().putObject(session.getSessionId(), SERVICE_CARD_TITLE + ".categoryName", categoryNameSlot.getValue());
 
-        Category item = new Category(categoryNameSlot.getValue());
-        DynamoDbClient.instance.putItem(Category.TABLE_NAME, item);
+            return getAskResponse(SERVICE_CARD_TITLE, "Moechtest du die Kategorie " + categoryNameSlot.getValue() + " wirklich erstellen?");
+        } else {
+            String slotName = (String) SessionStorage.getInstance().getObject(session.getSessionId(), SERVICE_CARD_TITLE + ".categoryName");
 
-        PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
-        outputSpeech.setText("Verstanden. die Kategorie " + categoryNameSlot.getValue() + " wurde erstellt.");
+            Category item = new Category(slotName);
+            DynamoDbClient.instance.putItem(Category.TABLE_NAME, item);
 
-        SpeechletResponse response = SpeechletResponse.newTellResponse(outputSpeech);
-
-        return response;
+            return getResponse(SERVICE_CARD_TITLE, "Verstanden. Die Kategorie " + slotName + " wurde erstellt.");
+        }
     }
 
     /**
