@@ -70,6 +70,7 @@ SavingsPlanNewIntent Neu
 SavingsPlanNewIntent Neu beginnen
 StandingOrdersDeleteIntent Lösche Dauerauftrag Nummer {Number}
 StandingOrderSmartIntent Richte einen neuen Dauerauftrag für {Payee} {PayeeSecondName} in Höhe von {orderAmount} Euro ein
+StandingOrderSmartIntent Richte Dauerauftrag für {Payee} {PayeeSecondName} über von {orderAmount} Euro ein
 StandingOrderSmartIntent Richte einen neuen Dauerauftrag ein
 StandingOrderSmartIntent Richte einen neuen
 StandingOrderSmartIntent Richte einfach einen neuen Dauerauftrag ein
