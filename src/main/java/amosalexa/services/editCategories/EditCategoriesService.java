@@ -219,6 +219,9 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
             namesOfCategories += item.getName() + ", ";
         }
 
+        namesOfCategories = namesOfCategories.toLowerCase();
+        categoryName = categoryName.toLowerCase();
+
         if (namesOfCategories.contains(categoryName)) {
             return true;
         } else {
