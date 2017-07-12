@@ -5,7 +5,7 @@ import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
-import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PeriodicTransactionService extends AbstractSpeechService implements SpeechService {
 
@@ -68,6 +69,13 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
     // Key for the transaction number (used as slot key as well as session key!)
     private static final String TRANSACTION_NUMBER_KEY = "TransactionNumber";
 
+    private static final String NEXT_TRANSACTION_KEY = "NextTransaction";
+
+    /**
+     * Number of transactions responded within one speech answer step
+     */
+    private static final int TRANSACTION_LIMIT = 3;
+
     private DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
 
     public PeriodicTransactionService(SpeechletSubject speechletSubject) {
@@ -92,10 +100,14 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
         if (PERIODIC_TRANSACTION_LIST_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, intentName);
             markPeriodicTransactions();
-            return getResponse(PERIODIC_TRANSACTION, "Liste");
+            return listPeriodicTransactions(session);
         } else if (PERIODIC_TRANSACTION_ADD_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, intentName);
             return savePeriodicTransaction(intent, session, false);
+        } else if (context != null && context.equals(PERIODIC_TRANSACTION_LIST_INTENT) && YES_INTENT.equals(intentName)) {
+            return listNextTransactions(session);
+        } else if (context != null && context.equals(PERIODIC_TRANSACTION_LIST_INTENT) && NO_INTENT.equals(intentName)) {
+            return getResponse(PERIODIC_TRANSACTION, "Okay, tschuess!");
         } else if (context != null && context.equals(PERIODIC_TRANSACTION_ADD_INTENT) && YES_INTENT.equals(intentName)) {
             return savePeriodicTransaction(intent, session, true);
         } else if (context != null && context.equals(PERIODIC_TRANSACTION_ADD_INTENT) && NO_INTENT.equals(intentName)) {
@@ -112,6 +124,52 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
         }
     }
 
+    private SpeechletResponse listPeriodicTransactions(Session session) {
+        List<TransactionDB> transactionsDb = dynamoDbMapper.loadAll(TransactionDB.class);
+        transactionsDb = transactionsDb.stream().filter(t -> t.isPeriodic()).collect(Collectors.toList());
+        LOGGER.info("TransactionsDB: " + transactionsDb);
+
+        if (transactionsDb == null || transactionsDb.isEmpty()) {
+            LOGGER.warn("No periodic transactions have been found.");
+            return getResponse(PERIODIC_TRANSACTION, "Du hast momentan keine Transaktionen als periodisch markiert.");
+        }
+
+        StringBuilder stringBuilder = new StringBuilder(Transaction.getTransactionSizeText(transactionsDb.size()));
+        int i;
+        for (i = 0; i < TRANSACTION_LIMIT; i++) {
+            if (i < transactionsDb.size()) {
+                Transaction transaction = TransactionAPI.getTransactionForAccount(ACCOUNT_NUMBER, transactionsDb.get(i).getTransactionId());
+                stringBuilder.append(Transaction.getTransactionText(transaction));
+            } else {
+                break;
+            }
+        }
+
+        if (i - 1 < transactionsDb.size()) {
+            stringBuilder.append(Transaction.getAskMoreTransactionText());
+            session.setAttribute(NEXT_TRANSACTION_KEY, i);
+        } else {
+            return getResponse(PERIODIC_TRANSACTION, "Das waren alle periodischen Transaktionen.");
+        }
+
+        return getSSMLAskResponse(PERIODIC_TRANSACTION, stringBuilder.toString());
+    }
+
+    private SpeechletResponse listNextTransactions(Session session) {
+        String nextTransaction = (String) session.getAttribute(NEXT_TRANSACTION_KEY);
+        if (nextTransaction != null) {
+            int nextTransactionId = Integer.valueOf(nextTransaction);
+            List<Transaction> transactions = TransactionAPI.getTransactionsForAccount(ACCOUNT_NUMBER);
+            String transactionText = Transaction.getTransactionText(transactions.get(Integer.valueOf(nextTransaction)));
+            if (nextTransactionId - 1 < transactions.size()) {
+                transactionText = transactionText + Transaction.getAskMoreTransactionText();
+                session.setAttribute(NEXT_TRANSACTION_KEY, nextTransaction + 1);
+            }
+            return getSSMLAskResponse(PERIODIC_TRANSACTION, transactionText);
+        }
+        return null;
+    }
+
     private SpeechletResponse savePeriodicTransaction(Intent intent, Session session, boolean confirmed) {
         if (!confirmed) {
             if (intent.getSlot(TRANSACTION_NUMBER_KEY) == null || StringUtils.isBlank(intent.getSlot(TRANSACTION_NUMBER_KEY).getValue())) {
@@ -122,14 +180,7 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
 
                 //Search for transaction
                 //TODO wait for API extension to get transaction detail request call
-                List<Transaction> allTransactions = Transaction.getTransactions("8888888888");
-                Number transactionNumber = Integer.valueOf(transactionId);
-                Transaction transaction = null;
-                for (Transaction t : allTransactions) {
-                    if (transactionNumber.equals(t.getTransactionId())) {
-                        transaction = t;
-                    }
-                }
+                Transaction transaction = TransactionAPI.getTransactionForAccount("8888888888", transactionId);
                 LOGGER.info("Found transaction: " + transaction);
                 if (transaction == null) {
                     session.getAttributes().clear();
@@ -159,36 +210,6 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
             }
         }
         return null;
-    }
-
-    private int markPeriodicTransactions() {
-        List<Transaction> transactions = new ArrayList(AccountAPI.getTransactionsForAccount(ACCOUNT_NUMBER));
-        LOGGER.info("Size: " + transactions.size());
-
-        Map<Number, Set<Transaction>> candidates = new HashMap<>();
-
-        for (Transaction t : transactions) {
-            LOGGER.info("Transaction: " + t);
-            if (!candidates.containsKey(t.getAmount())) {
-                LOGGER.info("Not contains");
-                Set<Transaction> tList = new HashSet<>();
-                tList.add(t);
-                candidates.put(t.getAmount(), tList);
-            } else {
-                candidates.get(t.getAmount()).add(t);
-            }
-        }
-
-        Iterator<Number> iter = candidates.keySet().iterator();
-        while (iter.hasNext()) {
-            Number key = iter.next();
-            if (candidates.get(key).size() <= 1) {
-                iter.remove();
-            }
-        }
-
-        LOGGER.info("Candidates: " + candidates);
-        return candidates.size();
     }
 
     private SpeechletResponse deletePeriodicTransaction(Intent intent, Session session, boolean confirmed) {
@@ -221,5 +242,35 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
             }
         }
         return null;
+    }
+
+    private int markPeriodicTransactions() {
+        List<Transaction> transactions = new ArrayList(TransactionAPI.getTransactionsForAccount(ACCOUNT_NUMBER));
+        LOGGER.info("Size: " + transactions.size());
+
+        Map<Number, Set<Transaction>> candidates = new HashMap<>();
+
+        for (Transaction t : transactions) {
+            LOGGER.info("Transaction: " + t);
+            if (!candidates.containsKey(t.getAmount())) {
+                LOGGER.info("Not contains");
+                Set<Transaction> tList = new HashSet<>();
+                tList.add(t);
+                candidates.put(t.getAmount(), tList);
+            } else {
+                candidates.get(t.getAmount()).add(t);
+            }
+        }
+
+        Iterator<Number> iter = candidates.keySet().iterator();
+        while (iter.hasNext()) {
+            Number key = iter.next();
+            if (candidates.get(key).size() <= 1) {
+                iter.remove();
+            }
+        }
+
+        LOGGER.info("Candidates: " + candidates);
+        return candidates.size();
     }
 }
