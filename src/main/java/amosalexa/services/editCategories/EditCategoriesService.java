@@ -12,7 +12,6 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
 import model.db.Category;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -130,6 +129,11 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
 
         if (!confirmed) {
             Slot categoryNameSlot = intent.getSlot("CategoryName");
+
+            if (contains(categoryNameSlot.getValue()) == true) {
+                return getResponse(SERVICE_CARD_TITLE, "Diese Kategorie existiert bereits.");
+            }
+
             session.setAttribute(DIALOG_CONTEXT, ADD_CATEGORY_INTENT);
             SessionStorage.getInstance().putObject(session.getSessionId(), SERVICE_CARD_TITLE + ".categoryName", categoryNameSlot.getValue());
 
@@ -204,6 +208,24 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, closestCategory);
 
         return getResponse(SERVICE_CARD_TITLE, "OK, wie du willst. Ich habe die Kategorie mit dem Namen '" + closestCategory.getName() + "' gelöscht. Hoffentlich bereust du es nicht.");
+    }
+
+    private boolean contains(String categoryName) {
+
+        List<Category> items = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        String namesOfCategories = "";
+
+        for (Category item : items) {
+            namesOfCategories += item.getName() + ", ";
+        }
+
+        if (namesOfCategories.contains(categoryName)) {
+            return true;
+        } else {
+            return false;
+        }
+
+
     }
 
 }
