@@ -1,13 +1,7 @@
 package model.banking;
 
 
-import api.banking.AccountAPI;
 import org.springframework.hateoas.ResourceSupport;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class Transaction extends ResourceSupport {
 
@@ -60,18 +54,6 @@ public class Transaction extends ResourceSupport {
             transactionText = Transaction.getTransactionFromAccountText(transaction);
         }
         return transactionText;
-    }
-
-    /**
-     * request api for list of transaction @{@link Transaction}
-     *
-     * @return list of tranactions
-     */
-    public static List<Transaction> getTransactions(String accountNumber) {
-        Collection<Transaction> transactions = AccountAPI.getTransactionsForAccount(accountNumber);
-        List<Transaction> txs = new ArrayList<>(transactions);
-        Collections.reverse(txs);
-        return txs;
     }
 
     public Number getTransactionId() {

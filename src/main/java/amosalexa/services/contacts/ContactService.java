@@ -4,6 +4,7 @@ import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -117,7 +118,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         LOGGER.info("TransactionNumber: " + transactionNumberSlot.getValue());
 
         String speechText = "";
-        List<Transaction> allTransactions = Transaction.getTransactions("0000000001");
+        List<Transaction> allTransactions = TransactionAPI.getTransactionsForAccount("0000000001");
         Number transactionNumber = Integer.valueOf(transactionNumberSlot.getValue());
 
         Transaction transaction = null;
