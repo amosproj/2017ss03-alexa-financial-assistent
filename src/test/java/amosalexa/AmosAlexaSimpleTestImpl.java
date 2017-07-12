@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -196,12 +197,45 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     }
 
     @Test
-    public void standingOrderSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+    public void standingOrderUpdateSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
-        testIntent(
-                "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:10",
-                "Der Dauerauftrag für max mustermann über 10.0 Euro existiert schon. Möchtest du diesen aktualisieren");
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount("9999999999");
+
+        List<StandingOrder> standingOrders = new ArrayList<>(standingOrdersCollection);
+        for (StandingOrder standingOrder : standingOrders) {
+            if (standingOrder.getPayee().toLowerCase().equals("max mustermann")) {
+               String orderAmount = standingOrder.getAmount().toString();
+                testIntent(
+                        "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:10",
+                        "Der Dauerauftrag für max mustermann über " + orderAmount + " Euro existiert schon. Möchtest du diesen aktualisieren");
+//                testIntent(
+//                        "AMAZON.YesIntent",
+//                        "Der Dauerauftrag Nummer " + standingOrder.getStandingOrderId() + " für Max Mustermann über 10 euro wurde erfolgreich aktualisiert");
+                break;
+            }
+        }
+    }
+
+    @Test
+    public void standingOrderCreateSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount("9999999999");
+
+        List<StandingOrder> standingOrders = new ArrayList<>(standingOrdersCollection);
+        for (StandingOrder standingOrder : standingOrders) {
+            if (standingOrder.getPayee().toLowerCase().equals("max mustermann")) {
+                String orderAmount = standingOrder.getAmount().toString();
+                testIntent(
+                        "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:10",
+                        "Der Dauerauftrag für max mustermann über " + orderAmount + " Euro existiert schon. Möchtest du diesen aktualisieren");
+                testIntent(
+                        "StandingOrderSmartIntent",
+                        "Der neue Dauerauftrag für max mustermann über 10 Euro wurde erfolgreich eingerichtet");
+                break;
+            }
+        }
     }
 
     @Test
