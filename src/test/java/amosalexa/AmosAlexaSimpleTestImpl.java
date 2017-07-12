@@ -205,7 +205,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         List<StandingOrder> standingOrders = new ArrayList<>(standingOrdersCollection);
         for (StandingOrder standingOrder : standingOrders) {
             if (standingOrder.getPayee().toLowerCase().equals("max mustermann")) {
-               String orderAmount = standingOrder.getAmount().toString();
+                String orderAmount = standingOrder.getAmount().toString();
                 testIntent(
                         "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:10",
                         "Der Dauerauftrag für max mustermann über " + orderAmount + " Euro existiert schon. Möchtest du diesen aktualisieren");
@@ -402,8 +402,19 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         //Simple status test
         testIntent("CategoryStatusInfoIntent", "Category:lebensmittel",
-                "Du hast 5.0% von 100.0 Euro deines Limits fuer die Kategorie lebensmittel ausgegeben. Du kannst noch 95.0 Euro für diese Kategorie ausgeben.");
+                "Du hast bereits 5% des Limits von 100.0 Euro fuer die Kategorie lebensmittel ausgegeben. Du kannst noch" +
+                        " 95.0 Euro für diese Kategorie ausgeben.");
 
+        category.setLimit(100);
+        category.setSpending(150);
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+
+        //Simple status test
+        testIntent("CategoryStatusInfoIntent", "Category:lebensmittel",
+                "Du hast bereits 150% des Limits von 100.0 Euro fuer die Kategorie lebensmittel ausgegeben. Du kannst noch " +
+                        "0.0 Euro für diese Kategorie ausgeben.");
     }
 
     @Test

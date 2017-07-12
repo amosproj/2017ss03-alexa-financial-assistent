@@ -121,7 +121,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             return askForCorrection(session);
         } else if (STOP_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
             return getResponse("Stop", null);
-        } else if (CATEGORY_STATUS_INFO_INTENT.equals(intentName)){
+        } else if (CATEGORY_STATUS_INFO_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, intentName);
             return getCategoryStatusInfo(intent);
         } else {
@@ -291,18 +291,14 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         LOGGER.info("Category spending: " + category.getSpending());
 
         if (category != null) {
-            String responce = "";
-            if (category.getSpending() > category.getLimit()) {
-                responce = "Du hast " + (category.getSpending()/category.getLimit()*100) + "% von " + category.getLimit() + " Euro deines Limits fuer die Kategorie " + categorySlot.getValue() + " ausgegeben. " +
-                        "Du darfst fuer diese Kategorie kein Geld mehr ausgeben.";
-            } else {
-                responce = "Du hast " + (category.getSpending()/category.getLimit()*100) + "% von " + category.getLimit() + " Euro deines Limits fuer die Kategorie " + categorySlot.getValue() + " ausgegeben. " +
-                        "Du kannst noch " + (category.getLimit()-category.getSpending()) + " Euro für diese Kategorie ausgeben.";
-            }
-            return getResponse(BUDGET_TRACKER, responce);
-        } else {
+            long percentage = Math.round(category.getSpending() / category.getLimit() * 100);
+            double remaining = category.getLimit() - category.getSpending() > 0 ? category.getLimit() - category.getSpending() : 0;
+            String response = "Du hast bereits " + percentage + "% des Limits von " + category.getLimit() + " Euro fuer" +
+                    " die Kategorie " + category.getName() + " ausgegeben. " +
+                    "Du kannst noch " + remaining + " Euro für diese Kategorie ausgeben.";
+            return getResponse(BUDGET_TRACKER, response);
+        } else
             return getAskResponse(BUDGET_TRACKER, "Es gibt keine Kategorie mit diesem Namen. Waehle eine andere Kategorie oder" +
                     " erhalte eine Info zu den verfuegbaren Kategorien.");
-        }
     }
 }
