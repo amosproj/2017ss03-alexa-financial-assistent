@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class Category implements Comparable<Category>, DynamoDbStorable {
 
-    public static final String TABLE_NAME = "category";
+    public static String TABLE_NAME = "category";
 
     private int id;
 

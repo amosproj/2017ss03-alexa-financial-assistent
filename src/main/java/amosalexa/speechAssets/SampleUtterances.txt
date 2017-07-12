@@ -20,6 +20,18 @@ BankOpeningHours {BankNameSlots} Öffnungszeiten
 BankOpeningHours Öffnungszeiten der {BankNameSlots}
 BankOpeningHours wann hat {BankNameSlots} offen
 BankOpeningHours hat die {BankNameSlots} {OpeningHoursDate} geöffnet
+ReplacementCardReasonIntent Die Karte wurde {ReplacementReason}
+ReplacementCardReasonIntent Die Karte ist {ReplacementReason}
+ReplacementCardReasonIntent Die alte Karte wurde {ReplacementReason}
+ReplacementCardReasonIntent Die alte Karte ist {ReplacementReason}
+ReplacementCardReasonIntent Meine Karte wurde {ReplacementReason}
+ReplacementCardReasonIntent Meine Karte ist {ReplacementReason}
+ReplacementCardReasonIntent Meine alte Karte wurde {ReplacementReason}
+ReplacementCardReasonIntent Meine alte Karte ist {ReplacementReason}
+ReplacementCardReasonIntent {ReplacementReason}
+ReplacementCardIntent Bestelle eine Ersatzkarte
+ReplacementCardIntent Ich brauche eine Ersatzkarte
+BlockCardIntent Sperre Karte {BankCardNumber}
 BankAddress Bankadresse
 BankAddress Wo finde ich meine Bank
 BankAddress Wo ist meine Bank
@@ -50,6 +62,7 @@ SavingsPlanIntroIntent Berechne mir einen Sparplan
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem Grundsparbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Berechne mir einen Sparplan mit einem monatlichen Einzahlungsbetrag von {Betrag} Euro
 SavingsPlanIntroIntent Ich moechte monatlich Geld sparen
+SavingsPlanIntroIntent Kategorie {Category}
 SavingsPlanChangeParameterIntent {SavingsPlanParameter}
 SavingsPlanChangeParameterIntent Ändere den {SavingsPlanParameter}
 SavingsPlanChangeParameterIntent Ändere die {SavingsPlanParameter}
@@ -132,6 +145,7 @@ BudgetReportEMailIntent Schicke mir den Ausgabenreport
 BudgetReportEMailIntent Sende mir meinen Budget Report
 BudgetReportEMailIntent Schicke mir den Budget Report
 ContactTransferIntent Überweise {Amount} Euro an {Contact}
+ContactTransferIntent Kategorie {Category}
 ContactChoiceIntent Kontakt Nummer {ContactIndex}
 ShowCategoriesIntent zeig mir meine Kategorien
 DeleteCategoryIntent loesche die Kategorie {CategoryName}

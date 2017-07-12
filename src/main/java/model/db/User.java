@@ -13,6 +13,8 @@ public class User implements Comparable<User>, DynamoDbStorable {
 
 	protected int id;
 	protected Number balanceLimit;
+	protected String accessToken;
+	protected String accessTokenExpiryTime;
 
 	public static Factory factory = (Factory<User>) User::new;
 	public static final String TABLE_NAME = "user";
@@ -41,6 +43,22 @@ public class User implements Comparable<User>, DynamoDbStorable {
 
 	public void setBalanceLimit(Number balanceLimit) {
 		this.balanceLimit = balanceLimit;
+	}
+
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	public String getAccessTokenExpiryTime() {
+		return accessTokenExpiryTime;
+	}
+
+	public void setAccessTokenExpiryTime(String accessTokenExpiryTime) {
+		this.accessTokenExpiryTime = accessTokenExpiryTime;
 	}
 
 	@Override
@@ -72,6 +90,8 @@ public class User implements Comparable<User>, DynamoDbStorable {
 
 		map.put("id", new AttributeValue().withN(Integer.toString(this.id)));
 		map.put("balanceLimit", new AttributeValue().withN(balanceLimit.toString()));
+		map.put("accessToken", new AttributeValue().withS(accessToken));
+		map.put("accessTokenExpiryTime", new AttributeValue().withS(accessTokenExpiryTime));
 
 		return map;
 	}
@@ -91,6 +111,12 @@ public class User implements Comparable<User>, DynamoDbStorable {
 				break;
 			case "balanceLimit":
 				this.balanceLimit = Integer.parseInt(attributeValue.getN());
+				break;
+			case "accessToken":
+				this.accessToken = attributeValue.getS();
+				break;
+			case "accessTokenExpiryTime":
+				this.accessTokenExpiryTime = attributeValue.getS();
 				break;
 			default:
 				throw new RuntimeException("Unknown attribute");
