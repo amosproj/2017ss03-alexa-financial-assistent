@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -91,27 +90,54 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
             add(AffordabilityService.SEARCH_ASK);
         }};
 
+        // can not understand search keyword
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:1awd448", AffordabilityService.NO_RESULTS + " " + AffordabilityService.SEARCH_ASK);
 
+        // just one result
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:B01HH5MOPY", AffordabilityService.TOO_FEW_RESULTS+ " " + AffordabilityService.SEARCH_ASK);
+
+
+        // can not afford test
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(emailAnswers, "|"));
 
+        // can afford test
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:smartphone", StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(emailAnswers, "|"));
+
+
+
+        // does not want to note the product
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
         testIntentMatches("AMAZON.NoIntent", StringUtils.join(byeAnswers, "|"));
 
+        // product selection is null
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:", StringUtils.join(productSelectionAskAnswers, "|"));
+
+        // does not want to buy anything
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.NoIntent", StringUtils.join(byeAnswers, "|"));
 
+        // product selection unclear
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
+
     }
 
 
