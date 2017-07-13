@@ -123,10 +123,6 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
         getSlots();
 
-        if(intent.getName().equals(STOP_INTENT)){
-            return getResponse(CARD, "");
-        }
-
         // error occured when trying to request data from amazon product api
         Object errorRequest = DialogUtil.getDialogState("error!", session);
         if(errorRequest != null){
@@ -252,8 +248,8 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 return getAskResponse(CARD, TOO_FEW_RESULTS+ " " + SEARCH_ASK);
             }
 
-            StringBuilder text = new StringBuilder();
 
+            StringBuilder text = new StringBuilder();
             for (int i = 0; i < 3; i++) {
 
                 // save in session
@@ -275,7 +271,6 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             return getSSMLAskResponse(CARD, text.toString(), SEARCH_ASK);
         }
 
-        log.info("Dialog State: no keyword");
         return getAskResponse(CARD, "Ein Fehler ist aufgetreten. " + ERROR);
     }
 

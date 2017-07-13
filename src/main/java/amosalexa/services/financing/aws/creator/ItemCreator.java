@@ -17,7 +17,8 @@ public class ItemCreator {
         ArrayList<Item> items = new ArrayList<>();
 
         for(String xmlItem : xmlItems){
-            items.add(createItem(xmlItem));
+            if(!xmlItem.isEmpty())
+                items.add(createItem(xmlItem));
         }
 
         return items;
@@ -27,14 +28,14 @@ public class ItemCreator {
 
         Item item = new Item();
 
+        // ASIN
+        String ASIN = XMLParser.readValue(itemXML, new String[]{"ASIN"});
+        item.setASIN(ASIN);
+
         //Timestamp
         java.util.Date date = new java.util.Date();
         Timestamp timestamp = new Timestamp(date.getTime());
         item.setAdded(timestamp);
-
-        // ASIN
-        String ASIN = XMLParser.readValue(itemXML, new String[]{"ASIN"});
-        item.setASIN(ASIN);
 
         // Locale
         item.setLocale("de");
@@ -86,6 +87,7 @@ public class ItemCreator {
 
         // Title
         String title = XMLParser.readValue(itemXML, new String[]{"ItemAttributes", "Title"});
+        System.out.println("set title: " + title);
         item.setTitle(title);
 
         // Lowest New Price
