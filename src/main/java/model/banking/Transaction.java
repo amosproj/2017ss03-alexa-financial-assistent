@@ -1,9 +1,14 @@
 package model.banking;
 
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.hateoas.ResourceSupport;
 
 public class Transaction extends ResourceSupport {
+
+    private static final DateTimeFormatter apiTransactionFmt = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private Number transactionId;
     private Number amount;
@@ -98,6 +103,10 @@ public class Transaction extends ResourceSupport {
 
     public String getValueDate() {
         return valueDate;
+    }
+
+    public DateTime getValueDateAsDateTime() {
+        return apiTransactionFmt.parseDateTime(valueDate);
     }
 
     public void setValueDate(String valueDate) {

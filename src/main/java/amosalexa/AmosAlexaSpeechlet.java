@@ -47,6 +47,8 @@ public class AmosAlexaSpeechlet extends AbstractSpeechService implements Speechl
     // TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
     public static final int USER_ID = 4711;
 
+    public static final String ACCOUNT_ID = "0000000001";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
     private Map<String, List<SpeechletObserver>> speechServiceObservers = new HashMap<>();

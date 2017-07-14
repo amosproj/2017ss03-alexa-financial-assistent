@@ -4,6 +4,7 @@ import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -13,6 +14,7 @@ import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazonaws.services.dynamodbv2.xspec.B;
 import model.db.Category;
+import model.db.Spending;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +78,8 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
     private static final String CATEGORY = "Category";
     private static final String AMOUNT = "Amount";
     private static final String CATEGORY_LIMIT = "CategoryLimit";
+
+    private DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
 
     @Override
     public void subscribe(SpeechletSubject speechletSubject) {
@@ -159,8 +163,8 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             }
         }
         if (category != null) {
-            LOGGER.info("Category spending before: " + category.getSpending());
-            LOGGER.info("Add spending for category " + spendingAmount);
+            //LOGGER.info("Category spending before: " + category.getSpending());
+            //LOGGER.info("Add spending for category " + spendingAmount);
             double newSpending = category.getSpending() + Double.valueOf(spendingAmount);
             if (!isConfirmation && newSpending > category.getLimit()) {
                 //Fallback if the user is about to exceed the limit
@@ -168,9 +172,12 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
                         Math.round(category.getLimit()) + " fuer die Kategorie " + categoryName + " ueberschreiten. Soll ich den" +
                         " Betrag trotzdem notieren?");
             }
-            category.setSpending(newSpending);
-            DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
-            LOGGER.info("Category spending afterwards: " + category.getSpending());
+
+            // Create new spending in DB
+            BudgetManager.instance.createSpending(category.getId(), Double.valueOf(spendingAmount));
+
+            //DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+            //LOGGER.info("Category spending afterwards: " + category.getSpending());
         } else {
             //TODO ask for category creation?
         }
@@ -218,8 +225,8 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         Map<String, Slot> slots = intent.getSlots();
         Slot categorySlot = slots.get(CATEGORY);
         Slot categoryLimitSlot = slots.get(CATEGORY_LIMIT);
-        LOGGER.info("Category: " + categorySlot.getValue());
-        LOGGER.info("CategoryLimit: " + categoryLimitSlot.getValue());
+        //LOGGER.info("Category: " + categorySlot.getValue());
+        //LOGGER.info("CategoryLimit: " + categoryLimitSlot.getValue());
 
         if (categorySlot == null || categoryLimitSlot == null ||
                 StringUtils.isBlank(categorySlot.getValue()) ||
@@ -258,14 +265,14 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             }
         }
         if (category != null) {
-            LOGGER.info("Category limit before: " + category.getLimit());
-            LOGGER.info("Set limit for category " + categoryName);
+            //LOGGER.info("Category limit before: " + category.getLimit());
+            //LOGGER.info("Set limit for category " + categoryName);
             category.setLimit(Double.valueOf(categoryLimit));
             DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
-            LOGGER.info("Category limit afterwards: " + category.getLimit());
+            //LOGGER.info("Category limit afterwards: " + category.getLimit());
         } else {
-            LOGGER.info("Category does not exist yet. Create category...");
-            LOGGER.info("Set limit for category " + categoryName + " to value: " + categoryLimit);
+            //LOGGER.info("Category does not exist yet. Create category...");
+            //LOGGER.info("Set limit for category " + categoryName + " to value: " + categoryLimit);
             category = new Category(categoryName, Double.valueOf(categoryLimit), 0);
             DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
         }
@@ -287,12 +294,13 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             }
         }
 
-        LOGGER.info("Category limit: " + category.getLimit());
-        LOGGER.info("Category spending: " + category.getSpending());
+        //LOGGER.info("Category limit: " + category.getLimit());
+        //LOGGER.info("Category spending: " + category.getSpending());
 
         if (category != null) {
-            long percentage = Math.round(category.getSpending() / category.getLimit() * 100);
-            double remaining = category.getLimit() - category.getSpending() > 0 ? category.getLimit() - category.getSpending() : 0;
+            double spending = category.getSpending();
+            long percentage = Math.round(spending / category.getLimit() * 100);
+            double remaining = category.getLimit() - spending > 0 ? category.getLimit() - spending : 0;
             String response = "Du hast bereits " + percentage + "% des Limits von " + category.getLimit() + " Euro fuer" +
                     " die Kategorie " + category.getName() + " ausgegeben. " +
                     "Du kannst noch " + remaining + " Euro für diese Kategorie ausgeben.";
