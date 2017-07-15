@@ -1,3 +1,17 @@
+TransactionForecast Welche Transaktionen erwarten mich
+TransactionForecast Welche Transaktionen erwarten mich in der zunkunft
+TransactionForecast Was sind meine zukünftigen Transaktionen
+TransactionForecast Zukünftige Transaktionen
+TransactionForecast Welche Transaktionen kommen auf mich zu
+
+AccountBalanceForecast sag mir mein Kontostand vorraus
+AccountBalanceForecast was wird mein Kontostand am {TargetDate} sein
+AccountBalanceForecast wie wird mein Kontostand am {TargetDate} sein
+
+PlainDate Bis zum {TargetDate}
+PlainDate {TargetDate}
+PlainDate am {TargetDate}
+
 SecuritiesAccountInformationIntent Wie sind meine Aktien
 SecuritiesAccountInformationIntent Wie ist der Stand meiner Aktien
 SecuritiesAccountInformationIntent Nenne mir meine Aktien

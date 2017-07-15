@@ -433,6 +433,26 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "intent": "TransactionForecast"
+    },
+    {
+      "intent": "AccountBalanceForecast",
+      "slots": [
+        {
+          "name": "TargetDate",
+          "type": "AMAZON.DATE"
+        }
+    },
+    {
+      "intent": "PlainDate",
+      "slots": [
+        {
+          "name": "TargetDate",
+          "type": "AMAZON.DATE"
+        }
+      ]
     }
   ]
 }
