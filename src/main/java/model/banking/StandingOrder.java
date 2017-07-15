@@ -1,11 +1,15 @@
 package model.banking;
 
+import amosalexa.services.DateUtil;
+import amosalexa.services.NumberUtil;
+import api.banking.AccountAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.ResourceSupport;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 
 /*
@@ -145,5 +149,32 @@ public class StandingOrder extends ResourceSupport {
     public enum StandingOrderStatus {
         ACTIVE,
         INACTIVE
+    }
+
+    public static double getFutureStandingOrderBalance(String accountNumber, String futureDate){
+        Collection<StandingOrder> standingOrderCollection = AccountAPI.getStandingOrdersForAccount(accountNumber);
+        if(standingOrderCollection == null) return 0;
+
+        double futureStandingOrderBalance = 0;
+        for(StandingOrder standingOrder : standingOrderCollection){
+            int executions = DateUtil.getDatesBetween(standingOrder.firstExecution, futureDate);
+
+            switch (standingOrder.getExecutionRate()){
+                case YEARLY:
+                    executions = executions / 12;
+                    break;
+                case HALF_YEARLY:
+                    executions = executions / 6;
+                    break;
+                case QUARTERLY:
+                    executions = executions / 4;
+                    break;
+            }
+
+            if(standingOrder.getStatus().equals(StandingOrderStatus.ACTIVE)){
+                futureStandingOrderBalance = futureStandingOrderBalance - (executions * standingOrder.getAmount().doubleValue());
+            }
+        }
+        return NumberUtil.round(futureStandingOrderBalance, 2);
     }
 }

@@ -1,9 +1,22 @@
 package model.banking;
 
-
+import amosalexa.services.DateUtil;
+import amosalexa.services.NumberUtil;
+import api.aws.DynamoDbMapper;
+import api.banking.TransactionAPI;
+import model.db.TransactionDB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.ResourceSupport;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Transaction extends ResourceSupport {
+
+    private static final Logger log = LoggerFactory.getLogger(Transaction.class);
+
+    private static List<Transaction> transactionCache;
 
     private Number transactionId;
     private Number amount;
@@ -160,4 +173,76 @@ public class Transaction extends ResourceSupport {
                 ", remitter='" + remitter + '\'' +
                 '}';
     }
+
+
+    /**
+     * gets all periodic transaction from DB/API
+     * @param accountNumber account number
+     * @return List of all periodic transactions
+     */
+    public static List<Transaction> getPeriodicTransactions(String accountNumber) {
+        ArrayList<Transaction> periodicTransactions = new ArrayList<>();
+        DynamoDbMapper dynamoDbMapper = DynamoDbMapper.getInstance();
+        List<TransactionDB> transactionsDB = dynamoDbMapper.loadAll(TransactionDB.class);
+        for (TransactionDB transactionDB : transactionsDB) {
+            if (transactionDB.isPeriodic() && transactionDB.getAccountNumber().equals(accountNumber)) {
+                Transaction transaction = getCachedTransactionForAccount(accountNumber, transactionDB.getTransactionId());
+                periodicTransactions.add(transaction);
+            }
+        }
+        return periodicTransactions;
+    }
+
+    /**
+     * saves result of get Transaction in cache and return Transaction by id
+     * @param accountNumber account number
+     * @param transactionId transaction
+     * @return transaction
+     */
+    private static Transaction getCachedTransactionForAccount(String accountNumber, String transactionId){
+       if(transactionCache == null){
+           transactionCache = TransactionAPI.getTransactionsForAccount(accountNumber);
+       }
+        for (Transaction transaction : transactionCache) {
+            if (transaction.getTransactionId().toString().equals(transactionId)) {
+                return transaction;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * returns all periodic transactions til a certain day of month
+     * @param periodicTransactions periodic transactions
+     * @param futureDate future date
+     * @return list of periodic transactions
+     */
+    public static List<Transaction> getTargetDatePeriodicTransactions(List<Transaction> periodicTransactions, String futureDate){
+
+        List<Transaction> futurePeriodicTransactions = new ArrayList<>();
+        for(Transaction periodicTransaction : periodicTransactions){
+            if(DateUtil.getDatesBetween(periodicTransaction.getValueDate(), futureDate) > 0){
+                futurePeriodicTransactions.add(periodicTransaction);
+            }
+        }
+        return futurePeriodicTransactions;
+    }
+
+    /**
+     * returns the added transaction values
+     * @param futurePeriodicTransactions list of periodic transactions
+     * @return balance of transactions
+     */
+    public static double getFutureTransactionBalance(List<Transaction> futurePeriodicTransactions, String futureDate){
+        double transactionBalance = 0;
+        for(Transaction futurePeriodicTransaction : futurePeriodicTransactions){
+            int executionDates = DateUtil.getDatesBetween(futurePeriodicTransaction.getValueDate(), futureDate);
+            transactionBalance = transactionBalance + (executionDates * futurePeriodicTransaction.getAmount().doubleValue());
+        }
+        return NumberUtil.round(transactionBalance, 2);
+    }
+
+
+
+
 }
