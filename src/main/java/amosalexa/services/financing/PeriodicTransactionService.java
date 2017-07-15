@@ -201,6 +201,7 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
                 if (transactionDb == null) {
                     transactionDb = new TransactionDB(transactionId);
                     transactionDb.setPeriodic(true);
+                    transactionDb.setAccountNumber(ACCOUNT_NUMBER);
                 }
 
                 dynamoDbMapper.save(transactionDb);
