@@ -7,6 +7,7 @@ TransactionForecast Welche Transaktionen kommen auf mich zu
 AccountBalanceForecast sag mir mein Kontostand vorraus
 AccountBalanceForecast was wird mein Kontostand am {TargetDate} sein
 AccountBalanceForecast wie wird mein Kontostand am {TargetDate} sein
+AccountBalanceForecast kontostandvorhersage
 
 PlainDate Bis zum {TargetDate}
 PlainDate {TargetDate}

@@ -37,7 +37,7 @@ public class AccountBalanceForecastService extends AbstractSpeechService impleme
     /**
      * speech texts
      */
-    public final static String DATE_ASK = "Sag mir bitte, zu welchem Zeitpunk möchtest du dein Kontostand erfahren";
+    public final static String DATE_ASK = "Sag mir bitte, zu welchem Zeitpunkt möchtest du dein Kontostand erfahren";
     public final static String DATE_ERROR = "Ich konnte den Zeitpunkt nicht verstehen. Sag ein Datum an dem du dein Kontostand erfahren willst";
 
     /**

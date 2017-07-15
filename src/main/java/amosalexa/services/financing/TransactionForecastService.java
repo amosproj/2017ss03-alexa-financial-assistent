@@ -145,11 +145,11 @@ public class TransactionForecastService extends AbstractSpeechService implements
 
         String futureTransactionText = "Ich habe " + counter + " " +
                 DialogUtil.getTransactionNumerus(counter) +
-                " gefunden, die noch bis zum <say-as interpret-as=\"digits\">" +
-                futureDate + "</say-as> ausgeführt werden. " +
-                "Insgesamt werden noch <say-as interpret-as=\"unit\">€" + Math.abs(futureDateTransactionBalance)+
-                "</say-as> " + DialogUtil.getBalanceVerb(futureDateTransactionBalance) + ". " +
-                " Soll ich diese Transaktionen auflisten?";
+                " gefunden, die noch bis zum " +
+                futureDate + " ausgeführt werden. " +
+                "Insgesamt werden noch €" + Math.abs(futureDateTransactionBalance)+
+                " " + DialogUtil.getBalanceVerb(futureDateTransactionBalance) + ". " +
+                "Soll ich diese Transaktionen auflisten?";
 
 
         log.info(futureTransactionText);

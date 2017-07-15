@@ -444,6 +444,7 @@
           "name": "TargetDate",
           "type": "AMAZON.DATE"
         }
+      ]
     },
     {
       "intent": "PlainDate",

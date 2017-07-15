@@ -1,6 +1,7 @@
 package model.banking;
 
 import amosalexa.services.DateUtil;
+import amosalexa.services.DialogUtil;
 import amosalexa.services.NumberUtil;
 import api.aws.DynamoDbMapper;
 import api.banking.TransactionAPI;
@@ -127,7 +128,7 @@ public class Transaction extends ResourceSupport {
 
     public String getPayee() {
         if (payee == null) {
-            return getDestinationAccount();
+            return DialogUtil.getIbanSsmlOutput(getDestinationAccount());
         }
         return payee;
     }
@@ -139,7 +140,7 @@ public class Transaction extends ResourceSupport {
 
     public String getRemitter() {
         if (remitter == null) {
-            return getSourceAccount();
+            return DialogUtil.getIbanSsmlOutput(getSourceAccount());
         }
         return remitter;
     }
@@ -241,8 +242,4 @@ public class Transaction extends ResourceSupport {
         }
         return NumberUtil.round(transactionBalance, 2);
     }
-
-
-
-
 }

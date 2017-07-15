@@ -54,6 +54,9 @@ public class DialogUtil {
 
 
     public static String getIbanSsmlOutput(String iban) {
+        if(iban == null){
+            return null;
+        }
         String ssml = "<emphasis level=\"reduced\"><say-as interpret-as=\"characters\">";
         String firstPart = iban.startsWith(" ") ? iban.substring(0, 3).substring(1) : iban.substring(0, 2);
         ssml = ssml + firstPart + "<break time=\"10ms\"/>";
