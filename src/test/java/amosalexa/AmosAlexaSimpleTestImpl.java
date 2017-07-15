@@ -810,7 +810,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:999999",
                 "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
 
-        testIntentMatches("PeriodicTransactionListIntent", "");
+        testIntentMatches("PeriodicTransactionListIntent", "(.*)");
     }
 
     @Test
