@@ -125,7 +125,15 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
     }
 
     private SpeechletResponse listPeriodicTransactions(Session session) {
-        List<TransactionDB> transactionsDb = dynamoDbMapper.loadAll(TransactionDB.class);
+        List<TransactionDB> allTransactionsDb = dynamoDbMapper.loadAll(TransactionDB.class);
+
+        List<TransactionDB> transactionsDb = new ArrayList<>();
+        for(TransactionDB transactionDb : allTransactionsDb){
+            if(transactionDb.getAccountNumber().equals(ACCOUNT_NUMBER))
+                transactionsDb.add(transactionDb);
+        }
+
+
         transactionsDb = transactionsDb.stream().filter(t -> t.isPeriodic()).collect(Collectors.toList());
         LOGGER.info("TransactionsDB: " + transactionsDb);
 
@@ -137,8 +145,10 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
         StringBuilder stringBuilder = new StringBuilder(Transaction.getTransactionSizeText(transactionsDb.size()));
         int i;
         for (i = 0; i < TRANSACTION_LIMIT; i++) {
+
             if (i < transactionsDb.size()) {
                 Transaction transaction = TransactionAPI.getTransactionForAccount(ACCOUNT_NUMBER, transactionsDb.get(i).getTransactionId());
+                LOGGER.info("TRANSACTION: " + transaction);
                 stringBuilder.append(Transaction.getTransactionText(transaction));
             } else {
                 break;
