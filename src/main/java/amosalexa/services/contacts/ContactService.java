@@ -2,6 +2,7 @@ package amosalexa.services.contacts;
 
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
 import api.banking.TransactionAPI;
@@ -14,8 +15,8 @@ import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SsmlOutputSpeech;
-import model.db.Contact;
 import model.banking.Transaction;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,7 +236,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             response.append("Name: ")
                     .append(contact.getName())
                     .append(", IBAN: ")
-                    .append(contact.getIbanSsmlOutput())
+                    .append(DialogUtil.getIbanSsmlOutput(contact.getIban()))
                     .append(". ");
         }
 

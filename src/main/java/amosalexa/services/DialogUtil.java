@@ -53,5 +53,22 @@ public class DialogUtil {
     }
 
 
+    public static String getIbanSsmlOutput(String iban) {
+        String ssml = "<emphasis level=\"reduced\"><say-as interpret-as=\"characters\">";
+        String firstPart = iban.startsWith(" ") ? iban.substring(0, 3).substring(1) : iban.substring(0, 2);
+        ssml = ssml + firstPart + "<break time=\"10ms\"/>";
+        ssml = ssml + "</say-as>";
+        ssml = ssml + "<say-as interpret-as=\"digits\">";
+        String firstNumberChar = iban.startsWith(" ") ? iban.substring(3, 4) : iban.substring(2, 3);
+        ssml = ssml + firstNumberChar + "<break time=\"10ms\"/>";
+        String remainingNumbers = iban.startsWith(" ") ? iban.substring(4) : iban.substring(3);
+        for (char ch : remainingNumbers.toCharArray()) {
+            ssml = ssml.concat(ch + "<break time=\"10ms\"/>");
+        }
+        ssml = ssml + "</say-as></emphasis>";
+        return ssml;
+    }
+
+
 
 }
