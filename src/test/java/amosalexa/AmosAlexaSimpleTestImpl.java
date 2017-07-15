@@ -819,10 +819,13 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         // list all ? yes
         newSession();
         testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
-        testIntentMatches("TransactionForecast", "TargetDate:2017-12-31",
+        testIntentMatches("TransactionForecast", "TargetDate:2017-09-03",
                 "Ich habe (.*) Transaktionen gefunden, die noch bis zum (.*) ausgeführt werden. Insgesamt werden noch (.*)");
-        testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*) |" +
+        testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*)|" +
                 TransactionForecastService.NO_TRANSACTION_INFO );
+        testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*)|" +
+                TransactionForecastService.NO_TRANSACTION_INFO );
+
 
         // list all ? no
         newSession();

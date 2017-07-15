@@ -9,6 +9,7 @@ import model.banking.Transaction;
 import model.db.TransactionDB;
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,7 @@ public class TransactionTest {
         }
     }
 
-    @Test
+    @Ignore
     public void createPeriodicTransactionTest(){
 
         DynamoDbMapper dynamoDbMapper = DynamoDbMapper.getInstance();
@@ -90,9 +91,9 @@ public class TransactionTest {
         String destination = AccountAPI.getAccount(AccountData.ACCOUNT_DEFAULT_2).getIban();
 
         // create sample transactions
-        String date = new DateTime(2017, 7, 18, 12, 0).toLocalDate().toString();
-        Transaction transaction = TransactionAPI.createTransaction(1, source, destination, date,
-                "Montaliche Mitgliedschaftsgebühr", "Auto Kredit", "Peter Müller");
+        String date = new DateTime(2017, 8, 14, 12, 0).toLocalDate().toString();
+        Transaction transaction = TransactionAPI.createTransaction(10, source, destination, date,
+                "Netflix", "Netflix", "Peter Müller");
 
         TransactionDB tDB1 = new TransactionDB(transaction.getTransactionId().toString(), "", AccountData.ACCOUNT_DEFAULT);
         tDB1.setPeriodic(true);

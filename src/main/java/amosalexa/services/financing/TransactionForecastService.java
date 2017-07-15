@@ -99,7 +99,8 @@ public class TransactionForecastService extends AbstractSpeechService implements
             return getFutureTransactionsResponse(futureDate);
         }
 
-        if (DialogUtil.getDialogState("transaction?", session) != null) {
+        if (DialogUtil.getDialogState("transaction?", session) != null ||
+                DialogUtil.getDialogState("more?", session) != null ) {
             if(intentName.equals(YES_INTENT)){
                 return getFutureTransactionListResponse();
             }
@@ -107,7 +108,6 @@ public class TransactionForecastService extends AbstractSpeechService implements
                 return getGoodByeResponse();
             }
         }
-
         return askForPeriodicTimeResponse();
     }
 
@@ -117,9 +117,22 @@ public class TransactionForecastService extends AbstractSpeechService implements
 
     private SpeechletResponse getFutureTransactionListResponse() {
         StringBuilder futureTransactionText = new StringBuilder();
-        for(Transaction futurePeriodicTransaction : futureDatePeriodicTransactions){
-            futureTransactionText.append(Transaction.getTransactionText(futurePeriodicTransaction)).append(" ");
+        int size = futureDatePeriodicTransactions.size();
+        Object indexAttribute = session.getAttribute("transactionIndex");
+        int i = indexAttribute == null ? 0 : (int) indexAttribute;
+        int limit = i + 3; // respond every time 3 transactions
+
+        while(i < limit && i < size){
+            futureTransactionText.append(Transaction.getTransactionText(futureDatePeriodicTransactions.get(i))).append(" ");
+            i++;
         }
+        session.setAttribute("transactionIndex", i);
+
+        if(i < size){ //
+            DialogUtil.setDialogState("more?", session);
+            return getAskResponse(CARD, futureTransactionText.toString() + ". Möchtest du weitere hören");
+        }
+
         return getResponse(CARD, futureTransactionText.toString());
     }
 
@@ -130,7 +143,7 @@ public class TransactionForecastService extends AbstractSpeechService implements
 
     private SpeechletResponse getFutureTransactionsResponse(String futureDate) {
 
-        log.info("Future Date: " + futureDate);
+        log.info("Date: " + futureDate);
         int futureDayOfMonth = DateUtil.getDayOfMonth(futureDate);
 
         if(futureDayOfMonth == 0 || futureDate == null) return getAskResponse(CARD, DATE_ERROR);
