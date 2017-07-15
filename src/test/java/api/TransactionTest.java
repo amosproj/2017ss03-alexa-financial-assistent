@@ -1,9 +1,12 @@
 package api;
 
 
+import amosalexa.services.AccountData;
+import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import model.banking.Transaction;
+import model.db.TransactionDB;
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,6 +25,7 @@ public class TransactionTest {
     private static final Logger log = LoggerFactory.getLogger(TransactionTest.class);
 
     private static final String ACCOUNT_NUMBER1 = "0000000000";
+
     private static final String ACCOUNT_IBAN1 = "DE77100000000000000000";
     private static final String ACCOUNT_IBAN2 = "DE50100000000000000001";
     private static final String VALUE_DATE = new DateTime(2017, 5, 1, 12, 0).toLocalDate().toString();
@@ -52,7 +56,7 @@ public class TransactionTest {
 
         log.info("Found transactions: " + transactions.size());
         for (Transaction transaction : transactions) {
-            if (transaction.getDescription().equals("TestDescription")) {
+            if (transaction.getTransactionId().equals(newTransaction.getTransactionId())) {
                 foundTransaction = true;
                 break;
             }
@@ -75,6 +79,25 @@ public class TransactionTest {
             System.out.println("Destination: " + transaction.getDestinationAccount());
             System.out.println("Date: " + transaction.getValueDate());
         }
+    }
+
+    @Test
+    public void createPeriodicTransactionTest(){
+
+        DynamoDbMapper dynamoDbMapper = DynamoDbMapper.getInstance();
+
+        String source = AccountAPI.getAccount(AccountData.ACCOUNT_DEFAULT).getIban();
+        String destination = AccountAPI.getAccount(AccountData.ACCOUNT_DEFAULT_2).getIban();
+
+        // create sample transactions
+        String date = new DateTime(2017, 7, 18, 12, 0).toLocalDate().toString();
+        Transaction transaction = TransactionAPI.createTransaction(1, source, destination, date,
+                "Montaliche Mitgliedschaftsgebühr", "Auto Kredit", "Peter Müller");
+
+        TransactionDB tDB1 = new TransactionDB(transaction.getTransactionId().toString(), "", AccountData.ACCOUNT_DEFAULT);
+        tDB1.setPeriodic(true);
+        dynamoDbMapper.save(tDB1);
+
     }
 
 }
