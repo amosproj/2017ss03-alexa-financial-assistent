@@ -20,11 +20,18 @@ public class DynamoDbMapper {
     private DynamoDBMapper mapper;
     private DynamoDB dynamoDB;
 
+    private static DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
 
     public DynamoDbMapper(AmazonDynamoDBClient dynamoDbClient) {
         this.dynamoDbClient = dynamoDbClient;
         this.mapper = new DynamoDBMapper(dynamoDbClient);
         this.dynamoDB = new DynamoDB(dynamoDbClient);
+    }
+
+    public static DynamoDbMapper getInstance(){
+        synchronized (DynamoDbMapper.class){
+            return dynamoDbMapper;
+        }
     }
 
     /**
