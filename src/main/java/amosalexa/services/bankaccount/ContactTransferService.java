@@ -143,7 +143,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
                 String transactionId = (String) session.getAttribute(TRANSACTION_ID_ATTRIBUTE);
-                dynamoDbMapper.save(new TransactionDB(transactionId, "" + category.getId()));
+                dynamoDbMapper.save(new TransactionDB(transactionId, "" + category.getId(), ACCOUNT_NUMBER));
                 return getResponse(CONTACT_TRANSFER_CARD, "Verstanden. Die Transaktion wurde zur Kategorie " + categoryName + " hinzugefügt");
             }
         }
