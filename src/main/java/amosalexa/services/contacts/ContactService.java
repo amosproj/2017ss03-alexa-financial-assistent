@@ -141,7 +141,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         LOGGER.info("Remitter: " + transaction.getRemitter());
         String payee = transaction.getPayee();
         String remitter = transaction.getRemitter();
-        String ibanRegex = "^DE([0-9a-zA-Z]\\s?){20}$";
+        String ibanRegex = ".*\\d+.*";
         if ((payee == null && remitter == null) || (transaction.isOutgoing() && payee.matches(ibanRegex)) ||
                 (!transaction.isOutgoing() && remitter.matches(ibanRegex))) {
             speechText = "Ich kann fuer diese Transaktion keine Kontaktdaten speichern, weil der Name des";
