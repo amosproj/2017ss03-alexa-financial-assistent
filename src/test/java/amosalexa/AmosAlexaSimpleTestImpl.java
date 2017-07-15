@@ -2,7 +2,9 @@ package amosalexa;
 
 import amosalexa.server.Launcher;
 import amosalexa.services.bankaccount.ContactTransferService;
+import amosalexa.services.financing.AccountBalanceForecastService;
 import amosalexa.services.financing.AffordabilityService;
+import amosalexa.services.financing.TransactionForecastService;
 import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
 import model.banking.Card;
@@ -96,7 +98,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         // just one result
         newSession();
-        testIntentMatches("AffordProduct", "ProductKeyword:B01HH5MOPY", AffordabilityService.TOO_FEW_RESULTS+ " " + AffordabilityService.SEARCH_ASK);
+        testIntentMatches("AffordProduct", "ProductKeyword:B01HH5MOPY", AffordabilityService.TOO_FEW_RESULTS + " " + AffordabilityService.SEARCH_ASK);
 
 
         // can not afford test
@@ -112,7 +114,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(emailAnswers, "|"));
-
 
 
         // does not want to note the product
@@ -786,21 +787,70 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         newSession();
         testIntent("PeriodicTransactionAddIntent", "TransactionNumber:999999",
                 "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
+
         testIntent("PeriodicTransactionAddIntent", "TransactionNumber: ",
                 "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
+
         testIntent("PeriodicTransactionAddIntent", "TransactionNumber:31",
                 "Moechtest du die Transaktion mit der Nummer 31 wirklich als periodisch markieren?");
+
         testIntent("AMAZON.YesIntent",
                 "Transaktion Nummer 31 wurde als periodisch markiert.");
+
+
         testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:31",
                 "Moechtest du die Markierung als periodisch fuer die Transaktion mit der Nummer 31 wirklich entfernen?");
+
         testIntent("AMAZON.YesIntent",
                 "Transaktion Nummer 31 ist nun nicht mehr als periodisch markiert.");
+
         testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:999999",
                 "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
+
         testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:999999",
                 "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
-        testIntentMatches("PeriodicTransactionListIntent", "(.*)");
+
+        testIntentMatches("PeriodicTransactionListIntent", "");
     }
 
+    @Test
+    public void transactionForecastTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+
+        // list all ? yes
+        newSession();
+        testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
+        testIntentMatches("TransactionForecast", "TargetDate:2017-12-31",
+                "Ich habe (.*) Transaktionen gefunden, die noch bis zum (.*) ausgeführt werden. Insgesamt werden noch (.*)");
+        testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*) |" +
+                TransactionForecastService.NO_TRANSACTION_INFO );
+
+        // list all ? no
+        newSession();
+        testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
+        testIntentMatches("TransactionForecast", "TargetDate:2017-12-31",
+                "Ich habe (.*) Transaktionen gefunden, die noch bis zum (.*) ausgeführt werden. Insgesamt werden noch (.*)");
+        testIntentMatches("AMAZON.NoIntent", TransactionForecastService.BYE);
+
+
+        // date is not correct
+        newSession();
+        testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
+        testIntent("TransactionForecast", "TargetDate:201a7awd", TransactionForecastService.DATE_ERROR);
+
+        // no transactions
+        newSession();
+        testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
+        testIntent("TransactionForecast", "TargetDate:2016-12-31", TransactionForecastService.NO_TRANSACTION_INFO);
+    }
+
+    @Test
+    public void accountBalanceForecastTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        testIntentMatches("AccountBalanceForecast", AccountBalanceForecastService.DATE_ASK);
+        testIntentMatches("PlainDate", "TargetDate:2017-12-31", "Dein Kontostand beträgt vorraussichtlich am (.*)");
+
+        newSession();
+        testIntentMatches("AccountBalanceForecast", "TargetDate:2017-12-31",
+                "Dein Kontostand beträgt vorraussichtlich am (.*)");
+    }
 }
