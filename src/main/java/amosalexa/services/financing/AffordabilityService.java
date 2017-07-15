@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class AffordabilityService extends AbstractSpeechService implements SpeechService{
+public class AffordabilityService extends AbstractSpeechService implements SpeechService {
 
 
     private static final Logger log = LoggerFactory.getLogger(AffordabilityService.class);
@@ -70,7 +70,6 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
     private static String productSelectionSlot;
 
     /**
-     *
      * session / intent
      */
     private static Session session;
@@ -82,7 +81,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
     private Item selectedItem;
 
 
-    public AffordabilityService(SpeechletSubject speechletSubject){
+    public AffordabilityService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
 
@@ -123,16 +122,16 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
         getSlots();
 
-        // error occured when trying to request data from amazon product api
+        // error occurs when trying to request data from amazon product api
         Object errorRequest = DialogUtil.getDialogState("error!", session);
-        if(errorRequest != null){
+        if (errorRequest != null) {
             return getResponse(CARD, ERROR);
         }
 
         // user decides if he wants to buy a product
-        if(DialogUtil.getDialogState("buy?", session) != null){
+        if (DialogUtil.getDialogState("buy?", session) != null) {
             log.debug("Dialog State: buy?");
-            if(intent.getName().equals(YES_INTENT)){
+            if (intent.getName().equals(YES_INTENT)) {
                 DialogUtil.setDialogState("which?", session);
                 return getAskResponse(CARD, SELECTION_ASK);
             }
@@ -140,9 +139,9 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         }
 
         // user decides which product he wants to buy
-        if(DialogUtil.getDialogState("which?", session) != null){
+        if (DialogUtil.getDialogState("which?", session) != null) {
             log.debug("Dialog State: which?");
-            if(productSelectionSlot != null){
+            if (productSelectionSlot != null) {
                 return getAffordabilityResponse();
             }
             DialogUtil.setDialogState("which?", session);
@@ -150,18 +149,18 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         }
 
         // user decides if he want to look for other products
-        if(DialogUtil.getDialogState("other?", session) != null){
+        if (DialogUtil.getDialogState("other?", session) != null) {
             log.debug("Dialog State: other?");
-            if(intent.getName().equals(YES_INTENT)){
+            if (intent.getName().equals(YES_INTENT)) {
                 return getAskResponse(CARD, SEARCH_ASK);
             }
             return exitDialogRespond();
         }
 
         // user decides if he wants a email with a product link
-        if(DialogUtil.getDialogState("email?", session) != null){
+        if (DialogUtil.getDialogState("email?", session) != null) {
             log.debug("Dialog State: email?");
-            if (intent.getName().equals(YES_INTENT)){
+            if (intent.getName().equals(YES_INTENT)) {
                 EMailClient.SendEMail("Amazon Produkt: " + selectedItem.getTitle(), selectedItem.getDetailPageURL());
                 return getResponse(CARD, EMAIL_ACK);
             }
@@ -173,31 +172,33 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
     /**
      * default exit response
+     *
      * @return SpeechletResponse
      */
-    private SpeechletResponse exitDialogRespond(){
+    private SpeechletResponse exitDialogRespond() {
         return getResponse(CARD, BYE);
     }
 
     /**
      * response if the selected items is affordable or not referring the account balance
+     *
      * @return SpeechletResponse
      */
-    private SpeechletResponse getAffordabilityResponse(){
+    private SpeechletResponse getAffordabilityResponse() {
 
-        if(productSelectionSlot == null){
+        if (productSelectionSlot == null) {
             DialogUtil.setDialogState("which?", session);
             return getAskResponse(CARD, ERROR + " " + SELECTION_ASK);
         }
 
-        if(productSelectionSlot.length() != 1){
+        if (productSelectionSlot.length() != 1) {
             DialogUtil.setDialogState("which?", session);
             return getAskResponse(CARD, ERROR + " " + SELECTION_ASK);
         }
 
         selectedItem = (Item) SessionStorage.getInstance().getObject(session.getSessionId(), "produkt " + productSelectionSlot.toLowerCase());
 
-        if(selectedItem == null){
+        if (selectedItem == null) {
             DialogUtil.setDialogState("which?", session);
             return getAskResponse(CARD, ERROR + " " + SELECTION_ASK);
         }
@@ -210,18 +211,19 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
         account.setSpeechTexts();
         Number balance = account.getBalance();
 
-        if(selectedItem.getLowestNewPrice() / 100 > balance.doubleValue()){
+        if (selectedItem.getLowestNewPrice() / 100 > balance.doubleValue()) {
             DialogUtil.setDialogState("other?", session);
             return getSSMLAskResponse(CARD, getItemText(selectedItem)
                     + " " + CANT_AFFORD + " " + account.getBalanceText() + " " + OTHER_SELECTION);
         }
 
         DialogUtil.setDialogState("email?", session);
-        return getAskResponse(CARD, "Produkt " + productSelectionSlot + " " +  selectedItem.getTitleShort() + " " + NOTE_ASK);
+        return getAskResponse(CARD, "Produkt " + productSelectionSlot + " " + selectedItem.getTitleShort() + " " + NOTE_ASK);
     }
 
     /**
      * creates a speech response by the response of a amazon query and return 3 items
+     *
      * @return SpeechletResponse
      */
     private SpeechletResponse getProductInformation() {
@@ -239,13 +241,13 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             if (items.isEmpty()) {
                 log.error("no results by keywordSlot: " + keywordSlot);
                 DialogUtil.setDialogState("error!", session);
-                return getAskResponse(CARD, NO_RESULTS +  " " + SEARCH_ASK);
+                return getAskResponse(CARD, NO_RESULTS + " " + SEARCH_ASK);
             }
 
-            if(items.size() < 3){
+            if (items.size() < 3) {
                 log.error("too few results by keywordSlot: " + keywordSlot);
                 DialogUtil.setDialogState("error!", session);
-                return getAskResponse(CARD, TOO_FEW_RESULTS+ " " + SEARCH_ASK);
+                return getAskResponse(CARD, TOO_FEW_RESULTS + " " + SEARCH_ASK);
             }
 
 
@@ -253,7 +255,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
             for (int i = 0; i < 3; i++) {
 
                 // save in session
-                SessionStorage.getInstance().putObject(session.getSessionId(), "produkt " + (char) ('a' + i) , items.get(i));
+                SessionStorage.getInstance().putObject(session.getSessionId(), "produkt " + (char) ('a' + i), items.get(i));
 
                 // shorten title
                 String productTitle = AWSUtil.shortTitle(items.get(i).getTitle());
@@ -277,7 +279,7 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
     /**
      * get all slot values
      */
-    private void getSlots(){
+    private void getSlots() {
         keywordSlot = intent.getSlot(KEYWORD_SLOT) != null ? intent.getSlot(KEYWORD_SLOT).getValue() : null;
         productSelectionSlot = intent.getSlot(PRODUCT_SLOT) != null ? intent.getSlot(PRODUCT_SLOT).getValue() : null;
 
@@ -287,10 +289,11 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
 
     /**
      * returns the text for a item of the amazon search
+     *
      * @param item Item from Amazon
      * @return text
      */
-    private String getItemText(Item item){
+    private String getItemText(Item item) {
         return item.getTitleShort() + "kostet <say-as interpret-as=\"unit\">€" + item.getLowestNewPrice() / 100 +
                 "</say-as> <break time=\"1s\"/>";
     }
