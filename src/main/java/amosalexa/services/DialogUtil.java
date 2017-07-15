@@ -33,4 +33,25 @@ public class DialogUtil {
 
         return object;
     }
+
+    /**
+     * checks the numerus for the noun "Transaktion"
+     * @param count count
+     * @return String
+     */
+    public static String getTransactionNumerus(int count){
+      return count == 1 ? "Transaktion" : "Transaktionen";
+    }
+
+    /**
+     * gutschrift oder abbuchung
+     * @param balance balance
+     * @return String
+     */
+    public static String getBalanceVerb(double balance){
+        return balance >= 0 ? "gutgeschrieben" : "abgebucht";
+    }
+
+
+
 }
