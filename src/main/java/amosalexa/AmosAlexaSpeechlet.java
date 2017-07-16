@@ -22,7 +22,7 @@ import amosalexa.services.cards.ReplacementCardService;
 import amosalexa.services.contacts.ContactService;
 import amosalexa.services.editCategories.EditCategoriesService;
 import amosalexa.services.financing.*;
-import amosalexa.services.help.IntroductionService;
+import amosalexa.services.help.HelpService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -65,7 +65,7 @@ public class AmosAlexaSpeechlet extends AbstractSpeechService implements Speechl
         new ContactService(amosAlexaSpeechlet);
         new ContactTransferService(amosAlexaSpeechlet);
         new BudgetTrackerService(amosAlexaSpeechlet);
-        new IntroductionService(amosAlexaSpeechlet);
+        new HelpService(amosAlexaSpeechlet);
         new EditCategoriesService(amosAlexaSpeechlet);
         new PeriodicTransactionService(amosAlexaSpeechlet);
         new TransactionForecastService(amosAlexaSpeechlet);

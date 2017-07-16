@@ -189,6 +189,7 @@ CategorySpendingIntent Ich habe {Amount} Euro für {Category} ausgegeben
 IntroductionIntent Was kann AMOS
 IntroductionIntent Was kannst du eigentlich
 IntroductionIntent Was kann ich fragen
+IntroductionIntent Hilfe
 
 PlainCategoryIntent {Category}
 PlainCategoryIntent Kategorie {Category}

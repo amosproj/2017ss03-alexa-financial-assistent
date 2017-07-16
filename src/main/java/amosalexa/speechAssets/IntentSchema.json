@@ -65,6 +65,15 @@
       "intent": "IntroductionIntent"
     },
     {
+      "intent": "FunctionGroupIntent",
+      "slots": [
+        {
+          "name": "FunctionGroup",
+          "type": "LIST_OF_FUNCTION_GROUPS"
+        }
+      ]
+    },
+    {
       "slots": [
         {
           "name": "Number",
