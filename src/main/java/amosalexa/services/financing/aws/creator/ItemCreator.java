@@ -1,7 +1,9 @@
-package amosalexa.services.pricequery.aws.creator;
+package amosalexa.services.financing.aws.creator;
 
-import amosalexa.services.pricequery.aws.model.Item;
-import amosalexa.services.pricequery.aws.util.XMLParser;
+import amosalexa.services.financing.aws.model.Item;
+import amosalexa.services.financing.aws.util.AWSUtil;
+import amosalexa.services.financing.aws.util.XMLParser;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
@@ -15,25 +17,25 @@ public class ItemCreator {
         ArrayList<Item> items = new ArrayList<>();
 
         for(String xmlItem : xmlItems){
-            itemXML = xmlItem;
-            items.add(createItem());
+            if(!xmlItem.isEmpty())
+                items.add(createItem(xmlItem));
         }
 
         return items;
     }
 
-    private static Item createItem(){
+    public static Item createItem(String itemXML){
 
         Item item = new Item();
+
+        // ASIN
+        String ASIN = XMLParser.readValue(itemXML, new String[]{"ASIN"});
+        item.setASIN(ASIN);
 
         //Timestamp
         java.util.Date date = new java.util.Date();
         Timestamp timestamp = new Timestamp(date.getTime());
         item.setAdded(timestamp);
-
-        // ASIN
-        String ASIN = XMLParser.readValue(itemXML, new String[]{"ASIN"});
-        item.setASIN(ASIN);
 
         // Locale
         item.setLocale("de");
@@ -85,8 +87,16 @@ public class ItemCreator {
 
         // Title
         String title = XMLParser.readValue(itemXML, new String[]{"ItemAttributes", "Title"});
+        System.out.println("set title: " + title);
         item.setTitle(title);
 
+        // Lowest New Price
+
+        // Title
+        String lowestNewPrice = XMLParser.readValue(itemXML, new String[]{"OfferSummary", "LowestNewPrice", "Amount"});
+        if(AWSUtil.isNumeric(lowestNewPrice)){
+            item.setLowestNewPrice(Integer.parseInt(lowestNewPrice));
+        }
 
         return item;
     }

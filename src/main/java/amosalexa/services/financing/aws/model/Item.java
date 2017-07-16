@@ -1,4 +1,4 @@
-package amosalexa.services.pricequery.aws.model;
+package amosalexa.services.financing.aws.model;
 
 import java.sql.Timestamp;
 
@@ -30,9 +30,9 @@ public class Item {
 
     private String title;
 
-    private Offer offer;
-
     private String titleShort;
+
+    private Integer lowestNewPrice;
 
     public Item(){
         this.locale = "de";
@@ -143,21 +143,21 @@ public class Item {
         this.locale = locale;
     }
 
-    public Offer getOffer() {
-        return offer;
-    }
-
-    public Item setOffer(Offer offer) {
-        this.offer = offer;
-        return this;
-    }
-
     public String getTitleShort() {
         return titleShort;
     }
 
     public Item setTitleShort(String titleShort) {
         this.titleShort = titleShort;
+        return this;
+    }
+
+    public Integer getLowestNewPrice() {
+        return lowestNewPrice;
+    }
+
+    public Item setLowestNewPrice(Integer lowestNewPrice) {
+        this.lowestNewPrice = lowestNewPrice;
         return this;
     }
 }

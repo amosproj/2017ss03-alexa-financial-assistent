@@ -9,20 +9,20 @@
  */
 package amosalexa;
 
+import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.bankaccount.BalanceLimitService;
 import amosalexa.services.bankaccount.BankAccountService;
+import amosalexa.services.bankaccount.ContactTransferService;
 import amosalexa.services.bankaccount.StandingOrderService;
-import amosalexa.services.bankaccount.TransactionService;
 import amosalexa.services.bankcontact.BankContactService;
 import amosalexa.services.budgetreport.BudgetReportService;
 import amosalexa.services.budgettracker.BudgetTrackerService;
 import amosalexa.services.cards.BlockCardService;
 import amosalexa.services.cards.ReplacementCardService;
-import amosalexa.services.contactTransfer.ContactTransferService;
 import amosalexa.services.contacts.ContactService;
-import amosalexa.services.financing.AffordabilityService;
-import amosalexa.services.financing.SavingsPlanService;
-import amosalexa.services.pricequery.PriceQueryService;
+import amosalexa.services.editCategories.EditCategoriesService;
+import amosalexa.services.financing.*;
+import amosalexa.services.help.IntroductionService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -38,9 +38,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This sample shows how to create a simple speechlet for handling speechlet requests.
+ * Base speechlet to register services that handle the intents.
  */
-public class AmosAlexaSpeechlet implements SpeechletSubject {
+public class AmosAlexaSpeechlet extends AbstractSpeechService implements SpeechletSubject {
+
+    // TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
+    public static final int USER_ID = 4711;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
@@ -51,8 +54,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new BankAccountService(amosAlexaSpeechlet);
         new StandingOrderService(amosAlexaSpeechlet);
         new AffordabilityService(amosAlexaSpeechlet);
-        new TransactionService(amosAlexaSpeechlet);
-        new PriceQueryService(amosAlexaSpeechlet);
         new BankContactService(amosAlexaSpeechlet);
         new SavingsPlanService(amosAlexaSpeechlet);
         new BlockCardService(amosAlexaSpeechlet);
@@ -64,7 +65,11 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         new ContactService(amosAlexaSpeechlet);
         new ContactTransferService(amosAlexaSpeechlet);
         new BudgetTrackerService(amosAlexaSpeechlet);
-        //new AuthenticationManager(amosAlexaSpeechlet);
+        new IntroductionService(amosAlexaSpeechlet);
+        new EditCategoriesService(amosAlexaSpeechlet);
+        new PeriodicTransactionService(amosAlexaSpeechlet);
+        new TransactionForecastService(amosAlexaSpeechlet);
+        new AccountBalanceForecastService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
@@ -159,7 +164,7 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
             }
 
             if (response != null) {
-                if(response.getShouldEndSession()) {
+                if (response.getShouldEndSession()) {
                     SessionStorage.getInstance().removeStorage(sessionId);
                 }
                 return response;
@@ -186,8 +191,6 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
         IntentRequest request = requestEnvelope.getRequest();
         Session session = requestEnvelope.getSession();
 
-        //LOGGER.info("Authenticated: " + AuthenticationManager.isAuthenticated());
-
         LOGGER.info("onIntent requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
 
@@ -199,6 +202,10 @@ public class AmosAlexaSpeechlet implements SpeechletSubject {
 
         LOGGER.info("Intent: " + intentName);
         LOGGER.info("DialogContext: " + currentDialogContext);
+
+        if(intentName.equals(STOP_INTENT)){
+            return getResponse("Stop", "");
+        }
 
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 

@@ -1,11 +1,8 @@
-package amosalexa.services.pricequery.aws.request;
+package amosalexa.services.financing.aws.request;
 
-import amosalexa.services.pricequery.aws.creator.ItemCreator;
-import amosalexa.services.pricequery.aws.creator.OfferCreator;
-import amosalexa.services.pricequery.aws.model.Item;
-import amosalexa.services.pricequery.aws.model.Offer;
-import amosalexa.services.pricequery.aws.util.AWSUtil;
-import org.apache.log4j.Logger;
+import amosalexa.services.financing.aws.creator.ItemCreator;
+import amosalexa.services.financing.aws.model.Item;
+import amosalexa.services.financing.aws.util.AWSUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -16,19 +13,6 @@ import java.util.Map;
 
 
 public class AWSLookup {
-
-    final static Logger log = Logger.getLogger(AWSLookup.class);
-
-    public static void main(String[] args) {
-
-        /*
-        List<Item> items = itemSearch("Iphone", 1, null);
-        for (Item item : items){
-            log.info(item.getTitle());
-
-        }
-        */
-    }
 
     public static List<Item> itemSearch(String keyword, int itemPage, String sort) throws ParserConfigurationException, SAXException, IOException {
 
@@ -47,18 +31,18 @@ public class AWSLookup {
         return ItemCreator.createItems(xml);
     }
 
-    public static Offer offerLookup(String ASIN) throws ParserConfigurationException, SAXException, IOException {
+    public static Item itemLookup(String ASIN) throws ParserConfigurationException, SAXException, IOException {
 
-       Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
 
         params.put("Operation", "ItemLookup");
-        params.put("ResponseGroup", "Offers");
+        params.put("ResponseGroup", "Large");
         params.put("ItemId", ASIN);
 
         AWSRequest awsRequest = new AWSRequest(params);
         String xml = awsRequest.signedRequest();
 
-        return OfferCreator.createOffer(xml);
+        return ItemCreator.createItem(xml);
     }
 
 }

@@ -1,16 +1,16 @@
 package amosalexa;
 
 import amosalexa.server.Launcher;
-import amosalexa.services.contactTransfer.ContactTransferService;
+import amosalexa.services.bankaccount.ContactTransferService;
+import amosalexa.services.financing.AccountBalanceForecastService;
 import amosalexa.services.financing.AffordabilityService;
+import amosalexa.services.financing.TransactionForecastService;
 import api.aws.DynamoDbClient;
 import api.banking.AccountAPI;
-import api.banking.TransactionAPI;
 import model.banking.Card;
-import model.db.Contact;
 import model.banking.StandingOrder;
-import model.banking.Transaction;
 import model.db.Category;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
@@ -56,8 +56,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
     }
 
-    /*
-    FIXME
 
     @Test
     public void affordabilityTest() throws Exception {
@@ -66,14 +64,14 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         ArrayList<String> buyAskAnswers = new ArrayList<String>() {{
             add("Produkt a (.*) kostet (.*) Produkt b (.*) kostet (.*) Produkt c (.*) kostet (.*) Möchtest du ein Produkt kaufen");
-            add("Ein Fehler ist aufgetreten. " + AffordabilityService.NO_RESULTS);
-            add("Ein Fehler ist aufgetreten. " + AffordabilityService.TOO_FEW_RESULTS);
+            add(AffordabilityService.NO_RESULTS);
+            add(AffordabilityService.TOO_FEW_RESULTS);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
         }};
 
         ArrayList<String> productSelectionAskAnswers = new ArrayList<String>() {{
             add(AffordabilityService.SELECTION_ASK);
-            add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
+            add(AffordabilityService.ERROR + " " + AffordabilityService.SELECTION_ASK);
         }};
 
         ArrayList<String> byeAnswers = new ArrayList<String>() {{
@@ -82,41 +80,67 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         }};
 
         ArrayList<String> balanceCheckAnswers = new ArrayList<String>() {{
-            add("Dein kontostand beträgt €(.*) kostet €(.*) Das Produkt kannst du dir nicht leisten! Möchtest du nach etwas anderem suchen");
+            add("(.*) Das Produkt kannst du dir nicht leisten! Dein kontostand beträgt €(.*) Möchtest du nach etwas anderem suchen");
             add(AffordabilityService.BYE);
             add("Ein Fehler ist aufgetreten. " + AffordabilityService.ERROR);
-            add("Produkt a (.*)  Willst du das Produkt in den Warenkorb legen");
+            add("Produkt (.*) " + AffordabilityService.NOTE_ASK);
         }};
 
-        ArrayList<String> cartAnswers = new ArrayList<String>() {{
+        ArrayList<String> emailAnswers = new ArrayList<String>() {{
             add(AffordabilityService.BYE);
-            add(AffordabilityService.CART_ACK);
+            add(AffordabilityService.EMAIL_ACK);
             add(AffordabilityService.SEARCH_ASK);
         }};
 
+        // can not understand search keyword
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:1awd448", AffordabilityService.NO_RESULTS + " " + AffordabilityService.SEARCH_ASK);
 
+        // just one result
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:B01HH5MOPY", AffordabilityService.TOO_FEW_RESULTS + " " + AffordabilityService.SEARCH_ASK);
+
+
+        // can not afford test
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
-        testIntentMatches("AMAZON.YesIntent", StringUtils.join(cartAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(emailAnswers, "|"));
 
+        // can afford test
+        newSession();
+        testIntentMatches("AffordProduct", "ProductKeyword:smartphone", StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(emailAnswers, "|"));
+
+
+        // does not want to note the product
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:a", StringUtils.join(balanceCheckAnswers, "|"));
         testIntentMatches("AMAZON.NoIntent", StringUtils.join(byeAnswers, "|"));
 
+        // product selection is null
+        testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
+        testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
+        testIntentMatches("AffordProduct", "ProductSelection:", StringUtils.join(productSelectionAskAnswers, "|"));
+
+        // does not want to buy anything
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.NoIntent", StringUtils.join(byeAnswers, "|"));
 
+        // product selection unclear
         newSession();
         testIntentMatches("AffordProduct", "ProductKeyword:Samsung", StringUtils.join(buyAskAnswers, "|"));
         testIntentMatches("AMAZON.YesIntent", StringUtils.join(productSelectionAskAnswers, "|"));
         testIntentMatches("AffordProduct", "ProductSelection:randomtext", StringUtils.join(productSelectionAskAnswers, "|"));
+
     }
-    */
+
 
     @Test
     public void bankAccountTransactionIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
@@ -170,16 +194,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     }
 
     @Test
-    public void bankTransferIntentTest() throws Throwable {
-        newSession();
-        testIntentMatches("BankTransferIntent", "Name:anne", "Amount:2",
-                "Aktuell betraegt dein Kontostand (.*) Euro\\. Bist du sicher, dass du 2 Euro an anne ueberweisen willst\\?");
-
-        testIntentMatches("AMAZON.YesIntent",
-                "Ok, (.*) Euro wurden an anne ueberwiesen\\. Dein neuer Kontostand betraegt (.*) Euro\\.");
-    }
-
-    @Test
     public void standingOrdersInfoTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
@@ -195,21 +209,60 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         //TODO this test expects to be at least 4 standing orders existent in the system
         testIntentMatches(
                 "StandingOrdersInfoIntent", StringUtils.join(possibleAnswers, "|"));
-        testIntentMatches(
-                "AMAZON.YesIntent",
-                "Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto." +
-                        "|Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro an (.*)");
+        //Test speech answer with some securities in the depot
+        String response = performIntent("AMAZON.YesIntent");
+        Pattern p = Pattern.compile("Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro auf dein Sparkonto." +
+                " Moechtest du einen weiteren Eintrag hoeren?" +
+                "|Dauerauftrag Nummer \\d+: Ueberweise monatlich \\d+\\.\\d+ Euro an (.*)");
+        Matcher m = p.matcher(response);
+        if (!m.find()) {
+            fail("Unexpected speech output.\nExcpected: " + p.pattern() + "\nAcutual: " + response);
+        }
+
         testIntentMatches(
                 "AMAZON.NoIntent", "Okay, tschuess!");
     }
 
     @Test
-    public void StandingOrderSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+    public void standingOrderUpdateSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
-        testIntent(
-                "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:zehn",
-                "Der Dauerauftrag für max mustermann über 10.0 Euro existiert schon. Möchtest du diesen aktualisieren");
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount("9999999999");
+
+        List<StandingOrder> standingOrders = new ArrayList<>(standingOrdersCollection);
+        for (StandingOrder standingOrder : standingOrders) {
+            if (standingOrder.getPayee().toLowerCase().equals("max mustermann")) {
+                String orderAmount = standingOrder.getAmount().toString();
+                testIntent(
+                        "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:10",
+                        "Der Dauerauftrag für max mustermann über " + orderAmount + " Euro existiert schon. Möchtest du diesen aktualisieren");
+//                testIntent(
+//                        "AMAZON.YesIntent",
+//                        "Der Dauerauftrag Nummer " + standingOrder.getStandingOrderId() + " für Max Mustermann über 10 euro wurde erfolgreich aktualisiert");
+                break;
+            }
+        }
+    }
+
+    @Test
+    public void standingOrderCreateSmartIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+
+        Collection<StandingOrder> standingOrdersCollection = AccountAPI.getStandingOrdersForAccount("9999999999");
+
+        List<StandingOrder> standingOrders = new ArrayList<>(standingOrdersCollection);
+        for (StandingOrder standingOrder : standingOrders) {
+            if (standingOrder.getPayee().toLowerCase().equals("max mustermann")) {
+                String orderAmount = standingOrder.getAmount().toString();
+                testIntent(
+                        "StandingOrderSmartIntent", "Payee:max", "PayeeSecondName:mustermann", "orderAmount:10",
+                        "Der Dauerauftrag für max mustermann über " + orderAmount + " Euro existiert schon. Möchtest du diesen aktualisieren");
+                testIntent(
+                        "StandingOrderSmartIntent",
+                        "Der neue Dauerauftrag für max mustermann über 10 Euro wurde erfolgreich eingerichtet");
+                break;
+            }
+        }
     }
 
     @Test
@@ -222,23 +275,44 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         String todayDate = formatter.format(now);
 
         //Create a transaction that we can use for ContactAddIntent (ingoing transaction)
+        /*
         Transaction transaction = TransactionAPI.createTransaction(1, "DE60100000000000000001",
                 "DE50100000000000000001", todayDate,
                 "Ueberweisung fuer Unit Test", null, "Sandra");
-        int transactionId = transaction.getTransactionId().intValue();
-        String transactionRemitter = transaction.getRemitter();
+        */
 
-        LOGGER.info("Latest transaction id: " + transactionId);
-        LOGGER.info("Latest transaction remitter: " + transactionRemitter);
+        int transactionId1 = 18877; //transaction.getTransactionId().intValue();
+        int transactionId2 = 6328; //transaction without remitter or payee
+        int transactionId3 = 23432423; //transaction not existent
 
-        //Test add contact
+        String transactionRemitter = "Sandra";//for transactionId1 //transaction.getRemitter();
+
+        //Test add contact no transaction number given
         testIntent(
                 "ContactAddIntent",
-                "TransactionNumber:" + transactionId, "Moechtest du " + transactionRemitter + " als " +
+                "TransactionNumber: ", "Das habe ich nicht ganz verstanden. Bitte wiederhole deine Eingabe.");
+
+        //Test add contact successful
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId1, "Moechtest du " + transactionRemitter + " als " +
                         "Kontakt speichern?");
         testIntent(
                 "AMAZON.YesIntent",
                 "Okay! Der Kontakt Sandra wurde angelegt.");
+
+        //Test add contact unknown payee/remitter
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId2, "Ich kann fuer diese Transaktion keine Kontaktdaten speichern, weil der Name des Auftraggebers" +
+                        " nicht bekannt ist. Bitte wiederhole deine Eingabe oder breche ab, indem du \"Alexa, Stop!\" sagst.");
+
+        //Test add contact transaction not existent
+        testIntent(
+                "ContactAddIntent",
+                "TransactionNumber:" + transactionId3, "Ich habe keine Transaktion mit dieser Nummer gefunden." +
+                        " Bitte wiederhole deine Eingabe.");
+
 
         //Get the contact that we just created by searching for the contact with highest id
         List<Contact> allContacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
@@ -260,18 +334,14 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent(
                 "AMAZON.YesIntent",
                 "Kontakt wurde geloescht.");
-
-        /*
-        TODO
-        testIntent(
-                "ContactListInfoIntent",
-                "TO DO..");
-        */
     }
 
     @Test
     public void savingsPlanTest() throws Exception {
         newSession();
+
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = categories.get(0);
 
         testIntent("SavingsPlanIntroIntent",
                 "Was moechtest du als Grundbetrag anlegen?"
@@ -305,7 +375,11 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         //Test with YesIntent, savings plan should be actually created
         testIntent(
                 "AMAZON.YesIntent",
-                "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + ".");
+                "Okay! Ich habe den Sparplan angelegt. Der Grundbetrag von 1500 Euro wird deinem Sparkonto gutgeschrieben. Die erste regelmaeßige Einzahlung von 150 Euro erfolgt am " + nextPayin + "."
+                        + " Zu welcher Kategorie soll der Dauerauftrag hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText());
+
+        testIntentMatches("PlainCategoryIntent", "Category:" + category.getName(),
+                "Verstanden. Der Dauerauftrag wurde zur Kategorie " + category.getName() + " hinzugefügt");
 
         Collection<StandingOrder> allStandingOrders = AccountAPI.getStandingOrdersForAccount(TEST_ACCOUNT_NUMBER);
         final Comparator<StandingOrder> comp = Comparator.comparingInt(s -> s.getStandingOrderId().intValue());
@@ -323,6 +397,51 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent(
                 "AMAZON.YesIntent",
                 "Dauerauftrag Nummer " + latestStandingOrderId + " wurde geloescht.");
+    }
+
+    @Test
+    public void categoryStatusInfoIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        //Test assumes that category 'lebensmittel' already exists
+
+        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
+        //does not affect our data
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        Double originalLimit = null;
+        Double originialSpending = null;
+        //We assume that 'lebensmittel' category exists!
+        for (Category cat : categories) {
+            if (cat.getName().equals("lebensmittel")) {
+                category = cat;
+                originalLimit = cat.getLimit();
+                originialSpending = cat.getSpending();
+            }
+        }
+
+        //Set spending to 0 and limit to 100 for test purpose
+        category.setSpending(0);
+        category.setLimit(100);
+        category.setSpending(5);
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+
+        //Simple status test
+        testIntent("CategoryStatusInfoIntent", "Category:lebensmittel",
+                "Du hast bereits 5% des Limits von 100.0 Euro fuer die Kategorie lebensmittel ausgegeben. Du kannst noch" +
+                        " 95.0 Euro für diese Kategorie ausgeben.");
+
+        category.setLimit(100);
+        category.setSpending(150);
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+
+        //Simple status test
+        testIntent("CategoryStatusInfoIntent", "Category:lebensmittel",
+                "Du hast bereits 150% des Limits von 100.0 Euro fuer die Kategorie lebensmittel ausgegeben. Du kannst noch " +
+                        "0.0 Euro für diese Kategorie ausgeben.");
     }
 
     @Test
@@ -371,6 +490,60 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         for (Category c : categories2) {
             DynamoDbClient.instance.putItem(Category.TABLE_NAME, c);
         }
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+    }
+
+    @Test
+    public void categorySpendingTestIntent() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        //Test assumes that category 'lebensmittel' already exists
+
+        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
+        //does not affect our data
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        Double originalLimit = null;
+        Double originialSpending = null;
+        //We assume that 'lebensmittel' category exists!
+        for (Category cat : categories) {
+            if (cat.getName().equals("lebensmittel")) {
+                category = cat;
+                originalLimit = cat.getLimit();
+                originialSpending = cat.getSpending();
+            }
+        }
+
+        //Set spending to 0 and limit to 100 for test purpose
+        category.setSpending(0);
+        category.setLimit(100);
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+
+        //Simple spending test
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:5",
+                "Okay. Ich habe 5 Euro fuer lebensmittel notiert.");
+
+        //Spending 89 OK!
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:84",
+                "Okay. Ich habe 84 Euro fuer lebensmittel notiert.");
+
+        //Spending 90 Warning!
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:1",
+                "Okay. Ich habe 1 Euro fuer lebensmittel notiert. Warnung! Du hast in diesem Monat bereits 90 Euro" +
+                        " fuer lebensmittel ausgegeben. Das sind 90% des Limits fuer diese Kategorie.");
+
+        //Limit overrun warning
+        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:20",
+                "Warnung! Durch diese Aktion wirst du das Limit von 100 fuer die Kategorie lebensmittel ueberschreiten." +
+                        " Soll ich den Betrag trotzdem notieren?");
+
+        testIntent("AMAZON.YesIntent", "Okay. Ich habe 20 Euro fuer lebensmittel notiert. Warnung! Du hast" +
+                " in diesem Monat bereits 110 Euro fuer lebensmittel ausgegeben. Das sind 110% des Limits fuer diese Kategorie.");
+
+        //Reset category lebensmittel to previous state
+        category.setSpending(0);
+        category.setLimit(originalLimit);
         DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
     }
 
@@ -524,6 +697,11 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     public void contactTransferTest() throws Exception {
         ContactTransferService.contactTable = Contact.TABLE_NAME + "_test";
 
+
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = categories.get(0);
+
+
         // Empty test contacts table
         DynamoDbClient.instance.clearItems(ContactTransferService.contactTable, Contact::new);
 
@@ -538,7 +716,11 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Dein aktueller Kontostand beträgt ([0-9\\.]+) Euro\\. Möchtest du 1\\.0 Euro an Sandra überweisen\\?");
 
         testIntentMatches("AMAZON.YesIntent",
-                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\.");
+                "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
+                        "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText());
+
+        testIntentMatches("PlainCategoryIntent", "Category:" + category.getName(),
+                "Verstanden. Die Transaktion wurde zur Kategorie " + category.getName() + " hinzugefügt");
 
         newSession();
 
@@ -552,4 +734,126 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Okay, verstanden. Dann bis zum nächsten Mal.");
     }
 
+    @Test
+    public void budgetReportTest() throws Exception {
+        newSession();
+        SessionStorage.getInstance().getStorage(sessionId).put("DEBUG", true);
+        testIntentMatches("BudgetReportEMailIntent", "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.");
+    }
+
+    @Test
+    public void categoryTest() throws Exception {
+        newSession();
+
+        Category.TABLE_NAME = "category_test";
+        DynamoDbClient.instance.clearItems(Category.TABLE_NAME, Category::new);
+
+        testIntent("AddCategoryIntent",
+                "CategoryName:Auto",
+                "Moechtest du die Kategorie Auto wirklich erstellen?");
+
+        testIntent("AMAZON.YesIntent",
+                "Verstanden. Die Kategorie Auto wurde erstellt.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du folgende Kategorien: Auto, ");
+
+        testIntent("AddCategoryIntent",
+                "CategoryName:Lebensmittel",
+                "Moechtest du die Kategorie Lebensmittel wirklich erstellen?");
+
+        testIntent("AMAZON.NoIntent",
+                "OK, verstanden. Dann bis bald.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du folgende Kategorien: Auto, ");
+
+        //FIXME fix precondition that category Auto must exist for this test
+        testIntent("DeleteCategoryIntent",
+                "CategoryName:Auto",
+                "Möchtest du die Kategorie mit dem Namen 'Auto' und dem Limit von 0.0 Euro wirklich löschen?");
+
+        testIntent("AMAZON.YesIntent",
+                "OK, wie du willst. Ich habe die Kategorie mit dem Namen 'Auto' gelöscht. Hoffentlich bereust du es nicht.");
+
+        testIntent("ShowCategoriesIntent",
+                "Aktuell hast du keine Kategorien.");
+
+        Category.TABLE_NAME = "category";
+    }
+
+    @Test
+    public void periodicTransactionTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber:999999",
+                "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
+
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber: ",
+                "Das habe ich nicht verstanden. Bitte wiederhole deine Eingabe.");
+
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber:31",
+                "Moechtest du die Transaktion mit der Nummer 31 wirklich als periodisch markieren?");
+
+        testIntent("AMAZON.YesIntent",
+                "Transaktion Nummer 31 wurde als periodisch markiert.");
+
+
+        testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:31",
+                "Moechtest du die Markierung als periodisch fuer die Transaktion mit der Nummer 31 wirklich entfernen?");
+
+        testIntent("AMAZON.YesIntent",
+                "Transaktion Nummer 31 ist nun nicht mehr als periodisch markiert.");
+
+        testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:999999",
+                "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
+
+        testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:999999",
+                "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
+
+        testIntentMatches("PeriodicTransactionListIntent", "(.*)");
+    }
+
+    @Test
+    public void transactionForecastTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+
+        // list all ? yes
+        newSession();
+        testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
+        testIntentMatches("TransactionForecast", "TargetDate:2017-09-03",
+                "Ich habe (.*) Transaktionen gefunden, die noch bis zum (.*) ausgeführt werden. Insgesamt werden noch (.*)");
+        testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*)|" +
+                TransactionForecastService.NO_TRANSACTION_INFO );
+        testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*)|" +
+                TransactionForecastService.NO_TRANSACTION_INFO );
+
+
+        // list all ? no
+        newSession();
+        testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
+        testIntentMatches("TransactionForecast", "TargetDate:2017-12-31",
+                "Ich habe (.*) Transaktionen gefunden, die noch bis zum (.*) ausgeführt werden. Insgesamt werden noch (.*)");
+        testIntentMatches("AMAZON.NoIntent", TransactionForecastService.BYE);
+
+
+        // date is not correct
+        newSession();
+        testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
+        testIntent("TransactionForecast", "TargetDate:201a7awd", TransactionForecastService.DATE_ERROR);
+
+        // no transactions
+        newSession();
+        testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
+        testIntent("TransactionForecast", "TargetDate:2016-12-31", TransactionForecastService.NO_TRANSACTION_INFO);
+    }
+
+    @Test
+    public void accountBalanceForecastTest() throws IllegalAccessException, NoSuchFieldException, IOException {
+        newSession();
+        testIntentMatches("AccountBalanceForecast", AccountBalanceForecastService.DATE_ASK);
+        testIntentMatches("PlainDate", "TargetDate:2017-12-31", "Dein Kontostand beträgt vorraussichtlich am (.*)");
+
+        newSession();
+        testIntentMatches("AccountBalanceForecast", "TargetDate:2017-12-31",
+                "Dein Kontostand beträgt vorraussichtlich am (.*)");
+    }
 }

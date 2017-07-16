@@ -19,7 +19,7 @@
  *
  */
 
-package amosalexa.services.pricequery.aws.request;
+package amosalexa.services.financing.aws.request;
 
 import org.apache.commons.codec.binary.Base64;
 

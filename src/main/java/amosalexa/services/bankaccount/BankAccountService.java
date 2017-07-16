@@ -5,6 +5,7 @@ import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -159,7 +160,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      * @return SpeechletResponse to alexa
      */
     private SpeechletResponse handleTransactionSpeech() {
-        List<Transaction> transactions = Transaction.getTransactions(account.getNumber());
+        List<Transaction> transactions = TransactionAPI.getTransactionsForAccount(account.getNumber());
 
         if (transactions == null || transactions.isEmpty()) {
             LOGGER.warn("Account: " + account.getNumber() + " has no transactions");
@@ -190,7 +191,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      * @return speechletResponse
      */
     private SpeechletResponse getNextTransaction(int i) {
-        List<Transaction> transactions = Transaction.getTransactions(account.getNumber());
+        List<Transaction> transactions = TransactionAPI.getTransactionsForAccount(account.getNumber());
         String transactionText = Transaction.getTransactionText(transactions.get(i));
         if (i - 1 < transactions.size()) {
             transactionText = transactionText + Transaction.getAskMoreTransactionText();

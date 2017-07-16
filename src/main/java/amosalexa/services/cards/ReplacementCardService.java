@@ -1,5 +1,6 @@
 package amosalexa.services.cards;
 
+import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
@@ -135,7 +136,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
             }
 
             // Store all card numbers in the session
-            session.setAttribute(STORAGE_VALID_CARDS, userCards);
+            SessionStorage.getInstance().getStorage(session.getSessionId()).put(STORAGE_VALID_CARDS, userCards);
 
             stringBuilder.append("Bitte gib die Endziffern der Karte an, für die du Ersatz benötigst.");
             stringBuilder.append("</speak>");
@@ -156,7 +157,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
         boolean validDigits = false;
 
         // Check if these digits are valid
-        List<Card> userCards = (List<Card>) session.getAttribute(STORAGE_VALID_CARDS);
+        List<Card> userCards = (List<Card>) SessionStorage.getInstance().getStorage(session.getSessionId()).get(STORAGE_VALID_CARDS);
         for (Card card : userCards) {
             String cardNumber = card.getCardNumber();
             if (cardNumber.substring(cardNumber.length() - 4).equals(fourDigits)) {

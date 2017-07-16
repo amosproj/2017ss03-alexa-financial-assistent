@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -22,7 +20,10 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractAmosAlexaSpeechletTest {
 
     private Session session;
-    private String sessionId;
+    protected String sessionId;
+
+    List<Long> timer = new ArrayList<>();
+    List<String> intents = new ArrayList<>();
 
     // FIXME: Get the current account AccountNumber from the session
     protected static final String TEST_ACCOUNT_NUMBER = "9999999999";
@@ -33,6 +34,7 @@ public abstract class AbstractAmosAlexaSpeechletTest {
      ************************************/
 
     protected String testIntentMatches(String intent, String... params) throws IOException, NoSuchFieldException, IllegalAccessException {
+
         String[] slots = new String[params.length - 1];
         String expectedOutput = null;
 
@@ -73,6 +75,21 @@ public abstract class AbstractAmosAlexaSpeechletTest {
 
     protected String performIntent(String intent, String... params) throws IOException, NoSuchFieldException, IllegalAccessException {
         String[] slots = new String[params.length];
+
+        timer.add(System.currentTimeMillis());
+        intents.add(intent);
+
+        if(timer.size() == 2){
+
+            long elapsedTime = timer.get(1) - timer.get(0);
+
+            if(elapsedTime > 5000) {
+                System.err.println("Elapsed Time: " + elapsedTime + "ms Intent: " + intents.get(0) + " may take too long");
+            }
+
+            intents.clear();
+            timer.clear();
+        }
 
         int i = 0;
         for (String param : params) {
@@ -140,7 +157,7 @@ public abstract class AbstractAmosAlexaSpeechletTest {
             slotsJson.append("\"").append(slotParts[0]).append("\":");
             slotsJson.append("{");
             slotsJson.append("\"name\":\"").append(slotParts[0]).append("\",");
-            slotsJson.append("\"value\":\"").append(slotParts[1]).append("\"");
+            slotsJson.append("\"value\":\"").append(slotParts.length > 1 ? slotParts[1] : null).append("\"");
             slotsJson.append("}");
         }
 

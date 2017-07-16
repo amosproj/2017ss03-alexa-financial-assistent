@@ -3,7 +3,6 @@ package api.banking;
 import model.banking.Account;
 import model.banking.Card;
 import model.banking.StandingOrder;
-import model.banking.Transaction;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.MediaTypes;
@@ -117,7 +116,7 @@ public class AccountAPI {
 		// TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
 		Traverson traverson = null;
 		try {
-			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/cards"),
+			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V2 + "/accounts/" + accountNumber + "/cards"),
 						MediaTypes.HAL_JSON);
 		} catch (URISyntaxException e) {
 			log.error("getCardsForAccount failed", e);
@@ -125,7 +124,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<Card>> typeRefDevices = new ParameterizedTypeReference<Resources<Card>>() {};
-		Resources<Card> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		Resources<Card> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
 		return resResponses.getContent();
 	}
 
@@ -181,31 +180,6 @@ public class AccountAPI {
 	}
 
 	/**
-	 * Get all transactions for the given account.
-	 *
-	 * @param accountNumber Account number
-	 * @return Collection of Cards
-	 * @throws HttpClientErrorException
-	 */
-	public static Collection<Transaction> getTransactionsForAccount(String accountNumber) throws HttpClientErrorException {
-		// TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
-		Traverson traverson = null;
-		String uri = BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/transactions";
-		log.info("URI: " + uri);
-		try {
-			traverson = new Traverson(new URI(uri),
-					MediaTypes.HAL_JSON);
-		} catch (URISyntaxException e) {
-			log.error("getTransactionsForAccount failed", e);
-			return null;
-		}
-
-		ParameterizedTypeReference<Resources<Transaction>> typeRefDevices = new ParameterizedTypeReference<Resources<Transaction>>() {};
-		Resources<Transaction> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
-		return resResponses.getContent();
-	}
-
-	/**
 	 * Get all standing orders for the given account.
 	 *
 	 * @param accountNumber Account number
@@ -216,7 +190,7 @@ public class AccountAPI {
 		// TODO: Create a generic method for getting embedded JSON-HAL collections (in BankingRESTClient)
 		Traverson traverson = null;
 		try {
-			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V1 + "/accounts/" + accountNumber + "/standingorders"),
+			traverson = new Traverson(new URI(BankingRESTClient.BANKING_API_ENDPOINT + BankingRESTClient.BANKING_API_BASEURL_V2 + "/accounts/" + accountNumber + "/standingorders"),
 					MediaTypes.HAL_JSON);
 		} catch (URISyntaxException e) {
 			log.error("getStandingOrdersForAccount failed", e);
@@ -224,7 +198,7 @@ public class AccountAPI {
 		}
 
 		ParameterizedTypeReference<Resources<StandingOrder>> typeRefDevices = new ParameterizedTypeReference<Resources<StandingOrder>>() {};
-		Resources<StandingOrder> resResponses = traverson.follow(rel("$._links.self.href")).toObject(typeRefDevices);
+		Resources<StandingOrder> resResponses = traverson.follow(rel("$._links.self.href")).withHeaders(bankingRESTClient.generateHttpHeaders()).toObject(typeRefDevices);
 		return resResponses.getContent();
 	}
 
