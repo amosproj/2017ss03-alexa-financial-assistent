@@ -112,7 +112,7 @@ public class TransactionForecastService extends AbstractSpeechService implements
     }
 
     private SpeechletResponse getGoodByeResponse() {
-        return getAskResponse(CARD, BYE);
+        return getResponse(CARD, BYE);
     }
 
     private SpeechletResponse getFutureTransactionListResponse() {
@@ -130,10 +130,10 @@ public class TransactionForecastService extends AbstractSpeechService implements
 
         if(i < size){ //
             DialogUtil.setDialogState("more?", session);
-            return getAskResponse(CARD, futureTransactionText.toString() + ". Möchtest du weitere hören");
+            return getSSMLAskResponse(CARD, futureTransactionText.toString() + ". Möchtest du weitere hören");
         }
 
-        return getResponse(CARD, futureTransactionText.toString());
+        return getSSMLResponse(CARD, futureTransactionText.toString() + ". Das waren alle zukünftigen Transaktionen");
     }
 
     private SpeechletResponse askForPeriodicTimeResponse() {
