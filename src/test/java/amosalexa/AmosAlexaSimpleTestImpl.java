@@ -843,7 +843,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         // no transactions
         newSession();
         testIntent("TransactionForecast", TransactionForecastService.DATE_ASK);
-        testIntent("TransactionForecast", "TargetDate:2016-12-31", TransactionForecastService.NO_TRANSACTION_INFO);
+        testIntent("TransactionForecast", "TargetDate:2016-12-31", TransactionForecastService.DATE_PAST);
     }
 
     @Test
