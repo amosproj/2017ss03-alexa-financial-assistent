@@ -27,6 +27,15 @@ public class DateUtil {
         return dateTime.dayOfMonth().get();
     }
 
+
+    public static boolean isPastDate(String date) {
+
+        DateTime dateTime = new DateTime(date);
+        DateTime now = new DateTime();
+
+        return dateTime.isBefore(now);
+    }
+
     /**
      * calculates how many times a transaction is executed (max. 12 month)
      * @param event event date

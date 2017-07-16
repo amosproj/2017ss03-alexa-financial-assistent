@@ -37,6 +37,8 @@ public class TransactionForecastService extends AbstractSpeechService implements
     public final static String DATE_ASK = "Sag mir bitte, bis wann möchtest du deine zukünftigen Transaktionen hören?";
     public final static String DATE_ERROR = "Ich konnte den Zeitpunkt nicht verstehen. Sag ein Datum bis wann du zukünftige Transaktionen hören willst";
     public final static String NO_TRANSACTION_INFO = "Ich konnte keine Transaktionen finden, die noch ausgeführt werden";
+    public final static String DATE_PAST = "Der Zeitpunkt befindet sich in der Vergangenheit. Sag ein Datum bis wann du zukünftige Transaktionen hören willst";
+
     public final static String BYE = "OK, Tschüss";
 
     /**
@@ -147,6 +149,8 @@ public class TransactionForecastService extends AbstractSpeechService implements
         int futureDayOfMonth = DateUtil.getDayOfMonth(futureDate);
 
         if(futureDayOfMonth == 0 || futureDate == null) return getAskResponse(CARD, DATE_ERROR);
+
+        if(DateUtil.isPastDate(futureDate)) return getAskResponse(CARD, DATE_PAST);
 
         List<Transaction> periodicTransactions = Transaction.getPeriodicTransactions(AccountData.ACCOUNT_DEFAULT);
         futureDatePeriodicTransactions = Transaction.getTargetDatePeriodicTransactions(periodicTransactions, futureDate);

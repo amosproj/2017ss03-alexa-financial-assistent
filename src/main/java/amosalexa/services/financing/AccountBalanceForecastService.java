@@ -39,6 +39,7 @@ public class AccountBalanceForecastService extends AbstractSpeechService impleme
      */
     public final static String DATE_ASK = "Sag mir bitte, zu welchem Zeitpunkt möchtest du dein Kontostand erfahren";
     public final static String DATE_ERROR = "Ich konnte den Zeitpunkt nicht verstehen. Sag ein Datum an dem du dein Kontostand erfahren willst";
+    public final static String DATE_PAST = "Der Zeitpunkt befindet sich in der Vergangenheit. Sag ein zuküngtiges Datum an dem du dein Kontostand erfahren willst";
 
     /**
      * slots
@@ -111,6 +112,8 @@ public class AccountBalanceForecastService extends AbstractSpeechService impleme
 
         int futureDayOfMonth = DateUtil.getDayOfMonth(futureDate);
         if(futureDayOfMonth == 0 || futureDate == null) return getAskResponse(CARD, DATE_ERROR);
+
+        if(DateUtil.isPastDate(futureDate)) return getAskResponse(CARD, DATE_PAST);
 
         double balance = AccountAPI.getAccount(AccountData.ACCOUNT_DEFAULT).getBalance().doubleValue();
         double futureTransactionBalance = getFutureTransactionBalance(futureDate);
