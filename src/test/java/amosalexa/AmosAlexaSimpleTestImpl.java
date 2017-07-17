@@ -458,8 +458,8 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         BudgetManager.instance.createSpending(category.getId(), 5);
         DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
 
-        LOGGER.info("getSpending: " + category.getSpending());
-        LOGGER.info("getLimit: " + category.getLimit());
+        //LOGGER.info("getSpending: " + category.getSpending());
+        //LOGGER.info("getLimit: " + category.getLimit());
 
         //Simple status test
         testIntent("CategoryStatusInfoIntent", "Category:" + TEST_CATEGORY_NAME,
@@ -467,8 +467,8 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                         " 95.0 Euro für diese Kategorie ausgeben.");
 
         BudgetManager.instance.createSpending(category.getId(), 145);
-        LOGGER.info("getSpending: " + category.getSpending());
-        LOGGER.info("getLimit: " + category.getLimit());
+        //LOGGER.info("getSpending: " + category.getSpending());
+        //LOGGER.info("getLimit: " + category.getLimit());
 
         //Simple status test
         testIntent("CategoryStatusInfoIntent", "Category:" + TEST_CATEGORY_NAME,
@@ -545,8 +545,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
             }
         }
 
-        //Set spending to 0 and limit to 100 for test purpose
-        //category.setSpending(0);
+        //Set limit to 100 for test purpose
         category.setLimit(100);
         //LOGGER.info("getSpending: " + category.getSpending());
         //LOGGER.info("getLimit: " + category.getLimit());
@@ -842,7 +841,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("PeriodicTransactionListIntent", "(.*)");
     }
 
-    @Test
+    //@Test
     public void budgetManagerTest() throws InterruptedException {
         //DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
         //dynamoDbMapper.createTable(TransactionDB.class);
