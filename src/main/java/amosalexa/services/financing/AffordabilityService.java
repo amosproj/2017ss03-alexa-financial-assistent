@@ -261,6 +261,13 @@ public class AffordabilityService extends AbstractSpeechService implements Speec
                 String productTitle = AWSUtil.shortTitle(items.get(i).getTitle());
                 items.get(i).setTitleShort(productTitle);
 
+                // Seems to happen if the product is not available? Just skip to prevent NullPointerException in getItemText()
+                if(items.get(i).getLowestNewPrice() == null) {
+                    items.remove(i);
+                    i--;
+                    continue;
+                }
+
                 // build respond
                 text.append("Produkt ")
                         .append((char) ('a' + i))
