@@ -66,8 +66,7 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
                 categories.add(new BudgetReportCategory(cat.getName(), cat.getSpending(), cat.getLimit()));
             }
             
-            JtwigModel model = JtwigModel.newModel().with("var", "World")
-                                                    .with("categories", categories);
+            JtwigModel model = JtwigModel.newModel().with("categories", categories);
 
             // Render mail template
             String body = template.render(model);
