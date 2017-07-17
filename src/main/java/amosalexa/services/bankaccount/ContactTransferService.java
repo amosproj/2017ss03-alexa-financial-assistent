@@ -21,6 +21,9 @@ import model.db.Category;
 import model.db.Contact;
 import model.db.TransactionDB;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -323,7 +326,9 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             amount = (int) amountObj;
         }
 
-        Transaction transaction = TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), "2017-05-16",
+        DateTimeFormatter apiTransactionFmt = DateTimeFormat.forPattern("yyyy-MM-dd");
+        String valueDate = DateTime.now().toString(apiTransactionFmt);
+        Transaction transaction = TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), valueDate,
                 "Beschreibung", "Hans", null);
 
 

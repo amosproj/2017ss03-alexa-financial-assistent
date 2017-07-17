@@ -83,7 +83,7 @@ public class BudgetManager {
 			for(Transaction transaction : apiTransactions) {
 				if(transactionDB.getTransactionId().equals(transaction.getTransactionId().toString())) {
 					if(transaction.getValueDateAsDateTime().isAfter(start) && transaction.getValueDateAsDateTime().isBefore(end)) {
-						sum += transaction.getAmount().doubleValue();
+						sum += Math.abs(transaction.getAmount().doubleValue());
 					}
 				}
 			}

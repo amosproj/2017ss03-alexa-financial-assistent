@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -747,8 +748,12 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Erfolgreich\\. 1\\.0 Euro wurden an Sandra überwiesen\\. Dein neuer Kontostand beträgt ([0-9\\.]+) Euro\\. " +
                         "Zu welcher Kategorie soll die Transaktion hinzugefügt werden. Sag zum Beispiel Kategorie " + Category.categoryListText());
 
+        double before = category.getSpending();
         testIntentMatches("PlainCategoryIntent", "Category:" + category.getName(),
                 "Verstanden. Die Transaktion wurde zur Kategorie " + category.getName() + " hinzugefügt");
+        double after = category.getSpending();
+
+        assertTrue("Category spending amount did not increase.", after > before);
 
         newSession();
 
@@ -839,19 +844,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
 
         testIntentMatches("PeriodicTransactionListIntent", "(.*)");
-    }
-
-    //@Test
-    public void budgetManagerTest() throws InterruptedException {
-        //DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
-        //dynamoDbMapper.createTable(TransactionDB.class);
-
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
-
-        for(Category category : categories) {
-            System.out.println("-> " + category.getName());
-            System.out.println("    -> " + BudgetManager.instance.getTotalSpendingForCategory(category.getId()));
-        }
     }
 
     @Test
