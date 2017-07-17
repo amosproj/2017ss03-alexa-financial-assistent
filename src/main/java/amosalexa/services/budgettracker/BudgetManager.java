@@ -77,7 +77,7 @@ public class BudgetManager {
 		List<TransactionDB> dbTransactions = dynamoDbMapper.loadAll(TransactionDB.class);
 
 		for(TransactionDB transactionDB : dbTransactions) {
-			if(!transactionDB.getCategoryId().equals(String.valueOf(categoryId))) {
+			if(transactionDB.getCategoryId() == null || !transactionDB.getCategoryId().equals(String.valueOf(categoryId))) {
 				continue;
 			}
 			for(Transaction transaction : apiTransactions) {
