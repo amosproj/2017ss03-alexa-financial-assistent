@@ -3,14 +3,18 @@ package amosalexa;
 import amosalexa.server.Launcher;
 import amosalexa.services.bankaccount.ContactTransferService;
 import amosalexa.services.financing.AccountBalanceForecastService;
+import amosalexa.services.budgettracker.BudgetManager;
 import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.TransactionForecastService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
 import model.banking.Card;
 import model.banking.StandingOrder;
 import model.db.Category;
 import model.db.Contact;
+import model.db.Spending;
+import model.db.TransactionDB;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
@@ -39,7 +43,11 @@ import static org.junit.Assert.fail;
 @org.junit.experimental.categories.Category(AmosAlexaSimpleTest.class)
 public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest implements AmosAlexaSimpleTest {
 
+    private static final String TEST_CATEGORY_NAME = "TEST-CATEGORY";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSimpleTestImpl.class);
+
+    private DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
 
     /*************************************
      *          Testing section          *
@@ -54,6 +62,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         String openingDate = formatter.format(time);
 
         AccountAPI.createAccount("9999999999", 1250000, openingDate);
+        AccountAPI.createAccount(AmosAlexaSpeechlet.ACCOUNT_ID, 1250000, openingDate);
     }
 
 
@@ -399,49 +408,74 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Dauerauftrag Nummer " + latestStandingOrderId + " wurde geloescht.");
     }
 
+    private void resetTestCategory() {
+        // Delete old test category
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        Category category = null;
+        List<Integer> testCategoryIds = new ArrayList<>();
+        for (Category cat : categories) {
+            if (cat.getName().equals(TEST_CATEGORY_NAME)) {
+                testCategoryIds.add(cat.getId());
+                category = cat;
+                DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, cat);
+            }
+        }
+
+        List<Spending> dbSpendings = dynamoDbMapper.loadAll(Spending.class);
+        for(Spending spending : dbSpendings) {
+            int catId = -1;
+            try {
+                catId = Integer.parseInt(spending.getCategoryId());
+            } catch(Exception e) {
+                continue;
+            }
+            if(testCategoryIds.contains(catId)) {
+                dynamoDbMapper.delete(spending);
+            }
+        }
+    }
+
     @Test
     public void categoryStatusInfoIntentTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
-        //Test assumes that category 'lebensmittel' already exists
 
-        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
-        //does not affect our data
+        resetTestCategory();
+
+        Category item = new Category(TEST_CATEGORY_NAME);
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, item);
+
         List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         Category category = null;
-        Double originalLimit = null;
-        Double originialSpending = null;
-        //We assume that 'lebensmittel' category exists!
         for (Category cat : categories) {
-            if (cat.getName().equals("lebensmittel")) {
+            if (cat.getName().equals(TEST_CATEGORY_NAME)) {
                 category = cat;
-                originalLimit = cat.getLimit();
-                originialSpending = cat.getSpending();
+                break;
             }
         }
 
         //Set spending to 0 and limit to 100 for test purpose
-        category.setSpending(0);
         category.setLimit(100);
-        category.setSpending(5);
-        LOGGER.info("getSpending: " + category.getSpending());
-        LOGGER.info("getLimit: " + category.getLimit());
+        BudgetManager.instance.createSpending(category.getId(), 5);
         DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
 
+        LOGGER.info("getSpending: " + category.getSpending());
+        LOGGER.info("getLimit: " + category.getLimit());
+
         //Simple status test
-        testIntent("CategoryStatusInfoIntent", "Category:lebensmittel",
-                "Du hast bereits 5% des Limits von 100.0 Euro fuer die Kategorie lebensmittel ausgegeben. Du kannst noch" +
+        testIntent("CategoryStatusInfoIntent", "Category:" + TEST_CATEGORY_NAME,
+                "Du hast bereits 5% des Limits von 100.0 Euro fuer die Kategorie " + TEST_CATEGORY_NAME + " ausgegeben. Du kannst noch" +
                         " 95.0 Euro für diese Kategorie ausgeben.");
 
-        category.setLimit(100);
-        category.setSpending(150);
+        BudgetManager.instance.createSpending(category.getId(), 145);
         LOGGER.info("getSpending: " + category.getSpending());
         LOGGER.info("getLimit: " + category.getLimit());
-        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
 
         //Simple status test
-        testIntent("CategoryStatusInfoIntent", "Category:lebensmittel",
-                "Du hast bereits 150% des Limits von 100.0 Euro fuer die Kategorie lebensmittel ausgegeben. Du kannst noch " +
+        testIntent("CategoryStatusInfoIntent", "Category:" + TEST_CATEGORY_NAME,
+                "Du hast bereits 150% des Limits von 100.0 Euro fuer die Kategorie " + TEST_CATEGORY_NAME + " ausgegeben. Du kannst noch " +
                         "0.0 Euro für diese Kategorie ausgeben.");
+
+        resetTestCategory();
     }
 
     @Test
@@ -496,55 +530,50 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     @Test
     public void categorySpendingTestIntent() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
-        //Test assumes that category 'lebensmittel' already exists
 
-        //Fetch category object 'lebensmittel' previously to be able to set it back afterwards, so that the test
-        //does not affect our data
+        resetTestCategory();
+
+        Category item = new Category(TEST_CATEGORY_NAME);
+        DynamoDbClient.instance.putItem(Category.TABLE_NAME, item);
+
         List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         Category category = null;
-        Double originalLimit = null;
-        Double originialSpending = null;
-        //We assume that 'lebensmittel' category exists!
         for (Category cat : categories) {
-            if (cat.getName().equals("lebensmittel")) {
+            if (cat.getName().equals(TEST_CATEGORY_NAME)) {
                 category = cat;
-                originalLimit = cat.getLimit();
-                originialSpending = cat.getSpending();
+                break;
             }
         }
 
         //Set spending to 0 and limit to 100 for test purpose
-        category.setSpending(0);
+        //category.setSpending(0);
         category.setLimit(100);
-        LOGGER.info("getSpending: " + category.getSpending());
-        LOGGER.info("getLimit: " + category.getLimit());
+        //LOGGER.info("getSpending: " + category.getSpending());
+        //LOGGER.info("getLimit: " + category.getLimit());
         DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
 
         //Simple spending test
-        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:5",
-                "Okay. Ich habe 5 Euro fuer lebensmittel notiert.");
+        testIntent("CategorySpendingIntent", "Category:" + TEST_CATEGORY_NAME, "Amount:5",
+                "Okay. Ich habe 5 Euro fuer " + TEST_CATEGORY_NAME + " notiert.");
 
         //Spending 89 OK!
-        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:84",
-                "Okay. Ich habe 84 Euro fuer lebensmittel notiert.");
+        testIntent("CategorySpendingIntent", "Category:" + TEST_CATEGORY_NAME, "Amount:84",
+                "Okay. Ich habe 84 Euro fuer " + TEST_CATEGORY_NAME + " notiert.");
 
         //Spending 90 Warning!
-        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:1",
-                "Okay. Ich habe 1 Euro fuer lebensmittel notiert. Warnung! Du hast in diesem Monat bereits 90 Euro" +
-                        " fuer lebensmittel ausgegeben. Das sind 90% des Limits fuer diese Kategorie.");
+        testIntent("CategorySpendingIntent", "Category:" + TEST_CATEGORY_NAME, "Amount:1",
+                "Okay. Ich habe 1 Euro fuer " + TEST_CATEGORY_NAME + " notiert. Warnung! Du hast in diesem Monat bereits 90 Euro" +
+                        " fuer " + TEST_CATEGORY_NAME + " ausgegeben. Das sind 90% des Limits fuer diese Kategorie.");
 
         //Limit overrun warning
-        testIntent("CategorySpendingIntent", "Category:lebensmittel", "Amount:20",
-                "Warnung! Durch diese Aktion wirst du das Limit von 100 fuer die Kategorie lebensmittel ueberschreiten." +
+        testIntent("CategorySpendingIntent", "Category:" + TEST_CATEGORY_NAME, "Amount:20",
+                "Warnung! Durch diese Aktion wirst du das Limit von 100 fuer die Kategorie " + TEST_CATEGORY_NAME + " ueberschreiten." +
                         " Soll ich den Betrag trotzdem notieren?");
 
-        testIntent("AMAZON.YesIntent", "Okay. Ich habe 20 Euro fuer lebensmittel notiert. Warnung! Du hast" +
-                " in diesem Monat bereits 110 Euro fuer lebensmittel ausgegeben. Das sind 110% des Limits fuer diese Kategorie.");
+        testIntent("AMAZON.YesIntent", "Okay. Ich habe 20 Euro fuer " + TEST_CATEGORY_NAME + " notiert. Warnung! Du hast" +
+                " in diesem Monat bereits 110 Euro fuer " + TEST_CATEGORY_NAME + " ausgegeben. Das sind 110% des Limits fuer diese Kategorie.");
 
-        //Reset category lebensmittel to previous state
-        category.setSpending(0);
-        category.setLimit(originalLimit);
-        DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+        resetTestCategory();
     }
 
     @Test
@@ -811,6 +840,19 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
 
         testIntentMatches("PeriodicTransactionListIntent", "(.*)");
+    }
+
+    @Test
+    public void budgetManagerTest() throws InterruptedException {
+        //DynamoDbMapper dynamoDbMapper = new DynamoDbMapper(DynamoDbClient.getAmazonDynamoDBClient());
+        //dynamoDbMapper.createTable(TransactionDB.class);
+
+        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+
+        for(Category category : categories) {
+            System.out.println("-> " + category.getName());
+            System.out.println("    -> " + BudgetManager.instance.getTotalSpendingForCategory(category.getId()));
+        }
     }
 
     @Test

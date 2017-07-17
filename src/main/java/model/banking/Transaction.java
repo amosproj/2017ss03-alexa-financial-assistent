@@ -4,6 +4,9 @@ import amosalexa.services.DateUtil;
 import amosalexa.services.DialogUtil;
 import amosalexa.services.NumberUtil;
 import api.aws.DynamoDbMapper;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import api.banking.TransactionAPI;
 import model.db.TransactionDB;
 import org.slf4j.Logger;
@@ -16,6 +19,7 @@ import java.util.List;
 public class Transaction extends ResourceSupport {
 
     private static final Logger log = LoggerFactory.getLogger(Transaction.class);
+    private static final DateTimeFormatter apiTransactionFmt = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private static List<Transaction> transactionCache;
 
@@ -112,6 +116,10 @@ public class Transaction extends ResourceSupport {
 
     public String getValueDate() {
         return valueDate;
+    }
+
+    public DateTime getValueDateAsDateTime() {
+        return apiTransactionFmt.parseDateTime(valueDate);
     }
 
     public void setValueDate(String valueDate) {

@@ -1,8 +1,10 @@
 package model.db;
 
+import amosalexa.services.budgettracker.BudgetManager;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbStorable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,11 +29,6 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
      */
     private double limit;
 
-    /**
-     * The amount that has been spent for this category.
-     */
-    private double spending;
-
     public Category() {
     }
 
@@ -42,7 +39,6 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
     public Category(String name, double limit, double spending) {
         this.name = name;
         this.limit = limit;
-        this.spending = spending;
     }
 
     @Override
@@ -51,7 +47,6 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
         map.put("id", new AttributeValue().withN(Integer.toString(id)));
         map.put("name", new AttributeValue(name));
         map.put("limit", new AttributeValue(String.valueOf(limit)));
-        map.put("spending", new AttributeValue(String.valueOf(spending)));
         return map;
     }
 
@@ -74,14 +69,15 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
             case "limit":
                 this.limit = Double.parseDouble(attributeValue.getS());
                 break;
-            case "spending":
-                this.spending = Double.parseDouble(attributeValue.getS());
-                break;
         }
     }
 
     public Long getSpendingPercentage() {
-        return Math.round((spending / limit) * 100);
+        return Math.round((getSpending() / limit) * 100);
+    }
+
+    public double getSpending() {
+        return BudgetManager.instance.getTotalSpendingForCategory(this.getId());
     }
 
     @Override
@@ -95,7 +91,6 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", limit=" + limit +
-                ", spending=" + spending +
                 '}';
     }
 
@@ -109,7 +104,6 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
 
         if (id != category.id) return false;
         if (Double.compare(category.limit, limit) != 0) return false;
-        if (Double.compare(category.spending, spending) != 0) return false;
         return name != null ? name.equals(category.name) : category.name == null;
     }
 
@@ -120,8 +114,6 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
         result = 31 * result + id;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         temp = Double.doubleToLongBits(limit);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(spending);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
@@ -138,14 +130,6 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
 
     public String getName() {
         return name;
-    }
-
-    public double getSpending() {
-        return spending;
-    }
-
-    public void setSpending(double spending) {
-        this.spending = spending;
     }
 
     public double getLimit() {
