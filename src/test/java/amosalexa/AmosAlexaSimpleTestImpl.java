@@ -808,7 +808,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Möchtest du die Kategorie mit dem Namen 'Auto' und dem Limit von 0.0 Euro wirklich löschen?");
 
         testIntent("AMAZON.YesIntent",
-                "OK, wie du willst. Ich habe die Kategorie mit dem Namen 'Auto' gelöscht. Hoffentlich bereust du es nicht.");
+                "OK, wie du willst. Ich habe die Kategorie mit dem Namen 'Auto' gelöscht.");
 
         testIntent("ShowCategoriesIntent",
                 "Aktuell hast du keine Kategorien.");

@@ -191,9 +191,8 @@ IntroductionIntent Was kannst du eigentlich
 IntroductionIntent Was kann ich fragen
 IntroductionIntent Hilfe
 FunctionGroupOverviewIntent Übersicht über Kategorien
-FunctionGroupIntent Mehr über Kategorie {CategoryName}
+FunctionGroupIntent Mehr über Kategorie {FunctionGroup}
 
-PlainCategoryIntent {Category}
 PlainCategoryIntent Kategorie {Category}
 
 PeriodicTransactionListIntent Wie sind meine periodischen Transaktionen
