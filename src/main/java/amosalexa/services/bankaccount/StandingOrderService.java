@@ -552,6 +552,15 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         Slot amountSlot = slots.get("orderAmount");
         String amount = (amountSlot == null ? null : amountSlot.getValue());
+        String payeeFullName;
+        if (payee == null) {
+            payeeFullName = payeeSecondName.toLowerCase();
+        } else if (payeeSecondName == null) {
+            payeeFullName = payee.toLowerCase();
+        } else {
+            payeeFullName = (payee + " " + payeeSecondName).toLowerCase();
+        }
+        LOGGER.info("full name: " + payeeFullName);
 
         session.setAttribute("NewAmount", amount);
         session.setAttribute("Payee", payee);
@@ -560,8 +569,9 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         for (StandingOrder standingOrder : standingOrders) {
 
             String amountString = Integer.toString(standingOrder.getAmount().intValue());
+            LOGGER.info(standingOrder.getPayee().toLowerCase() + ": " + payeeFullName);
 
-            if (standingOrder.getPayee().toLowerCase().equals(payee + " " + payeeSecondName)) {
+            if (standingOrder.getPayee().toLowerCase().equals(payeeFullName)) {
                 //getting data object
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
                 Date executionDate;
@@ -574,7 +584,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
                 // Create the plain text output
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText("Der Dauerauftrag für " + payee + " " + payeeSecondName + " über " + standingOrder.getAmount() +
+                speech.setText("Der Dauerauftrag für " + payeeFullName + " über " + standingOrder.getAmount() +
                         " Euro existiert schon. Möchtest du diesen aktualisieren");
 
                 session.setAttribute("StandingOrderToModify", standingOrder.getStandingOrderId());
@@ -590,18 +600,20 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         //creating a new stating order if its in contact list
         List<Contact> contactList = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
         List<Contact> contacts = new ArrayList<>(contactList);
-        String payeeFullName = payee + " " + payeeSecondName;
         for (int i = 0; i < contacts.size(); i++) {
-            if (contacts.get(i).getName().toString().toLowerCase().equals(payeeFullName.toLowerCase())) {
+            LOGGER.info(contacts.get(i).getName().toString().toLowerCase());
+            if (contacts.get(i).getName().toString().toLowerCase().equals(payeeFullName)) {
                 StandingOrder standingOrder = new StandingOrder();
-                standingOrder.setPayee(payee + " " + payeeSecondName);
+                standingOrder.setPayee(payeeFullName);
                 standingOrder.setAmount(Integer.parseInt(amount));
                 standingOrder.setDestinationAccount(contacts.get(i).getIban());
+                standingOrder.setFirstExecution("09-09-2017");
+                standingOrder.setDestinationAccount("DE39100000007777777777");
                 AccountAPI.createStandingOrderForAccount(ACCOUNT_NUMBER, standingOrder);
 
                 PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-                speech.setText("Ich habe den neuen Dauerauftrag für" +
-                        payee + " " + payeeSecondName + " über " + amount + " Euro erfolgreich eingerichtet");
+                speech.setText("Ich habe den neuen Dauerauftrag für" + payeeFullName +
+                         " über " + amount + " Euro erfolgreich eingerichtet");
 
                 //deleting attributes
                 session.removeAttribute("NewAmount");
@@ -614,7 +626,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
 
         // Contact not found
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Ich habe " + payee + " " + payeeSecondName + " in deiner Kontaktliste nicht gefunden. " +
+        speech.setText("Ich habe " + payeeFullName + " in deiner Kontaktliste nicht gefunden. " +
                 "Du musst ihm erst in der Kontaktliste hinzufügen");
 
         //deleting attributes
