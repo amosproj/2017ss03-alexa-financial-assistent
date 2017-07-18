@@ -133,7 +133,7 @@ public class AuthenticationAPI {
 		}
 
 		try {
-			DateTime validUntil = fmt.parseDateTime(user.getAccessTokenExpiryTime());
+			DateTime validUntil = fmt.parseDateTime(user.getAccessTokenExpiryTime()).withZone(DateTimeZone.UTC);
 
 			DateTime now = DateTime.now().withZone(DateTimeZone.UTC);
 
