@@ -1,9 +1,11 @@
-package amosalexa.services.editCategories;
+package amosalexa.services.budgettracker;
 
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -12,7 +14,6 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
 import model.db.Category;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,6 +22,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.BUDGET_TRACKING,
+        functionName = "Alle Kategorien verwalten",
+        example = "Zeig mir meine Kategorien!",
+        description = "Mit dieser Funktion kannst du Kategorien ausgeben lassen, Kategorien erstellen und Kategorien löschen."
+)
 public class EditCategoriesService extends AbstractSpeechService implements SpeechService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditCategoriesService.class);
     private static final String ADD_CATEGORY_INTENT = "AddCategoryIntent";
@@ -130,6 +137,11 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
 
         if (!confirmed) {
             Slot categoryNameSlot = intent.getSlot("CategoryName");
+
+            if (contains(categoryNameSlot.getValue()) == true) {
+                return getResponse(SERVICE_CARD_TITLE, "Diese Kategorie existiert bereits.");
+            }
+
             session.setAttribute(DIALOG_CONTEXT, ADD_CATEGORY_INTENT);
             SessionStorage.getInstance().putObject(session.getSessionId(), SERVICE_CARD_TITLE + ".categoryName", categoryNameSlot.getValue());
 
@@ -171,7 +183,7 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         }
 
         if (closestDist > 5) {
-            return getResponse(SERVICE_CARD_TITLE, "Ich konnte keine passende Kategorie finden. Vielleicht hast du sie ja schon gelöscht, du Held.");
+            return getResponse(SERVICE_CARD_TITLE, "Ich konnte keine passende Kategorie finden.");
         }
 
         SessionStorage.getInstance().putObject(session.getSessionId(), SERVICE_CARD_TITLE + ".categoryId", closestCategory);
@@ -203,7 +215,22 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
 
         DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, closestCategory);
 
-        return getResponse(SERVICE_CARD_TITLE, "OK, wie du willst. Ich habe die Kategorie mit dem Namen '" + closestCategory.getName() + "' gelöscht. Hoffentlich bereust du es nicht.");
+        return getResponse(SERVICE_CARD_TITLE, "OK, wie du willst. Ich habe die Kategorie mit dem Namen '" + closestCategory.getName() + "' gelöscht.");
+    }
+
+    private boolean contains(String categoryName) {
+        List<Category> items = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        categoryName = categoryName.toLowerCase();
+
+        for (Category item : items) {
+            if (StringUtils.getLevenshteinDistance(
+                    item.getName().toLowerCase(),
+                    categoryName) < 2) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

@@ -72,6 +72,7 @@ dependencies {
     compile 'com.jayway.jsonpath:json-path:2.2.0'
 
     compile 'org.jtwig:jtwig-core:5.85.3.RELEASE'
+    compile 'org.reflections:reflections:0.9.10'
 
     testCompile 'junit:junit:4.12'
 }
