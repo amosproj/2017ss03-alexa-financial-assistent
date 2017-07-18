@@ -1,8 +1,10 @@
 package amosalexa.services.budgettracker;
 
+import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -26,6 +28,12 @@ import java.util.Map;
 /**
  * Budget tracking service
  */
+@Service(
+        functionGroup = HelpService.FunctionGroup.BUDGET_TRACKING,
+        functionName = "Einzelne Kategorie verwalten",
+        example = "Wie ist das Limit für Lebensmittel?",
+        description = "Mit dieser Funktion kannst du das Limit für eine Kategorie ändern oder den Status einer Kategorie abfragen."
+)
 public class BudgetTrackerService extends AbstractSpeechService implements SpeechService {
 
     @Override

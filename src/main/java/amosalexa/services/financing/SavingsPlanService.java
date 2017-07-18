@@ -1,8 +1,10 @@
 package amosalexa.services.financing;
 
+import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
@@ -27,6 +29,13 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.SMART_FINANCING,
+        functionName = "Sparplan erstellen",
+        example = "Erstelle einen Sparplan!",
+        description = "Mit dieser Funktion kannst du einen individuellen Sparplan erstellen. Du kannst dabei Parameter wie " +
+                "Laufzeit, monatlicher Sparbetrag und initialer Sparbetrag festlegen."
+)
 public class SavingsPlanService extends AbstractSpeechService implements SpeechService {
 
     @Override

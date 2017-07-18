@@ -1,9 +1,11 @@
-package amosalexa.services.editCategories;
+package amosalexa.services.budgettracker;
 
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -20,6 +22,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.BUDGET_TRACKING,
+        functionName = "Alle Kategorien verwalten",
+        example = "Zeig mir meine Kategorien!",
+        description = "Mit dieser Funktion kannst du Kategorien ausgeben lassen, Kategorien erstellen und Kategorien löschen."
+)
 public class EditCategoriesService extends AbstractSpeechService implements SpeechService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditCategoriesService.class);
     private static final String ADD_CATEGORY_INTENT = "AddCategoryIntent";
