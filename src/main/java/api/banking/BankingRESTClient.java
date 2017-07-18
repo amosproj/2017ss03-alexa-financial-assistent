@@ -55,6 +55,7 @@ public class BankingRESTClient {
      * @return the http headers
      */
     public static HttpHeaders generateHttpHeaders() {
+        log.info("generateHttpHeaders");
         // Refresh the user's access token if necessary
         AuthenticationAPI.updateAccessToken(USER_ID);
 

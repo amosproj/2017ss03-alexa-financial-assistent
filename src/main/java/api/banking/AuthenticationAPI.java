@@ -3,6 +3,7 @@ package api.banking;
 import api.aws.DynamoDbClient;
 import model.db.User;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.LoggerFactory;
@@ -107,9 +108,10 @@ public class AuthenticationAPI {
 
 			// Add expiry time (seconds) to current time, store this value as a String in the User object
 			int expiresInSeconds = Integer.valueOf(authResponse.getExpires_in());
-			DateTime expiryDateTime = DateTime.now().plusSeconds(expiresInSeconds);
+			DateTime expiryDateTime = DateTime.now().withZone(DateTimeZone.UTC).plusSeconds(expiresInSeconds);
 			String dtStr = fmt.print(expiryDateTime);
 			user.setAccessTokenExpiryTime(dtStr);
+			log.info("new expiry time: " + dtStr);
 
 			// Store this token in our HashMap
 			accessTokenUsers.put(user.getId(), user);
@@ -131,9 +133,11 @@ public class AuthenticationAPI {
 		}
 
 		try {
-			DateTime validUntil = fmt.parseDateTime(user.getAccessTokenExpiryTime());
+			DateTime validUntil = fmt.parseDateTime(user.getAccessTokenExpiryTime()).withZone(DateTimeZone.UTC);
 
-			DateTime now = DateTime.now();
+			DateTime now = DateTime.now().withZone(DateTimeZone.UTC);
+
+			log.info("now: " + now + " - validUntil: " + validUntil);
 
 			if(validUntil.minusMinutes(10).isBefore(now)) {
 				return true;
