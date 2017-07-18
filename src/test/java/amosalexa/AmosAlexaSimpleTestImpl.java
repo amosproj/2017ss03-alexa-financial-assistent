@@ -6,6 +6,7 @@ import amosalexa.services.financing.AccountBalanceForecastService;
 import amosalexa.services.budgettracker.BudgetManager;
 import amosalexa.services.financing.AffordabilityService;
 import amosalexa.services.financing.TransactionForecastService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
@@ -423,14 +424,14 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         }
 
         List<Spending> dbSpendings = dynamoDbMapper.loadAll(Spending.class);
-        for(Spending spending : dbSpendings) {
+        for (Spending spending : dbSpendings) {
             int catId = -1;
             try {
                 catId = Integer.parseInt(spending.getCategoryId());
-            } catch(Exception e) {
+            } catch (Exception e) {
                 continue;
             }
-            if(testCategoryIds.contains(catId)) {
+            if (testCategoryIds.contains(catId)) {
                 dynamoDbMapper.delete(spending);
             }
         }
@@ -855,9 +856,9 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("TransactionForecast", "TargetDate:2017-09-03",
                 "Ich habe (.*) Transaktionen gefunden, die noch bis zum (.*) ausgeführt werden. Insgesamt werden noch (.*)");
         testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*)|" +
-                TransactionForecastService.NO_TRANSACTION_INFO );
+                TransactionForecastService.NO_TRANSACTION_INFO);
         testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*)|" +
-                TransactionForecastService.NO_TRANSACTION_INFO );
+                TransactionForecastService.NO_TRANSACTION_INFO);
 
 
         // list all ? no
@@ -888,5 +889,27 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         newSession();
         testIntentMatches("AccountBalanceForecast", "TargetDate:2017-12-31",
                 "Dein Kontostand beträgt vorraussichtlich am (.*)");
+    }
+
+    @Test
+    public void introductionService() throws Exception {
+        newSession();
+
+        testIntent("IntroductionIntent",
+                "Willkommen bei AMOS, der sprechenden Banking-App! Mit mir kannst du deine Bank-Geschäfte" +
+                        " mit Sprachbefehlen erledigen. Ich möchte dir kurz vorstellen, was ich alles kann. Um eine Übersicht über die" +
+                        " verfügbaren Kategorien von Funktionen zu erhalten, sage \"Übersicht über Kategorien\". Um mehr über die Funktionen einer" +
+                        " Kategorie zu erfahren, sage \"Mehr über Kategorie\" und dann den Namen der Kategorie, zum Beispiel \"Mehr über Kategorie Smart Financing\".");
+
+        testIntentMatches("FunctionGroupOverviewIntent",
+                "Die Funktionen sind in folgende Kategorien gruppiert: " +
+                        "(.*). " +
+                        "Um mehr über eine Kategorie zu erfahren, sage \"Mehr über Kategorie\" und dann den Namen der Kategorie.");
+
+        for (HelpService.FunctionGroup category : EnumSet.allOf(HelpService.FunctionGroup.class)) {
+            testIntentMatches("FunctionGroupIntent",
+                    "FunctionGroup:" + category,
+                    "Gerne erkläre ich dir die Funktionen in der Kategorie " + category + " (.*)");
+        }
     }
 }
