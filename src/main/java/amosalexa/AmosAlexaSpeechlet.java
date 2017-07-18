@@ -20,7 +20,7 @@ import amosalexa.services.budgettracker.BudgetTrackerService;
 import amosalexa.services.cards.BlockCardService;
 import amosalexa.services.cards.ReplacementCardService;
 import amosalexa.services.contacts.ContactService;
-import amosalexa.services.editCategories.EditCategoriesService;
+import amosalexa.services.budgettracker.EditCategoriesService;
 import amosalexa.services.financing.*;
 import amosalexa.services.help.HelpService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;

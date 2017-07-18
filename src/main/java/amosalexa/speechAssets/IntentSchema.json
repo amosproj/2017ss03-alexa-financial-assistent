@@ -65,6 +65,9 @@
       "intent": "IntroductionIntent"
     },
     {
+      "intent": "FunctionGroupOverviewIntent"
+    },
+    {
       "intent": "FunctionGroupIntent",
       "slots": [
         {

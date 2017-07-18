@@ -190,6 +190,8 @@ IntroductionIntent Was kann AMOS
 IntroductionIntent Was kannst du eigentlich
 IntroductionIntent Was kann ich fragen
 IntroductionIntent Hilfe
+FunctionGroupOverviewIntent Übersicht über Kategorien
+FunctionGroupIntent Mehr über Kategorie {CategoryName}
 
 PlainCategoryIntent {Category}
 PlainCategoryIntent Kategorie {Category}
