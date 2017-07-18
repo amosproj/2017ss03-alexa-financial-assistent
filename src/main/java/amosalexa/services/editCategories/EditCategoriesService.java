@@ -175,7 +175,7 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         }
 
         if (closestDist > 5) {
-            return getResponse(SERVICE_CARD_TITLE, "Ich konnte keine passende Kategorie finden. Vielleicht hast du sie ja schon gelöscht, du Held.");
+            return getResponse(SERVICE_CARD_TITLE, "Ich konnte keine passende Kategorie finden.");
         }
 
         SessionStorage.getInstance().putObject(session.getSessionId(), SERVICE_CARD_TITLE + ".categoryId", closestCategory);
@@ -207,28 +207,22 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
 
         DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, closestCategory);
 
-        return getResponse(SERVICE_CARD_TITLE, "OK, wie du willst. Ich habe die Kategorie mit dem Namen '" + closestCategory.getName() + "' gelöscht. Hoffentlich bereust du es nicht.");
+        return getResponse(SERVICE_CARD_TITLE, "OK, wie du willst. Ich habe die Kategorie mit dem Namen '" + closestCategory.getName() + "' gelöscht.");
     }
 
     private boolean contains(String categoryName) {
-
         List<Category> items = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
-        String namesOfCategories = "";
-
-        for (Category item : items) {
-            namesOfCategories += item.getName() + ", ";
-        }
-
-        namesOfCategories = namesOfCategories.toLowerCase();
         categoryName = categoryName.toLowerCase();
 
-        if (namesOfCategories.contains(categoryName)) {
-            return true;
-        } else {
-            return false;
+        for (Category item : items) {
+            if (StringUtils.getLevenshteinDistance(
+                    item.getName().toLowerCase(),
+                    categoryName) < 2) {
+                return true;
+            }
         }
 
-
+        return false;
     }
 
 }
