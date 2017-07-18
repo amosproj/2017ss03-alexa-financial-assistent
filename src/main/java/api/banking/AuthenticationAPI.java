@@ -110,6 +110,7 @@ public class AuthenticationAPI {
 			DateTime expiryDateTime = DateTime.now().plusSeconds(expiresInSeconds);
 			String dtStr = fmt.print(expiryDateTime);
 			user.setAccessTokenExpiryTime(dtStr);
+			log.info("new expiry time: " + dtStr);
 
 			// Store this token in our HashMap
 			accessTokenUsers.put(user.getId(), user);
@@ -134,6 +135,8 @@ public class AuthenticationAPI {
 			DateTime validUntil = fmt.parseDateTime(user.getAccessTokenExpiryTime());
 
 			DateTime now = DateTime.now();
+
+			log.info("now: " + now + " - validUntil: " + validUntil);
 
 			if(validUntil.minusMinutes(10).isBefore(now)) {
 				return true;
