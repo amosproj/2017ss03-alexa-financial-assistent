@@ -67,7 +67,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
     private static final String STANDING_ORDERS_INFO_INTENT = "StandingOrdersInfoIntent";
     private static final String STANDING_ORDERS_DELETE_INTENT = "StandingOrdersDeleteIntent";
     private static final String STANDING_ORDERS_MODIFY_INTENT = "StandingOrdersModifyIntent";
-    private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrderKeyword";
+    private static final String STANDING_ORDERS_KEYWORD_INTENT = "StandingOrdersKeywordIntent";
     private static final String STANDING_ORDERS_SMART_INTENT = "StandingOrderSmartIntent";
 
     // FIXME: Get the current account number from the session
