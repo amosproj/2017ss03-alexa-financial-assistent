@@ -12,12 +12,9 @@ public class DemoAccountTest {
     private static DynamoDbMapper dynamoDbMapper = DynamoDbMapper.getInstance();
 
 
-    @BeforeClass
+    /*@BeforeClass
     public static void createTables() throws InterruptedException {
-
-        /**
-         * properly drop old tables first
-          */
+        // Drop and recreate tables
 
         dynamoDbMapper.dropTable(AccountDB.class);
         dynamoDbMapper.dropTable(CategoryDB.class);
@@ -33,10 +30,9 @@ public class DemoAccountTest {
 
     }
 
-
     @Test
     public void createDemoAccount(){
        Account demoAccount = AccountFactory.getInstance().createDemo();
-    }
+    }*/
 
 }
