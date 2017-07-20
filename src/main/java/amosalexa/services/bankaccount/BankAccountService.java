@@ -1,9 +1,11 @@
 package amosalexa.services.bankaccount;
 
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.banking.AccountAPI;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -25,6 +27,13 @@ import java.util.List;
  * <p>
  * registered Intent @BANK_ACCOUNT_INTENT, @YES_INTENT, @NO_INTENT
  */
+@Service(
+        functionGroup = HelpService.FunctionGroup.ACCOUNT_INFORMATION,
+        functionName = "Kontoinformation",
+        example = "Wie ist mein Kontostand? ",
+        description = "Mit dieser Funktion kannst du Informationen über dein Konto abfragen. Du kannst dabei Parameter wie " +
+                "Kontostand, Kreditlimit, Überweisungen, IBAN und Abhebegebühr angeben."
+)
 public class BankAccountService extends AbstractSpeechService implements SpeechService {
 
     /**
