@@ -6,6 +6,7 @@ import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import api.aws.EMailClient;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -598,7 +599,7 @@ public class StandingOrderService extends AbstractSpeechService implements Speec
         }
 
         //creating a new stating order if its in contact list
-        List<Contact> contactList = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        List<Contact> contactList = DynamoDbMapper.getInstance().loadAll(Contact.class);
         List<Contact> contacts = new ArrayList<>(contactList);
         for (int i = 0; i < contacts.size(); i++) {
             LOGGER.info(contacts.get(i).getName().toString().toLowerCase());

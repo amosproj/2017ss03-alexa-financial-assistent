@@ -17,13 +17,13 @@ public class DemoAccountTest {
         // Drop and recreate tables
 
         dynamoDbMapper.dropTable(AccountDB.class);
-        dynamoDbMapper.dropTable(CategoryDB.class);
+        dynamoDbMapper.dropTable(Category.class);
         dynamoDbMapper.dropTable(ContactDB.class);
         dynamoDbMapper.dropTable(StandingOrderDB.class);
         dynamoDbMapper.dropTable(model.db.User.class);
 
         dynamoDbMapper.createTable(AccountDB.class);
-        dynamoDbMapper.createTable(CategoryDB.class);
+        dynamoDbMapper.createTable(Category.class);
         dynamoDbMapper.createTable(ContactDB.class);
         dynamoDbMapper.createTable(StandingOrderDB.class);
         dynamoDbMapper.createTable(model.db.User.class);

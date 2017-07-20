@@ -27,6 +27,7 @@ public class DynamoDbClient {
         BasicAWSCredentials credentials = new BasicAWSCredentials("AKIAIUOLL3674W3T67IQ", "X4KiAVCPab5aiW0c/93y7PnABVsPlj6YYqmfSkng");
         dynamoDB = new AmazonDynamoDBClient(credentials);
         dynamoDB.setEndpoint("http://dynamodb.us-east-1.amazonaws.com");
+        //dynamoDB.setEndpoint("http://localhost:8000");
         return dynamoDB;
     }
 

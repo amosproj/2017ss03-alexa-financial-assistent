@@ -166,7 +166,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     private SpeechletResponse standingOrderCategoryResponse(Intent intent, Session session){
         String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
         LOGGER.info("Category: " + categoryName);
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
                 String standingOrderId = (String) session.getAttribute(STANDING_ORDER_ID_ATTRIBUTE);

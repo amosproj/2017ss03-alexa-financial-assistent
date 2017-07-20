@@ -93,7 +93,10 @@ public class AccountFactory {
         String[] names = {"bob", "sandra", "lucas"};
         int i = 0;
         for(Account contactAccount : contactAccounts){
-            dynamoDbMapper.save(new ContactDB(contactAccount.getNumber(), names[i]));
+            Contact c = new Contact();
+            c.setAccountNumber(contactAccount.getNumber());
+            c.setName(names[i]);
+            dynamoDbMapper.save(c);
             i++;
         }
     }
@@ -131,7 +134,7 @@ public class AccountFactory {
     private void createCategories(Account newDemoAccount) {
         String[] categoryNames = {"auto", "haushalt", "freizeit", "reisen", "sonstiges"};
         for (String categoryName : categoryNames) {
-            dynamoDbMapper.save(new CategoryDB(newDemoAccount.getNumber(), categoryName, 200));
+            dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), categoryName, 200));
         }
     }
 
@@ -144,14 +147,14 @@ public class AccountFactory {
     }
 
     private String getRandomCategoryId(){
-        List<CategoryDB> categoryDBList = dynamoDbMapper.loadAll(CategoryDB.class);
+        List<Category> categoryDBList = dynamoDbMapper.loadAll(Category.class);
         int randomNum = ThreadLocalRandom.current().nextInt(0, categoryDBList.size());
         return categoryDBList.get(randomNum).getId();
     }
 
     private String getContactName(String accountNumber) {
-        List<ContactDB> contactDBList = dynamoDbMapper.loadAll(ContactDB.class);
-        for(ContactDB contactDB : contactDBList){
+        List<Contact> contactDBList = dynamoDbMapper.loadAll(Contact.class);
+        for(Contact contactDB : contactDBList){
             if(contactDB.getAccountNumber().equals(accountNumber))
                 return contactDB.getName();
         }
@@ -176,8 +179,8 @@ public class AccountFactory {
     }
 
     private void removeDemoCategories(String accountNumber) {
-        List<CategoryDB> categoryDBList = dynamoDbMapper.loadAll(CategoryDB.class);
-        for (CategoryDB categoryDB : categoryDBList) {
+        List<Category> categoryDBList = dynamoDbMapper.loadAll(Category.class);
+        for (Category categoryDB : categoryDBList) {
             if (categoryDB.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(categoryDB);
             }
@@ -212,8 +215,8 @@ public class AccountFactory {
     }
 
     private void removeDemoContacts(String accountNumber) {
-        List<ContactDB> contactDBList = dynamoDbMapper.loadAll(ContactDB.class);
-        for (ContactDB contactDB : contactDBList) {
+        List<Contact> contactDBList = dynamoDbMapper.loadAll(Contact.class);
+        for (Contact contactDB : contactDBList) {
             if (contactDB.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(contactDB);
             }

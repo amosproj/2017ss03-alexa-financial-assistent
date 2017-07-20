@@ -17,6 +17,8 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import model.banking.Account;
 import model.banking.Transaction;
 import model.db.Category;
@@ -151,7 +153,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
 
     private SpeechletResponse transactionCategoryResponse(Intent intent, Session session){
         String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
                 String transactionId = (String) session.getAttribute(TRANSACTION_ID_ATTRIBUTE);
@@ -186,7 +188,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         session.setAttribute(SESSION_PREFIX + ".amount", amount);
 
         // Query database
-        List<Contact> contacts = DynamoDbClient.instance.getItems(contactTable, Contact::new);
+        List<Contact> contacts = DynamoDbMapper.getInstance().loadAll(Contact.class);
 
         List<Contact> contactsFound = new LinkedList<>();
         for (Contact contact : contacts) {

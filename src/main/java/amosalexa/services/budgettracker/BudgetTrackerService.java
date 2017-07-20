@@ -163,7 +163,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         String spendingAmount = isConfirmation ? (String) session.getAttribute(AMOUNT) : spendingSlot.getValue();
         String categoryName = isConfirmation ? (String) session.getAttribute(CATEGORY) : categorySlot.getValue();
 
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         Category category = null;
         for (Category cat : categories) {
             //TODO duplicate. write find and update category method
@@ -212,7 +212,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         Slot categorySlot = slots.get(CATEGORY);
         LOGGER.info("Category: " + categorySlot.getValue());
 
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         LOGGER.info("All categories: " + categories);
         Category category = null;
 
@@ -264,7 +264,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         String categoryName = (String) session.getAttribute(CATEGORY);
         String categoryLimit = (String) session.getAttribute(CATEGORY_LIMIT);
 
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         LOGGER.info("Categories: " + categories);
         Category category = null;
 
@@ -277,13 +277,16 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             //LOGGER.info("Category limit before: " + category.getLimit());
             //LOGGER.info("Set limit for category " + categoryName);
             category.setLimit(Double.valueOf(categoryLimit));
-            DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+            //DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+            DynamoDbMapper.getInstance().save(category);
             //LOGGER.info("Category limit afterwards: " + category.getLimit());
         } else {
             //LOGGER.info("Category does not exist yet. Create category...");
             //LOGGER.info("Set limit for category " + categoryName + " to value: " + categoryLimit);
-            category = new Category(categoryName, Double.valueOf(categoryLimit), 0);
-            DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
+            category = new Category(categoryName);
+            category.setLimit(Double.valueOf(categoryLimit));
+            DynamoDbMapper.getInstance().save(category);
+            //DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
         }
         return getResponse(BUDGET_TRACKER, "Limit fuer " + categoryName + " wurde gesetzt.");
     }
@@ -293,7 +296,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         Slot categorySlot = slots.get(CATEGORY);
         LOGGER.info("Category: " + categorySlot.getValue());
 
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         LOGGER.info("All categories: " + categories);
         Category category = null;
 

@@ -7,6 +7,7 @@ import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -112,7 +113,7 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
         String intentName = intent.getName();
         LOGGER.info("Intent Name: " + intentName);
 
-        List<Category> items = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> items = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         String namesOfCategories = "";
 
         if (items.size() == 0) {
@@ -150,7 +151,8 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
             String slotName = (String) SessionStorage.getInstance().getObject(session.getSessionId(), SERVICE_CARD_TITLE + ".categoryName");
 
             Category item = new Category(slotName);
-            DynamoDbClient.instance.putItem(Category.TABLE_NAME, item);
+            DynamoDbMapper.getInstance().save(item);
+            //DynamoDbClient.instance.putItem(Category.TABLE_NAME, item);
 
             return getResponse(SERVICE_CARD_TITLE, "Verstanden. Die Kategorie " + slotName + " wurde erstellt.");
         }
@@ -168,7 +170,7 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
             return getResponse(SERVICE_CARD_TITLE, "Ich konnte den Namen der Kategorie nicht verstehen. Bitte versuche es noch einmal.");
         }
 
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
 
         int closestDist = Integer.MAX_VALUE;
         Category closestCategory = null;
@@ -213,13 +215,14 @@ public class EditCategoriesService extends AbstractSpeechService implements Spee
 
         Category closestCategory = (Category) closestCategoryObj;
 
-        DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, closestCategory);
+        //DynamoDbClient.instance.deleteItem(Category.TABLE_NAME, closestCategory);
+        DynamoDbMapper.getInstance().delete(closestCategory);
 
         return getResponse(SERVICE_CARD_TITLE, "OK, wie du willst. Ich habe die Kategorie mit dem Namen '" + closestCategory.getName() + "' gelöscht.");
     }
 
     private boolean contains(String categoryName) {
-        List<Category> items = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> items = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         categoryName = categoryName.toLowerCase();
 
         for (Category item : items) {

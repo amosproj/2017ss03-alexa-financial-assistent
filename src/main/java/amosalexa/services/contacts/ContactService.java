@@ -5,6 +5,7 @@ import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -164,7 +165,8 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         //Acutally create and save contact
         String contactName = (String) session.getAttribute("ContactName");
         Contact contact = new Contact(contactName, "DE50100000000000000001");
-        DynamoDbClient.instance.putItem(Contact.TABLE_NAME, contact);
+        //DynamoDbClient.instance.putItem(Contact.TABLE_NAME, contact);
+        DynamoDbMapper.getInstance().save(contact);
         return getResponse(CONTACTS, "Okay! Der Kontakt " + contactName + " wurde angelegt.");
     }
 
@@ -185,7 +187,8 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
 
             if (contactId != null) {
                 Contact contact = new Contact(contactId);
-                DynamoDbClient.instance.deleteItem(Contact.TABLE_NAME, contact);
+                //DynamoDbClient.instance.deleteItem(Contact.TABLE_NAME, contact);
+                DynamoDbMapper.getInstance().delete(contact);
 
                 return getResponse(CONTACTS, "Kontakt wurde geloescht.");
             }
@@ -205,7 +208,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
     }
 
     private SpeechletResponse readContacts(Session session, int offset, int limit) {
-        List<Contact> contactList = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        List<Contact> contactList = DynamoDbMapper.getInstance().loadAll(Contact.class);
         List<Contact> contacts = new ArrayList<>(contactList);
         LOGGER.info("Contacts: " + contacts);
 
@@ -222,7 +225,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             limit = contacts.size() - offset;
         }
 
-        Collections.sort(contacts);
+        //Collections.sort(contacts);
 
         StringBuilder response = new StringBuilder();
         response.append("<speak>");
