@@ -1,10 +1,12 @@
 package amosalexa.services.bankaccount;
 
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import amosalexa.services.bankcontact.BankContactService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
@@ -35,6 +37,13 @@ import java.util.List;
 /**
  * This dialog allows users to perform a transfer to a {@link Contact contact} from the contact book.
  */
+@Service(
+        functionGroup = HelpService.FunctionGroup.ACCOUNT_INFORMATION,
+        functionName = "Überweisung",
+        example = "Überweise zehn Euro an Bob!",
+        description = "Mit dieser Funktion kannst du Überweisungen an deine Kontakte tätigen. Du kannst dabei Parameter wie " +
+                "Kontaktname und Geldbetrag festlegen."
+)
 public class ContactTransferService extends AbstractSpeechService implements SpeechService {
 
     @Override
