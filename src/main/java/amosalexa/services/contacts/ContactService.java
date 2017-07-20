@@ -164,8 +164,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
     private SpeechletResponse createNewContact(Session session) {
         //Acutally create and save contact
         String contactName = (String) session.getAttribute("ContactName");
-        Contact contact = new Contact(DynamoDbClient.getNewId("contact"), contactName, "DE50100000000000000001");
-        //DynamoDbClient.instance.putItem(Contact.TABLE_NAME, contact);
+        Contact contact = new Contact(contactName, "DE50100000000000000001");
         DynamoDbMapper.getInstance().save(contact);
         return getResponse(CONTACTS, "Okay! Der Kontakt " + contactName + " wurde angelegt.");
     }
@@ -187,7 +186,6 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
 
             if (contactId != null) {
                 Contact contact = new Contact(contactId);
-                //DynamoDbClient.instance.deleteItem(Contact.TABLE_NAME, contact);
                 DynamoDbMapper.getInstance().delete(contact);
 
                 return getResponse(CONTACTS, "Kontakt wurde geloescht.");
@@ -225,7 +223,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             limit = contacts.size() - offset;
         }
 
-        //Collections.sort(contacts);
+        Collections.sort(contacts);
 
         StringBuilder response = new StringBuilder();
         response.append("<speak>");

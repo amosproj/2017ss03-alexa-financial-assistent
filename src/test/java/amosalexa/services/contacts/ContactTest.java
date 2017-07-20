@@ -13,7 +13,7 @@ public class ContactTest {
 
     @Test
     public void createAndDeleteContact() {
-        Contact contact = new Contact(DynamoDbClient.getNewId("contact"), "Lucas", "DE12345678901234");
+        Contact contact = new Contact("Lucas", "DE12345678901234");
 
         DynamoDbMapper.getInstance().save(contact);
 
