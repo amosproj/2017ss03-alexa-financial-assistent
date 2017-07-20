@@ -16,6 +16,7 @@ public class AccountDB {
 
     public AccountDB(String accountNumber, String savingsAccountNumber, boolean isDemo) {
         this.accountNumber = accountNumber;
+        this.savingsAccountNumber = savingsAccountNumber;
         this.isDemo = isDemo;
     }
 
