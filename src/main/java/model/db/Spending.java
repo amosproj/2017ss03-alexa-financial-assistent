@@ -14,10 +14,12 @@ public class Spending {
 	private String creationDateTime;
 	private String categoryId;
 	private double amount;
+	private String accountNumber;
 
 	public Spending() {}
 
-	public Spending(int categoryId, double amount) {
+	public Spending(String accountNumber, int categoryId, double amount) {
+		this.accountNumber = accountNumber;
 		this.creationDateTime = DateTime.now().toString(fmt);
 		this.categoryId = String.valueOf(categoryId);
 		this.amount = amount;
@@ -71,6 +73,16 @@ public class Spending {
 
 	public Spending setAmount(double amount) {
 		this.amount = amount;
+		return this;
+	}
+
+	@DynamoDBAttribute
+	public String getAccountNumber() {
+		return accountNumber;
+	}
+
+	public Spending setAccountNumber(String accountNumber) {
+		this.accountNumber = accountNumber;
 		return this;
 	}
 }

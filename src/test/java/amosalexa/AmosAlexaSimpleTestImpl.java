@@ -1,6 +1,7 @@
 package amosalexa;
 
 import amosalexa.server.Launcher;
+import amosalexa.services.AccountData;
 import amosalexa.services.bankaccount.ContactTransferService;
 import amosalexa.services.financing.AccountBalanceForecastService;
 import amosalexa.services.budgettracker.BudgetManager;
@@ -457,7 +458,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
         //Set spending to 0 and limit to 100 for test purpose
         category.setLimit(100);
-        BudgetManager.instance.createSpending(category.getId(), 5);
+        BudgetManager.instance.createSpending(AccountData.ACCOUNT_DEFAULT, category.getId(), 5);
         DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
 
         //LOGGER.info("getSpending: " + category.getSpending());
@@ -468,7 +469,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Du hast bereits 5% des Limits von 100.0 Euro fuer die Kategorie " + TEST_CATEGORY_NAME + " ausgegeben. Du kannst noch" +
                         " 95.0 Euro für diese Kategorie ausgeben.");
 
-        BudgetManager.instance.createSpending(category.getId(), 145);
+        BudgetManager.instance.createSpending(AccountData.ACCOUNT_DEFAULT, category.getId(), 145);
         //LOGGER.info("getSpending: " + category.getSpending());
         //LOGGER.info("getLimit: " + category.getLimit());
 
