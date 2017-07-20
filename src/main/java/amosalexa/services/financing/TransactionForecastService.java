@@ -1,7 +1,9 @@
 package amosalexa.services.financing;
 
+import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.*;
+import amosalexa.services.help.HelpService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -16,6 +18,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.SMART_FINANCING,
+        functionName = "Transaktionenvorhersage",
+        example = "Welche Transaktionen erwarten mich?",
+        description = "Mit dieser Funktion kannst du deine zukünftigen Transaktionen vorhersagen. " +
+                "Du kannst dabei den Parameter " +
+                "Datum definieren."
+)
 public class TransactionForecastService extends AbstractSpeechService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(TransactionForecastService.class);
