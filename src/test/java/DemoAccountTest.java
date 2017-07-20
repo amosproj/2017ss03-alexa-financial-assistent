@@ -1,5 +1,6 @@
 
 import api.aws.DynamoDbMapper;
+import model.db.Category;
 import org.junit.Before;
 import org.junit.Test;
 

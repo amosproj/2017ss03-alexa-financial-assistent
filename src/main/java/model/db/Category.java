@@ -3,6 +3,9 @@ package model.db;
 import amosalexa.services.budgettracker.BudgetManager;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbStorable;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -15,6 +18,7 @@ import java.util.Map;
  * Every category has a (unique) name and a spending limit.
  * Categories are persisted in the Dynamo DB storage.
  */
+@DynamoDBTable(tableName = "category")
 public class Category implements Comparable<Category>, DynamoDbStorable {
 
     public static String TABLE_NAME = "category";
@@ -124,14 +128,17 @@ public class Category implements Comparable<Category>, DynamoDbStorable {
     }
 
     @Override
+    @DynamoDBHashKey
     public int getId() {
         return id;
     }
 
+    @DynamoDBAttribute
     public String getName() {
         return name;
     }
 
+    @DynamoDBAttribute
     public double getLimit() {
         return limit;
     }
