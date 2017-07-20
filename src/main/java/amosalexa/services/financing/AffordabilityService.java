@@ -1,5 +1,6 @@
 package amosalexa.services.financing;
 
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
@@ -9,6 +10,7 @@ import amosalexa.services.SpeechService;
 import amosalexa.services.financing.aws.model.Item;
 import amosalexa.services.financing.aws.request.AWSLookup;
 import amosalexa.services.financing.aws.util.AWSUtil;
+import amosalexa.services.help.HelpService;
 import api.aws.EMailClient;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -27,6 +29,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.SMART_FINANCING,
+        functionName = "Produktbezahlbarkeit",
+        example = "Was kostet ein Samsung Galaxy?",
+        description = "Mit dieser Funktion kannst du ein Produkt auf Amazon suchen, den Preis überprüfen und per Email" +
+                "vormerken lassen. Du kannst dabei den Parameter " +
+                "Suchwort definieren."
+)
 public class AffordabilityService extends AbstractSpeechService implements SpeechService {
 
 
