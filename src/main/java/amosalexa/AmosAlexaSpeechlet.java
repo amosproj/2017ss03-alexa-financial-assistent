@@ -43,7 +43,7 @@ import java.util.Map;
 public class AmosAlexaSpeechlet extends AbstractSpeechService implements SpeechletSubject {
 
     // TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
-    public static final int USER_ID = 4711;
+    public static final String USER_ID = "4711";
 
     public static final String ACCOUNT_ID = "0000000001";
 

@@ -61,6 +61,9 @@ public class AccountFactory {
      */
     public Account createDemo() {
 
+        // user - needed for authenticating all following API calls
+        createDemoUser();
+
         // account + savings account
         Account newDemoAccount = createDemoAccount();
         Account newDemoSavingsAccount = createSavingsAccount();
@@ -78,6 +81,12 @@ public class AccountFactory {
 
 
         return newDemoAccount;
+    }
+
+    private void createDemoUser() {
+        User user = new User();
+        user.setId(AmosAlexaSpeechlet.USER_ID);
+        DynamoDbMapper.getInstance().save(user);
     }
 
     private void saveContactAccounts(List<Account> contactAccounts) {
@@ -135,8 +144,8 @@ public class AccountFactory {
     }
 
     private String getRandomCategoryId(){
-        List<CategoryDB> categoryDBList = dynamoDbMapper.loadAll(ContactDB.class);
-        int randomNum = ThreadLocalRandom.current().nextInt(0, categoryDBList.size() + 1);
+        List<CategoryDB> categoryDBList = dynamoDbMapper.loadAll(CategoryDB.class);
+        int randomNum = ThreadLocalRandom.current().nextInt(0, categoryDBList.size());
         return categoryDBList.get(randomNum).getId();
     }
 
@@ -260,7 +269,7 @@ public class AccountFactory {
         BigInteger max = new BigInteger("9999999999");
         do {
             BigInteger i = new BigInteger(max.bitLength(), rnd);
-            if (i.compareTo(max) <= 0)
+            if (i.compareTo(max) <= 0 && !existAccount(i.toString()))
                 return i.toString();
         } while (true);
     }

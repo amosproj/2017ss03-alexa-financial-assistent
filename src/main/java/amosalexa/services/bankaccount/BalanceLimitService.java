@@ -6,6 +6,7 @@ import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -19,10 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class BalanceLimitService extends AbstractSpeechService implements SpeechService {
+import static amosalexa.AmosAlexaSpeechlet.USER_ID;
 
-	// TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
-	private static final int USER_ID = 4711;
+public class BalanceLimitService extends AbstractSpeechService implements SpeechService {
 
 	@Override
 	public String getDialogName() {
@@ -70,7 +70,7 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 
 		SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-		model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, USER_ID, model.db.User.factory);
+		model.db.User user = (User)DynamoDbMapper.getInstance().load(model.db.User.class, USER_ID); //(model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, USER_ID, model.db.User.factory);
 
 		if(intent.getName().equals(SET_BALANCE_LIMIT_INTENT)) {
 			Map<String, Slot> slots = intent.getSlots();
@@ -96,7 +96,8 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 			}
 			String balanceLimitAmount = (String)sessionStorage.get(NEW_BALANCE_LIMIT);
 			user.setBalanceLimit(Integer.parseInt(balanceLimitAmount));
-			DynamoDbClient.instance.putItem(User.TABLE_NAME, user);
+			//DynamoDbClient.instance.putItem(User.TABLE_NAME, user);
+			DynamoDbMapper.getInstance().save(user);
 			return getResponse(CARD_TITLE, "Okay, dein Kontolimit wurde auf " + balanceLimitAmount + " Euro gesetzt.");
 		} else if(intent.getName().equals(NO_INTENT)) {
 			return getResponse(CARD_TITLE, "");

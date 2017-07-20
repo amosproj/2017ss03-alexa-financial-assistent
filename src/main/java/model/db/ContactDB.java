@@ -16,6 +16,8 @@ public class ContactDB {
     private String name;
     private Date createdAt;
 
+    public ContactDB() {}
+
     public ContactDB(String accountNumber, String name) {
         this.accountNumber = accountNumber;
         this.name = name;
