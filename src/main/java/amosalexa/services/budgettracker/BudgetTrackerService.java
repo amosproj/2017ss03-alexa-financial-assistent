@@ -3,6 +3,7 @@ package amosalexa.services.budgettracker;
 import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.AccountData;
 import amosalexa.services.SpeechService;
 import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
@@ -182,7 +183,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             }
 
             // Create new spending in DB
-            BudgetManager.instance.createSpending(category.getId(), Double.valueOf(spendingAmount));
+            BudgetManager.instance.createSpending(AccountData.ACCOUNT_DEFAULT, category.getId(), Double.valueOf(spendingAmount));
 
             //DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
             //LOGGER.info("Category spending afterwards: " + category.getSpending());

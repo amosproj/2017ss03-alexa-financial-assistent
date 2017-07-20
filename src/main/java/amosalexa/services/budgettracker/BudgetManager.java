@@ -28,8 +28,8 @@ public class BudgetManager {
 	 * @param categoryId the category id
 	 * @param amount     the amount
 	 */
-	public void createSpending(int categoryId, double amount) {
-		dynamoDbMapper.save(new Spending(categoryId, amount));
+	public void createSpending(String accountNumber, int categoryId, double amount) {
+		dynamoDbMapper.save(new Spending(accountNumber, categoryId, amount));
 	}
 
 	/**

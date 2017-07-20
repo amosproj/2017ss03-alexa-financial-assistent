@@ -1,14 +1,19 @@
 package api;
 
+import amosalexa.AccountFactory;
+import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
 import model.banking.Account;
 import model.banking.Card;
 import model.banking.StandingOrder;
+import model.db.AccountDB;
+import model.db.CategoryDB;
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -42,9 +47,19 @@ public class AccountTest {
 
     @BeforeClass
     public static void setUpAccount() {
-        AccountAPI.createAccount(ACCOUNT_NUMBER, 1250000, getCurrentOpeningDate());
+        //AccountAPI.createAccount(ACCOUNT_NUMBER, 1250000, getCurrentOpeningDate());
         //AccountAPI.createAccount("0000000020", 1250000, getLastWeekOpeningDate());
     }
+
+    @Test
+    public void createRandNumber() throws InterruptedException {
+       //DynamoDbMapper.getInstance().createTable(CategoryDB.class);
+        //DynamoDbMapper.getInstance().save(new CategoryDB("1234", "test", 100));
+    }
+
+
+
+
 
     /**
      * Account Information
