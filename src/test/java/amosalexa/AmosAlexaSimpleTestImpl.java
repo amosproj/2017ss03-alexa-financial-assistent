@@ -740,10 +740,10 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         DynamoDbMapper.getInstance().dropTable(Contact.class);
         DynamoDbMapper.getInstance().createTable(Contact.class);
 
-        DynamoDbMapper.getInstance().save(new Contact("Bob Marley", "UK1"));
-        DynamoDbMapper.getInstance().save(new Contact("Bob Ray Simmons", "UK2"));
-        DynamoDbMapper.getInstance().save(new Contact("Lucas", "DE1"));
-        DynamoDbMapper.getInstance().save(new Contact("Sandra", "DE2"));
+        DynamoDbMapper.getInstance().save(new Contact(0, "Bob Marley", "UK1"));
+        DynamoDbMapper.getInstance().save(new Contact(1, "Bob Ray Simmons", "UK2"));
+        DynamoDbMapper.getInstance().save(new Contact(2, "Lucas", "DE1"));
+        DynamoDbMapper.getInstance().save(new Contact(3, "Sandra", "DE2"));
 
         newSession();
 

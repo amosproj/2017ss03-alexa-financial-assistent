@@ -27,7 +27,8 @@ public class Contact implements Comparable<Contact>{
     public Contact() {
     }
 
-    public Contact(String name, String iban) {
+    public Contact(int id, String name, String iban) {
+        this.id = id;
         this.name = name;
         this.iban = iban;
         this.createdAt = new Date();

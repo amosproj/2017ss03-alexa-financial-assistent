@@ -164,7 +164,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
     private SpeechletResponse createNewContact(Session session) {
         //Acutally create and save contact
         String contactName = (String) session.getAttribute("ContactName");
-        Contact contact = new Contact(contactName, "DE50100000000000000001");
+        Contact contact = new Contact(DynamoDbClient.getNewId("contact"), contactName, "DE50100000000000000001");
         //DynamoDbClient.instance.putItem(Contact.TABLE_NAME, contact);
         DynamoDbMapper.getInstance().save(contact);
         return getResponse(CONTACTS, "Okay! Der Kontakt " + contactName + " wurde angelegt.");
