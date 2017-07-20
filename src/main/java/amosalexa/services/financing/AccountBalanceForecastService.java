@@ -1,7 +1,9 @@
 package amosalexa.services.financing;
 
+import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.*;
+import amosalexa.services.help.HelpService;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -18,6 +20,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.SMART_FINANCING,
+        functionName = "Kontostandvorhersage",
+        example = "Sag mir mein Kontostand vorraus",
+        description = "Mit dieser Funktion kannst du dein Kontostand zu einem bestimmten Datum vorhersagen lassen. " +
+                "Du kannst dabei den Parameter " +
+                "Datum definieren."
+)
 public class AccountBalanceForecastService extends AbstractSpeechService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(AccountBalanceForecastService.class);
