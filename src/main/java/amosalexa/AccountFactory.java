@@ -269,10 +269,11 @@ public class AccountFactory {
      */
     private String getRandomAccountNumber() {
         Random rnd = new Random();
+        BigInteger min = new BigInteger("1000000000");
         BigInteger max = new BigInteger("9999999999");
         do {
             BigInteger i = new BigInteger(max.bitLength(), rnd);
-            if (i.compareTo(max) <= 0 && !existAccount(i.toString()))
+            if (i.compareTo(min) > 0 && i.compareTo(max) <= 0 && !existAccount(i.toString()))
                 return i.toString();
         } while (true);
     }
