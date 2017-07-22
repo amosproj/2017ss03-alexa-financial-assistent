@@ -46,7 +46,7 @@ public class AccountTest {
 
     @BeforeClass
     public static void setUpAccount() {
-        //AccountAPI.createAccount(ACCOUNT_NUMBER, 1250000, getCurrentOpeningDate());
+        AccountAPI.createAccount(ACCOUNT_NUMBER, 1250000, getCurrentOpeningDate());
         //AccountAPI.createAccount("0000000020", 1250000, getLastWeekOpeningDate());
     }
 
