@@ -1,8 +1,10 @@
 package amosalexa.services.cards;
 
+import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -15,6 +17,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.BANK_CONTACT,
+        functionName = "Karte sperren",
+        example = "Sperre Karte 001",
+        description = "Mit dieser Funktion kannst du Karten sperren lassen, wenn sie verloren gegangen sind oder gestolen wurden."
+)
 public class BlockCardService extends AbstractSpeechService implements SpeechService {
 
     @Override
