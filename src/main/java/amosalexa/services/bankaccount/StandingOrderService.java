@@ -2,9 +2,12 @@ package amosalexa.services.bankaccount;
 
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
+
+import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.aws.EMailClient;
 import api.banking.AccountAPI;
@@ -28,6 +31,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@Service(
+        functionName = "Daueraufträge verwalten",
+        functionGroup = HelpService.FunctionGroup.ONLINE_BANKING,
+        example = "Wie lauten meine Daueraufträge?",
+        description = "Diese Funktion ermöglicht dir das Verwalten von Daueraufträgen."
+)
 public class StandingOrderService extends AbstractSpeechService implements SpeechService {
 
     /**
