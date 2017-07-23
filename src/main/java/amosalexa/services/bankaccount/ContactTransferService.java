@@ -38,7 +38,7 @@ import java.util.List;
  * This dialog allows users to perform a transfer to a {@link Contact contact} from the contact book.
  */
 @Service(
-        functionGroup = HelpService.FunctionGroup.ACCOUNT_INFORMATION,
+        functionGroup = HelpService.FunctionGroup.ONLINE_BANKING,
         functionName = "Überweisung",
         example = "Überweise zehn Euro an Bob!",
         description = "Mit dieser Funktion kannst du Überweisungen an deine Kontakte tätigen. Du kannst dabei Parameter wie " +
