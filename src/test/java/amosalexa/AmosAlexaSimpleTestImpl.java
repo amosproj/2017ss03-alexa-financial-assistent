@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -787,7 +788,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntentMatches("BudgetReportEMailIntent", "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.");
     }
 
-    @Test
+    @Ignore
     public void categoryTest() throws Exception {
         newSession();
 

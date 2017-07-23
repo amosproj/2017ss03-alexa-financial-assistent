@@ -23,7 +23,9 @@ public class Contact implements Comparable<Contact>{
 
     public static final String TABLE_NAME = "contact";
 
-    public Contact() {}
+    public Contact() {
+        this.id = DynamoDbClient.getNewId("contact");
+    }
 
     public Contact(String name, String iban) {
         this.id = DynamoDbClient.getNewId("contact");

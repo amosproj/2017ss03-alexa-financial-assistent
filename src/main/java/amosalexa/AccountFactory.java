@@ -60,6 +60,12 @@ public class AccountFactory {
      * 3 contacts with easy names
      */
     public Account createDemo() {
+        //removeDemoAccounts();
+
+        Account existingDemoAccount = getDemoAccount();
+        if(existingDemoAccount != null) {
+            return existingDemoAccount;
+        }
 
         // user - needed for authenticating all following API calls
         createDemoUser();
@@ -96,6 +102,7 @@ public class AccountFactory {
             Contact c = new Contact();
             c.setAccountNumber(contactAccount.getNumber());
             c.setName(names[i]);
+            c.setIban(contactAccount.getIban());
             dynamoDbMapper.save(c);
             i++;
         }
@@ -120,18 +127,23 @@ public class AccountFactory {
     }
 
     private List<Account> createContactsAccount() {
-        String accountNumber = getRandomAccountNumber();
         List<Account> contactAccounts = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            if (!existAccount(accountNumber)) {
-                Account contactAccount = AccountAPI.createAccount(accountNumber, ACCOUNT_BALANCE_DEMO, ACCOUNT_OPENING_DATE_DEMO);
-                contactAccounts.add(contactAccount);
-            }
+            String accountNumber = getRandomAccountNumber();
+            Account contactAccount = AccountAPI.createAccount(accountNumber, ACCOUNT_BALANCE_DEMO, ACCOUNT_OPENING_DATE_DEMO);
+            contactAccounts.add(contactAccount);
         }
         return contactAccounts;
     }
 
     private void createCategories(Account newDemoAccount) {
+        DynamoDbMapper.getInstance().dropTable(Category.class);
+        try {
+            DynamoDbMapper.getInstance().createTable(Category.class);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         String[] categoryNames = {"auto", "haushalt", "freizeit", "reisen", "sonstiges"};
         for (String categoryName : categoryNames) {
             dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), categoryName, 200));
@@ -249,7 +261,7 @@ public class AccountFactory {
      * @param isDemo        is valid account for demo
      */
     private void saveAccount(String accountNumber, String savingsAccountNumber, boolean isDemo) {
-        removeDemoAccounts();
+        //removeDemoAccounts();
         dynamoDbMapper.save(new AccountDB(accountNumber, savingsAccountNumber, isDemo));
     }
 
