@@ -162,6 +162,10 @@ public class HelpService extends AbstractSpeechService implements SpeechService 
 
         EnumSet<FunctionGroup> categories = EnumSet.allOf(FunctionGroup.class);
         for (Iterator<FunctionGroup> iter = categories.iterator(); iter.hasNext(); ) {
+            FunctionGroup functionGroup = iter.next();
+
+            if (functionGroup.features.size() == 0) continue;
+
             if (first) {
                 first = false;
             } else {
@@ -172,7 +176,6 @@ public class HelpService extends AbstractSpeechService implements SpeechService 
                 }
             }
 
-            FunctionGroup functionGroup = iter.next();
             sb.append(functionGroup.name);
         }
 
