@@ -1,9 +1,11 @@
 package amosalexa.services.contacts;
 
+import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -26,6 +28,12 @@ import java.util.*;
 /**
  * Service for contact and contact list related intents.
  */
+@Service(
+        functionGroup = HelpService.FunctionGroup.ACCOUNT_INFORMATION,
+        functionName = "Karte sperren",
+        example = "Was sind meine Kontakte?",
+        description = "Mit dieser Funktion kannst du Kontakte verwalten, um schnell Überweisungen vorzunehmen."
+)
 public class ContactService extends AbstractSpeechService implements SpeechService {
 
     @Override
