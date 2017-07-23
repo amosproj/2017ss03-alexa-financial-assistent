@@ -1,10 +1,12 @@
 package amosalexa.services.bankaccount;
 
 
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -19,6 +21,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@Service(
+		functionName = "Kontolimit setzen",
+		functionGroup = HelpService.FunctionGroup.BUDGET_TRACKING,
+		example = "Setze mein Kontolimit auf 800 Euro",
+		description = "Diese Funktion erlaubt es dir ein Kontolimit zu setzen, sodass du nicht aus Versehen zu viel Geld ausgibst."
+)
 public class BalanceLimitService extends AbstractSpeechService implements SpeechService {
 
 	// TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
