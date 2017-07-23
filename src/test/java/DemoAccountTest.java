@@ -20,6 +20,7 @@ public class DemoAccountTest {
         dynamoDbMapper.dropTable(AccountDB.class);
         dynamoDbMapper.dropTable(Category.class);
         dynamoDbMapper.dropTable(Contact.class);
+        dynamoDbMapper.dropTable(DynamoTestObject.class);
         dynamoDbMapper.dropTable(Spending.class);
         dynamoDbMapper.dropTable(StandingOrderDB.class);
         dynamoDbMapper.dropTable(TransactionDB.class);
@@ -30,6 +31,7 @@ public class DemoAccountTest {
         dynamoDbMapper.createTable(AccountDB.class);
         dynamoDbMapper.createTable(Category.class);
         dynamoDbMapper.createTable(Contact.class);
+        dynamoDbMapper.createTable(DynamoTestObject.class);
         dynamoDbMapper.createTable(Spending.class);
         dynamoDbMapper.createTable(StandingOrderDB.class);
         dynamoDbMapper.createTable(TransactionDB.class);
