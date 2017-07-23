@@ -1,9 +1,11 @@
 package amosalexa.services.budgetreport;
 
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.aws.EMailClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
@@ -18,6 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Service(
+        functionName = "Budget-Report anfordern",
+        functionGroup = HelpService.FunctionGroup.ACCOUNT_INFORMATION,
+        example = "Sende mir meinen Ausgabenreport.",
+        description = "Diese Funktion schickt dir einen detaillierten Report über deine Ausgaben, wenn du willst."
+)
 public class BudgetReportService extends AbstractSpeechService implements SpeechService {
 
     @Override
