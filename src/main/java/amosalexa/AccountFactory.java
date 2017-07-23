@@ -60,6 +60,8 @@ public class AccountFactory {
      * 3 contacts with easy names
      */
     public Account createDemo() {
+
+        // Uncomment the following line to create and use NEW demo accounts
         //removeDemoAccounts();
 
         Account existingDemoAccount = getDemoAccount();
