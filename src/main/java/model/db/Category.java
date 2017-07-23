@@ -29,8 +29,7 @@ public class Category {
 
     private String accountNumber;
 
-    public Category() {
-    }
+    public Category() {}
 
     public Category(String name) {
         this.accountNumber = AmosAlexaSpeechlet.USER_ID;

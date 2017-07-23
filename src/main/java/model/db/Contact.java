@@ -9,8 +9,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Represents a contact to which we can transfer money.
@@ -25,8 +23,7 @@ public class Contact implements Comparable<Contact>{
 
     public static final String TABLE_NAME = "contact";
 
-    public Contact() {
-    }
+    public Contact() {}
 
     public Contact(String name, String iban) {
         this.id = DynamoDbClient.getNewId("contact");

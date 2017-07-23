@@ -1,5 +1,6 @@
 package amosalexa.services.contacts;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.DialogUtil;
@@ -120,7 +121,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         LOGGER.info("TransactionNumber: " + transactionNumberSlot.getValue());
 
         String speechText = "";
-        List<Transaction> allTransactions = TransactionAPI.getTransactionsForAccount("0000000001");
+        List<Transaction> allTransactions = TransactionAPI.getTransactionsForAccount(AmosAlexaSpeechlet.ACCOUNT_ID);
         Number transactionNumber = Integer.valueOf(transactionNumberSlot.getValue());
 
         Transaction transaction = null;

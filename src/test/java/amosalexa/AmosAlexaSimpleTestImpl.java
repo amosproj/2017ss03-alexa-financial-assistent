@@ -11,8 +11,10 @@ import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import model.banking.Card;
 import model.banking.StandingOrder;
+import model.banking.Transaction;
 import model.db.Category;
 import model.db.Contact;
 import model.db.Spending;
@@ -288,14 +290,18 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         String todayDate = formatter.format(now);
 
         //Create a transaction that we can use for ContactAddIntent (ingoing transaction)
-        /*
-        Transaction transaction = TransactionAPI.createTransaction(1, "DE60100000000000000001",
+
+        Transaction transaction = TransactionAPI.createTransaction(1, AmosAlexaSpeechlet.ACCOUNT_IBAN/*"DE60100000000000000001"*/,
                 "DE50100000000000000001", todayDate,
                 "Ueberweisung fuer Unit Test", null, "Sandra");
-        */
 
+/*
         int transactionId1 = 18877; //transaction.getTransactionId().intValue();
         int transactionId2 = 6328; //transaction without remitter or payee
+        int transactionId3 = 23432423; //transaction not existent
+*/
+        int transactionId1 = transaction.getTransactionId().intValue();
+        //int transactionId2 = 6328; //transaction without remitter or payee
         int transactionId3 = 23432423; //transaction not existent
 
         String transactionRemitter = "Sandra";//for transactionId1 //transaction.getRemitter();
@@ -315,11 +321,12 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Okay! Der Kontakt Sandra wurde angelegt.");
 
         //Test add contact unknown payee/remitter
+/*
         testIntent(
                 "ContactAddIntent",
                 "TransactionNumber:" + transactionId2, "Ich kann fuer diese Transaktion keine Kontaktdaten speichern, weil der Name des Auftraggebers" +
                         " nicht bekannt ist. Bitte wiederhole deine Eingabe oder breche ab, indem du \"Alexa, Stop!\" sagst.");
-
+*/
         //Test add contact transaction not existent
         testIntent(
                 "ContactAddIntent",
@@ -328,8 +335,8 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
 
 
         //Get the contact that we just created by searching for the contact with highest id
-        // TODO: Disabled because Contact IDs are now Strings instead of Integers
-        /*List<Contact> allContacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+
+        List<Contact> allContacts = DynamoDbMapper.getInstance().loadAll(Contact.class);
         final Comparator<Contact> comp2 = Comparator.comparingInt(c -> c.getId());
         Contact latestContact = allContacts.stream().max(comp2).get();
         LOGGER.info("Contact: " + latestContact.getName());
@@ -347,7 +354,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                         "loeschen?");
         testIntent(
                 "AMAZON.YesIntent",
-                "Kontakt wurde geloescht.");*/
+                "Kontakt wurde geloescht.");
     }
 
     @Test
@@ -583,7 +590,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
     public void replacementCardDialogTest() throws Exception {
         newSession();
 
-        final String accountNumber = "9999999999";
+        final String accountNumber = AmosAlexaSpeechlet.ACCOUNT_ID;
 
         Collection<Card> cards = AccountAPI.getCardsForAccount(accountNumber);
         for (Card card : cards) {

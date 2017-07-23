@@ -13,8 +13,7 @@ public class User {
 	private String accessToken;
 	private String accessTokenExpiryTime;
 
-	public User() {
-	}
+	public User() {}
 
 	@DynamoDBHashKey
 	public String getId() {

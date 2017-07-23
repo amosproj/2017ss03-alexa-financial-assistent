@@ -1,5 +1,6 @@
 package amosalexa.services.financing;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
@@ -85,7 +86,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     // FIXME: Hardcoded Strings for account
     private static final String SOURCE_ACCOUNT = "DE42100000009999999999";
     private static final String SAVINGS_ACCOUNT = "DE39100000007777777777";
-    private static final String STANDING_ORDER_ACCOUNT = "9999999999";
+    private static final String STANDING_ORDER_ACCOUNT = AmosAlexaSpeechlet.ACCOUNT_ID; //"9999999999";
     private static final String PAYEE = "Max Mustermann";
     private static final String DESCRIPTION_SAVINGS_PLAN = "Sparplan regelm. Einzahlung";
     private static final String DESCRIPTION_ONE_OFF_PAYMENT = "Sparplan Einmalzahlung";

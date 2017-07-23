@@ -1,5 +1,6 @@
 package amosalexa.services.cards;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
@@ -48,7 +49,7 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
     /**
      *
      */
-    private static final String number = "0000000001";
+    private static final String ACCOUNT_ID = AmosAlexaSpeechlet.ACCOUNT_ID;
 
     private static final String BLOCK_CARD_INTENT = "BlockCardIntent";
 
@@ -74,7 +75,7 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
         Session session = requestEnvelope.getSession();
 
         // TODO: Use account later to actually block a card
-        Account account = AccountAPI.getAccount(number);
+        Account account = AccountAPI.getAccount(ACCOUNT_ID);
 
         if (request.getIntent().getName().equals(YES_INTENT)) {
             String cardNumberObj = (String) session.getAttribute("BlockCardService.CardNumber");
@@ -82,7 +83,7 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
             if (cardNumberObj != null) {
                 long cardNumber = Long.parseLong(cardNumberObj);
 
-                // TODO: Lock card with number cardNumber
+                // TODO: Lock card with ACCOUNT_ID cardNumber
 
                 return getResponse(BLOCK_CARD, "Karte " + cardNumberObj + " wurde gesperrt.");
             }

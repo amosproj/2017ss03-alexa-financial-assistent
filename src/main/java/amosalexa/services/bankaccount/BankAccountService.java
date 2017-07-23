@@ -1,5 +1,6 @@
 package amosalexa.services.bankaccount;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
@@ -39,7 +40,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
     /**
      * Account number of the bank account to be used.
      */
-    public static final String ACCOUNT_NUMBER = "0000000001";
+    public static final String ACCOUNT_NUMBER = AmosAlexaSpeechlet.ACCOUNT_ID;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountService.class);
     /**

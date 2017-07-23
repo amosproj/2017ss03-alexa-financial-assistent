@@ -155,7 +155,7 @@ public class AccountFactory {
     private String getContactName(String accountNumber) {
         List<Contact> contactDBList = dynamoDbMapper.loadAll(Contact.class);
         for(Contact contactDB : contactDBList){
-            if(contactDB.getAccountNumber().equals(accountNumber))
+            if(contactDB.getAccountNumber() != null && contactDB.getAccountNumber().equals(accountNumber))
                 return contactDB.getName();
         }
         return null;
@@ -208,7 +208,7 @@ public class AccountFactory {
     private void removeDemoSpending(String accountNumber) {
         List<Spending> spendingList = dynamoDbMapper.loadAll(Spending.class);
         for (Spending spending : spendingList) {
-            if (spending.getAccountNumber().equals(accountNumber)) {
+            if (spending.getAccountNumber() != null && spending.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(spending);
             }
         }
@@ -217,7 +217,7 @@ public class AccountFactory {
     private void removeDemoContacts(String accountNumber) {
         List<Contact> contactDBList = dynamoDbMapper.loadAll(Contact.class);
         for (Contact contactDB : contactDBList) {
-            if (contactDB.getAccountNumber().equals(accountNumber)) {
+            if (contactDB.getAccountNumber() != null && contactDB.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(contactDB);
             }
         }

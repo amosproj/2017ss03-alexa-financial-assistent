@@ -1,5 +1,6 @@
 package amosalexa.services.bankaccount;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
@@ -109,7 +110,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
     /**
      * Account number.
      */
-    private static final String ACCOUNT_NUMBER = "0000000001";
+    private static final String ACCOUNT_NUMBER = AmosAlexaSpeechlet.ACCOUNT_ID;
 
     private static final SessionStorage SESSION_STORAGE = SessionStorage.getInstance();
 
@@ -339,11 +340,11 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
 
         DateTimeFormatter apiTransactionFmt = DateTimeFormat.forPattern("yyyy-MM-dd");
         String valueDate = DateTime.now().toString(apiTransactionFmt);
-        Transaction transaction = TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), valueDate,
+        Transaction transaction = TransactionAPI.createTransaction((int) amount, /*"DE50100000000000000001"*/ AmosAlexaSpeechlet.ACCOUNT_IBAN, contact.getIban(), valueDate,
                 "Beschreibung", "Hans", null);
 
 
-        Account account = AccountAPI.getAccount("0000000001");
+        Account account = AccountAPI.getAccount(ACCOUNT_NUMBER);
         String balanceAfterTransaction = String.valueOf(account.getBalance());
 
 

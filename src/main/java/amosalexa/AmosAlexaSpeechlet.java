@@ -29,6 +29,7 @@ import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
+import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,9 @@ public class AmosAlexaSpeechlet extends AbstractSpeechService implements Speechl
 
     //
     public static final String USER_ID = "4711";
-    public static final String ACCOUNT_ID = "0000000001";
+    private static final Account demoAccount = AccountFactory.getInstance().createDemo();
+    public static final String ACCOUNT_ID = demoAccount.getNumber(); //"0000000001";
+    public static final String ACCOUNT_IBAN = demoAccount.getIban();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();

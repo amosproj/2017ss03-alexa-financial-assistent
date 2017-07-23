@@ -5,7 +5,6 @@ import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
-import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -70,7 +69,7 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 
 		SessionStorage.Storage sessionStorage = SessionStorage.getInstance().getStorage(session.getSessionId());
 
-		model.db.User user = (User)DynamoDbMapper.getInstance().load(model.db.User.class, USER_ID); //(model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, USER_ID, model.db.User.factory);
+		model.db.User user = (User)DynamoDbMapper.getInstance().load(model.db.User.class, USER_ID);
 
 		if(intent.getName().equals(SET_BALANCE_LIMIT_INTENT)) {
 			Map<String, Slot> slots = intent.getSlots();
@@ -96,7 +95,6 @@ public class BalanceLimitService extends AbstractSpeechService implements Speech
 			}
 			String balanceLimitAmount = (String)sessionStorage.get(NEW_BALANCE_LIMIT);
 			user.setBalanceLimit(Integer.parseInt(balanceLimitAmount));
-			//DynamoDbClient.instance.putItem(User.TABLE_NAME, user);
 			DynamoDbMapper.getInstance().save(user);
 			return getResponse(CARD_TITLE, "Okay, dein Kontolimit wurde auf " + balanceLimitAmount + " Euro gesetzt.");
 		} else if(intent.getName().equals(NO_INTENT)) {
