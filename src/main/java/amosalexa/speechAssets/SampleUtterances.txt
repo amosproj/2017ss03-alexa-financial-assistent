@@ -201,3 +201,5 @@ PeriodicTransactionAddIntent Markiere Transaktion {TransactionNumber} als period
 PeriodicTransactionAddIntent Markiere Transaktion Nummer {TransactionNumber} als periodisch
 PeriodicTransactionDeleteIntent Lösche Kennzeichnung periodisch für Transaktion {TransactionNumber}
 PeriodicTransactionDeleteIntent Lösche Markierung periodisch für Transaktion {TransactionNumber}
+
+FutureIntent Spring in die Zukunft
