@@ -82,7 +82,7 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
 
             String answer = "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.";
             boolean isDebug = SessionStorage.getInstance().getStorage(requestEnvelope.getSession().getSessionId()).containsKey("DEBUG");
-            if (!isDebug && !EMailClient.SendHTMLEMail("Test-Mail", body)) {
+            if (!isDebug && !EMailClient.SendHTMLEMail("Ausgabenreport", body)) {
                 answer = "Leider konnte der Ausgabenreport nicht gesendet werden.";
             }
             return getResponse("Ausgabenreport", answer);
