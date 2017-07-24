@@ -25,8 +25,14 @@ public class DynamoDbClient {
 
     public static AmazonDynamoDBClient getAmazonDynamoDBClient(){
         BasicAWSCredentials credentials = new BasicAWSCredentials("AKIAIUOLL3674W3T67IQ", "X4KiAVCPab5aiW0c/93y7PnABVsPlj6YYqmfSkng");
+
         dynamoDB = new AmazonDynamoDBClient(credentials);
         dynamoDB.setEndpoint("http://dynamodb.us-east-1.amazonaws.com");
+
+        // Local DynamoDB
+        //dynamoDB = new AmazonDynamoDBClient();
+        //dynamoDB.setEndpoint("http://localhost:8000");
+
         return dynamoDB;
     }
 
@@ -105,29 +111,37 @@ public class DynamoDbClient {
             Map<String, AttributeValue> request = new TreeMap<>();
             request.put("table_name", new AttributeValue(tableName));
 
-            // Try to get the last id and leave it at 0 if cannot find last id
-            int id = 0;
-            try {
-                GetItemResult result = dynamoDB.getItem("last_ids", request);
-                if (result.getItem() != null) {
-                    AttributeValue aid = result.getItem().get("id");
-                    id = Integer.parseInt(aid.getN());
-                }
-            } catch (ResourceNotFoundException ignored) {
-            }
-
-            // Increment the id
-            id++;
-
             // Set the id to the item and leave other fields unchanged
-            item.setId(id);
-
-            // Store the id
-            request.put("id", new AttributeValue().withN(Integer.toString(id)));
-            dynamoDB.putItem("last_ids", request);
+            item.setId(getNewId(tableName));
         }
 
         dynamoDB.putItem(tableName, item.getDynamoDbItem());
+    }
+
+    public static int getNewId(String tableName) {
+        // Create a new item by fetching the id first.
+        Map<String, AttributeValue> request = new TreeMap<>();
+        request.put("table_name", new AttributeValue(tableName));
+
+        // Try to get the last id and leave it at 0 if cannot find last id
+        int id = 0;
+        try {
+            GetItemResult result = dynamoDB.getItem("last_ids", request);
+            if (result.getItem() != null) {
+                AttributeValue aid = result.getItem().get("id");
+                id = Integer.parseInt(aid.getN());
+            }
+        } catch (ResourceNotFoundException ignored) {
+        }
+
+        // Increment the id
+        id++;
+
+        // Store the id
+        request.put("id", new AttributeValue().withN(Integer.toString(id)));
+        dynamoDB.putItem("last_ids", request);
+
+        return id;
     }
 
     /**

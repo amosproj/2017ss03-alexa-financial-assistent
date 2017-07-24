@@ -61,6 +61,17 @@ public class AccountFactory {
      */
     public Account createDemo() {
 
+        // Uncomment the following line to create and use NEW demo accounts
+        //removeDemoAccounts();
+
+        Account existingDemoAccount = getDemoAccount();
+        if(existingDemoAccount != null) {
+            return existingDemoAccount;
+        }
+
+        // user - needed for authenticating all following API calls
+        createDemoUser();
+
         // account + savings account
         Account newDemoAccount = createDemoAccount();
         Account newDemoSavingsAccount = createSavingsAccount();
@@ -80,11 +91,21 @@ public class AccountFactory {
         return newDemoAccount;
     }
 
+    private void createDemoUser() {
+        User user = new User();
+        user.setId(AmosAlexaSpeechlet.USER_ID);
+        DynamoDbMapper.getInstance().save(user);
+    }
+
     private void saveContactAccounts(List<Account> contactAccounts) {
         String[] names = {"bob", "sandra", "lucas"};
         int i = 0;
         for(Account contactAccount : contactAccounts){
-            dynamoDbMapper.save(new ContactDB(contactAccount.getNumber(), names[i]));
+            Contact c = new Contact();
+            c.setAccountNumber(contactAccount.getNumber());
+            c.setName(names[i]);
+            c.setIban(contactAccount.getIban());
+            dynamoDbMapper.save(c);
             i++;
         }
     }
@@ -108,21 +129,26 @@ public class AccountFactory {
     }
 
     private List<Account> createContactsAccount() {
-        String accountNumber = getRandomAccountNumber();
         List<Account> contactAccounts = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            if (!existAccount(accountNumber)) {
-                Account contactAccount = AccountAPI.createAccount(accountNumber, ACCOUNT_BALANCE_DEMO, ACCOUNT_OPENING_DATE_DEMO);
-                contactAccounts.add(contactAccount);
-            }
+            String accountNumber = getRandomAccountNumber();
+            Account contactAccount = AccountAPI.createAccount(accountNumber, ACCOUNT_BALANCE_DEMO, ACCOUNT_OPENING_DATE_DEMO);
+            contactAccounts.add(contactAccount);
         }
         return contactAccounts;
     }
 
     private void createCategories(Account newDemoAccount) {
+        DynamoDbMapper.getInstance().dropTable(Category.class);
+        try {
+            DynamoDbMapper.getInstance().createTable(Category.class);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         String[] categoryNames = {"auto", "haushalt", "freizeit", "reisen", "sonstiges"};
         for (String categoryName : categoryNames) {
-            dynamoDbMapper.save(new CategoryDB(newDemoAccount.getNumber(), categoryName, 200));
+            dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), categoryName, 200));
         }
     }
 
@@ -135,15 +161,15 @@ public class AccountFactory {
     }
 
     private String getRandomCategoryId(){
-        List<CategoryDB> categoryDBList = dynamoDbMapper.loadAll(ContactDB.class);
-        int randomNum = ThreadLocalRandom.current().nextInt(0, categoryDBList.size() + 1);
+        List<Category> categoryDBList = dynamoDbMapper.loadAll(Category.class);
+        int randomNum = ThreadLocalRandom.current().nextInt(0, categoryDBList.size());
         return categoryDBList.get(randomNum).getId();
     }
 
     private String getContactName(String accountNumber) {
-        List<ContactDB> contactDBList = dynamoDbMapper.loadAll(ContactDB.class);
-        for(ContactDB contactDB : contactDBList){
-            if(contactDB.getAccountNumber().equals(accountNumber))
+        List<Contact> contactDBList = dynamoDbMapper.loadAll(Contact.class);
+        for(Contact contactDB : contactDBList){
+            if(contactDB.getAccountNumber() != null && contactDB.getAccountNumber().equals(accountNumber))
                 return contactDB.getName();
         }
         return null;
@@ -167,8 +193,8 @@ public class AccountFactory {
     }
 
     private void removeDemoCategories(String accountNumber) {
-        List<CategoryDB> categoryDBList = dynamoDbMapper.loadAll(CategoryDB.class);
-        for (CategoryDB categoryDB : categoryDBList) {
+        List<Category> categoryDBList = dynamoDbMapper.loadAll(Category.class);
+        for (Category categoryDB : categoryDBList) {
             if (categoryDB.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(categoryDB);
             }
@@ -196,16 +222,16 @@ public class AccountFactory {
     private void removeDemoSpending(String accountNumber) {
         List<Spending> spendingList = dynamoDbMapper.loadAll(Spending.class);
         for (Spending spending : spendingList) {
-            if (spending.getAccountNumber().equals(accountNumber)) {
+            if (spending.getAccountNumber() != null && spending.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(spending);
             }
         }
     }
 
     private void removeDemoContacts(String accountNumber) {
-        List<ContactDB> contactDBList = dynamoDbMapper.loadAll(ContactDB.class);
-        for (ContactDB contactDB : contactDBList) {
-            if (contactDB.getAccountNumber().equals(accountNumber)) {
+        List<Contact> contactDBList = dynamoDbMapper.loadAll(Contact.class);
+        for (Contact contactDB : contactDBList) {
+            if (contactDB.getAccountNumber() != null && contactDB.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(contactDB);
             }
         }
@@ -237,7 +263,7 @@ public class AccountFactory {
      * @param isDemo        is valid account for demo
      */
     private void saveAccount(String accountNumber, String savingsAccountNumber, boolean isDemo) {
-        removeDemoAccounts();
+        //removeDemoAccounts();
         dynamoDbMapper.save(new AccountDB(accountNumber, savingsAccountNumber, isDemo));
     }
 
@@ -257,10 +283,11 @@ public class AccountFactory {
      */
     private String getRandomAccountNumber() {
         Random rnd = new Random();
+        BigInteger min = new BigInteger("1000000000");
         BigInteger max = new BigInteger("9999999999");
         do {
             BigInteger i = new BigInteger(max.bitLength(), rnd);
-            if (i.compareTo(max) <= 0)
+            if (i.compareTo(min) > 0 && i.compareTo(max) <= 0 && !existAccount(i.toString()))
                 return i.toString();
         } while (true);
     }

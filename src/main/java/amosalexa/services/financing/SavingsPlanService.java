@@ -1,5 +1,6 @@
 package amosalexa.services.financing;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
@@ -85,7 +86,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     // FIXME: Hardcoded Strings for account
     private static final String SOURCE_ACCOUNT = "DE42100000009999999999";
     private static final String SAVINGS_ACCOUNT = "DE39100000007777777777";
-    private static final String STANDING_ORDER_ACCOUNT = "9999999999";
+    private static final String STANDING_ORDER_ACCOUNT = AmosAlexaSpeechlet.ACCOUNT_ID; //"9999999999";
     private static final String PAYEE = "Max Mustermann";
     private static final String DESCRIPTION_SAVINGS_PLAN = "Sparplan regelm. Einzahlung";
     private static final String DESCRIPTION_ONE_OFF_PAYMENT = "Sparplan Einmalzahlung";
@@ -166,7 +167,7 @@ public class SavingsPlanService extends AbstractSpeechService implements SpeechS
     private SpeechletResponse standingOrderCategoryResponse(Intent intent, Session session){
         String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
         LOGGER.info("Category: " + categoryName);
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
                 String standingOrderId = (String) session.getAttribute(STANDING_ORDER_ID_ATTRIBUTE);

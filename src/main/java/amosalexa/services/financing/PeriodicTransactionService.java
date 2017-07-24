@@ -1,5 +1,6 @@
 package amosalexa.services.financing;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
@@ -64,7 +65,7 @@ public class PeriodicTransactionService extends AbstractSpeechService implements
     private static final String PERIODIC_TRANSACTION_DELETE_INTENT = "PeriodicTransactionDeleteIntent";
 
     // FIXME: Hardcoded Strings for account
-    private static final String ACCOUNT_NUMBER = "8888888888";
+    private static final String ACCOUNT_NUMBER = AmosAlexaSpeechlet.ACCOUNT_ID; //"8888888888";
 
     // Key for the transaction number (used as slot key as well as session key!)
     private static final String TRANSACTION_NUMBER_KEY = "TransactionNumber";

@@ -28,7 +28,7 @@ public class BudgetManager {
 	 * @param categoryId the category id
 	 * @param amount     the amount
 	 */
-	public void createSpending(String accountNumber, int categoryId, double amount) {
+	public void createSpending(String accountNumber, String categoryId, double amount) {
 		dynamoDbMapper.save(new Spending(accountNumber, categoryId, amount));
 	}
 
@@ -39,7 +39,7 @@ public class BudgetManager {
 	 * @param forMonth   an arbitrary DateTime value.
 	 * @return the total spending for category
 	 */
-	public double getTotalSpendingForCategory(int categoryId, DateTime forMonth) {
+	public double getTotalSpendingForCategory(String categoryId, DateTime forMonth) {
 		// Calculate start and end of the month (as limits)
 		DateTime start = forMonth.withTimeAtStartOfDay().withDayOfMonth(1);
 		DateTime end = start.plusMonths(1);
@@ -53,7 +53,7 @@ public class BudgetManager {
 	 * @param categoryId the category id
 	 * @return the total spending for category
 	 */
-	public double getTotalSpendingForCategory(int categoryId) {
+	public double getTotalSpendingForCategory(String categoryId) {
 		DateTime forMonth = DateTime.now();
 		return getTotalSpendingForCategory(categoryId, forMonth);
 	}
@@ -64,12 +64,12 @@ public class BudgetManager {
 	 * @param categoryId the category id
 	 * @return the total spending for category
 	 */
-	public double getTotalSpendingForCategoryLastMonth(int categoryId) {
+	public double getTotalSpendingForCategoryLastMonth(String categoryId) {
 		DateTime forMonth = DateTime.now().minusMonths(1);
 		return getTotalSpendingForCategory(categoryId, forMonth);
 	}
 
-	private double getTransactionAmount(int categoryId, DateTime start, DateTime end) {
+	private double getTransactionAmount(String categoryId, DateTime start, DateTime end) {
 		double sum = 0;
 
 		Collection<Transaction> apiTransactions = TransactionAPI.getTransactionsForAccount(AmosAlexaSpeechlet.ACCOUNT_ID);
@@ -77,7 +77,7 @@ public class BudgetManager {
 		List<TransactionDB> dbTransactions = dynamoDbMapper.loadAll(TransactionDB.class);
 
 		for(TransactionDB transactionDB : dbTransactions) {
-			if(transactionDB.getCategoryId() == null || !transactionDB.getCategoryId().equals(String.valueOf(categoryId))) {
+			if(transactionDB.getCategoryId() == null || !transactionDB.getCategoryId().equals(categoryId)) {
 				continue;
 			}
 			for(Transaction transaction : apiTransactions) {
@@ -92,13 +92,13 @@ public class BudgetManager {
 		return sum;
 	}
 
-	private double getSpendingAmount(int categoryId, DateTime start, DateTime end) {
+	private double getSpendingAmount(String categoryId, DateTime start, DateTime end) {
 		double sum = 0;
 
 		List<Spending> dbSpendings = dynamoDbMapper.loadAll(Spending.class);
 
 		for(Spending spending : dbSpendings) {
-			if(spending.getCategoryId().equals(String.valueOf(categoryId))) {
+			if(spending.getCategoryId().equals(categoryId)) {
 				if(spending.getCreationDateTimeAsDateTime().isAfter(start) && spending.getCreationDateTimeAsDateTime().isBefore(end)) {
 					sum += spending.getAmount();
 				}

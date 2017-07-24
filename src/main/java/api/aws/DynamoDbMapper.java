@@ -9,6 +9,7 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,7 +54,15 @@ public class DynamoDbMapper {
      */
     public void dropTable(Class cl) {
         DeleteTableRequest tableRequest = mapper.generateDeleteTableRequest(cl);
-        dynamoDbClient.deleteTable(tableRequest);
+        Table table = dynamoDB.getTable(tableRequest.getTableName());
+        try {
+            dynamoDbClient.deleteTable(tableRequest);
+            table.waitForDelete();
+        } catch(ResourceNotFoundException e) {
+            // Table does not exist
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

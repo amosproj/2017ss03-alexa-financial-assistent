@@ -13,6 +13,8 @@ public class StandingOrderDB {
     private String categoryId;
     private String accountNumber;
 
+    public StandingOrderDB() {}
+
     public StandingOrderDB(String accountNumber, String standingOrderId, String categoryId) {
         this.accountNumber = accountNumber;
         this.standingOrderId = standingOrderId;

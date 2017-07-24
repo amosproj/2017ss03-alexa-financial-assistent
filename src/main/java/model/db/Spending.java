@@ -18,16 +18,16 @@ public class Spending {
 
 	public Spending() {}
 
-	public Spending(String accountNumber, int categoryId, double amount) {
+	public Spending(String accountNumber, String categoryId, double amount) {
 		this.accountNumber = accountNumber;
 		this.creationDateTime = DateTime.now().toString(fmt);
-		this.categoryId = String.valueOf(categoryId);
+		this.categoryId = categoryId;
 		this.amount = amount;
 	}
 
-	public Spending(int categoryId, double amount, DateTime creationDateTime) {
+	public Spending(String categoryId, double amount, DateTime creationDateTime) {
 		this.creationDateTime = creationDateTime.toString(fmt);
-		this.categoryId = String.valueOf(categoryId);
+		this.categoryId = categoryId;
 		this.amount = amount;
 	}
 

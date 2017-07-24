@@ -7,7 +7,6 @@ import model.banking.Account;
 import model.banking.Card;
 import model.banking.StandingOrder;
 import model.db.AccountDB;
-import model.db.CategoryDB;
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,7 +46,7 @@ public class AccountTest {
 
     @BeforeClass
     public static void setUpAccount() {
-        //AccountAPI.createAccount(ACCOUNT_NUMBER, 1250000, getCurrentOpeningDate());
+        AccountAPI.createAccount(ACCOUNT_NUMBER, 1250000, getCurrentOpeningDate());
         //AccountAPI.createAccount("0000000020", 1250000, getLastWeekOpeningDate());
     }
 

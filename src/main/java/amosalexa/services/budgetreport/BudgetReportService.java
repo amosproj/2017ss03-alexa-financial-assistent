@@ -7,6 +7,7 @@ import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import api.aws.EMailClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -69,7 +70,7 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
             List<BudgetReportCategory> categories = new ArrayList<>();
-            List<Category> dbCategories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+            List<Category> dbCategories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
             for (Category cat : dbCategories) {
                 categories.add(new BudgetReportCategory(cat.getName(), cat.getSpending(), cat.getLimit()));
             }

@@ -1,5 +1,6 @@
 package amosalexa.services.bankaccount;
 
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
@@ -17,6 +18,8 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import model.banking.Account;
 import model.banking.Transaction;
 import model.db.Category;
@@ -107,7 +110,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
     /**
      * Account number.
      */
-    private static final String ACCOUNT_NUMBER = "0000000001";
+    private static final String ACCOUNT_NUMBER = AmosAlexaSpeechlet.ACCOUNT_ID;
 
     private static final SessionStorage SESSION_STORAGE = SessionStorage.getInstance();
 
@@ -151,7 +154,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
 
     private SpeechletResponse transactionCategoryResponse(Intent intent, Session session){
         String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
                 String transactionId = (String) session.getAttribute(TRANSACTION_ID_ATTRIBUTE);
@@ -186,7 +189,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         session.setAttribute(SESSION_PREFIX + ".amount", amount);
 
         // Query database
-        List<Contact> contacts = DynamoDbClient.instance.getItems(contactTable, Contact::new);
+        List<Contact> contacts = DynamoDbMapper.getInstance().loadAll(Contact.class);
 
         List<Contact> contactsFound = new LinkedList<>();
         for (Contact contact : contacts) {
@@ -337,11 +340,11 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
 
         DateTimeFormatter apiTransactionFmt = DateTimeFormat.forPattern("yyyy-MM-dd");
         String valueDate = DateTime.now().toString(apiTransactionFmt);
-        Transaction transaction = TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), valueDate,
+        Transaction transaction = TransactionAPI.createTransaction((int) amount, /*"DE50100000000000000001"*/ AmosAlexaSpeechlet.ACCOUNT_IBAN, contact.getIban(), valueDate,
                 "Beschreibung", "Hans", null);
 
 
-        Account account = AccountAPI.getAccount("0000000001");
+        Account account = AccountAPI.getAccount(ACCOUNT_NUMBER);
         String balanceAfterTransaction = String.valueOf(account.getBalance());
 
 
