@@ -146,10 +146,11 @@ public class AccountFactory {
             e.printStackTrace();
         }
 
-        String[] categoryNames = {"auto", "haushalt", "freizeit", "reisen", "sonstiges"};
-        for (String categoryName : categoryNames) {
-            dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), categoryName, 200));
-        }
+        dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), "auto", 150));
+        dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), "lebensmittel", 300));
+        dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), "freizeit", 200));
+        dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), "reisen", 200));
+        dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), "sonstiges", 150));
     }
 
     private void createStandingOrders(Account demoAccount, List<Account> contactAccounts) {
