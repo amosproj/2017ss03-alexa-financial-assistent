@@ -28,7 +28,7 @@ public class AccountFactory {
     /**
      * balance of demo account
      */
-    private static final long ACCOUNT_BALANCE_DEMO = 1000000L;
+    private static final long ACCOUNT_BALANCE_DEMO = 1000000;
 
     /**
      * opening date of demo account
@@ -44,7 +44,6 @@ public class AccountFactory {
      * dynamo db mapper
      */
     private static DynamoDbMapper dynamoDbMapper = DynamoDbMapper.getInstance();
-
 
     public static AccountFactory getInstance(){
         synchronized (AccountFactory.class){
@@ -201,7 +200,7 @@ public class AccountFactory {
     private void removeDemoCategories(String accountNumber) {
         List<Category> categoryDBList = dynamoDbMapper.loadAll(Category.class);
         for (Category categoryDB : categoryDBList) {
-            if (categoryDB.getAccountNumber().equals(accountNumber)) {
+            if (categoryDB.getAccountNumber() != null && categoryDB.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(categoryDB);
             }
         }
