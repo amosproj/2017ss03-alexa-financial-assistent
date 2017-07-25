@@ -84,7 +84,7 @@ public class SecuritiesAccountInformationService extends AbstractSpeechService i
         if (SECURITIES_ACCOUNT_INFORMATION_INTENT.equals(intentName)) {
             LOGGER.info(getClass().toString() + " Intent started: " + intentName);
             session.setAttribute(DIALOG_CONTEXT, intentName);
-            return getSecuritiesAccountInformation(request.getIntent(), session);
+            return getSecuritiesAccountInformation(session);
         }
         if (YES_INTENT.equals(intentName) && context != null && context.equals(SECURITIES_ACCOUNT_INFORMATION_INTENT)) {
             return getNextSecuritiesAccountInformation(request.getIntent(), session);
@@ -95,10 +95,8 @@ public class SecuritiesAccountInformationService extends AbstractSpeechService i
         }
     }
 
-    private SpeechletResponse getSecuritiesAccountInformation(Intent intent, Session session) {
+    private SpeechletResponse getSecuritiesAccountInformation(Session session) {
         LOGGER.info("SecuritiesAccountInformation called.");
-
-        Map<String, Slot> slots = intent.getSlots();
         SecuritiesAccount securitiesAccount = SecuritiesAccountAPI.getSecuritiesAccount(SEC_ACCOUNT_ID);
 
         Collection<Security> securitiesCollection = SecuritiesAccountAPI.getSecuritiesForAccount(SEC_ACCOUNT_ID);
@@ -108,21 +106,6 @@ public class SecuritiesAccountInformationService extends AbstractSpeechService i
         }
 
         securities = new LinkedList<>(securitiesCollection);
-
-        /*
-        TODO not yet implemented
-
-        // Check if user requested to have their stranding orders sent to their email address
-        Slot channelSlot = slots.get("Channel");
-        boolean sendPerEmail = channelSlot != null &&
-                channelSlot.getValue() != null &&
-                channelSlot.getValue().equals("email");
-
-        if (sendPerEmail) {
-            // TODO: Send info to user's email address
-            textBuilder.append("Ich habe die Informationen ueber dein Depot an deine E-Mail-Adresse gesendet.");
-        }
-        */
 
         StringBuilder textBuilder = new StringBuilder();
 
@@ -136,6 +119,7 @@ public class SecuritiesAccountInformationService extends AbstractSpeechService i
             textBuilder.append("Wertpapier Nummer ")
                     .append(securities.get(i).getSecurityId())
                     .append(": ").append(securities.get(i).getDescription()).
+                    append(", " + securities.get(i).getQuantity() + " Stueck, ").
                     append(" mit einem momentanen Wert von ").append(stockPrice).append(" Euro. ");
         }
 
@@ -161,7 +145,8 @@ public class SecuritiesAccountInformationService extends AbstractSpeechService i
             nextSecurity = securities.get(nextEntry);
             textBuilder.append("Wertpapier Nummer ")
                     .append(nextSecurity.getSecurityId())
-                    .append(": ").append(securities.get(nextEntry).getDescription()).
+                    .append(": ").append(nextSecurity.getDescription()).
+                    append(", " + nextSecurity.getQuantity() + " Stueck, ").
                     append(" mit einem momentanen Wert von ").append(stockPrice).append(" Euro. ");
 
             if (nextEntry == (securities.size() - 1)) {
