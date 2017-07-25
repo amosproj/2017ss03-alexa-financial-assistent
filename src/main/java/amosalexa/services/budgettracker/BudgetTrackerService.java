@@ -104,6 +104,7 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         LOGGER.info("Intent name: " + intentName);
         Session session = requestEnvelope.getSession();
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
+        String withinDialogContext = (String) session.getAttribute(WITHIN_DIALOG_CONTEXT);
 
         if (CATEGORY_LIMIT_INFO_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, CATEGORY_LIMIT_INFO_INTENT);
@@ -126,8 +127,16 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         } else if (CATEGORY_SPENDING_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, intentName);
             return saveSpendingAmountForCategory(intent, session, false);
-        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_SPENDING_INTENT)) {
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_SPENDING_INTENT) &&
+                !withinDialogContext.equals("createCategory")) {
             return saveSpendingAmountForCategory(intent, session, true);
+        } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_SPENDING_INTENT) &&
+                withinDialogContext.equals("createCategory")) {
+            String categoryName = (String) session.getAttribute("categoryName");
+            String amount = (String) session.getAttribute("categoryAmount");
+            Category category = new Category(categoryName);
+            DynamoDbMapper.getInstance().save(category);
+            return getResponse(BUDGET_TRACKER, "Ich habe die Kategorie " + categoryName + " erstellt und " + amount + " Euro hinzugefuegt.");
         } else if (YES_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
             return setCategoryLimit(session);
         } else if (NO_INTENT.equals(intentName) && context != null && context.equals(CATEGORY_LIMIT_SET_INTENT)) {
@@ -188,7 +197,12 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
             //DynamoDbClient.instance.putItem(Category.TABLE_NAME, category);
             //LOGGER.info("Category spending afterwards: " + category.getSpending());
         } else {
-            //TODO ask for category creation?
+            // Ask for category creation
+            session.setAttribute("categoryAmount", spendingAmount);
+            session.setAttribute("categoryName", categoryName);
+            session.setAttribute(WITHIN_DIALOG_CONTEXT, "createCategory");
+            return getAskResponse(BUDGET_TRACKER, "Ich konnte diese Kategorie nicht finden. Soll ich eine Kategorie" +
+                    " mit dem Namen " + categoryName + " anlegen und den Betrag hinzufuegen?");
         }
 
         String speechResponse = "";
