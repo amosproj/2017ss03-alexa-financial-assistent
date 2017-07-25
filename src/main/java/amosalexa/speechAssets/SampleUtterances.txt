@@ -204,4 +204,4 @@ PeriodicTransactionDeleteIntent Lösche Markierung periodisch für Transaktion {
 
 FutureIntent Spring in die Zukunft
 
-FutureIntent Spring in die Vergangenheit
+PastIntent Spring in die Vergangenheit

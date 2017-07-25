@@ -475,6 +475,9 @@
     },
     {
       "intent": "FutureIntent"
+    },
+    {
+      "intent": "PastIntent"
     }
   ]
 }
