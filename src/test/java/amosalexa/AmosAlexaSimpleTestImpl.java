@@ -722,7 +722,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
 
         // Switching to another Service should fail because the BalanceLimit dialog is currently active.
-        testIntentMatches("SavingsPlanIntroIntent", "Ein Fehler ist aufgetreten.");
+        testIntentMatches("SavingsPlanIntroIntent", "");
 
         newSession();
 
