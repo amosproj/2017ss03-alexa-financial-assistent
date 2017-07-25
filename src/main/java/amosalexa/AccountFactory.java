@@ -151,6 +151,11 @@ public class AccountFactory {
         dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), "freizeit", 200));
         dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), "reisen", 200));
         dynamoDbMapper.save(new Category(newDemoAccount.getNumber(), "sonstiges", 150));
+
+        List<Category> allCategories = dynamoDbMapper.loadAll(Category.class);
+        for (Category cat : allCategories) {
+            dynamoDbMapper.save(new Spending(newDemoAccount.getNumber(), cat.getId(), cat.getLimit()));
+        }
     }
 
     private void createStandingOrders(Account demoAccount, List<Account> contactAccounts) {
