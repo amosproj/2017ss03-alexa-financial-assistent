@@ -57,7 +57,9 @@ public abstract class AbstractSpeechService {
         PlainTextOutputSpeech speech = getPlainTextOutputSpeech(speechText);
         Reprompt reprompt = getReprompt(speech);
 
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+        SpeechletResponse response = SpeechletResponse.newAskResponse(speech, reprompt, card);
+        response.setShouldEndSession(false);
+        return response;
     }
 
     /**
@@ -71,7 +73,9 @@ public abstract class AbstractSpeechService {
         SimpleCard card = getSimpleCard(cardTitle, speechText);
         PlainTextOutputSpeech speech = getPlainTextOutputSpeech(speechText);
 
-        return SpeechletResponse.newTellResponse(speech, card);
+        SpeechletResponse response = SpeechletResponse.newTellResponse(speech, card);
+        response.setShouldEndSession(true);
+        return response;
     }
 
     /**
@@ -140,7 +144,10 @@ public abstract class AbstractSpeechService {
     protected SpeechletResponse getSSMLResponse(String cardTitle, String ssmlText) {
         SimpleCard card = getSimpleCard(cardTitle, ssmlText);
         SsmlOutputSpeech ssmlOutputSpeech = getSSMLOutputSpeech(ssmlText);
-        return SpeechletResponse.newTellResponse(ssmlOutputSpeech, card);
+
+        SpeechletResponse response = SpeechletResponse.newTellResponse(ssmlOutputSpeech, card);
+        response.setShouldEndSession(true);
+        return response;
     }
 
     /**
@@ -157,7 +164,9 @@ public abstract class AbstractSpeechService {
         SsmlOutputSpeech repromptSpeech = getSSMLOutputSpeech(repromptText);
         Reprompt reprompt = getReprompt(repromptSpeech);
 
-        return SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
+        SpeechletResponse response = SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
+        response.setShouldEndSession(false);
+        return response;
     }
 
     /**
@@ -171,7 +180,10 @@ public abstract class AbstractSpeechService {
         SimpleCard card = getSimpleCard(cardTitle, speechText);
         SsmlOutputSpeech ssmlOutputSpeech = getSSMLOutputSpeech(speechText);
         Reprompt reprompt = getReprompt(ssmlOutputSpeech);
-        return SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
+
+        SpeechletResponse response = SpeechletResponse.newAskResponse(ssmlOutputSpeech, reprompt, card);
+        response.setShouldEndSession(false);
+        return response;
     }
 
     /**
@@ -182,9 +194,12 @@ public abstract class AbstractSpeechService {
      */
     protected SpeechletResponse getErrorResponse(String errorDetail) {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText("Ein Fehler ist aufgetreten. " + errorDetail);
+        //speech.setText("Ein Fehler ist aufgetreten. " + errorDetail);
+        speech.setText("");
 
-        return SpeechletResponse.newTellResponse(speech);
+        SpeechletResponse response = SpeechletResponse.newTellResponse(speech);
+        response.setShouldEndSession(true);
+        return response;
     }
 
     /**

@@ -37,11 +37,11 @@ public class DemoAccountTest {
         dynamoDbMapper.createTable(TransactionDB.class);
         dynamoDbMapper.createTable(model.db.User.class);
         dynamoDbMapper.createTable(LastIds.class);
-    }
+    }*/
 
     @Test
     public void createDemoAccount(){
        //Account demoAccount = AccountFactory.getInstance().createDemo();
-    }*/
+    }
 
 }

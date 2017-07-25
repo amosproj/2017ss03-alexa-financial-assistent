@@ -219,7 +219,8 @@ public class AmosAlexaSpeechlet extends AbstractSpeechService implements Speechl
             SessionStorage.getInstance().removeStorage(session.getSessionId());
 
             PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText("Ein Fehler ist aufgetreten.");
+            //speech.setText("Ein Fehler ist aufgetreten.");
+            speech.setText("");
 
             return SpeechletResponse.newTellResponse(speech);
         }
