@@ -492,7 +492,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         resetTestCategory();
     }
 
-    @Test
+    @Ignore
     public void categoryLimitTest() throws IllegalAccessException, NoSuchFieldException, IOException {
         newSession();
 
