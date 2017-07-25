@@ -61,7 +61,7 @@ public class AccountFactory {
     public Account createDemo() {
 
         // Uncomment the following line to create and use NEW demo accounts
-        removeDemoAccounts();
+        //removeDemoAccounts();
 
         Account existingDemoAccount = getDemoAccount();
         if(existingDemoAccount != null) {
