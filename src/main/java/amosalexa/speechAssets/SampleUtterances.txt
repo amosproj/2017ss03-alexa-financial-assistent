@@ -203,3 +203,5 @@ PeriodicTransactionDeleteIntent Lösche Kennzeichnung periodisch für Transaktio
 PeriodicTransactionDeleteIntent Lösche Markierung periodisch für Transaktion {TransactionNumber}
 
 FutureIntent Spring in die Zukunft
+
+FutureIntent Spring in die Vergangenheit

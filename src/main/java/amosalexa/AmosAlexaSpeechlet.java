@@ -21,7 +21,7 @@ import amosalexa.services.cards.BlockCardService;
 import amosalexa.services.cards.ReplacementCardService;
 import amosalexa.services.contacts.ContactService;
 import amosalexa.services.budgettracker.EditCategoriesService;
-import amosalexa.services.demo.FutureService;
+import amosalexa.services.demo.TimeTravelService;
 import amosalexa.services.financing.*;
 import amosalexa.services.help.HelpService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
@@ -75,7 +75,7 @@ public class AmosAlexaSpeechlet extends AbstractSpeechService implements Speechl
         new PeriodicTransactionService(amosAlexaSpeechlet);
         new TransactionForecastService(amosAlexaSpeechlet);
         new AccountBalanceForecastService(amosAlexaSpeechlet);
-        new FutureService(amosAlexaSpeechlet);
+        new TimeTravelService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }

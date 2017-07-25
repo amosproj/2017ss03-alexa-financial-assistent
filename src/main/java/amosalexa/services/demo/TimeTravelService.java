@@ -1,5 +1,6 @@
 package amosalexa.services.demo;
 
+import amosalexa.AccountFactory;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
@@ -14,21 +15,21 @@ import com.amazon.speech.speechlet.interfaces.audioplayer.PlayBehavior;
 import com.amazon.speech.speechlet.interfaces.audioplayer.Stream;
 import com.amazon.speech.speechlet.interfaces.audioplayer.directive.PlayDirective;
 import com.amazon.speech.ui.SimpleCard;
+import model.banking.Account;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
- * Dummy intent for demo purposes. It just gives an answer that will be part of our story and potentially sets up
+ * Service for dummy intents for demo purposes. It just gives an answer that will be part of our story and potentially sets up
  * some database entries to match with the story.
  */
-public class FutureService extends AbstractSpeechService implements SpeechService {
+public class TimeTravelService extends AbstractSpeechService implements SpeechService {
 
-    private static final String CARD_TITLE = "Sprung in die Zukunft";
+    private static final String CARD_TITLE = "Zeitreise";
     private static final String FUTURE_INTENT = "FutureIntent";
+    private static final String PAST_INTENT = "PastIntent";
 
-    public FutureService(SpeechletSubject speechletSubject) {
+    public TimeTravelService(SpeechletSubject speechletSubject) {
         subscribe(speechletSubject);
     }
 
@@ -39,15 +40,17 @@ public class FutureService extends AbstractSpeechService implements SpeechServic
 
     @Override
     public List<String> getStartIntents() {
-        return Collections.singletonList(
-                FUTURE_INTENT
+        return Arrays.asList(
+                FUTURE_INTENT,
+                PAST_INTENT
         );
     }
 
     @Override
     public List<String> getHandledIntents() {
-        return Collections.singletonList(
-                FUTURE_INTENT
+        return Arrays.asList(
+                FUTURE_INTENT,
+                PAST_INTENT
         );
     }
 
@@ -86,10 +89,42 @@ public class FutureService extends AbstractSpeechService implements SpeechServic
             response.setOutputSpeech(getSSMLOutputSpeech(text));
 
             return response;
+        } else if (intent.getName().equals(PAST_INTENT)) {
+            // Create new demo account
+            AccountFactory accountFactory = AccountFactory.getInstance();
+            Account account = accountFactory.createDemo();
+
+            String text = "<prosody rate=\"x-fast\">Okay! Es geht wieder zurueck. Halte dich fest!</prosody>";
+
+            SpeechletResponse response = new SpeechletResponse();
+
+            // Back to the future song
+            List<Directive> directives = new LinkedList<>();
+            PlayDirective directive = new PlayDirective();
+            AudioItem audioItem = new AudioItem();
+            Stream stream = new Stream();
+            stream.setToken("this-is-the-audio-token");
+            stream.setUrl("https://files.bitspark.de/bttf.mp3"); // temporarily hosted on Julian's server
+            audioItem.setStream(stream);
+            directive.setAudioItem(audioItem);
+            directive.setPlayBehavior(PlayBehavior.REPLACE_ALL);
+            directives.add(directive);
+            response.setDirectives(directives);
+
+            // Card
+            SimpleCard simpleCard = new SimpleCard();
+            simpleCard.setTitle(CARD_TITLE);
+            simpleCard.setContent(text);
+            response.setCard(simpleCard);
+
+            // Speech
+            response.setOutputSpeech(getSSMLOutputSpeech(text));
+
+            return response;
         }
 
         // Shouldn't happen
-        assert(false);
+        assert (false);
         return null;
     }
 
