@@ -94,7 +94,7 @@ public class TimeTravelService extends AbstractSpeechService implements SpeechSe
             AccountFactory accountFactory = AccountFactory.getInstance();
             Account account = accountFactory.createDemo();
 
-            String text = "<prosody rate=\"x-fast\">Okay! Es geht wieder zurueck. Halte dich fest!</prosody>";
+            String text = "<prosody rate=\"fast\">Okay! Es geht wieder zurueck. Halte dich fest!</prosody>";
 
             SpeechletResponse response = new SpeechletResponse();
 
