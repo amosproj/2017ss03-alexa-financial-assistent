@@ -120,7 +120,7 @@ public class SecuritiesAccountInformationService extends AbstractSpeechService i
                     .append(securities.get(i).getSecurityId())
                     .append(": ").append(securities.get(i).getDescription()).
                     append(", " + securities.get(i).getQuantity() + " Stueck, ").
-                    append(" mit einem momentanen Wert von ").append(stockPrice).append(" Euro. ");
+                    append("mit einem momentanen Wert von ").append(stockPrice).append(" Euro. ");
         }
 
         if (securities.size() > 2) {
@@ -147,7 +147,7 @@ public class SecuritiesAccountInformationService extends AbstractSpeechService i
                     .append(nextSecurity.getSecurityId())
                     .append(": ").append(nextSecurity.getDescription()).
                     append(", " + nextSecurity.getQuantity() + " Stueck, ").
-                    append(" mit einem momentanen Wert von ").append(stockPrice).append(" Euro. ");
+                    append("mit einem momentanen Wert von ").append(stockPrice).append(" Euro. ");
 
             if (nextEntry == (securities.size() - 1)) {
                 textBuilder.append("Das waren alle Wertpapiere in deinem Depot.");

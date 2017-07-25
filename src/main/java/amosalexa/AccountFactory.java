@@ -87,6 +87,9 @@ public class AccountFactory {
         createStandingOrders(newDemoAccount, contactAccounts);
 
 
+        // periodic transactions
+        createPeriodicTransactions(newDemoAccount);
+
         return newDemoAccount;
     }
 
@@ -162,6 +165,21 @@ public class AccountFactory {
             StandingOrder standingOrder = AccountAPI.createStandingOrderForAccount(demoAccount.getNumber(), getContactName(contactAccount.getNumber()), 50,
                     contactAccount.getIban(), TODAY_DATE, StandingOrder.ExecutionRate.MONTHLY, "Demo Dauerauftrag");
             dynamoDbMapper.save(new StandingOrderDB(demoAccount.getNumber(), standingOrder.getStandingOrderId().toString(), getRandomCategoryId()));
+        }
+    }
+
+    private void createPeriodicTransactions(Account newDemoAccount) {
+        int transactions[] = {31, 32, 33};
+        for(int i : transactions) {
+            TransactionDB transactionDb = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, Integer.toString(i));
+
+            if (transactionDb == null) {
+                transactionDb = new TransactionDB(Integer.toString(i));
+                transactionDb.setPeriodic(true);
+                transactionDb.setAccountNumber(newDemoAccount.getNumber());
+            }
+
+            dynamoDbMapper.save(transactionDb);
         }
     }
 
