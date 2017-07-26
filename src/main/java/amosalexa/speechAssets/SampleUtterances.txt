@@ -181,8 +181,6 @@ CategoryStatusInfoIntent Wie ist der Status für {Category}
 CategorySpendingIntent Speichere {Amount} Euro
 CategorySpendingIntent Speichere {Amount} Euro für Kategorie {Category}
 CategorySpendingIntent Speichere {Amount} Euro für {Category}
-CategorySpendingIntent Notiere {Amount} Euro für Kategorie {Category}
-CategorySpendingIntent Notiere {Amount} Euro für {Category}
 CategorySpendingIntent Ich habe {Amount} Euro für {Category} ausgegeben
 
 IntroductionIntent Was kann AMOS
