@@ -157,7 +157,7 @@ public abstract class AbstractAmosAlexaSpeechletTest {
             slotsJson.append("\"").append(slotParts[0]).append("\":");
             slotsJson.append("{");
             slotsJson.append("\"name\":\"").append(slotParts[0]).append("\",");
-            slotsJson.append("\"value\":\"").append(slotParts[1]).append("\"");
+            slotsJson.append("\"value\":\"").append(slotParts.length > 1 ? slotParts[1] : null).append("\"");
             slotsJson.append("}");
         }
 

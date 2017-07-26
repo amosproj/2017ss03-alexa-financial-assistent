@@ -1,6 +1,7 @@
 package amosalexa.services.contacts;
 
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import model.db.Contact;
 import org.junit.Test;
 
@@ -14,15 +15,15 @@ public class ContactTest {
     public void createAndDeleteContact() {
         Contact contact = new Contact("Lucas", "DE12345678901234");
 
-        DynamoDbClient.instance.putItem(Contact.TABLE_NAME + "_test", contact);
+        DynamoDbMapper.getInstance().save(contact);
 
-        List<Contact> contacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME + "_test", Contact::new);
+        List<Contact> contacts = DynamoDbMapper.getInstance().loadAll(Contact.class);
 
         assertTrue(contacts.contains(contact));
 
-        DynamoDbClient.instance.deleteItem(Contact.TABLE_NAME + "_test", contact);
+        DynamoDbMapper.getInstance().delete(contact);
 
-        contacts = DynamoDbClient.instance.getItems(Contact.TABLE_NAME + "_test", Contact::new);
+        contacts = DynamoDbMapper.getInstance().loadAll(Contact.class);
 
         assertFalse(contacts.contains(contact));
     }

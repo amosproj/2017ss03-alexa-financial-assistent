@@ -1,8 +1,11 @@
 package amosalexa.services.cards;
 
+import amosalexa.Service;
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -15,6 +18,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.BANK_CONTACT,
+        functionName = "Karte sperren",
+        example = "Sperre Karte 001",
+        description = "Mit dieser Funktion kannst du Karten sperren lassen, wenn sie verloren gegangen sind oder gestolen wurden."
+)
 public class BlockCardService extends AbstractSpeechService implements SpeechService {
 
     @Override
@@ -48,7 +57,7 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
     /**
      *
      */
-    private static final String number = "0000000001";
+    private static final String ACCOUNT_ID = AmosAlexaSpeechlet.ACCOUNT_ID;
 
     private static final String BLOCK_CARD_INTENT = "BlockCardIntent";
 
@@ -74,7 +83,7 @@ public class BlockCardService extends AbstractSpeechService implements SpeechSer
         Session session = requestEnvelope.getSession();
 
         // TODO: Use account later to actually block a card
-        Account account = AccountAPI.getAccount(number);
+        Account account = AccountAPI.getAccount(ACCOUNT_ID);
 
         if (request.getIntent().getName().equals(YES_INTENT)) {
             String cardNumberObj = (String) session.getAttribute("BlockCardService.CardNumber");

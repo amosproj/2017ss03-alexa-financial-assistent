@@ -1,10 +1,14 @@
 package amosalexa.services.bankaccount;
 
+import amosalexa.AmosAlexaSpeechlet;
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.banking.AccountAPI;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -24,12 +28,19 @@ import java.util.List;
  * <p>
  * registered Intent @BANK_ACCOUNT_INTENT, @YES_INTENT, @NO_INTENT
  */
+@Service(
+        functionGroup = HelpService.FunctionGroup.ACCOUNT_INFORMATION,
+        functionName = "Kontoinformation",
+        example = "Wie ist mein Kontostand? ",
+        description = "Mit dieser Funktion kannst du Informationen über dein Konto abfragen. Du kannst dabei Parameter wie " +
+                "Kontostand, Kreditlimit, Überweisungen, IBAN und Abhebegebühr angeben."
+)
 public class BankAccountService extends AbstractSpeechService implements SpeechService {
 
     /**
      * Account number of the bank account to be used.
      */
-    public static final String ACCOUNT_NUMBER = "0000000001";
+    public static final String ACCOUNT_NUMBER = AmosAlexaSpeechlet.ACCOUNT_ID;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountService.class);
     /**
@@ -159,7 +170,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      * @return SpeechletResponse to alexa
      */
     private SpeechletResponse handleTransactionSpeech() {
-        List<Transaction> transactions = Transaction.getTransactions(account.getNumber());
+        List<Transaction> transactions = TransactionAPI.getTransactionsForAccount(account.getNumber());
 
         if (transactions == null || transactions.isEmpty()) {
             LOGGER.warn("Account: " + account.getNumber() + " has no transactions");
@@ -190,7 +201,7 @@ public class BankAccountService extends AbstractSpeechService implements SpeechS
      * @return speechletResponse
      */
     private SpeechletResponse getNextTransaction(int i) {
-        List<Transaction> transactions = Transaction.getTransactions(account.getNumber());
+        List<Transaction> transactions = TransactionAPI.getTransactionsForAccount(account.getNumber());
         String transactionText = Transaction.getTransactionText(transactions.get(i));
         if (i - 1 < transactions.size()) {
             transactionText = transactionText + Transaction.getAskMoreTransactionText();

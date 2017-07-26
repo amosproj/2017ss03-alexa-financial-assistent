@@ -1,3 +1,18 @@
+TransactionForecast Welche Transaktionen erwarten mich
+TransactionForecast Welche Transaktionen erwarten mich in der zunkunft
+TransactionForecast Was sind meine zukünftigen Transaktionen
+TransactionForecast Zukünftige Transaktionen
+TransactionForecast Welche Transaktionen kommen auf mich zu
+
+AccountBalanceForecast sag mir mein Kontostand vorraus
+AccountBalanceForecast was wird mein Kontostand am {TargetDate} sein
+AccountBalanceForecast wie wird mein Kontostand am {TargetDate} sein
+AccountBalanceForecast kontostandvorhersage
+
+PlainDate Bis zum {TargetDate}
+PlainDate {TargetDate}
+PlainDate am {TargetDate}
+
 SecuritiesAccountInformationIntent Wie sind meine Aktien
 SecuritiesAccountInformationIntent Wie ist der Stand meiner Aktien
 SecuritiesAccountInformationIntent Nenne mir meine Aktien
@@ -70,6 +85,7 @@ SavingsPlanNewIntent Neu
 SavingsPlanNewIntent Neu beginnen
 StandingOrdersDeleteIntent Lösche Dauerauftrag Nummer {Number}
 StandingOrderSmartIntent Richte einen neuen Dauerauftrag für {Payee} {PayeeSecondName} in Höhe von {orderAmount} Euro ein
+StandingOrderSmartIntent Richte Dauerauftrag für {Payee} {PayeeSecondName} über von {orderAmount} Euro ein
 StandingOrderSmartIntent Richte einen neuen Dauerauftrag ein
 StandingOrderSmartIntent Richte einen neuen
 StandingOrderSmartIntent Richte einfach einen neuen Dauerauftrag ein
@@ -81,7 +97,6 @@ StandingOrdersInfoIntent Nenne mir meine Daueraufträge
 StandingOrdersInfoIntent Sende Daueraufträge per {Channel}
 StandingOrdersInfoIntent Daueraufträge an {Payee}
 StandingOrdersModifyIntent Ändere den Betrag von Dauerauftrag Nummer {Number} auf {Amount} Euro
-StandingOrdersModifyIntent {Amount} Euro
 StandingOrdersModifyIntent Ändere den Ausführungsrhythmus von Dauerauftrag Nummer {Number} auf {ExecutionRate} beginnend am {FirstExecution}
 StandingOrdersKeywordIntent Wie viel bezahle ich für {StandingOrderKeyword}
 StandingOrdersKeywordIntent Wie viel bezahle ich monatlich für {StandingOrderKeyword}
@@ -166,15 +181,15 @@ CategoryStatusInfoIntent Wie ist der Status für {Category}
 CategorySpendingIntent Speichere {Amount} Euro
 CategorySpendingIntent Speichere {Amount} Euro für Kategorie {Category}
 CategorySpendingIntent Speichere {Amount} Euro für {Category}
-CategorySpendingIntent Notiere {Amount} Euro für Kategorie {Category}
-CategorySpendingIntent Notiere {Amount} Euro für {Category}
 CategorySpendingIntent Ich habe {Amount} Euro für {Category} ausgegeben
 
 IntroductionIntent Was kann AMOS
 IntroductionIntent Was kannst du eigentlich
 IntroductionIntent Was kann ich fragen
+IntroductionIntent Hilfe
+FunctionGroupOverviewIntent Übersicht über Kategorien
+FunctionGroupIntent Mehr über Kategorie {FunctionGroup}
 
-PlainCategoryIntent {Category}
 PlainCategoryIntent Kategorie {Category}
 
 PeriodicTransactionListIntent Wie sind meine periodischen Transaktionen
@@ -184,3 +199,7 @@ PeriodicTransactionAddIntent Markiere Transaktion {TransactionNumber} als period
 PeriodicTransactionAddIntent Markiere Transaktion Nummer {TransactionNumber} als periodisch
 PeriodicTransactionDeleteIntent Lösche Kennzeichnung periodisch für Transaktion {TransactionNumber}
 PeriodicTransactionDeleteIntent Lösche Markierung periodisch für Transaktion {TransactionNumber}
+
+FutureIntent Spring in die Zukunft
+
+PastIntent Spring in die Vergangenheit

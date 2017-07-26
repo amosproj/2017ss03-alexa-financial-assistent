@@ -1,8 +1,10 @@
 package api.banking;
 
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import model.db.User;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.LoggerFactory;
@@ -49,7 +51,7 @@ public class AuthenticationAPI {
 
 	private static final String AUTH_URL = "http://amos-keycloak-1926957976.eu-central-1.elb.amazonaws.com:8081/auth/realms/amos/protocol/openid-connect/token";
 
-	private static ConcurrentHashMap<Integer, User> accessTokenUsers = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<String, User> accessTokenUsers = new ConcurrentHashMap<>();
 
 	/**
 	 * Returns the access token for the given user id.
@@ -57,9 +59,9 @@ public class AuthenticationAPI {
 	 * @param userId the user id
 	 * @return the access token
 	 */
-	public static String getAccessToken(int userId) {
+	public static String getAccessToken(String userId) {
 		if(!accessTokenUsers.containsKey(userId)) {
-			model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
+			User user = (User)DynamoDbMapper.getInstance().load(User.class, userId);
 			accessTokenUsers.put(user.getId(), user);
 		}
 		return accessTokenUsers.get(userId).getAccessToken();
@@ -70,9 +72,9 @@ public class AuthenticationAPI {
 	 *
 	 * @param userId the user id
 	 */
-	public static void updateAccessToken(int userId) {
+	public static void updateAccessToken(String userId) {
 		if(!accessTokenUsers.containsKey(userId)) {
-			model.db.User user = (model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
+			User user = (User)DynamoDbMapper.getInstance().load(User.class, userId);//(model.db.User) DynamoDbClient.instance.getItem(model.db.User.TABLE_NAME, userId, model.db.User.factory);
 			accessTokenUsers.put(user.getId(), user);
 		}
 
@@ -84,7 +86,8 @@ public class AuthenticationAPI {
 			user.setId(userId);
 
 			// Update the user object in the db
-			DynamoDbClient.instance.putItem(model.db.User.TABLE_NAME, user);
+			DynamoDbMapper.getInstance().save(user);
+			//DynamoDbClient.instance.putItem(model.db.User.TABLE_NAME, user);
 		}
 
 		if(shouldRefresh(user)) {
@@ -107,15 +110,17 @@ public class AuthenticationAPI {
 
 			// Add expiry time (seconds) to current time, store this value as a String in the User object
 			int expiresInSeconds = Integer.valueOf(authResponse.getExpires_in());
-			DateTime expiryDateTime = DateTime.now().plusSeconds(expiresInSeconds);
+			DateTime expiryDateTime = DateTime.now().withZone(DateTimeZone.UTC).plusSeconds(expiresInSeconds);
 			String dtStr = fmt.print(expiryDateTime);
 			user.setAccessTokenExpiryTime(dtStr);
+			log.info("new expiry time: " + dtStr);
 
 			// Store this token in our HashMap
 			accessTokenUsers.put(user.getId(), user);
 
 			// Update the user object in the db
-			DynamoDbClient.instance.putItem(model.db.User.TABLE_NAME, user);
+			DynamoDbMapper.getInstance().save(user);
+			//DynamoDbClient.instance.putItem(model.db.User.TABLE_NAME, user);
 		}
 	}
 
@@ -131,9 +136,11 @@ public class AuthenticationAPI {
 		}
 
 		try {
-			DateTime validUntil = fmt.parseDateTime(user.getAccessTokenExpiryTime());
+			DateTime validUntil = fmt.parseDateTime(user.getAccessTokenExpiryTime()).withZone(DateTimeZone.UTC);
 
-			DateTime now = DateTime.now();
+			DateTime now = DateTime.now().withZone(DateTimeZone.UTC);
+
+			log.info("now: " + now + " - validUntil: " + validUntil);
 
 			if(validUntil.minusMinutes(10).isBefore(now)) {
 				return true;

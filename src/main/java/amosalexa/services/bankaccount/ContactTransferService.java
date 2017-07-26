@@ -1,10 +1,13 @@
 package amosalexa.services.bankaccount;
 
+import amosalexa.AmosAlexaSpeechlet;
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
 import amosalexa.services.bankcontact.BankContactService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
 import api.aws.DynamoDbMapper;
 import api.banking.AccountAPI;
@@ -15,12 +18,17 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import model.banking.Account;
 import model.banking.Transaction;
 import model.db.Category;
 import model.db.Contact;
 import model.db.TransactionDB;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +40,13 @@ import java.util.List;
 /**
  * This dialog allows users to perform a transfer to a {@link Contact contact} from the contact book.
  */
+@Service(
+        functionGroup = HelpService.FunctionGroup.ONLINE_BANKING,
+        functionName = "Überweisung",
+        example = "Überweise zehn Euro an Bob!",
+        description = "Mit dieser Funktion kannst du Überweisungen an deine Kontakte tätigen. Du kannst dabei Parameter wie " +
+                "Kontaktname und Geldbetrag festlegen."
+)
 public class ContactTransferService extends AbstractSpeechService implements SpeechService {
 
     @Override
@@ -95,7 +110,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
     /**
      * Account number.
      */
-    private static final String ACCOUNT_NUMBER = "0000000001";
+    private static final String ACCOUNT_NUMBER = AmosAlexaSpeechlet.ACCOUNT_ID;
 
     private static final SessionStorage SESSION_STORAGE = SessionStorage.getInstance();
 
@@ -139,11 +154,11 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
 
     private SpeechletResponse transactionCategoryResponse(Intent intent, Session session){
         String categoryName = intent.getSlot(CATEGORY_SLOT) != null ? intent.getSlot(CATEGORY_SLOT).getValue().toLowerCase() : null;
-        List<Category> categories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+        List<Category> categories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
         for (Category category : categories) {
             if (category.getName().equals(categoryName)){
                 String transactionId = (String) session.getAttribute(TRANSACTION_ID_ATTRIBUTE);
-                dynamoDbMapper.save(new TransactionDB(transactionId, "" + category.getId()));
+                dynamoDbMapper.save(new TransactionDB(transactionId, "" + category.getId(), ACCOUNT_NUMBER));
                 return getResponse(CONTACT_TRANSFER_CARD, "Verstanden. Die Transaktion wurde zur Kategorie " + categoryName + " hinzugefügt");
             }
         }
@@ -174,7 +189,7 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
         session.setAttribute(SESSION_PREFIX + ".amount", amount);
 
         // Query database
-        List<Contact> contacts = DynamoDbClient.instance.getItems(contactTable, Contact::new);
+        List<Contact> contacts = DynamoDbMapper.getInstance().loadAll(Contact.class);
 
         List<Contact> contactsFound = new LinkedList<>();
         for (Contact contact : contacts) {
@@ -323,11 +338,13 @@ public class ContactTransferService extends AbstractSpeechService implements Spe
             amount = (int) amountObj;
         }
 
-        Transaction transaction = TransactionAPI.createTransaction((int) amount, "DE50100000000000000001", contact.getIban(), "2017-05-16",
+        DateTimeFormatter apiTransactionFmt = DateTimeFormat.forPattern("yyyy-MM-dd");
+        String valueDate = DateTime.now().toString(apiTransactionFmt);
+        Transaction transaction = TransactionAPI.createTransaction((int) amount, /*"DE50100000000000000001"*/ AmosAlexaSpeechlet.ACCOUNT_IBAN, contact.getIban(), valueDate,
                 "Beschreibung", "Hans", null);
 
 
-        Account account = AccountAPI.getAccount("0000000001");
+        Account account = AccountAPI.getAccount(ACCOUNT_NUMBER);
         String balanceAfterTransaction = String.valueOf(account.getBalance());
 
 

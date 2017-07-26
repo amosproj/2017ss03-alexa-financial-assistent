@@ -1,10 +1,12 @@
 package amosalexa.services.bankcontact;
 
 
+import amosalexa.Service;
 import amosalexa.SpeechletSubject;
 import amosalexa.server.Launcher;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -18,6 +20,13 @@ import se.walkercrou.places.Place;
 
 import java.util.*;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.BANK_CONTACT,
+        functionName = "Bankkontaktinformation",
+        example = "Wo ist meine Bank? Wie lautet die Telefonummer meiner Bank?",
+        description = "Mit dieser Funktion kannst du Informationen über deine Bank abfragen. Du kannst dabei Parameter wie " +
+                "Öffnungszeiten und Banknamen angeben."
+)
 public class BankContactService extends AbstractSpeechService implements SpeechService {
 
     private static final Logger log = LoggerFactory.getLogger(BankContactService.class);

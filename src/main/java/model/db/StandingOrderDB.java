@@ -11,8 +11,12 @@ public class StandingOrderDB {
     private String id;
     private String standingOrderId;
     private String categoryId;
+    private String accountNumber;
 
-    public StandingOrderDB(String standingOrderId, String categoryId) {
+    public StandingOrderDB() {}
+
+    public StandingOrderDB(String accountNumber, String standingOrderId, String categoryId) {
+        this.accountNumber = accountNumber;
         this.standingOrderId = standingOrderId;
         this.categoryId = categoryId;
     }
@@ -45,6 +49,16 @@ public class StandingOrderDB {
 
     public StandingOrderDB setCategoryId(String categoryId) {
         this.categoryId = categoryId;
+        return this;
+    }
+
+    @DynamoDBAttribute
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public StandingOrderDB setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
         return this;
     }
 }

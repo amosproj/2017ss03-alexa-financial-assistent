@@ -1,10 +1,13 @@
 package amosalexa.services.budgetreport;
 
+import amosalexa.Service;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
 import api.aws.EMailClient;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
@@ -18,6 +21,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Service(
+        functionName = "Budget-Report anfordern",
+        functionGroup = HelpService.FunctionGroup.ACCOUNT_INFORMATION,
+        example = "Sende mir meinen Ausgabenreport.",
+        description = "Diese Funktion schickt dir einen detaillierten Report über deine Ausgaben, wenn du willst."
+)
 public class BudgetReportService extends AbstractSpeechService implements SpeechService {
 
     @Override
@@ -61,20 +70,19 @@ public class BudgetReportService extends AbstractSpeechService implements Speech
             JtwigTemplate template = JtwigTemplate.classpathTemplate("html-templates/budget-report.twig");
 
             List<BudgetReportCategory> categories = new ArrayList<>();
-            List<Category> dbCategories = DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
+            List<Category> dbCategories = DynamoDbMapper.getInstance().loadAll(Category.class); //DynamoDbClient.instance.getItems(Category.TABLE_NAME, Category::new);
             for (Category cat : dbCategories) {
                 categories.add(new BudgetReportCategory(cat.getName(), cat.getSpending(), cat.getLimit()));
             }
             
-            JtwigModel model = JtwigModel.newModel().with("var", "World")
-                                                    .with("categories", categories);
+            JtwigModel model = JtwigModel.newModel().with("categories", categories);
 
             // Render mail template
             String body = template.render(model);
 
             String answer = "Okay, ich habe dir deinen Ausgabenreport per E-Mail gesendet.";
             boolean isDebug = SessionStorage.getInstance().getStorage(requestEnvelope.getSession().getSessionId()).containsKey("DEBUG");
-            if (!isDebug && !EMailClient.SendHTMLEMail("Test-Mail", body)) {
+            if (!isDebug && !EMailClient.SendHTMLEMail("Ausgabenreport", body)) {
                 answer = "Leider konnte der Ausgabenreport nicht gesendet werden.";
             }
             return getResponse("Ausgabenreport", answer);

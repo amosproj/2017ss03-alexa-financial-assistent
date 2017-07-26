@@ -1,17 +1,19 @@
 package amosalexa;
 
 import amosalexa.server.Launcher;
-import org.eclipse.jetty.server.Server;
 import api.banking.SecuritiesAccountAPI;
 import model.banking.SecuritiesAccount;
 import model.banking.Security;
+import org.eclipse.jetty.server.Server;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,7 +38,7 @@ public class AmosAlexaExtendedTestImpl extends AbstractAmosAlexaSpeechletTest im
         Launcher.server = new Server();
         Launcher.server.start();
 
-        testIntentMatches("BankTelephone", "Sparkasse Nürnberg - Geldautomat hat die Telefonnummer 0911 2301000");
+        testIntentMatches("BankTelephone", "(.*) hat die Telefonnummer (.*)");
 
         Launcher.server.stop();
     }
@@ -100,8 +102,8 @@ public class AmosAlexaExtendedTestImpl extends AbstractAmosAlexaSpeechletTest im
         String response = performIntent("SecuritiesAccountInformationIntent");
         Pattern p = Pattern.compile(
                 "Du hast momentan 4 Wertpapiere in deinem Depot. " +
-                        "Wertpapier Nummer ([0-9]+): Adidas Aktie mit einem momentanen Wert von ([0-9\\\\.]+) Euro. " +
-                        "Wertpapier Nummer ([0-9]+): The Coca-Cola Company Aktie mit einem momentanen Wert von ([0-9\\.]+) Euro. " +
+                        "Wertpapier Nummer ([0-9]+): Adidas Aktie, ([0-9]+) Stueck, mit einem momentanen Wert von ([0-9\\\\.]+) Euro. " +
+                        "Wertpapier Nummer ([0-9]+): The Coca-Cola Company Aktie, ([0-9]+) Stueck, mit einem momentanen Wert von ([0-9\\.]+) Euro. " +
                         "Moechtest du einen weiteren Eintrag hoeren?");
         Matcher m = p.matcher(response);
         if (!m.find()) {
@@ -110,7 +112,7 @@ public class AmosAlexaExtendedTestImpl extends AbstractAmosAlexaSpeechletTest im
 
         response = performIntent("AMAZON.YesIntent");
         p = Pattern.compile("Wertpapier Nummer ([0-9]+): " +
-                "Apple Inc. Aktie mit einem momentanen Wert von ([0-9\\\\.]+) Euro. " +
+                "Apple Inc. Aktie, ([0-9]+) Stueck, mit einem momentanen Wert von ([0-9\\\\.]+) Euro. " +
                 "Moechtest du einen weiteren Eintrag hoeren?");
         m = p.matcher(response);
         if (!m.find()) {

@@ -20,17 +20,17 @@ import amosalexa.services.budgettracker.BudgetTrackerService;
 import amosalexa.services.cards.BlockCardService;
 import amosalexa.services.cards.ReplacementCardService;
 import amosalexa.services.contacts.ContactService;
-import amosalexa.services.editCategories.EditCategoriesService;
-import amosalexa.services.financing.AffordabilityService;
-import amosalexa.services.financing.PeriodicTransactionService;
-import amosalexa.services.financing.SavingsPlanService;
-import amosalexa.services.help.IntroductionService;
+import amosalexa.services.budgettracker.EditCategoriesService;
+import amosalexa.services.demo.TimeTravelService;
+import amosalexa.services.financing.*;
+import amosalexa.services.help.HelpService;
 import amosalexa.services.securitiesAccount.SecuritiesAccountInformationService;
 import amosalexa.services.transfertemplates.TransferTemplateService;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
+import model.banking.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +44,11 @@ import java.util.Map;
  */
 public class AmosAlexaSpeechlet extends AbstractSpeechService implements SpeechletSubject {
 
-    // TODO: Hardcoded user id. This should be read from the session storage - depending on the currently logged in user
-    public static final int USER_ID = 4711;
+    //
+    public static final String USER_ID = "4711";
+    private static final Account demoAccount = AccountFactory.getInstance().createDemo();
+    public static final String ACCOUNT_ID = demoAccount.getNumber(); //"0000000001";
+    public static final String ACCOUNT_IBAN = demoAccount.getIban();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmosAlexaSpeechlet.class);
     private static AmosAlexaSpeechlet amosAlexaSpeechlet = new AmosAlexaSpeechlet();
@@ -67,10 +70,12 @@ public class AmosAlexaSpeechlet extends AbstractSpeechService implements Speechl
         new ContactService(amosAlexaSpeechlet);
         new ContactTransferService(amosAlexaSpeechlet);
         new BudgetTrackerService(amosAlexaSpeechlet);
-        new IntroductionService(amosAlexaSpeechlet);
+        new HelpService(amosAlexaSpeechlet);
         new EditCategoriesService(amosAlexaSpeechlet);
         new PeriodicTransactionService(amosAlexaSpeechlet);
-        //new AuthenticationManager(amosAlexaSpeechlet);
+        new TransactionForecastService(amosAlexaSpeechlet);
+        new AccountBalanceForecastService(amosAlexaSpeechlet);
+        new TimeTravelService(amosAlexaSpeechlet);
 
         return amosAlexaSpeechlet;
     }
@@ -211,8 +216,11 @@ public class AmosAlexaSpeechlet extends AbstractSpeechService implements Speechl
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
         if (response == null) {
+            SessionStorage.getInstance().removeStorage(session.getSessionId());
+
             PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText("Ein Fehler ist aufgetreten.");
+            //speech.setText("Ein Fehler ist aufgetreten.");
+            speech.setText("");
 
             return SpeechletResponse.newTellResponse(speech);
         }

@@ -1,6 +1,12 @@
 {
   "intents": [
     {
+      "intent": "AMAZON.ResumeIntent"
+    },
+    {
+      "intent": "AMAZON.PauseIntent"
+    },
+    {
       "slots": [
         {
           "name": "ProductKeyword",
@@ -63,6 +69,18 @@
     },
     {
       "intent": "IntroductionIntent"
+    },
+    {
+      "intent": "FunctionGroupOverviewIntent"
+    },
+    {
+      "intent": "FunctionGroupIntent",
+      "slots": [
+        {
+          "name": "FunctionGroup",
+          "type": "LIST_OF_FUNCTION_GROUPS"
+        }
+      ]
     },
     {
       "slots": [
@@ -433,6 +451,33 @@
           "type": "AMAZON.NUMBER"
         }
       ]
+    },
+    {
+      "intent": "TransactionForecast"
+    },
+    {
+      "intent": "AccountBalanceForecast",
+      "slots": [
+        {
+          "name": "TargetDate",
+          "type": "AMAZON.DATE"
+        }
+      ]
+    },
+    {
+      "intent": "PlainDate",
+      "slots": [
+        {
+          "name": "TargetDate",
+          "type": "AMAZON.DATE"
+        }
+      ]
+    },
+    {
+      "intent": "FutureIntent"
+    },
+    {
+      "intent": "PastIntent"
     }
   ]
 }

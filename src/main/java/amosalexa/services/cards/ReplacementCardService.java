@@ -1,9 +1,12 @@
 package amosalexa.services.cards;
 
+import amosalexa.Service;
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SessionStorage;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.banking.AccountAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
@@ -23,6 +26,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+@Service(
+        functionGroup = HelpService.FunctionGroup.BANK_CONTACT,
+        functionName = "Ich brauche eine Ersatzkarte anfordern",
+        example = "Ich brauche eine Ersatzkarte",
+        description = "Mit dieser Funktion kannst du eine neue Bankkarte anfordern."
+)
 public class ReplacementCardService extends AbstractSpeechService implements SpeechService {
 
     private enum ReplacementReason {
@@ -66,7 +75,7 @@ public class ReplacementCardService extends AbstractSpeechService implements Spe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReplacementCardService.class);
 
-    private static final String ACCOUNT_NUMBER = "9999999999";
+    private static final String ACCOUNT_NUMBER = AmosAlexaSpeechlet.ACCOUNT_ID;
 
     private static final String REPLACEMENT_CARD_INTENT = "ReplacementCardIntent";
     private static final String REPLACEMENT_CARD_REASON_INTENT = "ReplacementCardReasonIntent";

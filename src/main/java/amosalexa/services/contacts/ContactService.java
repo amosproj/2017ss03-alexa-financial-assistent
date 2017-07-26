@@ -1,9 +1,15 @@
 package amosalexa.services.contacts;
 
+import amosalexa.Service;
+import amosalexa.AmosAlexaSpeechlet;
 import amosalexa.SpeechletSubject;
 import amosalexa.services.AbstractSpeechService;
+import amosalexa.services.DialogUtil;
 import amosalexa.services.SpeechService;
+import amosalexa.services.help.HelpService;
 import api.aws.DynamoDbClient;
+import api.aws.DynamoDbMapper;
+import api.banking.TransactionAPI;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.slu.Slot;
@@ -13,8 +19,8 @@ import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SsmlOutputSpeech;
-import model.db.Contact;
 import model.banking.Transaction;
+import model.db.Contact;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +30,12 @@ import java.util.*;
 /**
  * Service for contact and contact list related intents.
  */
+@Service(
+        functionGroup = HelpService.FunctionGroup.ACCOUNT_INFORMATION,
+        functionName = "Karte sperren",
+        example = "Was sind meine Kontakte?",
+        description = "Mit dieser Funktion kannst du Kontakte verwalten, um schnell Überweisungen vorzunehmen."
+)
 public class ContactService extends AbstractSpeechService implements SpeechService {
 
     @Override
@@ -117,7 +129,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         LOGGER.info("TransactionNumber: " + transactionNumberSlot.getValue());
 
         String speechText = "";
-        List<Transaction> allTransactions = Transaction.getTransactions("0000000001");
+        List<Transaction> allTransactions = TransactionAPI.getTransactionsForAccount(AmosAlexaSpeechlet.ACCOUNT_ID);
         Number transactionNumber = Integer.valueOf(transactionNumberSlot.getValue());
 
         Transaction transaction = null;
@@ -139,7 +151,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         LOGGER.info("Remitter: " + transaction.getRemitter());
         String payee = transaction.getPayee();
         String remitter = transaction.getRemitter();
-        String ibanRegex = "^DE([0-9a-zA-Z]\\s?){20}$";
+        String ibanRegex = ".*\\d+.*";
         if ((payee == null && remitter == null) || (transaction.isOutgoing() && payee.matches(ibanRegex)) ||
                 (!transaction.isOutgoing() && remitter.matches(ibanRegex))) {
             speechText = "Ich kann fuer diese Transaktion keine Kontaktdaten speichern, weil der Name des";
@@ -162,7 +174,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
         //Acutally create and save contact
         String contactName = (String) session.getAttribute("ContactName");
         Contact contact = new Contact(contactName, "DE50100000000000000001");
-        DynamoDbClient.instance.putItem(Contact.TABLE_NAME, contact);
+        DynamoDbMapper.getInstance().save(contact);
         return getResponse(CONTACTS, "Okay! Der Kontakt " + contactName + " wurde angelegt.");
     }
 
@@ -183,7 +195,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
 
             if (contactId != null) {
                 Contact contact = new Contact(contactId);
-                DynamoDbClient.instance.deleteItem(Contact.TABLE_NAME, contact);
+                DynamoDbMapper.getInstance().delete(contact);
 
                 return getResponse(CONTACTS, "Kontakt wurde geloescht.");
             }
@@ -203,7 +215,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
     }
 
     private SpeechletResponse readContacts(Session session, int offset, int limit) {
-        List<Contact> contactList = DynamoDbClient.instance.getItems(Contact.TABLE_NAME, Contact::new);
+        List<Contact> contactList = DynamoDbMapper.getInstance().loadAll(Contact.class);
         List<Contact> contacts = new ArrayList<>(contactList);
         LOGGER.info("Contacts: " + contacts);
 
@@ -234,7 +246,7 @@ public class ContactService extends AbstractSpeechService implements SpeechServi
             response.append("Name: ")
                     .append(contact.getName())
                     .append(", IBAN: ")
-                    .append(contact.getIbanSsmlOutput())
+                    .append(DialogUtil.getIbanSsmlOutput(contact.getIban()))
                     .append(". ");
         }
 
