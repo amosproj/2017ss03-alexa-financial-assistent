@@ -28,7 +28,7 @@ public class AccountFactory {
     /**
      * balance of demo account
      */
-    private static final long ACCOUNT_BALANCE_DEMO = 1000000L;
+    private static final long ACCOUNT_BALANCE_DEMO = 1000000;
 
     /**
      * opening date of demo account
@@ -44,7 +44,6 @@ public class AccountFactory {
      * dynamo db mapper
      */
     private static DynamoDbMapper dynamoDbMapper = DynamoDbMapper.getInstance();
-
 
     public static AccountFactory getInstance(){
         synchronized (AccountFactory.class){
@@ -62,7 +61,7 @@ public class AccountFactory {
     public Account createDemo() {
 
         // Uncomment the following line to create and use NEW demo accounts
-        removeDemoAccounts();
+        //removeDemoAccounts();
 
         Account existingDemoAccount = getDemoAccount();
         if(existingDemoAccount != null) {
@@ -87,6 +86,9 @@ public class AccountFactory {
         // standing orders
         createStandingOrders(newDemoAccount, contactAccounts);
 
+
+        // periodic transactions
+        createPeriodicTransactions(newDemoAccount);
 
         return newDemoAccount;
     }
@@ -166,6 +168,21 @@ public class AccountFactory {
         }
     }
 
+    private void createPeriodicTransactions(Account newDemoAccount) {
+        int transactions[] = {31, 32, 33};
+        for(int i : transactions) {
+            TransactionDB transactionDb = (TransactionDB) dynamoDbMapper.load(TransactionDB.class, Integer.toString(i));
+
+            if (transactionDb == null) {
+                transactionDb = new TransactionDB(Integer.toString(i));
+                transactionDb.setPeriodic(true);
+                transactionDb.setAccountNumber(newDemoAccount.getNumber());
+            }
+
+            dynamoDbMapper.save(transactionDb);
+        }
+    }
+
     private String getRandomCategoryId(){
         List<Category> categoryDBList = dynamoDbMapper.loadAll(Category.class);
         int randomNum = ThreadLocalRandom.current().nextInt(0, categoryDBList.size());
@@ -201,7 +218,7 @@ public class AccountFactory {
     private void removeDemoCategories(String accountNumber) {
         List<Category> categoryDBList = dynamoDbMapper.loadAll(Category.class);
         for (Category categoryDB : categoryDBList) {
-            if (categoryDB.getAccountNumber().equals(accountNumber)) {
+            if (categoryDB.getAccountNumber() != null && categoryDB.getAccountNumber().equals(accountNumber)) {
                 dynamoDbMapper.delete(categoryDB);
             }
         }

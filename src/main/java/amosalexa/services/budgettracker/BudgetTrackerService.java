@@ -105,6 +105,9 @@ public class BudgetTrackerService extends AbstractSpeechService implements Speec
         Session session = requestEnvelope.getSession();
         String context = (String) session.getAttribute(DIALOG_CONTEXT);
         String withinDialogContext = (String) session.getAttribute(WITHIN_DIALOG_CONTEXT);
+        if(withinDialogContext == null) {
+            withinDialogContext = "";
+        }
 
         if (CATEGORY_LIMIT_INFO_INTENT.equals(intentName)) {
             session.setAttribute(DIALOG_CONTEXT, CATEGORY_LIMIT_INFO_INTENT);

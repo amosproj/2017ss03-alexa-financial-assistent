@@ -722,7 +722,7 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent("SetBalanceLimitIntent", "BalanceLimitAmount:100", "Möchtest du dein Kontolimit wirklich auf 100 Euro setzen?");
 
         // Switching to another Service should fail because the BalanceLimit dialog is currently active.
-        testIntentMatches("SavingsPlanIntroIntent", "Ein Fehler ist aufgetreten.");
+        testIntentMatches("SavingsPlanIntroIntent", "");
 
         newSession();
 
@@ -852,6 +852,25 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
         testIntent("AMAZON.YesIntent",
                 "Transaktion Nummer 31 ist nun nicht mehr als periodisch markiert.");
 
+
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber:31",
+                "Moechtest du die Transaktion mit der Nummer 31 wirklich als periodisch markieren?");
+
+        testIntent("AMAZON.YesIntent",
+                "Transaktion Nummer 31 wurde als periodisch markiert.");
+
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber:32",
+                "Moechtest du die Transaktion mit der Nummer 32 wirklich als periodisch markieren?");
+
+        testIntent("AMAZON.YesIntent",
+                "Transaktion Nummer 32 wurde als periodisch markiert.");
+
+        testIntent("PeriodicTransactionAddIntent", "TransactionNumber:33",
+                "Moechtest du die Transaktion mit der Nummer 33 wirklich als periodisch markieren?");
+
+        testIntent("AMAZON.YesIntent",
+                "Transaktion Nummer 33 wurde als periodisch markiert.");
+
         testIntent("PeriodicTransactionDeleteIntent", "TransactionNumber:999999",
                 "Ich kann Transaktion Nummer 999999 nicht finden. Bitte aendere deine Eingabe.");
 
@@ -871,9 +890,6 @@ public class AmosAlexaSimpleTestImpl extends AbstractAmosAlexaSpeechletTest impl
                 "Ich habe (.*) Transaktionen gefunden, die noch bis zum (.*) ausgeführt werden. Insgesamt werden noch (.*)");
         testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*)|" +
                 TransactionForecastService.NO_TRANSACTION_INFO);
-        testIntentMatches("AMAZON.YesIntent", "Nummer (.*) Von deinem Konto auf das Konto von (.*) in Höhe von (.*)|" +
-                TransactionForecastService.NO_TRANSACTION_INFO);
-
 
         // list all ? no
         newSession();

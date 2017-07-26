@@ -91,8 +91,8 @@ public class TimeTravelService extends AbstractSpeechService implements SpeechSe
             return response;
         } else if (intent.getName().equals(PAST_INTENT)) {
             // Create new demo account
-            AccountFactory accountFactory = AccountFactory.getInstance();
-            Account account = accountFactory.createDemo();
+            //AccountFactory accountFactory = AccountFactory.getInstance();
+            //Account account = accountFactory.createDemo();
 
             String text = "<prosody rate=\"fast\">Okay! Es geht wieder zurueck. Halte dich fest!</prosody>";
 

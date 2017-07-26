@@ -216,8 +216,11 @@ public class AmosAlexaSpeechlet extends AbstractSpeechService implements Speechl
         SpeechletResponse response = notifyOnIntent(requestEnvelope);
 
         if (response == null) {
+            SessionStorage.getInstance().removeStorage(session.getSessionId());
+
             PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-            speech.setText("Ein Fehler ist aufgetreten.");
+            //speech.setText("Ein Fehler ist aufgetreten.");
+            speech.setText("");
 
             return SpeechletResponse.newTellResponse(speech);
         }
